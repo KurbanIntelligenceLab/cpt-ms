@@ -88,6 +88,35 @@ def check_ledger() -> dict:
     return {"records_written": len(rows), "ok": ok}
 
 
+def check_oracle_coverage() -> dict:
+    """Fail if a verification artifact recorded zero oracle comparisons.
+
+    The gradient verification degrades gracefully when cvxpylayers is missing: it
+    records the oracle as unavailable rather than crashing. That is the right
+    behavior, but it means an artifact can exist, look complete, and carry a null
+    tolerance — and a report citing a figure from an earlier run will keep citing
+    it. Checking the comparison COUNT catches the degraded artifact; checking only
+    for the file's existence does not.
+    """
+    from scripts.common.artifacts import RESULTS_DIR
+
+    path = RESULTS_DIR / "CP2_gradient_verification.json"
+    if not path.exists():
+        return {"skipped": "CP2_gradient_verification.json not yet emitted"}
+    tol = json.loads(path.read_text())["payload"]["tolerances"]
+    n = tol.get("cvxpylayers_configs_compared", 0)
+    return {
+        "ok": n > 0,
+        "cvxpylayers_configs_compared": n,
+        "worst_rel_diff_vs_cvxpylayers": tol.get("worst_rel_diff_vs_cvxpylayers"),
+        "detail": (
+            "oracle ran" if n > 0
+            else "artifact carries no cvxpylayers comparison: re-run after "
+                 "installing cvxpylayers, or any cited agreement figure is stale"
+        ),
+    }
+
+
 def check_artifacts() -> dict:
     """Artifact emission must round-trip with an intact payload checksum."""
     with tempfile.TemporaryDirectory() as td:
@@ -145,6 +174,7 @@ CHECKS: dict[str, Callable[[], dict]] = {
     "determinism": check_determinism,
     "ledger": check_ledger,
     "artifacts": check_artifacts,
+    "oracle_coverage": check_oracle_coverage,
     "solver": check_solver,
     "unfinished": check_unfinished,
 }

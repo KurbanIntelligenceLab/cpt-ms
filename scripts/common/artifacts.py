@@ -26,22 +26,37 @@ RESULTS_DIR = REPO_ROOT / "results"
 
 
 def _git_commit() -> str:
-    """Repo commit, or an explicit sentinel when version control is unavailable.
+    """Commit of the SOURCE tree, or a sentinel when version control is absent.
 
     Never fabricate a hash: a missing commit is recorded as such so the report
     builder can flag artifacts that predate version control.
+
+    Dirtiness is judged over source only — `scripts/` and `tests/` — and
+    deliberately excludes `results/`, `reports/`, and `figures/`. The reason is
+    ordering, not convenience. An artifact records the code that produced it, and
+    it necessarily exists BEFORE the commit that contains it, so its own presence
+    in the working tree must not count against the provenance of the code. When
+    several scripts are re-emitted in sequence the first one's output would
+    otherwise dirty the tree for every script after it, stamping them `-dirty`
+    against a commit whose source was in fact pristine — a misleading record,
+    since nothing about the code differed between the runs.
+
+    What `-dirty` means here is therefore precise and useful: the code that
+    produced this artifact is not exactly the code at the recorded commit.
     """
     try:
-        out = subprocess.run(
+        head = subprocess.run(
             ["git", "-C", str(REPO_ROOT), "rev-parse", "HEAD"],
             capture_output=True, text=True, timeout=10,
         )
-        if out.returncode == 0 and out.stdout.strip():
-            dirty = subprocess.run(
-                ["git", "-C", str(REPO_ROOT), "status", "--porcelain"],
-                capture_output=True, text=True, timeout=10,
-            ).stdout.strip()
-            return out.stdout.strip() + ("-dirty" if dirty else "")
+        if head.returncode != 0 or not head.stdout.strip():
+            return "UNVERSIONED"
+        dirty = subprocess.run(
+            ["git", "-C", str(REPO_ROOT), "status", "--porcelain",
+             "--", "scripts", "tests"],
+            capture_output=True, text=True, timeout=10,
+        ).stdout.strip()
+        return head.stdout.strip() + ("-dirty" if dirty else "")
     except Exception:
         pass
     return "UNVERSIONED"
@@ -91,6 +106,27 @@ def emit(
     path = out_dir / f"{name}.json"
     path.write_text(json.dumps(record, indent=2, sort_keys=False, default=str))
     return path
+
+
+def assert_fresh(name: str, max_age_s: float = 3600.0,
+                 results_dir: Path | None = None) -> None:
+    """Fail if an artifact on disk predates the current run.
+
+    Guards the failure mode where a measurement script raises, its stderr is
+    suppressed, and the PREVIOUS run's artifact is still on disk — so a reader
+    sees a plausible file and no error. Call this after a run that was expected to
+    re-emit, or in a report builder before consuming an artifact.
+    """
+    out_dir = Path(results_dir) if results_dir is not None else RESULTS_DIR
+    path = out_dir / f"{name}.json"
+    if not path.exists():
+        raise FileNotFoundError(f"artifact {name} was never emitted at {path}")
+    age = datetime.now(timezone.utc).timestamp() - path.stat().st_mtime
+    if age > max_age_s:
+        raise ValueError(
+            f"artifact {name} is {age / 60:.1f} min old (limit {max_age_s / 60:.1f}); "
+            "a run that was expected to re-emit it may have failed silently"
+        )
 
 
 def load(name: str, results_dir: Path | None = None) -> dict[str, Any]:

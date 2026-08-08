@@ -4,6 +4,33 @@ Standing note, rebuilt on change. Feeds CP0 and CP4. All numbers are read from
 `results/WS2_family_determinability.json`, emitted by
 `scripts/crystal/determinability.py`.
 
+## Resolution: the reference ordering dissolves the B1 problem
+
+The blocking question — whether charge balance can carry a steering sweep on the CIF
+character backbone — is answered, and the answer is yes, at no cost in convention.
+
+The reference model's own serialization places the complete cell composition in the
+`data_` tag on the first line. CrystaLLM's prompt construction builds
+`f"data_{comp_str}\n{block}\n_symmetry_space_group_name_H-M {sg}\n"`, where `comp_str`
+is the full formula with per-element counts, elements ordered by electronegativity
+(`bin/make_prompt_file.py::get_prompt`). Composition is therefore complete before any
+lattice or site token is emitted.
+
+Measured under that ordering, family (i) rises from a mean usable fraction of 0.002 to
+**0.949**, determined at token 13-21 of 245-409. Family (ii) remains healthy at 0.490.
+Both constraints are usable over most of the sequence on both backbones.
+
+This is the reverse of a deviation. Matching the reference ordering is matching the format
+the published model was trained on; the earlier 0.002 figure was measured on a naive CIF
+layout that no reference implementation uses. No B1-versus-B2 scoping decision is needed,
+and no departure from convention is required.
+
+| Backbone | Family (i) charge | Family (ii) density |
+|---|---|---|
+| B1 naive CIF layout | 0.002 | 0.670 |
+| B1ref reference ordering | 0.949 | 0.490 |
+| B2 typed fields | 0.785 | 0.480 |
+
 ## Summary
 
 The plan's family (ii) hedge is instantiable per step on both backbones, but the
@@ -70,8 +97,14 @@ measurement:
    0.2% of positions will not produce a measurable internalization curve, which is what
    CP0 reads.
 
-My recommendation is 1 if the B1 comparison to published CIF models is not load-bearing,
-otherwise 2. What should not happen is discovering this at CP4 through a null result on
+**Superseded.** The three options below were framed before the reference ordering was
+measured. Option 1 turned out to require no deviation at all — the reference implementation
+already places composition first — so the choice is moot and no scoping is needed. The
+options are retained because the pre-registration derived from them, and the record of why
+a threshold was set should stay visible.
+
+My recommendation at the time was 1 if the B1 comparison to published CIF models was not
+load-bearing, otherwise 2. What should not happen is discovering this at CP4 through a null result on
 one backbone.
 
 **The determinability position belongs in the pre-registration.** A constraint's usable
@@ -91,11 +124,11 @@ implements the delimiter rule rather than the last-digit rule.
 
 ## Verification
 
-Eleven tests in `tests/test_parser_determinability.py`, each checking a property by a route
+Fifteen tests in `tests/test_parser_determinability.py`, each checking a property by a route
 independent of the implementation: the cubic cell against its exact volume of 125 cubic
 angstroms and a triclinic cell against the closed-form expression; prefix-purity by
 re-running each truncated prefix from scratch and comparing states; each determinability
 position against a brute-force scan confirming no earlier prefix suffices; and the
 Regime-S mask against monotone shrinkage. A closing marker on an incomplete lattice block
 is asserted not to determine a volume, so a truncated stream cannot report a cell it never
-emitted. All pass, within a suite of 54.
+emitted. All pass, within a suite of 91.

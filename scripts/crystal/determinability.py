@@ -25,6 +25,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from scripts.common.artifacts import emit
+from scripts.crystal.actionability import profile as actionability_profile
 from scripts.crystal.family_ii import family_i_profile, family_ii_profile
 
 SCRIPT = "scripts/crystal/determinability.py"
@@ -41,6 +42,50 @@ def build_b2(n_elements: int, n_sites: int) -> list[str]:
     toks += ["<END_LATTICE>"]
     toks += [f"site:S{i}" for i in range(n_sites)]
     toks += ["<EOS>"]
+    return toks
+
+
+def build_b1_reference(n_elements: int, n_sites: int) -> list[str]:
+    """B1 in the reference model's standardized ordering (CrystaLLM).
+
+    CrystaLLM's prompt construction emits `data_{comp_str}` as the FIRST line,
+    where comp_str is the full cell composition with element counts (e.g.
+    `data_Zn1Cu1Te1Se1`), elements sorted by electronegativity. Source:
+    `bin/make_prompt_file.py::get_prompt`, which builds
+    `f"data_{comp_str}\\n{block}\\n_symmetry_space_group_name_H-M {sg}\\n"`.
+
+    This matters for family (i). On the naive CIF ordering the composition is
+    recoverable only from the atom-site loop at the end of the file, so charge
+    balance is determined within the last few tokens. In the reference ordering
+    the complete composition is present in the data_ tag before anything else,
+    which is the ordering the published model was actually trained on — so
+    matching it is not a deviation from convention, it IS the convention.
+    """
+    toks: list[str] = []
+    elements = ["Na", "Cl", "Mg", "O", "Fe"][:n_elements]
+    per = max(1, n_sites // n_elements)
+
+    # data_ tag carrying the full cell composition, character by character.
+    comp_str = "".join(f"{el}{per}" for el in elements)
+    for ch in f"data_{comp_str}\n":
+        toks.append(ch)
+    # The composition is complete at this point: emit the marker the parser
+    # keys on, so the constraint state closes here rather than at the loop.
+    toks.append("<COMP_COMPLETE>")
+
+    for tag, val in [("_cell_length_a", "5.0000"), ("_cell_length_b", "5.0000"),
+                     ("_cell_length_c", "5.0000"), ("_cell_angle_alpha", "90.0000"),
+                     ("_cell_angle_beta", "90.0000"), ("_cell_angle_gamma", "90.0000")]:
+        for ch in f"{tag} {val}\n":
+            toks.append(ch)
+    toks.append("<END_LATTICE>")
+
+    for ch in "loop_\n_atom_site_type_symbol\n_atom_site_fract_x\n":
+        toks.append(ch)
+    for i in range(n_sites):
+        el = elements[i % n_elements]
+        for ch in f"{el} 0.{i:04d}\n":
+            toks.append(ch)
     return toks
 
 
@@ -68,9 +113,14 @@ def build_b1(n_elements: int, n_sites: int) -> list[str]:
     # Atom site loop: composition is spelled out here, at the end.
     toks += list("loop_\n_atom_site_label\n_atom_site_type_symbol\n")
     toks.append("<COMP>")
+    # Real element symbols, not placeholders. An earlier version emitted `E0`,
+    # `E1` labels, which parse to an empty composition — so the family (i)
+    # statistic evaluated to a meaningless zero and the measurement described the
+    # fixture rather than the format.
+    elements = ["Na", "Cl", "Mg", "O", "Fe"][:max(n_elements, 1)]
     for i in range(n_sites):
-        toks += list(f"E{i % max(n_elements,1)}{i} E{i % max(n_elements,1)} "
-                     f"0.5000 0.5000 0.5000\n")
+        el = elements[i % len(elements)]
+        toks += list(f"{el}{i} {el} 0.5000 0.5000 0.5000\n")
     toks.append("<END_COMP>")
     toks.append("<EOS>")
     return toks
@@ -82,6 +132,7 @@ def build_sequences() -> dict[str, list[tuple[str, list[str]]]]:
     return {
         "B2": [(f"{e}el_{s}site", build_b2(e, s)) for e, s in cases],
         "B1": [(f"{e}el_{s}site", build_b1(e, s)) for e, s in cases],
+        "B1ref": [(f"{e}el_{s}site", build_b1_reference(e, s)) for e, s in cases],
     }
 
 
@@ -96,22 +147,40 @@ def main(smoke: bool = False) -> Path:
             for family, fn in (("i_charge", family_i_profile),
                                ("ii_density", family_ii_profile)):
                 p = fn(toks, backbone).as_dict()
-                p |= {"case": name, "family": family}
+                # Determinability and actionability answer different questions and
+                # are reported separately: a constraint can be computable from the
+                # prefix yet frozen, admitting no projection. CP0's threshold is
+                # set on activity within the ACTIONABLE window, since a working
+                # layer confined to a few positions reads low when averaged over
+                # the whole sequence.
+                a = actionability_profile(toks, backbone, family).as_dict()
+                p |= {
+                    "case": name,
+                    "family": family,
+                    "actionable_fraction": a["actionable_fraction"],
+                    "n_actionable": a["n_actionable"],
+                    "first_actionable": a["first_actionable"],
+                    "last_actionable": a["last_actionable"],
+                }
                 rows.append(p)
 
     def agg(backbone: str, family: str) -> dict:
         sel = [r for r in rows if r["backbone"] == backbone and r["family"] == family]
         fr = [r["usable_fraction"] for r in sel]
+        ac = [r["actionable_fraction"] for r in sel]
         return {
             "n_cases": len(sel),
             "min_usable_fraction": min(fr),
             "max_usable_fraction": max(fr),
             "mean_usable_fraction": sum(fr) / len(fr),
+            "mean_actionable_fraction": sum(ac) / len(ac),
+            "min_actionable_fraction": min(ac),
+            "max_actionable_fraction": max(ac),
         }
 
     summary = {
         f"{b}_{f}": agg(b, f)
-        for b in ("B1", "B2")
+        for b in ("B1", "B1ref", "B2")
         for f in ("i_charge", "ii_density")
     }
 
@@ -132,17 +201,27 @@ def main(smoke: bool = False) -> Path:
             band = "late"
         else:
             band = "usable over most of the sequence"
+        act = a["mean_actionable_fraction"]
         return {
             "band": band,
             "mean_usable_fraction": mean,
+            "mean_actionable_fraction": act,
+            "actionable_band": (
+                "frozen" if act < 1e-9
+                else "narrow" if act < 0.10
+                else "moderate" if act < 0.35
+                else "wide"
+            ),
             "n_cases_never_determined": len(undetermined),
             "determined_positions": sorted(
                 {r["first_determined_position"] for r in sel}
             ),
             "statement": (
-                f"{backbone} family {family}: {band} "
-                f"(mean usable fraction {mean:.3f} over {a['n_cases']} cases; "
-                f"{len(undetermined)} case(s) never determined)."
+                f"{backbone} family {family}: determinable {band} "
+                f"(mean usable fraction {mean:.3f}), actionable window "
+                f"{'frozen' if act < 1e-9 else 'narrow' if act < 0.10 else 'moderate' if act < 0.35 else 'wide'} "
+                f"(mean actionable fraction {act:.4f}) over {a['n_cases']} cases; "
+                f"{len(undetermined)} case(s) never determined."
             ),
         }
 
@@ -151,7 +230,7 @@ def main(smoke: bool = False) -> Path:
         "summary": summary,
         "verdict": {
             f"{b}_{f}": verdict(b, f)
-            for b in ("B1", "B2")
+            for b in ("B1", "B1ref", "B2")
             for f in ("i_charge", "ii_density")
         },
     }

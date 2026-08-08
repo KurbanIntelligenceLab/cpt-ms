@@ -30,6 +30,7 @@ Regime E family (ii) (density bound) is the hard case and is analyzed in
 from __future__ import annotations
 
 import math
+import re
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Iterator
@@ -118,14 +119,28 @@ class IncrementalParser:
     """
 
     def __init__(self, backbone: str):
-        if backbone not in ("B1", "B2"):
-            raise ValueError(f"backbone must be 'B1' or 'B2', got {backbone!r}")
+        if backbone not in ("B1", "B1ref", "B2"):
+            raise ValueError(
+                f"backbone must be 'B1', 'B1ref', or 'B2', got {backbone!r}"
+            )
         self.backbone = backbone
 
     def step(self, state: ConstraintState, token: str) -> ConstraintState:
         """Return the state after consuming one token. Does not mutate the input."""
-        if self.backbone == "B1" and len(token) == 1:
-            return self._step_char(state, token)
+        if self.backbone.startswith("B1"):
+            if token == "<COMP_COMPLETE>":
+                # Emitted by the reference ordering once the data_ tag's
+                # composition has been consumed. Closing here is what makes
+                # family (i) determined at the top of the file rather than in
+                # the trailing atom-site loop. It closes only if a composition
+                # was actually parsed, so a stream that never carried one cannot
+                # claim a determined charge.
+                s = state.copy()
+                s.position += 1
+                s.composition_closed = bool(s.element_counts)
+                return s
+            if len(token) == 1:
+                return self._step_char(state, token)
         return self._step_field(state, token)
 
     def _step_char(self, state: ConstraintState, ch: str) -> ConstraintState:
@@ -149,9 +164,41 @@ class IncrementalParser:
             # same line; flushing on space would discard the value before it is
             # read.
             buf = s._buf  # type: ignore[attr-defined]
-            for key in ("alpha", "beta", "gamma", "a", "b", "c"):
-                tag = f"_cell_length_{key}"
-                if tag in buf:
+
+            # A `data_` tag in the reference model's standardized ordering
+            # carries the complete cell composition with counts, e.g.
+            # `data_Na2Cl2`. When present it determines the composition at the
+            # top of the file rather than in the trailing atom-site loop.
+            if buf.startswith("data_") and len(buf) > 5:
+                for el, cnt in re.findall(r"([A-Z][a-z]?)(\d+)", buf[5:]):
+                    s.element_counts[el] = s.element_counts.get(el, 0) + int(cnt)
+
+            # An atom-site line contributes one atom of its type symbol. This is
+            # how a naive CIF layout (no composition in the data_ tag) accumulates
+            # its composition: one line at a time, at the end of the file.
+            elif s.region is Field.COMPOSITION:
+                m = re.match(r"^([A-Z][a-z]?)\d*\s+([A-Z][a-z]?)\s", buf)
+                if m:
+                    el = m.group(2)
+                    s.element_counts[el] = s.element_counts.get(el, 0) + 1
+                    s.sites_emitted += 1
+            # Real CIF spells angles `_cell_angle_alpha`, not
+            # `_cell_length_alpha`. Matching only the length form parses lengths
+            # and silently drops all three angles, leaving the lattice
+            # permanently open — so the volume never becomes determined and
+            # family (ii) reads as unusable. Both spellings are accepted:
+            # the angle form because it is what CIF actually emits, the length
+            # form because the naive fixture used it.
+            for key, tags in (
+                ("alpha", ("_cell_angle_alpha", "_cell_length_alpha")),
+                ("beta", ("_cell_angle_beta", "_cell_length_beta")),
+                ("gamma", ("_cell_angle_gamma", "_cell_length_gamma")),
+                ("a", ("_cell_length_a",)),
+                ("b", ("_cell_length_b",)),
+                ("c", ("_cell_length_c",)),
+            ):
+                tag = next((tg for tg in tags if tg in buf), None)
+                if tag is not None:
                     tail = buf.split(tag, 1)[1].strip()
                     try:
                         s.lattice_params[key] = float(tail)

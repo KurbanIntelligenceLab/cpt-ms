@@ -32,6 +32,14 @@ hash.
 the computed values they describe, so a change to the computation cannot leave a stale claim
 beside it.
 
+**Never suppress stderr on a measurement run.** A measurement script that raises must be
+seen to raise. Redirecting stderr — `2>/dev/null`, `2>&1 >/dev/null`, or a bare `try/except`
+around a measurement — converts a hard failure into a stale artifact that still exists on
+disk from the previous run and looks like a fresh result. This happened once here: a run
+appeared to succeed while silently emitting no rows for a new backbone variant, because the
+script was raising on an unrecognized backbone name and the redirection hid it. Suppress
+stdout if the volume is inconvenient; never stderr.
+
 **The ledger is append-only.** A run writes a `started` record and later a terminal one; the
 started record is never rewritten, so a crashed run stays visible as exactly that. The
 ledger stores no results — results are artifacts — so the two cannot disagree.

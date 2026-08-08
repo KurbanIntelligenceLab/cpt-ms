@@ -98,6 +98,63 @@ def test_b1_charge_is_near_terminal_and_b2_is_not():
     assert family_i_profile(t2, "B2").usable_fraction > 0.5
 
 
+def test_reference_ordering_makes_charge_determined_early():
+    """The B1 blocker dissolves under the reference model's own field order.
+
+    CrystaLLM emits `data_{comp_str}` as the first line, carrying the complete
+    cell composition with counts. Parsing it there determines charge balance at
+    the top of the file instead of in the trailing atom-site loop, which is the
+    difference between a constraint that can carry a steering sweep and one that
+    cannot.
+    """
+    from scripts.crystal.determinability import build_b1_reference
+
+    for ne, ns in [(2, 4), (3, 8), (5, 20)]:
+        naive = family_i_profile(build_b1(ne, ns), "B1")
+        ref = family_i_profile(build_b1_reference(ne, ns), "B1ref")
+        assert naive.usable_fraction < 0.01, f"{ne}el_{ns}site naive"
+        assert ref.usable_fraction > 0.9, f"{ne}el_{ns}site reference"
+
+
+def test_reference_ordering_keeps_density_usable():
+    """Moving composition first must not cost family (ii).
+
+    Regression for a real defect: the reference fixture used CIF's actual
+    `_cell_angle_*` spelling while the parser matched only `_cell_length_*`, so
+    all three angles were dropped, the lattice never closed, and density read as
+    unusable everywhere.
+    """
+    from scripts.crystal.determinability import build_b1_reference
+
+    for ne, ns in [(2, 4), (3, 8), (5, 20)]:
+        toks = build_b1_reference(ne, ns)
+        st = list(IncrementalParser("B1ref").run(toks))[-1]
+        assert st.cell_volume == pytest.approx(125.0, abs=1e-9)
+        assert family_ii_profile(toks, "B1ref").usable_fraction > 0.3
+
+
+def test_cif_angle_tags_are_parsed():
+    """`_cell_angle_alpha` is what real CIF writes; it must be understood.
+
+    Matching only `_cell_length_alpha` parses lengths and silently drops angles,
+    leaving the lattice permanently open. That fails on any actual CIF file.
+    """
+    p = IncrementalParser("B1")
+    cif = ("_cell_length_a 4.0000\n_cell_length_b 5.0000\n_cell_length_c 6.0000\n"
+           "_cell_angle_alpha 90.0000\n_cell_angle_beta 90.0000\n_cell_angle_gamma 90.0000\n")
+    st = list(p.run(list(cif)))[-1]
+    assert set(st.lattice_params) == {"a", "b", "c", "alpha", "beta", "gamma"}
+    assert st.cell_volume == pytest.approx(120.0, abs=1e-9)
+
+
+def test_composition_marker_requires_a_parsed_composition():
+    """A marker alone must not claim a determined charge."""
+    p = IncrementalParser("B1ref")
+    st = list(p.run(list("data_\n") + ["<COMP_COMPLETE>"]))[-1]
+    assert st.composition_closed is False
+    assert st.n_atoms is None
+
+
 def test_verdicts_are_derived_not_asserted():
     """No narrative field in the artifact may contradict the data beside it.
 
