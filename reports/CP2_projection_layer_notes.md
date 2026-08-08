@@ -146,11 +146,12 @@ identity when the constraint already holds; gradients pass autograd's gradcheck 
 two constraints; and a regression test asserting both a tight residual and a low iteration
 count, since the stall presented as hitting the iteration cap.
 
-All 95 tests in the suite pass: 15 here, 15 in `tests/test_parser_determinability.py`, 14
-in `tests/test_actionability.py`, 9 in `tests/test_ledger_preflight.py`, 9 in
-`tests/test_tilt_lemmas.py`, 8 in `tests/test_synthetic_targets.py`, 8 in
-`tests/test_provenance.py`, 8 in `tests/test_induced_distribution.py`, 7 in
-`tests/test_steering_frontier.py`, and 2 in `tests/test_report_consistency.py`. Five of the provenance tests build throwaway
+All 114 tests in the suite pass: 18 in `tests/test_cif_grammar.py`, 15 here, 15 in
+`tests/test_parser_determinability.py`, 14 in `tests/test_actionability.py`, 9 in
+`tests/test_ledger_preflight.py`, 9 in `tests/test_tilt_lemmas.py`, 8 in
+`tests/test_synthetic_targets.py`, 8 in `tests/test_provenance.py`, 8 in
+`tests/test_induced_distribution.py`, 7 in `tests/test_steering_frontier.py`, and 3 in
+`tests/test_report_consistency.py`. Five of the provenance tests build throwaway
 repositories and skip where `git init` is unavailable, so they exercise fully on a
 developer machine and report as skipped in a restricted sandbox.
 

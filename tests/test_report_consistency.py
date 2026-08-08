@@ -77,6 +77,85 @@ def test_per_file_counts_in_reports_are_current(counts):
     assert not problems, "; ".join(problems)
 
 
+def test_token_position_claims_match_the_artifact():
+    """Reports must not carry token ranges that contradict their own source.
+
+    Regression for a real drift: the determinability note claimed B1 charge was
+    determined at "token 322-780 of 323-781" while the artifact it names as its
+    sole source said 322-772 of 323-773. The note had been written before a
+    fixture fix shortened the atom-site lines, and the prose was not re-derived
+    when the measurement was re-run.
+
+    Test counts were already covered by a consistency check; measured values were
+    not, which is the gap this closes.
+    """
+    import json
+
+    art = REPO / "results" / "WS2_family_determinability.json"
+    note = REPORTS / "WS2_family_determinability_notes.md"
+    if not art.exists() or not note.exists():
+        pytest.skip("determinability artifact or note not present")
+
+    rows = json.loads(art.read_text())["payload"]["rows"]
+
+    def observed(backbone: str, family: str):
+        sel = [r for r in rows if r["backbone"] == backbone and r["family"] == family]
+        pos = sorted({r["first_determined_position"] for r in sel})
+        tok = sorted({r["n_tokens"] for r in sel})
+        return (pos[0], pos[-1]), (tok[0], tok[-1])
+
+    labels = {"B1 (CIF chars)": "B1", "B1ref": "B1ref", "B2 (fields)": "B2"}
+    fams = {"(i) charge": "i_charge", "(ii) density": "ii_density"}
+
+    pattern = re.compile(
+        r"\|\s*(?P<label>[^|]+?)\s*\|\s*(?P<family>\(i+\)[^|]+?)\s*\|"
+        r"[^|]*\|[^|]*\|\s*token\s*(?P<a>\d+)(?:[\u2013-](?P<b>\d+))?"
+        r"\s*of\s*(?P<c>\d+)[\u2013-](?P<d>\d+)"
+    )
+    checked = 0
+    for m in pattern.finditer(note.read_text()):
+        bb = labels.get(m.group("label").strip())
+        fam = fams.get(m.group("family").strip())
+        if bb is None or fam is None:
+            continue
+        pos, tok = observed(bb, fam)
+        a = int(m.group("a"))
+        b = int(m.group("b")) if m.group("b") else a
+        assert (a, b) == pos, f"{bb}/{fam}: note says det {a}-{b}, artifact {pos}"
+        assert (int(m.group("c")), int(m.group("d"))) == tok, (
+            f"{bb}/{fam}: note says {m.group('c')}-{m.group('d')} tokens, artifact {tok}"
+        )
+        checked += 1
+    assert checked >= 4, f"only {checked} position claims parsed; the check is not binding"
+
+    # Prose claims too, not just table rows. The table-only version of this check
+    # missed a stale denominator sitting two paragraphs above a row it had just
+    # corrected, because it regexed the numerator and ignored the "of N-M" part.
+    # Every "token N of A-B" in the note must match some measured row.
+    all_tokens = sorted({r["n_tokens"] for r in rows})
+    valid_spans = {
+        (min(r["n_tokens"] for r in rows if r["backbone"] == bb),
+         max(r["n_tokens"] for r in rows if r["backbone"] == bb))
+        for bb in {r["backbone"] for r in rows}
+    }
+    prose = re.compile(
+        r"token\s*(?P<a>\d+)(?:[\u2013-](?P<b>\d+))?\s*of\s*(?P<c>\d+)[\u2013-](?P<d>\d+)"
+    )
+    prose_checked = 0
+    for m in prose.finditer(note.read_text()):
+        span = (int(m.group("c")), int(m.group("d")))
+        assert span in valid_spans, (
+            f"token span {span[0]}-{span[1]} matches no backbone's measured "
+            f"n_tokens range; measured spans are {sorted(valid_spans)}"
+        )
+        a = int(m.group("a"))
+        assert min(all_tokens) <= a <= max(all_tokens) or a <= span[1], (
+            f"determined position {a} lies outside every measured token range"
+        )
+        prose_checked += 1
+    assert prose_checked >= checked, "prose scan must cover at least the table rows"
+
+
 def test_suite_totals_in_reports_are_current(counts):
     """Any 'all N tests' / 'suite of N' claim must match the whole suite."""
     total = sum(counts.values())

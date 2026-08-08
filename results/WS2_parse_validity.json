@@ -1,0 +1,71 @@
+{
+  "schema_version": "1.0",
+  "artifact_name": "WS2_parse_validity",
+  "script": "scripts/crystal/parse_validity.py",
+  "git_commit": "913c678afaac80eb3796e7e5ca60cee5a3661dd6-dirty",
+  "config": {
+    "n_samples": 500,
+    "max_chars": 900,
+    "smoke": false
+  },
+  "config_hash": "630d940477829cad",
+  "seeds": [
+    11,
+    5
+  ],
+  "created_utc": "2026-08-08T22:24:39.756657+00:00",
+  "python": "3.11.15",
+  "platform": "macOS-26.5.2-arm64-arm-64bit",
+  "payload_sha256": "664685a975fd89d55f4ccfe12fe00bfdb0fdc3ff204d3970863722bd333b92de",
+  "payload": {
+    "arms": {
+      "masked": {
+        "n_samples": 500,
+        "n_syntactically_valid": 500,
+        "syntactic_parse_rate": 1.0,
+        "n_structure_built": 235,
+        "structure_rate": 0.47,
+        "structure_rate_given_syntactic": 0.47,
+        "n_terminated_properly": 500,
+        "mean_length_chars": 400.044,
+        "syntactic_failure_kinds": {},
+        "semantic_failure_kinds": {
+          "ValueError": 265
+        },
+        "distinct_formulas_among_parsed": 218,
+        "site_count_range": [
+          1,
+          4
+        ]
+      },
+      "unmasked": {
+        "n_samples": 500,
+        "n_syntactically_valid": 0,
+        "syntactic_parse_rate": 0.0,
+        "n_structure_built": 0,
+        "structure_rate": 0.0,
+        "structure_rate_given_syntactic": null,
+        "n_terminated_properly": 454,
+        "mean_length_chars": 341.112,
+        "syntactic_failure_kinds": {
+          "NoDataBlocks": 500
+        },
+        "semantic_failure_kinds": {},
+        "distinct_formulas_among_parsed": 0,
+        "site_count_range": null
+      }
+    },
+    "delta_syntactic_parse_rate": 1.0,
+    "delta_structure_rate": 0.47,
+    "mask_freedom": {
+      "vocabulary_size": 63,
+      "mean_allowed_chars_per_step": 4.143466121553573,
+      "median_allowed_chars_per_step": 1.0,
+      "max_allowed_chars_per_step": 37,
+      "fraction_of_steps_forced": 0.7055766066709876,
+      "positions_measured": 80228
+    },
+    "claim_scope": "Grammar masking removes the SYNTACTIC failure mode by construction. It does not address semantic validity: overlapping sites, absurd lattice parameters, and unphysical stoichiometries parse without complaint and are present in the masked arm's own output. The comparison isolates the grammar's contribution by giving both arms the same character proposal distribution.",
+    "judge": "pymatgen.io.cif.CifParser, independent of the emitter"
+  }
+}

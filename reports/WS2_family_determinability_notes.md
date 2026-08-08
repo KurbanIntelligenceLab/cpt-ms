@@ -37,7 +37,7 @@ The plan's family (ii) hedge is instantiable per step on both backbones, but the
 measurement inverts the concern that motivated it. The worry was that density would be
 undefined per step on B1 because it depends on lattice parameters at scattered positions.
 In fact CIF emits the cell block in its header, so on B1 the volume is determined at token
-161 of 323–781, giving family (ii) a mean usable fraction of 0.670. The family that is
+161 of 323–773, giving family (ii) a mean usable fraction of 0.670. The family that is
 near-terminal on B1 is family (i), charge balance, at a mean usable fraction of **0.002** —
 because composition on a CIF character stream is spelled out in the atom-site loop at the
 very end. The hedge holds; the thing it was hedging against is the problem on the other
@@ -68,8 +68,8 @@ Six representative structures, 2–5 elements and 4–20 sites.
 |---|---|---|---|---|
 | B2 (fields) | (i) charge | 0.785 | 0.750–0.828 | token 4–7 of 16–35 |
 | B2 (fields) | (ii) density | 0.480 | 0.312–0.600 | token 11–14 of 16–35 |
-| B1 (CIF chars) | (i) charge | 0.002 | 0.001–0.003 | token 322–780 of 323–781 |
-| B1 (CIF chars) | (ii) density | 0.670 | 0.502–0.794 | token 161 of 323–781 |
+| B1 (CIF chars) | (i) charge | 0.002 | 0.001–0.003 | token 322–772 of 323–773 |
+| B1 (CIF chars) | (ii) density | 0.670 | 0.502–0.794 | token 161 of 323–773 |
 
 The asymmetry is structural, not a formatting artifact. A CIF header carries the cell
 parameters and the atom-site loop carries the composition, so a character stream learns
@@ -131,4 +131,4 @@ re-running each truncated prefix from scratch and comparing states; each determi
 position against a brute-force scan confirming no earlier prefix suffices; and the
 Regime-S mask against monotone shrinkage. A closing marker on an incomplete lattice block
 is asserted not to determine a volume, so a truncated stream cannot report a cell it never
-emitted. All pass, within a suite of 95.
+emitted. All pass, within a suite of 114.
