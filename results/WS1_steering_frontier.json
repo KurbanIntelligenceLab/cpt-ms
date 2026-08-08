@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "artifact_name": "WS1_steering_frontier",
   "script": "scripts/synthetic/steering_frontier.py",
-  "git_commit": "87c24ec0d09cb3a112946f90396148064ac235c3-dirty",
+  "git_commit": "07ac3429d848cda09d8c1af4953a7b7baa0c5a53",
   "config": {
     "symbols": [
       "A",
@@ -37,7 +37,7 @@
   "seeds": [
     0
   ],
-  "created_utc": "2026-08-08T21:53:15.302105+00:00",
+  "created_utc": "2026-08-08T22:04:54.523601+00:00",
   "python": "3.11.15",
   "platform": "macOS-26.5.2-arm64-arm-64bit",
   "payload_sha256": "30936408b53e67507599e6decd73fc27c1e4d1845846bcdc26f070267db502d7",

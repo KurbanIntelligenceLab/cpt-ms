@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "artifact_name": "WS1_induced_vs_tilt",
   "script": "scripts/synthetic/induced_distribution.py",
-  "git_commit": "87c24ec0d09cb3a112946f90396148064ac235c3-dirty",
+  "git_commit": "07ac3429d848cda09d8c1af4953a7b7baa0c5a53",
   "config": {
     "symbols": [
       "A",
@@ -28,10 +28,10 @@
   "seeds": [
     0
   ],
-  "created_utc": "2026-08-08T21:28:29.666749+00:00",
+  "created_utc": "2026-08-08T22:04:27.810734+00:00",
   "python": "3.11.15",
   "platform": "macOS-26.5.2-arm64-arm-64bit",
-  "payload_sha256": "372d76f49f682286b0afc09ea3863feda266f2c664f57f87ec09075c1ffc3bfb",
+  "payload_sha256": "b961f38e48806060d2162c5c30dea8b10d38922cd5e1d72f06f5cd48d05b32e3",
   "payload": {
     "distributions": {
       "base_S": {
@@ -76,6 +76,7 @@
       "entropy_gap_nats": 0.565977889268515
     },
     "per_step_diagnostics": {
+      "fallback_policy": "base",
       "mass_before_renormalization": 1.0,
       "nodes_visited": 16537,
       "per_step_infeasible_count": 6140,

@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "artifact_name": "CP2_gradient_verification",
   "script": "scripts/layer/verify_gradients.py",
-  "git_commit": "87c24ec0d09cb3a112946f90396148064ac235c3-dirty",
+  "git_commit": "07ac3429d848cda09d8c1af4953a7b7baa0c5a53",
   "config": {
     "configs": [
       [
@@ -38,7 +38,7 @@
   "seeds": [
     0
   ],
-  "created_utc": "2026-08-08T21:30:37.737022+00:00",
+  "created_utc": "2026-08-08T22:04:21.118115+00:00",
   "python": "3.11.15",
   "platform": "macOS-26.5.2-arm64-arm-64bit",
   "payload_sha256": "7e46c853653e337bd715c924e7c6989998a5937668f0397eb31d2f6cfa250eed",

@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "artifact_name": "WS2_family_determinability",
   "script": "scripts/crystal/determinability.py",
-  "git_commit": "87c24ec0d09cb3a112946f90396148064ac235c3-dirty",
+  "git_commit": "07ac3429d848cda09d8c1af4953a7b7baa0c5a53",
   "config": {
     "cases": [
       "2el_4site",
@@ -16,7 +16,7 @@
   },
   "config_hash": "df056f6069d2a413",
   "seeds": [],
-  "created_utc": "2026-08-08T20:29:19.754532+00:00",
+  "created_utc": "2026-08-08T22:04:10.518890+00:00",
   "python": "3.11.15",
   "platform": "macOS-26.5.2-arm64-arm-64bit",
   "payload_sha256": "1bc1610b79a5651745211bc776c38292b14f7d934cfd0060c9f2f6d48f61051f",
