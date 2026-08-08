@@ -1,0 +1,317 @@
+{
+  "schema_version": "1.0",
+  "artifact_name": "WS2_family_determinability",
+  "script": "scripts/crystal/determinability.py",
+  "git_commit": "UNVERSIONED",
+  "config": {
+    "cases": [
+      "2el_4site",
+      "2el_8site",
+      "3el_8site",
+      "3el_16site",
+      "4el_12site",
+      "5el_20site"
+    ],
+    "smoke": false
+  },
+  "config_hash": "df056f6069d2a413",
+  "seeds": [],
+  "created_utc": "2026-08-08T00:58:19.322036+00:00",
+  "python": "3.11.15",
+  "platform": "macOS-26.5.2-arm64-arm-64bit",
+  "payload_sha256": "64ee48ec9deeb515e1c635d43ea50f18b6d2d8c366d79186e99cb75ae8a30365",
+  "payload": {
+    "rows": [
+      {
+        "backbone": "B2",
+        "n_tokens": 16,
+        "first_determined_position": 4,
+        "usable_fraction": 0.75,
+        "reason": "linear in element counts once the composition block closes",
+        "case": "2el_4site",
+        "family": "i_charge"
+      },
+      {
+        "backbone": "B2",
+        "n_tokens": 16,
+        "first_determined_position": 11,
+        "usable_fraction": 0.3125,
+        "reason": "linear in remaining element counts once 1/V is a known constant",
+        "case": "2el_4site",
+        "family": "ii_density"
+      },
+      {
+        "backbone": "B2",
+        "n_tokens": 20,
+        "first_determined_position": 4,
+        "usable_fraction": 0.8,
+        "reason": "linear in element counts once the composition block closes",
+        "case": "2el_8site",
+        "family": "i_charge"
+      },
+      {
+        "backbone": "B2",
+        "n_tokens": 20,
+        "first_determined_position": 11,
+        "usable_fraction": 0.45,
+        "reason": "linear in remaining element counts once 1/V is a known constant",
+        "case": "2el_8site",
+        "family": "ii_density"
+      },
+      {
+        "backbone": "B2",
+        "n_tokens": 21,
+        "first_determined_position": 5,
+        "usable_fraction": 0.7619047619047619,
+        "reason": "linear in element counts once the composition block closes",
+        "case": "3el_8site",
+        "family": "i_charge"
+      },
+      {
+        "backbone": "B2",
+        "n_tokens": 21,
+        "first_determined_position": 12,
+        "usable_fraction": 0.42857142857142855,
+        "reason": "linear in remaining element counts once 1/V is a known constant",
+        "case": "3el_8site",
+        "family": "ii_density"
+      },
+      {
+        "backbone": "B2",
+        "n_tokens": 29,
+        "first_determined_position": 5,
+        "usable_fraction": 0.8275862068965517,
+        "reason": "linear in element counts once the composition block closes",
+        "case": "3el_16site",
+        "family": "i_charge"
+      },
+      {
+        "backbone": "B2",
+        "n_tokens": 29,
+        "first_determined_position": 12,
+        "usable_fraction": 0.5862068965517241,
+        "reason": "linear in remaining element counts once 1/V is a known constant",
+        "case": "3el_16site",
+        "family": "ii_density"
+      },
+      {
+        "backbone": "B2",
+        "n_tokens": 26,
+        "first_determined_position": 6,
+        "usable_fraction": 0.7692307692307693,
+        "reason": "linear in element counts once the composition block closes",
+        "case": "4el_12site",
+        "family": "i_charge"
+      },
+      {
+        "backbone": "B2",
+        "n_tokens": 26,
+        "first_determined_position": 13,
+        "usable_fraction": 0.5,
+        "reason": "linear in remaining element counts once 1/V is a known constant",
+        "case": "4el_12site",
+        "family": "ii_density"
+      },
+      {
+        "backbone": "B2",
+        "n_tokens": 35,
+        "first_determined_position": 7,
+        "usable_fraction": 0.8,
+        "reason": "linear in element counts once the composition block closes",
+        "case": "5el_20site",
+        "family": "i_charge"
+      },
+      {
+        "backbone": "B2",
+        "n_tokens": 35,
+        "first_determined_position": 14,
+        "usable_fraction": 0.6,
+        "reason": "linear in remaining element counts once 1/V is a known constant",
+        "case": "5el_20site",
+        "family": "ii_density"
+      },
+      {
+        "backbone": "B1",
+        "n_tokens": 323,
+        "first_determined_position": 322,
+        "usable_fraction": 0.0030959752321981426,
+        "reason": "linear in element counts once the composition block closes",
+        "case": "2el_4site",
+        "family": "i_charge"
+      },
+      {
+        "backbone": "B1",
+        "n_tokens": 323,
+        "first_determined_position": 161,
+        "usable_fraction": 0.5015479876160991,
+        "reason": "linear in remaining element counts once 1/V is a known constant",
+        "case": "2el_4site",
+        "family": "ii_density"
+      },
+      {
+        "backbone": "B1",
+        "n_tokens": 435,
+        "first_determined_position": 434,
+        "usable_fraction": 0.0022988505747126436,
+        "reason": "linear in element counts once the composition block closes",
+        "case": "2el_8site",
+        "family": "i_charge"
+      },
+      {
+        "backbone": "B1",
+        "n_tokens": 435,
+        "first_determined_position": 161,
+        "usable_fraction": 0.6298850574712643,
+        "reason": "linear in remaining element counts once 1/V is a known constant",
+        "case": "2el_8site",
+        "family": "ii_density"
+      },
+      {
+        "backbone": "B1",
+        "n_tokens": 435,
+        "first_determined_position": 434,
+        "usable_fraction": 0.0022988505747126436,
+        "reason": "linear in element counts once the composition block closes",
+        "case": "3el_8site",
+        "family": "i_charge"
+      },
+      {
+        "backbone": "B1",
+        "n_tokens": 435,
+        "first_determined_position": 161,
+        "usable_fraction": 0.6298850574712643,
+        "reason": "linear in remaining element counts once 1/V is a known constant",
+        "case": "3el_8site",
+        "family": "ii_density"
+      },
+      {
+        "backbone": "B1",
+        "n_tokens": 665,
+        "first_determined_position": 664,
+        "usable_fraction": 0.0015037593984962407,
+        "reason": "linear in element counts once the composition block closes",
+        "case": "3el_16site",
+        "family": "i_charge"
+      },
+      {
+        "backbone": "B1",
+        "n_tokens": 665,
+        "first_determined_position": 161,
+        "usable_fraction": 0.7578947368421053,
+        "reason": "linear in remaining element counts once 1/V is a known constant",
+        "case": "3el_16site",
+        "family": "ii_density"
+      },
+      {
+        "backbone": "B1",
+        "n_tokens": 549,
+        "first_determined_position": 548,
+        "usable_fraction": 0.0018214936247723133,
+        "reason": "linear in element counts once the composition block closes",
+        "case": "4el_12site",
+        "family": "i_charge"
+      },
+      {
+        "backbone": "B1",
+        "n_tokens": 549,
+        "first_determined_position": 161,
+        "usable_fraction": 0.7067395264116576,
+        "reason": "linear in remaining element counts once 1/V is a known constant",
+        "case": "4el_12site",
+        "family": "ii_density"
+      },
+      {
+        "backbone": "B1",
+        "n_tokens": 781,
+        "first_determined_position": 780,
+        "usable_fraction": 0.0012804097311139564,
+        "reason": "linear in element counts once the composition block closes",
+        "case": "5el_20site",
+        "family": "i_charge"
+      },
+      {
+        "backbone": "B1",
+        "n_tokens": 781,
+        "first_determined_position": 161,
+        "usable_fraction": 0.793854033290653,
+        "reason": "linear in remaining element counts once 1/V is a known constant",
+        "case": "5el_20site",
+        "family": "ii_density"
+      }
+    ],
+    "summary": {
+      "B1_i_charge": {
+        "n_cases": 6,
+        "min_usable_fraction": 0.0012804097311139564,
+        "max_usable_fraction": 0.0030959752321981426,
+        "mean_usable_fraction": 0.00204988985600099
+      },
+      "B1_ii_density": {
+        "n_cases": 6,
+        "min_usable_fraction": 0.5015479876160991,
+        "max_usable_fraction": 0.793854033290653,
+        "mean_usable_fraction": 0.6699677331838406
+      },
+      "B2_i_charge": {
+        "n_cases": 6,
+        "min_usable_fraction": 0.75,
+        "max_usable_fraction": 0.8275862068965517,
+        "mean_usable_fraction": 0.7847869563386803
+      },
+      "B2_ii_density": {
+        "n_cases": 6,
+        "min_usable_fraction": 0.3125,
+        "max_usable_fraction": 0.6,
+        "mean_usable_fraction": 0.4795463875205255
+      }
+    },
+    "verdict": {
+      "B1_i_charge": {
+        "band": "near-terminal",
+        "mean_usable_fraction": 0.00204988985600099,
+        "n_cases_never_determined": 0,
+        "determined_positions": [
+          322,
+          434,
+          548,
+          664,
+          780
+        ],
+        "statement": "B1 family i_charge: near-terminal (mean usable fraction 0.002 over 6 cases; 0 case(s) never determined)."
+      },
+      "B1_ii_density": {
+        "band": "usable over most of the sequence",
+        "mean_usable_fraction": 0.6699677331838406,
+        "n_cases_never_determined": 0,
+        "determined_positions": [
+          161
+        ],
+        "statement": "B1 family ii_density: usable over most of the sequence (mean usable fraction 0.670 over 6 cases; 0 case(s) never determined)."
+      },
+      "B2_i_charge": {
+        "band": "usable over most of the sequence",
+        "mean_usable_fraction": 0.7847869563386803,
+        "n_cases_never_determined": 0,
+        "determined_positions": [
+          4,
+          5,
+          6,
+          7
+        ],
+        "statement": "B2 family i_charge: usable over most of the sequence (mean usable fraction 0.785 over 6 cases; 0 case(s) never determined)."
+      },
+      "B2_ii_density": {
+        "band": "usable over most of the sequence",
+        "mean_usable_fraction": 0.4795463875205255,
+        "n_cases_never_determined": 0,
+        "determined_positions": [
+          11,
+          12,
+          13,
+          14
+        ],
+        "statement": "B2 family ii_density: usable over most of the sequence (mean usable fraction 0.480 over 6 cases; 0 case(s) never determined)."
+      }
+    }
+  }
+}

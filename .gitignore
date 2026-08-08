@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+**/.pytest_cache/
+.venv/
+*.egg-info/
+
+# macOS
+.DS_Store
+
+# Pre-flight shards are regenerable in seconds and would otherwise churn the
+# history on every launch. The full artifacts they mirror ARE tracked, because
+# they are the evidence reports are built from.
+results/*_smoke.json
+results/preflight_report.json
+
+# The run ledger is append-only and machine-local: two machines appending to the
+# same file produce conflicts on every push for no benefit. Runs that matter are
+# traceable through the artifacts they name.
+results/run_ledger.jsonl
