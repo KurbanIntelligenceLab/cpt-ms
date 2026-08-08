@@ -18,3 +18,6 @@ results/preflight_report.json
 # same file produce conflicts on every push for no benefit. Runs that matter are
 # traceable through the artifacts they name.
 results/run_ledger.jsonl
+
+# SSH keys for rented compute — never commit
+.vast/

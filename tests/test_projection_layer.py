@@ -180,3 +180,98 @@ def test_converges_without_stalling_near_the_optimum():
         res = project(logits, A, b)
         assert float(res.residual.abs().max()) < 1e-10, f"seed {seed}"
         assert res.iterations < 20, f"seed {seed}: {res.iterations} iterations"
+
+
+@pytest.mark.parametrize("dtype", [torch.float64, torch.float32,
+                                   torch.bfloat16, torch.float16])
+def test_solver_converges_at_every_input_dtype(dtype):
+    """The solve must not degrade with the training dtype.
+
+    Regression for a blocking defect found while preparing the CP2 benchmark. The
+    Newton iteration originally ran in the input dtype: at float32 only 11 of 64
+    entries reached tolerance, and half precision raised NotImplementedError
+    because torch has no half-precision LU. Under any mixed-precision training run
+    the layer would have crashed or silently returned non-KL-optimal
+    distributions — the exact condition the convergence flag exists to prevent.
+
+    The solve now runs in float64 internally and casts back.
+    """
+    torch.manual_seed(0)
+    B, V, m = 64, 120, 1
+    lo = torch.randn(B, V, dtype=torch.float64)
+    A = torch.randn(B, m, V, dtype=torch.float64)
+    b = torch.full((B, m), 0.3, dtype=torch.float64)
+    mask = torch.ones(B, V, dtype=torch.bool)
+
+    r = project(lo.to(dtype), A.to(dtype), b.to(dtype), mask)
+    assert bool(r.converged.all()), (
+        f"{dtype}: only {int(r.converged.sum())}/{B} converged"
+    )
+    assert r.q.dtype == dtype, "output dtype must match the input"
+    assert torch.isfinite(r.q).all()
+    # Evaluated in float64 so the check measures the solve, not the cast.
+    q = r.q.double()
+    resid = ((A.double() @ q.unsqueeze(-1)).squeeze(-1) - b.double()).abs().max()
+    floor = {torch.float64: 1e-9, torch.float32: 1e-6,
+             torch.float16: 1e-3, torch.bfloat16: 1e-2}[dtype]
+    assert resid < floor, f"{dtype}: residual {resid:.2e} exceeds its floor {floor:.0e}"
+
+
+def test_probabilities_remain_normalized_in_low_precision():
+    """A cast that broke normalization would corrupt downstream sampling."""
+    torch.manual_seed(1)
+    B, V, m = 32, 80, 1
+    lo = torch.randn(B, V, dtype=torch.float64)
+    A = torch.randn(B, m, V, dtype=torch.float64)
+    b = torch.zeros(B, m, dtype=torch.float64)
+    mask = torch.ones(B, V, dtype=torch.bool)
+    for dtype, tol in ((torch.float32, 1e-5), (torch.bfloat16, 5e-2),
+                       (torch.float16, 1e-2)):
+        q = project(lo.to(dtype), A.to(dtype), b.to(dtype), mask).q.double()
+        assert (q >= 0).all(), f"{dtype}: negative probability"
+        assert (q.sum(-1) - 1.0).abs().max() < tol, f"{dtype}: not normalized"
+
+
+def test_fast_hessian_path_reaches_the_same_optimum():
+    """The float32-Hessian fast path must not trade accuracy for speed.
+
+    The Hessian steers the Newton direction; it does not define the fixed point,
+    which is set by the residual tolerance. So the fast path must converge to the
+    same distribution to well within tolerance. It is opt-in rather than default
+    because it perturbs the stopping point by ~1e-13 to 1e-9, which is enough to
+    break a finite-difference gradient check — the layer stops being smooth at the
+    scale gradcheck probes, and the implicit-function-theorem backward assumes q is
+    the exact solution.
+    """
+    torch.manual_seed(0)
+    B, V, m = 32, 256, 2
+    lo = torch.randn(B, V, dtype=torch.float64)
+    A = torch.randn(B, m, V, dtype=torch.float64)
+    mask = torch.ones(B, V, dtype=torch.bool)
+    # Non-degenerate target: lambda != 0, so the Hessian actually participates.
+    b = torch.einsum("bmv,bv->bm", A, torch.softmax(lo, -1)) + 0.5
+
+    slow = project(lo, A, b, mask, tol=1e-10)
+    fast = project(lo, A, b, mask, tol=1e-10, fast_hessian_dtype=torch.float32)
+
+    assert bool(slow.converged.all()) and bool(fast.converged.all())
+    assert fast.residual.abs().max() < 1e-9, "fast path must still satisfy the constraint"
+    # Same optimum to far better than the tolerance that defines it.
+    assert (fast.q - slow.q).abs().max() < 1e-11, (
+        f"fast path reached a different point: {(fast.q - slow.q).abs().max():.2e}"
+    )
+
+
+def test_default_hessian_precision_is_the_accurate_one():
+    """A fast default would silently break the gradient path.
+
+    Regression guard: the speed-up is opt-in. If someone flips the default to
+    float32 for the benchmark number, gradcheck breaks and the implicit-function
+    backward is no longer differentiating the function it thinks it is.
+    """
+    import inspect
+
+    sig = inspect.signature(project)
+    assert sig.parameters["fast_hessian_dtype"].default is None, (
+        "fast_hessian_dtype must default to None (accurate float64 Hessian)"
+    )

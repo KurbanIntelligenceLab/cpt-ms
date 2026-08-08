@@ -37,6 +37,37 @@ than differentiating through the Newton iterations. The cost is cubic in the num
 constraints and independent of the iteration count, and the result is the exact gradient
 of the true optimum rather than the gradient of an unrolled approximation.
 
+## Solver precision — reported before benchmarking, as requested
+
+The dual Newton solve runs in **float64 internally regardless of the input dtype**, casting the
+result back at the end. The convergence flag is evaluated on the float64 solve, before the
+output cast, so a solver that reached the optimum is not marked failed merely because its answer
+cannot be represented in a lower-precision output.
+
+This was a blocking defect, found while preparing the CP2 benchmark rather than during the
+layer's own verification. The iteration originally ran in the input dtype:
+
+| Input dtype | Converged (of 64) | Residual, evaluated in float64 |
+|---|---|---|
+| float64 | 64 | 9.4e-11 |
+| float32 | 11 | 3.4e-04 |
+| bfloat16 | raised `NotImplementedError` | — |
+| float16 | raised `NotImplementedError` | — |
+
+Half precision raises because torch has no half-precision LU on CPU. Under any mixed-precision
+training run the layer would therefore have crashed outright or, at float32, silently returned
+distributions that are not KL-optimal for 53 of 64 batch entries — precisely the condition the
+convergence flag exists to prevent, defeated by the flag being computed in the same degraded
+precision as the solve.
+
+With the internal float64 solve, all four dtypes reach 64/64 convergence. The residual after
+cast-back is the output dtype's own representation floor (2.6e-08 at float32, 1.7e-04 at
+float16, 2.5e-03 at bfloat16), which no solver can improve on.
+
+Consequence for the CP2 benchmark: the projection's cost must be measured with the float64
+internal solve in place, since that is what will run in training. Benchmarking the
+input-dtype version would measure code that cannot be used.
+
 ## Verification results
 
 Five configurations, batch 3-4, vocabulary 10-32, one to three constraints, float64.
@@ -136,7 +167,7 @@ the two diagnoses. Before the line-search fix the same sweep ran from 8.5e-6 at 
 
 ## Verification tests
 
-Fifteen tests in `tests/test_projection_layer.py`, each checking a property against an
+22 tests in `tests/test_projection_layer.py`, each checking a property against an
 independent characterization rather than against the implementation's own output: the
 output is a distribution; the constraint is satisfied; the solution matches the KKT tilt
 form as a ratio identity; no feasible perturbation has smaller KL (200 random
@@ -146,7 +177,7 @@ identity when the constraint already holds; gradients pass autograd's gradcheck 
 two constraints; and a regression test asserting both a tight residual and a low iteration
 count, since the stall presented as hitting the iteration cap.
 
-All 114 tests in the suite pass: 18 in `tests/test_cif_grammar.py`, 15 here, 15 in
+All 121 tests in the suite pass: 22 here, 18 in `tests/test_cif_grammar.py`, 15 in
 `tests/test_parser_determinability.py`, 14 in `tests/test_actionability.py`, 9 in
 `tests/test_ledger_preflight.py`, 9 in `tests/test_tilt_lemmas.py`, 8 in
 `tests/test_synthetic_targets.py`, 8 in `tests/test_provenance.py`, 8 in
