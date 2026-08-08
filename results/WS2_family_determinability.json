@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "artifact_name": "WS2_family_determinability",
   "script": "scripts/crystal/determinability.py",
-  "git_commit": "07ac3429d848cda09d8c1af4953a7b7baa0c5a53",
+  "git_commit": "9c8076b842751de8dddd7b5ab0c29a2f83a2b422-dirty",
   "config": {
     "cases": [
       "2el_4site",
@@ -16,10 +16,10 @@
   },
   "config_hash": "df056f6069d2a413",
   "seeds": [],
-  "created_utc": "2026-08-08T22:04:10.518890+00:00",
+  "created_utc": "2026-08-08T22:11:23.644451+00:00",
   "python": "3.11.15",
   "platform": "macOS-26.5.2-arm64-arm-64bit",
-  "payload_sha256": "1bc1610b79a5651745211bc776c38292b14f7d934cfd0060c9f2f6d48f61051f",
+  "payload_sha256": "4d488a859a05ece878c46a267bc130ec07077e42b0efe78cce07562a28207a0a",
   "payload": {
     "rows": [
       {
@@ -43,10 +43,10 @@
         "reason": "linear in remaining element counts once 1/V is a known constant",
         "case": "2el_4site",
         "family": "ii_density",
-        "actionable_fraction": 0.125,
-        "n_actionable": 2,
+        "actionable_fraction": 0.5,
+        "n_actionable": 8,
         "first_actionable": 1,
-        "last_actionable": 2
+        "last_actionable": 9
       },
       {
         "backbone": "B2",
@@ -69,10 +69,10 @@
         "reason": "linear in remaining element counts once 1/V is a known constant",
         "case": "2el_8site",
         "family": "ii_density",
-        "actionable_fraction": 0.1,
-        "n_actionable": 2,
+        "actionable_fraction": 0.4,
+        "n_actionable": 8,
         "first_actionable": 1,
-        "last_actionable": 2
+        "last_actionable": 9
       },
       {
         "backbone": "B2",
@@ -95,10 +95,10 @@
         "reason": "linear in remaining element counts once 1/V is a known constant",
         "case": "3el_8site",
         "family": "ii_density",
-        "actionable_fraction": 0.14285714285714285,
-        "n_actionable": 3,
+        "actionable_fraction": 0.42857142857142855,
+        "n_actionable": 9,
         "first_actionable": 1,
-        "last_actionable": 3
+        "last_actionable": 10
       },
       {
         "backbone": "B2",
@@ -121,10 +121,10 @@
         "reason": "linear in remaining element counts once 1/V is a known constant",
         "case": "3el_16site",
         "family": "ii_density",
-        "actionable_fraction": 0.10344827586206896,
-        "n_actionable": 3,
+        "actionable_fraction": 0.3103448275862069,
+        "n_actionable": 9,
         "first_actionable": 1,
-        "last_actionable": 3
+        "last_actionable": 10
       },
       {
         "backbone": "B2",
@@ -147,10 +147,10 @@
         "reason": "linear in remaining element counts once 1/V is a known constant",
         "case": "4el_12site",
         "family": "ii_density",
-        "actionable_fraction": 0.15384615384615385,
-        "n_actionable": 4,
+        "actionable_fraction": 0.38461538461538464,
+        "n_actionable": 10,
         "first_actionable": 1,
-        "last_actionable": 4
+        "last_actionable": 11
       },
       {
         "backbone": "B2",
@@ -173,10 +173,10 @@
         "reason": "linear in remaining element counts once 1/V is a known constant",
         "case": "5el_20site",
         "family": "ii_density",
-        "actionable_fraction": 0.14285714285714285,
-        "n_actionable": 5,
+        "actionable_fraction": 0.3142857142857143,
+        "n_actionable": 11,
         "first_actionable": 1,
-        "last_actionable": 5
+        "last_actionable": 12
       },
       {
         "backbone": "B1",
@@ -542,9 +542,9 @@
         "min_usable_fraction": 0.3125,
         "max_usable_fraction": 0.6,
         "mean_usable_fraction": 0.4795463875205255,
-        "mean_actionable_fraction": 0.1280014525704181,
-        "min_actionable_fraction": 0.1,
-        "max_actionable_fraction": 0.15384615384615385
+        "mean_actionable_fraction": 0.38963622584312246,
+        "min_actionable_fraction": 0.3103448275862069,
+        "max_actionable_fraction": 0.5
       }
     },
     "verdict": {
@@ -619,8 +619,8 @@
       "B2_ii_density": {
         "band": "usable over most of the sequence",
         "mean_usable_fraction": 0.4795463875205255,
-        "mean_actionable_fraction": 0.1280014525704181,
-        "actionable_band": "moderate",
+        "mean_actionable_fraction": 0.38963622584312246,
+        "actionable_band": "wide",
         "n_cases_never_determined": 0,
         "determined_positions": [
           11,
@@ -628,7 +628,7 @@
           13,
           14
         ],
-        "statement": "B2 family ii_density: determinable usable over most of the sequence (mean usable fraction 0.480), actionable window moderate (mean actionable fraction 0.1280) over 6 cases; 0 case(s) never determined."
+        "statement": "B2 family ii_density: determinable usable over most of the sequence (mean usable fraction 0.480), actionable window wide (mean actionable fraction 0.3896) over 6 cases; 0 case(s) never determined."
       }
     }
   }

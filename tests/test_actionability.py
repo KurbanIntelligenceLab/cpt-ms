@@ -58,6 +58,42 @@ def test_naive_layout_composition_parses_real_elements():
     assert _charge(st) is not None
 
 
+@pytest.mark.parametrize("builder,backbone", [
+    (build_b1, "B1"), (build_b1_reference, "B1ref"), (build_b2, "B2"),
+])
+def test_fixtures_use_real_elements_not_placeholders(builder, backbone):
+    """Placeholder element symbols silently zero out both statistics.
+
+    Regression for a defect that occurred twice, in the naive B1 fixture and again
+    in B2. Labels like `E0`/`E1` carry no charge and no mass, so the charge
+    statistic evaluates to a meaningless zero and density evaluates to zero
+    regardless of the cell — which made every lattice token read as non-actionable
+    for density and collapsed B2's two families onto an identical figure. The
+    measurement then describes the fixture rather than the format.
+    """
+    from scripts.crystal.actionability import CHARGES, MASSES, _density
+
+    st = _final_state(builder(3, 8), backbone)
+    assert st.element_counts, "composition parsed empty"
+    unknown = [el for el in st.element_counts if el not in CHARGES or el not in MASSES]
+    assert not unknown, f"fixture emits elements with no charge/mass: {unknown}"
+    assert _charge(st) is not None
+    d = _density(st)
+    assert d is not None and d > 0.0, "density must be non-zero for a real composition"
+
+
+def test_density_has_more_actionable_room_than_charge_on_every_backbone():
+    """Density depends on lattice tokens as well as composition, so it must have
+    strictly more room. Equality is the signature of the placeholder defect.
+    """
+    for builder, backbone in ((build_b1, "B1"), (build_b1_reference, "B1ref"),
+                              (build_b2, "B2")):
+        toks = builder(3, 8)
+        chg = profile(toks, backbone, "i_charge").actionable_fraction
+        den = profile(toks, backbone, "ii_density").actionable_fraction
+        assert den > chg, f"{backbone}: density {den:.4f} not above charge {chg:.4f}"
+
+
 @pytest.mark.parametrize("backbone,builder", [
     ("B1", build_b1), ("B1ref", build_b1_reference), ("B2", build_b2),
 ])

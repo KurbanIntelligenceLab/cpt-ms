@@ -32,9 +32,17 @@ SCRIPT = "scripts/crystal/determinability.py"
 
 
 def build_b2(n_elements: int, n_sites: int) -> list[str]:
-    """Structured-field token stream."""
+    """Structured-field token stream.
+
+    Uses real element symbols. An earlier version emitted placeholders (`el:E0:1`)
+    which carry no charge and no mass, so the charge statistic was identically zero
+    and the density statistic was zero regardless of the cell — which made every
+    lattice token read as non-actionable for density and collapsed the two
+    families onto the same figure. Same defect class as the naive B1 fixture.
+    """
+    elements = ["Na", "Cl", "Mg", "O", "Fe"][:max(n_elements, 1)]
     toks = ["<COMP>"]
-    toks += [f"el:E{i}:{i+1}" for i in range(n_elements)]
+    toks += [f"el:{el}:{i+1}" for i, el in enumerate(elements)]
     toks += ["<END_COMP>"]
     for k, v in (("a", 5.0), ("b", 5.0), ("c", 5.0),
                  ("alpha", 90.0), ("beta", 90.0), ("gamma", 90.0)):
