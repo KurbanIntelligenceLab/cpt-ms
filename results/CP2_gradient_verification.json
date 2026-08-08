@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "artifact_name": "CP2_gradient_verification",
   "script": "scripts/layer/verify_gradients.py",
-  "git_commit": "UNVERSIONED",
+  "git_commit": "1041c1f668ab5df7cdd096f72c0307bd794d6502-dirty",
   "config": {
     "configs": [
       [
@@ -38,125 +38,120 @@
   "seeds": [
     0
   ],
-  "created_utc": "2026-08-08T02:05:57.339341+00:00",
-  "python": "3.11.15",
-  "platform": "macOS-26.5.2-arm64-arm-64bit",
-  "payload_sha256": "7e46c853653e337bd715c924e7c6989998a5937668f0397eb31d2f6cfa250eed",
+  "created_utc": "2026-08-08T19:05:11.453062+00:00",
+  "python": "3.13.2",
+  "platform": "macOS-26.5.2-arm64-arm-64bit-Mach-O",
+  "payload_sha256": "152eaeaa3085f40ad5f9f47bbce3941429ff09da7cb1836c3e96ac00e965b535",
   "payload": {
     "rows": [
       {
         "B": 4,
         "V": 10,
         "m": 1,
-        "forward_max_abs_residual": 3.402103598837414e-11,
+        "forward_max_abs_residual": 3.402100823279852e-11,
         "forward_iterations": 5,
         "forward_all_converged": true,
         "fd_sweep_rel_diff": {
-          "1e-02": 7.4323911290295095e-06,
-          "1e-03": 7.452900370264935e-08,
-          "1e-04": 9.511930017616716e-10,
-          "1e-05": 4.558588671117108e-10,
-          "1e-06": 1.9151266638433076e-09
+          "1e-02": 7.4323911290298855e-06,
+          "1e-03": 7.452849820076248e-08,
+          "1e-04": 9.562480197480161e-10,
+          "1e-05": 3.547586971904565e-10,
+          "1e-06": 1.907330189208873e-09
         },
         "fd_best_step": "1e-05",
-        "grad_rel_diff_vs_finite_difference": 4.558588671117108e-10,
-        "grad_max_abs_diff_vs_finite_difference": 1.0011932949360869e-10,
+        "grad_rel_diff_vs_finite_difference": 3.547586971904565e-10,
+        "grad_max_abs_diff_vs_finite_difference": 7.791491063446898e-11,
         "cvxpylayers": {
-          "available": true,
-          "grad_max_abs_diff": 1.0050822529805714e-07,
-          "grad_rel_diff": 4.5762936068329736e-07
+          "available": false,
+          "reason": "cvxpylayers not installed"
         }
       },
       {
         "B": 4,
         "V": 16,
         "m": 1,
-        "forward_max_abs_residual": 2.394792697479886e-12,
+        "forward_max_abs_residual": 2.394721573817371e-12,
         "forward_iterations": 4,
         "forward_all_converged": true,
         "fd_sweep_rel_diff": {
-          "1e-02": 7.889148103552234e-06,
-          "1e-03": 7.890137625463587e-08,
-          "1e-04": 7.912437053109901e-10,
-          "1e-05": 1.1312033261118314e-10,
-          "1e-06": 1.1087447598762095e-09
+          "1e-02": 7.88914806536267e-06,
+          "1e-03": 7.890023056402816e-08,
+          "1e-04": 7.912437053140119e-10,
+          "1e-05": 1.1312052355961373e-10,
+          "1e-06": 1.3926579377481269e-09
         },
         "fd_best_step": "1e-05",
-        "grad_rel_diff_vs_finite_difference": 1.1312033261118314e-10,
-        "grad_max_abs_diff_vs_finite_difference": 3.288552763436314e-11,
+        "grad_rel_diff_vs_finite_difference": 1.1312052355961373e-10,
+        "grad_max_abs_diff_vs_finite_difference": 3.2885583145514374e-11,
         "cvxpylayers": {
-          "available": true,
-          "grad_max_abs_diff": 5.7236885966927e-08,
-          "grad_rel_diff": 1.9688465121191053e-07
+          "available": false,
+          "reason": "cvxpylayers not installed"
         }
       },
       {
         "B": 4,
         "V": 16,
         "m": 2,
-        "forward_max_abs_residual": 7.842787530520923e-11,
+        "forward_max_abs_residual": 7.842784754963361e-11,
         "forward_iterations": 5,
         "forward_all_converged": true,
         "fd_sweep_rel_diff": {
-          "1e-02": 4.795177075044375e-06,
-          "1e-03": 4.795350730715474e-08,
-          "1e-04": 4.838969308533719e-10,
-          "1e-05": 1.0657025777313793e-10,
-          "1e-06": 7.92240539112655e-10
+          "1e-02": 4.795177092260993e-06,
+          "1e-03": 4.795333608238139e-08,
+          "1e-04": 4.856101209595553e-10,
+          "1e-05": 8.163288002256678e-11,
+          "1e-06": 7.933046874768115e-10
         },
         "fd_best_step": "1e-05",
-        "grad_rel_diff_vs_finite_difference": 1.0657025777313793e-10,
-        "grad_max_abs_diff_vs_finite_difference": 3.4532848802726335e-11,
+        "grad_rel_diff_vs_finite_difference": 8.163288002256678e-11,
+        "grad_max_abs_diff_vs_finite_difference": 2.645218245833636e-11,
         "cvxpylayers": {
-          "available": true,
-          "grad_max_abs_diff": 8.089524833332362e-08,
-          "grad_rel_diff": 2.496471463161356e-07
+          "available": false,
+          "reason": "cvxpylayers not installed"
         }
       },
       {
         "B": 3,
         "V": 24,
         "m": 2,
-        "forward_max_abs_residual": 6.323589221701731e-12,
+        "forward_max_abs_residual": 6.32349901608098e-12,
         "forward_iterations": 5,
         "forward_all_converged": true,
         "fd_sweep_rel_diff": {
-          "1e-02": 5.957319908181665e-06,
-          "1e-03": 5.957583297637417e-08,
-          "1e-04": 5.937568383467609e-10,
-          "1e-05": 1.0232333101606535e-10,
-          "1e-06": 7.828954867059258e-10
+          "1e-02": 5.957319941075585e-06,
+          "1e-03": 5.9576162656959696e-08,
+          "1e-04": 5.970543864074879e-10,
+          "1e-05": 9.455374257312862e-11,
+          "1e-06": 8.196749489998359e-10
         },
         "fd_best_step": "1e-05",
-        "grad_rel_diff_vs_finite_difference": 1.0232333101606535e-10,
-        "grad_max_abs_diff_vs_finite_difference": 1.72247494045763e-11,
+        "grad_rel_diff_vs_finite_difference": 9.455374257312862e-11,
+        "grad_max_abs_diff_vs_finite_difference": 1.591684423152273e-11,
         "cvxpylayers": {
-          "available": true,
-          "grad_max_abs_diff": 1.2223981190467859e-07,
-          "grad_rel_diff": 7.261634938105844e-07
+          "available": false,
+          "reason": "cvxpylayers not installed"
         }
       },
       {
         "B": 3,
         "V": 32,
         "m": 3,
-        "forward_max_abs_residual": 6.811284869456813e-11,
+        "forward_max_abs_residual": 6.81126266499632e-11,
         "forward_iterations": 5,
         "forward_all_converged": true,
         "fd_sweep_rel_diff": {
-          "1e-02": 7.599203653001585e-06,
-          "1e-03": 7.604269307293515e-08,
-          "1e-04": 8.085274320490798e-10,
-          "1e-05": 1.5531695970630716e-10,
-          "1e-06": 1.806306769110439e-09
+          "1e-02": 7.5992036532180505e-06,
+          "1e-03": 7.60422603629693e-08,
+          "1e-04": 8.171861757902195e-10,
+          "1e-05": 2.333970963284986e-10,
+          "1e-06": 2.0929540931090242e-09
         },
         "fd_best_step": "1e-05",
-        "grad_rel_diff_vs_finite_difference": 1.5531695970630716e-10,
-        "grad_max_abs_diff_vs_finite_difference": 1.991521877964253e-11,
+        "grad_rel_diff_vs_finite_difference": 2.333970963284986e-10,
+        "grad_max_abs_diff_vs_finite_difference": 2.9926894296039563e-11,
         "cvxpylayers": {
-          "available": true,
-          "grad_max_abs_diff": 2.561503214121297e-07,
-          "grad_rel_diff": 1.9976935621160652e-06
+          "available": false,
+          "reason": "cvxpylayers not installed"
         }
       }
     ],
@@ -166,10 +161,10 @@
       "cases": []
     },
     "tolerances": {
-      "worst_forward_residual": 7.842787530520923e-11,
-      "worst_rel_diff_vs_finite_difference": 4.558588671117108e-10,
-      "worst_rel_diff_vs_cvxpylayers": 1.9976935621160652e-06,
-      "cvxpylayers_configs_compared": 5,
+      "worst_forward_residual": 7.842784754963361e-11,
+      "worst_rel_diff_vs_finite_difference": 3.547586971904565e-10,
+      "worst_rel_diff_vs_cvxpylayers": null,
+      "cvxpylayers_configs_compared": 0,
       "note": "The finite-difference figure is the best point of a step-size sweep, not a single arbitrary step. Central differences trade truncation error (falling as eps^2) against roundoff amplification (growing as 1/eps, because the quotient divides the forward solve's own convergence error by the step), so the per-config sweep in fd_sweep_rel_diff shows that U-shape explicitly. A single small step would report a large discrepancy that is a property of the oracle, not of the gradient. The cvxpylayers comparison carries the real weight regardless, since it shares no code path with the closed-form tilt and differentiates the KKT system of the general cone program instead."
     }
   }

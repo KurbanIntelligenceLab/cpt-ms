@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "artifact_name": "WS2_synthetic_ground_truth",
   "script": "scripts/synthetic/compute_ground_truth.py",
-  "git_commit": "UNVERSIONED",
+  "git_commit": "1041c1f668ab5df7cdd096f72c0307bd794d6502",
   "config": {
     "symbols": [
       "A",
@@ -28,10 +28,10 @@
   "seeds": [
     0
   ],
-  "created_utc": "2026-08-07T21:44:05.922087+00:00",
-  "python": "3.11.15",
-  "platform": "macOS-26.5.2-arm64-arm-64bit",
-  "payload_sha256": "717a195b4c6a82b6c855cc658b2d1a9bbe83a7957bda70efb95efeaa25d861b7",
+  "created_utc": "2026-08-08T19:05:03.854983+00:00",
+  "python": "3.13.2",
+  "platform": "macOS-26.5.2-arm64-arm-64bit-Mach-O",
+  "payload_sha256": "834fc3d95969117177e3010e32b6249649e999170d9035e4506afd69781c4644",
   "payload": {
     "task": {
       "n_sequences": 65536,
@@ -46,7 +46,7 @@
       ]
     },
     "constraint_binds": {
-      "data_mean_charge": 5.180964642548152,
+      "data_mean_charge": 5.18096464254815,
       "charge_target": 0.0,
       "binding": true
     },
@@ -55,7 +55,7 @@
         "name": "data",
         "support_size": 65536,
         "entropy_nats": 9.954260691080997,
-        "mean_charge": 5.180964642548152,
+        "mean_charge": 5.18096464254815,
         "var_charge": 17.9864334110734,
         "hard_violation_rate": 0.9553957321732984,
         "regime_S_satisfied_mass": 0.3681831352436282,
@@ -67,8 +67,8 @@
         "name": "S_conditioned",
         "support_size": 36120,
         "entropy_nats": 9.64134343817761,
-        "mean_charge": 2.516433045245362,
-        "var_charge": 8.563613613185142,
+        "mean_charge": 2.5164330452453623,
+        "var_charge": 8.56361361318514,
         "hard_violation_rate": 0.9108939130892355,
         "regime_S_satisfied_mass": 1.0,
         "kl_from_data_nats": 0.999174814481405,
@@ -91,7 +91,7 @@
         "name": "E_tilt",
         "support_size": 65536,
         "entropy_nats": 10.498357850956566,
-        "mean_charge": 5.381806111870446e-13,
+        "mean_charge": 5.378475442796571e-13,
         "var_charge": 18.04331188001072,
         "hard_violation_rate": 0.9078917445238016,
         "regime_S_satisfied_mass": 0.5454525764859641,
@@ -104,8 +104,8 @@
         "name": "SE_tilt",
         "support_size": 36120,
         "entropy_nats": 9.895616448166207,
-        "mean_charge": 2.7755575615628914e-17,
-        "var_charge": 10.451958002729189,
+        "mean_charge": 1.3877787807814457e-16,
+        "var_charge": 10.451958002729187,
         "hard_violation_rate": 0.8754696585928741,
         "regime_S_satisfied_mass": 1.0,
         "kl_from_data_nats": 1.3338965591358338,

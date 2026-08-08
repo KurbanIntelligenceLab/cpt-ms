@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "artifact_name": "WS2_family_determinability",
   "script": "scripts/crystal/determinability.py",
-  "git_commit": "UNVERSIONED",
+  "git_commit": "1041c1f668ab5df7cdd096f72c0307bd794d6502-dirty",
   "config": {
     "cases": [
       "2el_4site",
@@ -16,10 +16,10 @@
   },
   "config_hash": "df056f6069d2a413",
   "seeds": [],
-  "created_utc": "2026-08-08T00:58:19.322036+00:00",
-  "python": "3.11.15",
-  "platform": "macOS-26.5.2-arm64-arm-64bit",
-  "payload_sha256": "64ee48ec9deeb515e1c635d43ea50f18b6d2d8c366d79186e99cb75ae8a30365",
+  "created_utc": "2026-08-08T19:05:04.999220+00:00",
+  "python": "3.13.2",
+  "platform": "macOS-26.5.2-arm64-arm-64bit-Mach-O",
+  "payload_sha256": "1771ab8d3a9cef382fefeed9d4ac8ff86616dcb35d71ad4a361aade5784a2829",
   "payload": {
     "rows": [
       {
@@ -256,7 +256,7 @@
         "n_cases": 6,
         "min_usable_fraction": 0.75,
         "max_usable_fraction": 0.8275862068965517,
-        "mean_usable_fraction": 0.7847869563386803
+        "mean_usable_fraction": 0.7847869563386806
       },
       "B2_ii_density": {
         "n_cases": 6,
@@ -290,7 +290,7 @@
       },
       "B2_i_charge": {
         "band": "usable over most of the sequence",
-        "mean_usable_fraction": 0.7847869563386803,
+        "mean_usable_fraction": 0.7847869563386806,
         "n_cases_never_determined": 0,
         "determined_positions": [
           4,
