@@ -21,3 +21,6 @@ results/run_ledger.jsonl
 
 # SSH keys for rented compute — never commit
 .vast/
+
+# scratch intermediates
+results/_*.json
