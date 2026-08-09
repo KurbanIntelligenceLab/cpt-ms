@@ -60,7 +60,8 @@ class CrystalTrainConfig:
     density_target: float = 5.0     # g/cm^3, set from the data below the median
     train_limit: int | None = None
     order: str = "cell_first"      # density needs the volume before the composition
-    expected_elements: float = 3.0  # mean distinct elements per MP-20 structure
+    expected_atoms: float = 10.4    # mean atoms per MP-20 structure
+    channel: str = "static"   # "static" = formulation 2; "prefix" = formulation 3
 
 
 class CrystalDecoder(nn.Module):
@@ -196,6 +197,31 @@ def mass_channel(ids: np.ndarray, V: CrystalVocab) -> np.ndarray:
     return out
 
 
+def _element_position(ids: np.ndarray, V: CrystalVocab) -> np.ndarray:
+    """True where the NEXT token is an element symbol.
+
+    With the static mass channel these are the only positions at which the
+    constraint is actionable: everywhere else every legal token has channel value
+    zero, so no substitution can move the constrained quantity.
+    """
+    n = ids.shape[0]
+    out = np.zeros(n, dtype=bool)
+    for r in range(n):
+        state = None
+        for t in range(ids.shape[1]):
+            tok = V.tokens[ids[r, t]]
+            if tok == "<COMP>":
+                state = "el"
+            elif tok.startswith("el:"):
+                state = "cnt"
+            elif tok.startswith("cnt:"):
+                state = "el"
+            elif tok in ("<END_COMP>", "<EOS>"):
+                state = None
+        out[r] = state == "el"
+    return out
+
+
 def _mass_budget(ids: np.ndarray, V: CrystalVocab, cfg) -> tuple[np.ndarray, np.ndarray]:
     """Remaining mass to reach the target density, and remaining element slots.
 
@@ -204,11 +230,19 @@ def _mass_budget(ids: np.ndarray, V: CrystalVocab, cfg) -> tuple[np.ndarray, np.
     is not determined. That is the actionability boundary WS-2 measured, appearing
     here as an explicit precondition rather than as a silent wrong answer.
 
-    Slots is the number of element tokens still expected. It cannot be known exactly
-    (the model decides how many elements to emit), so it is estimated from the mean
-    element count in the data. An estimate is sound here because the budget is
-    re-derived at every step from the mass actually emitted so far: an over- or
-    under-estimate corrects itself on the next token rather than accumulating.
+    The denominator is remaining ATOMS, not remaining element tokens. The static
+    channel gives an element token its ATOMIC mass — a per-atom quantity — while the
+    mass it actually commits is that atomic mass times the count that follows. So
+    dividing the budget by element slots demands, on MP-20, about three times the
+    mass the data's own next element carries (median 177u demanded against 59u
+    actual), and a third of positions demand more than the heaviest available
+    element. Dividing by remaining atoms puts the target on the same per-atom footing
+    as the channel.
+
+    The atom count cannot be known exactly (the model decides it), so it is estimated
+    from the data mean. An estimate is sound here because the budget is re-derived at
+    every step from the mass actually emitted, so an over- or under-estimate corrects
+    itself on the next token rather than accumulating.
     """
     n, L = ids.shape
     budget = np.full(n, np.nan, dtype=np.float64)
@@ -227,14 +261,16 @@ def _mass_budget(ids: np.ndarray, V: CrystalVocab, cfg) -> tuple[np.ndarray, np.
             elif tok.startswith("el:"):
                 cur_el = tok[3:]
             elif tok.startswith("cnt:") and cur_el:
-                mass += ATOMIC_MASS.get(cur_el, 0.0) * int(tok[4:])
-                n_el += 1; cur_el = None
+                k = int(tok[4:])
+                mass += ATOMIC_MASS.get(cur_el, 0.0) * k
+                n_el += k          # atoms committed, not element tokens
+                cur_el = None
         if cell_closed:
             vol = V.cell_volume(lens, angs)
             if vol:
                 total = cfg.density_target * vol / 1.66053906660
                 budget[r] = max(total - mass, 0.0)
-                slots[r] = max(cfg.expected_elements - n_el, 1)
+                slots[r] = max(cfg.expected_atoms - n_el, 1)
     return budget, slots
 
 
@@ -292,8 +328,20 @@ def sample(model, V, gm, cfg, device, n, *, use_mask: bool, project_at_inference
             budget, slots = _mass_budget(ids.cpu().numpy(), V, cfg)
             budget = torch.from_numpy(budget).to(device).float()
             slots = torch.from_numpy(slots).to(device).float()
-            active = (slots > 0) & torch.isfinite(budget) & ~done
-            ch = torch.from_numpy(mass_channel(ids.cpu().numpy(), V)).to(device)
+            # ACTIONABLE POSITIONS ONLY, per preregistration/CP0_actionable_window.md.
+            # With the static channel, only element positions carry nonzero mass: at
+            # a count or structural position every legal token has channel value 0,
+            # so the attainable range is {0} and any nonzero budget is infeasible by
+            # construction. Counting those as infeasible steps measures the
+            # serialization, not the constraint -- it was inflating the reported
+            # infeasible fraction from 0.331 to 0.52 without the projection ever
+            # having had a decision to make there.
+            el_next = torch.from_numpy(_element_position(ids.cpu().numpy(), V)).to(device)
+            active = (slots > 0) & torch.isfinite(budget) & ~done & el_next
+            if cfg.channel == "prefix":
+                ch = torch.from_numpy(mass_channel(ids.cpu().numpy(), V)).to(device)
+            else:
+                ch = mass_t.unsqueeze(0).expand(B, Vsz)
             A = ch.unsqueeze(1).contiguous()
             attain = torch.where(live, A[:, 0, :], torch.full_like(logits, float("nan")))
             lo = torch.nan_to_num(attain, nan=float("inf")).min(-1).values
@@ -377,6 +425,19 @@ def main(smoke: bool = False, arm: str = "A2", steps: int | None = None) -> Path
     mass_t = torch.tensor([ATOMIC_MASS.get(t[3:], 0.0) if t.startswith("el:") else 0.0
                            for t in V.tokens], device=dev, dtype=torch.float32)
 
+    # Initialization baseline for the A3 arm. The decisive quantity is whether the
+    # probability-weighted infeasible-step fraction FALLS through training, as it did
+    # 19.9x on the synthetic task. Measuring it only at convergence cannot answer
+    # that, so it is measured at step 0 against the identical untrained weights.
+    init_ref = None
+    if cfg.arm == "A3":
+        s0, d0 = sample(model, V, gm, cfg, dev, cfg.n_eval_samples, use_mask=True,
+                        project_at_inference=True, max_len=max_len + 2, rng=rng)
+        init_ref = structural_metrics(s0, V, gm, cfg) | d0 | {"step": 0}
+        print(f"  step     0 (init) infeasible {d0['per_step_infeasible_fraction']:.4f} "
+              f"density {init_ref['mean_density'] if init_ref['mean_density'] else float('nan'):.3f}",
+              flush=True)
+
     history, t0 = [], time.time()
     for step in range(1, cfg.steps + 1):
         idx = rng.integers(0, len(data), cfg.batch)
@@ -401,17 +462,25 @@ def main(smoke: bool = False, arm: str = "A2", steps: int | None = None) -> Path
             for t in range(L):
                 bb_, ss_ = _mass_budget(xc[:, :t + 1], V, cfg)
                 bud[:, t], slt[:, t] = bb_, ss_
-                chan[:, t] = mass_channel(xc[:, :t + 1], V)
-            A = torch.from_numpy(chan).to(dev).reshape(B * L, 1, Vs).contiguous()
+                if cfg.channel == "prefix":
+                    chan[:, t] = mass_channel(xc[:, :t + 1], V)
+            if cfg.channel == "prefix":
+                A = torch.from_numpy(chan).to(dev).reshape(B * L, 1, Vs).contiguous()
+            else:
+                A = mass_t.view(1, 1, Vs).expand(B * L, 1, Vs).contiguous()
             attain = torch.where(mkf, A[:, 0, :], torch.full_like(flat, float("nan")))
             lo = torch.nan_to_num(attain, nan=float("inf")).min(-1).values
             hi = torch.nan_to_num(attain, nan=float("-inf")).max(-1).values
             bt = torch.from_numpy(bud).to(dev).float().reshape(-1)
             st = torch.from_numpy(slt).to(dev).float().reshape(-1)
-            act = (st > 0) & torch.isfinite(bt)
+            elp = np.empty((B, L), dtype=bool)
+            for t in range(L):
+                elp[:, t] = _element_position(xc[:, :t + 1], V)
+            ept = torch.from_numpy(elp).to(dev).reshape(-1)
+            act = (st > 0) & torch.isfinite(bt) & ept
             b = torch.where(act, bt / st.clamp_min(1), lo).clamp(min=lo, max=hi).unsqueeze(-1)
             res = project(flat, A, b, mkf)
-            q = torch.where(res.converged.unsqueeze(-1), res.q,
+            q = torch.where((res.converged & act).unsqueeze(-1), res.q,
                             torch.softmax(flat, -1))
             logp = torch.log(q.clamp_min(1e-30)).reshape(B, L, Vs)
         else:
@@ -455,6 +524,7 @@ def main(smoke: bool = False, arm: str = "A2", steps: int | None = None) -> Path
         },
         "history": history,
         "final": history[-1],
+        "init_reference": init_ref,
         "wall_clock_s": round(time.time() - t0, 1),
     }
     return emit(

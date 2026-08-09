@@ -10,11 +10,13 @@ output at exactly 1.0 across three seeds, against 0.9789 for the unconstrained a
 does so **untrained** as well as trained, because validity is a property of the mask rather
 than of the model.
 
-The density steering claim does not transfer, and the reason is a scoping finding rather
-than a bug: **the per-step expectation form applies cleanly to an extensive quantity over a
-fixed-length sequence, and density is neither.** Three successive formulations were built
-and measured; none is a correct instantiation. That boundary should be stated in the paper
-rather than engineered around.
+The density steering claim also transfers, once the constraint is formulated correctly.
+Trained through for the full run, the deployed system reaches 4.810 g/cm^3 against a 5.0
+target — 9.4x closer than the unsteered baseline — and the probability-weighted
+infeasible-step fraction falls 6.9x through training, reproducing on real crystals the
+complementarity mechanism the synthetic task established. An earlier version of this note
+retired the dial on the strength of a claim about the data that the data did not support;
+that conclusion and its correction are recorded below.
 
 ## Setup
 
@@ -44,51 +46,89 @@ model of this capacity does emit malformed structures. And an *untrained* masked
 also at 1.0, which is the sharpest form of the claim — validity comes from the mask, not
 from learning.
 
-**The A3 backbone reading moves density toward the target** (5.567 against A2's 6.783,
-target 5.0), so training through the layer does change the network. But this figure cannot
-be reported as a steering result, because the constraint it trained against is not a correct
-expression of density. See below.
+The A3 rows in that table come from the first, incorrect density formulation and are
+superseded by the results in the next section. They are retained only as the record of what
+the mis-scaled constraint produced.
 
-## Scoping finding: what the per-step expectation form can and cannot express
+## The density dial survives: complementarity confirmed on crystals
 
-The synthetic task's constraint is a total charge that is a **sum of per-symbol
-contributions over a fixed-length sequence**. Both properties are load-bearing. The running
-budget "remaining charge divided by remaining steps" is exact because the denominator is
-known in advance, and the constraint channel is a constant per token because each symbol
-contributes its own charge.
+The previous version of this note concluded that the per-step expectation form cannot express
+density, and retired the dial. **That conclusion was wrong**, and the review that caught it was
+right about why: it rested on a claim that each formulation moved further from the target, which
+is not what the numbers showed. Against a 5.0 g/cm^3 target the three errors were 4.352, 1.540
+and 12.190 — the second formulation was the best of the three and already beat the unsteered A2
+baseline at 1.783. The series was bad, better-than-baseline, catastrophic; not monotone
+deterioration. The justification for stopping did not hold.
 
-Density satisfies neither property:
+Trained through for the full 6,000 steps across three seeds, with two defects in that
+formulation fixed, the dial works.
 
-1. It is **intensive** — a ratio of mass to volume — so a target density fixes a total mass
-   budget only once the cell volume is known.
-2. The crystal sequence has **model-determined length**: the number of element slots is
-   chosen during generation, so "remaining mass divided by remaining slots" has an estimated
-   denominator.
-3. Mass is committed at the **count** token rather than the element token, so a constant
-   per-token channel is zero exactly where the mass is decided.
+| Quantity | At initialization | At convergence |
+|---|---|---|
+| Probability-weighted infeasible-step fraction | 0.3430 +/- 0.0598 | **0.0496 +/- 0.0067** |
+| Deployed mean density (target 5.0) | 5.710 +/- 0.582 | **4.810 +/- 0.153** |
+| Structural validity | 1.0000 | 1.0000 +/- 0.0000 |
 
-Three formulations were built and measured against a 5.0 g/cm^3 target:
+**The complementarity mechanism reproduces on real crystals.** The infeasible-step fraction falls
+6.9x through training, against 19.9x on the synthetic task. Training moves the backbone to where
+the running mass budget rarely goes unattainable, the fallback rarely fires, and residual error
+does not accumulate — measured now on MP-20 with a real backbone and approximate targets, not
+only on an exactly enumerable task.
 
-| Formulation | Deployed mean density |
-|---|---|
-| Fixed mass-per-token target on a static channel | 0.648 |
-| Running mass budget, cell-first ordering, static channel | 6.540 |
-| Running mass budget, cell-first ordering, prefix-dependent channel | 17.190 |
+**The steering effect is large relative to every floor it must clear.** Deployed density lands
+0.190 from target against the A2 baseline's 1.783, i.e. 9.4x closer, a separation of 12.9
+seed-standard-deviations. In relative terms the shift from 6.783 to 4.810 is 29.1%, against a
+1.1% discretization error floor — 26x the floor.
 
-The first asks for 5 u of atomic mass per token — lighter than lithium — and drives the
-composition to the lightest available elements. The second fixes the target but leaves the
-channel zero at every count position, so 52% of steps are infeasible. The third makes the
-channel prefix-dependent, which fixes the infeasibility but leaves the estimated slot
-denominator, and overshoots in the opposite direction.
+### Two defects in formulation 2, both found by testing the constraint against the data
 
-Each attempt moved further from the target rather than closer. Continuing to patch would be
-fitting the formulation to the measurement. The correct statement is the scoping one: **the
-method's constraint form covers extensive quantities over sequences whose constraint-bearing
-length is known, and an intensive quantity over a variable-length serialization needs a
-different treatment.** Charge on a fixed composition template would satisfy the conditions;
-density as serialized here does not.
+**The budget denominator was in the wrong units.** The static channel gives an element token its
+ATOMIC mass, a per-atom quantity, but the budget was divided by remaining element TOKENS. Since
+each element carries a count, this demanded about three times the mass the data's own next
+element carries — median 177u against 59u actual — and 32.7% of actionable positions demanded
+more than the heaviest element in the periodic table. Dividing by remaining ATOMS puts the target
+on the channel's footing: the demand falls to 0.85x the data's own next element and unattainable
+demands drop to 5.6%.
 
-This does not weaken the synthetic result, which is exact and holds. It bounds the claim.
+**The constraint was applied at non-actionable positions.** At a count or structural position
+every legal token has channel value zero, so the attainable range is the single point {0} and any
+nonzero budget is infeasible by construction. Counting those inflated the reported infeasible
+fraction and gave the projection no decision to make. Restricting to element positions is the
+same scoping already pre-registered in `CP0_actionable_window.md`, applied here.
+
+Neither defect crashed. Both trained to completion while producing a constraint the training data
+itself could not satisfy, which is why the diagnostic that found them was to ask whether real
+structures satisfy the demanded target — not to inspect the implementation.
+
+### Backbone versus deployed runs the other way here
+
+On the synthetic task the backbone moved partway toward the target and the layer supplied the
+rest. On crystals the backbone reading is 9.200 while the deployed system is 4.810: **the
+backbone alone moves away from the target**. The network has not internalized the constraint; it
+has adapted to a training signal that already includes the projection, and it is only correct in
+combination with the layer it trained through. This is reported as measured rather than smoothed
+into the synthetic story, and it strengthens the case for the projection as a training component
+rather than a decoder: removing it at inference does not merely lose accuracy, it inverts the
+result.
+
+## Scope of the constraint form, retained
+
+The analysis that motivated the earlier retirement is a real contribution and stands, with the
+empirical claim corrected. The per-step expectation form is most natural for an **extensive**
+quantity whose constraint-bearing length is **known in advance** — the synthetic task's total
+charge over a fixed-length sequence, where the running budget's denominator is exact and the
+channel is a constant per token.
+
+Density satisfies neither condition cleanly. It is intensive, so a target fixes a total mass
+budget only once the cell volume is known — which is why cell-first serialization is required.
+And the crystal sequence has model-determined length, so the budget denominator is an estimate
+from the data mean rather than a known count.
+
+The finding is that **neither condition is necessary in practice**: an estimated denominator,
+corrected at every step from the mass actually emitted, is sufficient for the mechanism to work,
+because the re-derivation prevents error from accumulating. What the conditions govern is how
+much care the formulation needs, not whether the method applies. That is a more useful scope
+statement than the one it replaces, and it is now earned by measurement in both directions.
 
 ## Cell-first ordering
 

@@ -177,7 +177,7 @@ identity when the constraint already holds; gradients pass autograd's gradcheck 
 two constraints; and a regression test asserting both a tight residual and a low iteration
 count, since the stall presented as hitting the iteration cap.
 
-All 131 tests in the suite pass: 22 here, 6 in `tests/test_crystal_mask.py`, 4 in `tests/test_feasibility_exactness.py`, 18 in `tests/test_cif_grammar.py`, 15 in
+All 136 tests in the suite pass: 22 here, 6 in `tests/test_crystal_mask.py`, 5 in `tests/test_crystal_constraint.py`, 4 in `tests/test_feasibility_exactness.py`, 18 in `tests/test_cif_grammar.py`, 15 in
 `tests/test_parser_determinability.py`, 14 in `tests/test_actionability.py`, 9 in
 `tests/test_ledger_preflight.py`, 9 in `tests/test_tilt_lemmas.py`, 8 in
 `tests/test_synthetic_targets.py`, 8 in `tests/test_provenance.py`, 8 in
