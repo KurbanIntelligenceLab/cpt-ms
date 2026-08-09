@@ -1,0 +1,291 @@
+{
+  "schema_version": "1.0",
+  "artifact_name": "A2_train_A3",
+  "script": "scripts/train/train_a2.py",
+  "git_commit": "UNVERSIONED",
+  "config": {
+    "arm": "A3",
+    "steps": 4000,
+    "smoke": false
+  },
+  "config_hash": "8ca2c52c8b2e86bd",
+  "seeds": [
+    2
+  ],
+  "created_utc": "2026-08-09T02:20:21.326289+00:00",
+  "python": "3.11.13",
+  "platform": "Linux-6.8.0-136-generic-x86_64-with-glibc2.35",
+  "payload_sha256": "0c6b2e5016dd464c3d34a90ba34704a797ead545e1ef3b546136dcf295f14548",
+  "payload": {
+    "arm": "A3",
+    "train_config": {
+      "arm": "A3",
+      "d_model": 128,
+      "n_layer": 4,
+      "n_head": 4,
+      "steps": 4000,
+      "batch": 256,
+      "lr": 0.0003,
+      "warmup": 200,
+      "seed": 2,
+      "eval_every": 500,
+      "charge_target": 0.0
+    },
+    "task_config": {
+      "symbols": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "charges": [
+        2,
+        1,
+        -1,
+        -2
+      ],
+      "length": 8,
+      "max_count": 3,
+      "charge_target": 0.0,
+      "markov_seed": 0,
+      "markov_bias": 1.6,
+      "markov_temperature": 0.8
+    },
+    "device": "cuda",
+    "gpu": "NVIDIA GeForce RTX 5090",
+    "n_parameters": 795268,
+    "history": [
+      {
+        "mean_charge": -1.072563761156097,
+        "charge_error": -1.072563761156097,
+        "charge_variance": 7.481433864374536,
+        "infeasible_mass": 0.0,
+        "kl_from_data": 2.391577608180199,
+        "kl_from_tilt": 1.7807048971004866,
+        "violation_rate": 0.8295912588500156,
+        "entropy_nats": 8.837651991996808,
+        "deployed": {
+          "mean_charge": 0.0050938587705975725,
+          "charge_error": 0.0050938587705975725,
+          "charge_variance": 1.5704287870683085,
+          "infeasible_mass": 1.190100029744602e-30,
+          "kl_from_data": Infinity,
+          "kl_from_tilt": Infinity,
+          "violation_rate": 0.5893081157198694,
+          "entropy_nats": 9.01802748997114,
+          "per_step_infeasible_fraction": 0.01808187841978151,
+          "per_step_infeasible_fraction_unweighted": 0.108856201171875
+        },
+        "step": 500,
+        "loss": 7.354266166687012,
+        "elapsed_s": 68.0
+      },
+      {
+        "mean_charge": 0.2878474191122754,
+        "charge_error": 0.2878474191122754,
+        "charge_variance": 7.592475957472656,
+        "infeasible_mass": 0.0,
+        "kl_from_data": 2.112027946980456,
+        "kl_from_tilt": 1.8514177338262139,
+        "violation_rate": 0.8035654132034118,
+        "entropy_nats": 8.804134242321494,
+        "deployed": {
+          "mean_charge": -0.00397460241272156,
+          "charge_error": -0.00397460241272156,
+          "charge_variance": 1.4608756771455207,
+          "infeasible_mass": 1.258502518522812e-30,
+          "kl_from_data": Infinity,
+          "kl_from_tilt": Infinity,
+          "violation_rate": 0.5742221593310639,
+          "entropy_nats": 9.128311548051432,
+          "per_step_infeasible_fraction": 0.01874048880014322,
+          "per_step_infeasible_fraction_unweighted": 0.108856201171875
+        },
+        "step": 1000,
+        "loss": 6.909549713134766,
+        "elapsed_s": 135.4
+      },
+      {
+        "mean_charge": 0.18907906600725283,
+        "charge_error": 0.18907906600725283,
+        "charge_variance": 8.75522732973624,
+        "infeasible_mass": 0.0,
+        "kl_from_data": 2.1063393934470587,
+        "kl_from_tilt": 1.820299478908176,
+        "violation_rate": 0.8248098991610996,
+        "entropy_nats": 8.910524384400858,
+        "deployed": {
+          "mean_charge": 0.016619327375935695,
+          "charge_error": 0.016619327375935695,
+          "charge_variance": 1.4086944422341372,
+          "infeasible_mass": 1.2476970491127807e-30,
+          "kl_from_data": Infinity,
+          "kl_from_tilt": Infinity,
+          "violation_rate": 0.5738381676819085,
+          "entropy_nats": 9.139408265900311,
+          "per_step_infeasible_fraction": 0.01761679372474286,
+          "per_step_infeasible_fraction_unweighted": 0.108856201171875
+        },
+        "step": 1500,
+        "loss": 7.511706352233887,
+        "elapsed_s": 202.0
+      },
+      {
+        "mean_charge": 0.08761803737029769,
+        "charge_error": 0.08761803737029769,
+        "charge_variance": 8.954791549841884,
+        "infeasible_mass": 0.0,
+        "kl_from_data": 2.033515647003023,
+        "kl_from_tilt": 1.7213527529944654,
+        "violation_rate": 0.8262629227917915,
+        "entropy_nats": 9.028393102933864,
+        "deployed": {
+          "mean_charge": 0.00994525724384368,
+          "charge_error": 0.00994525724384368,
+          "charge_variance": 1.539607181224177,
+          "infeasible_mass": 1.3033434151478066e-30,
+          "kl_from_data": Infinity,
+          "kl_from_tilt": Infinity,
+          "violation_rate": 0.5976474727366397,
+          "entropy_nats": 9.2034328150171,
+          "per_step_infeasible_fraction": 0.018114385629919464,
+          "per_step_infeasible_fraction_unweighted": 0.108856201171875
+        },
+        "step": 2000,
+        "loss": 7.331550598144531,
+        "elapsed_s": 268.0
+      },
+      {
+        "mean_charge": 0.4123015837716356,
+        "charge_error": 0.4123015837716356,
+        "charge_variance": 8.484475412512586,
+        "infeasible_mass": 0.0,
+        "kl_from_data": 1.847449875695438,
+        "kl_from_tilt": 1.6188826413281057,
+        "violation_rate": 0.8435938848772823,
+        "entropy_nats": 9.039513496778865,
+        "deployed": {
+          "mean_charge": 0.014368017243284693,
+          "charge_error": 0.014368017243284693,
+          "charge_variance": 1.573302626968502,
+          "infeasible_mass": 1.3332169407486224e-30,
+          "kl_from_data": Infinity,
+          "kl_from_tilt": Infinity,
+          "violation_rate": 0.6209457145410606,
+          "entropy_nats": 9.170198442908553,
+          "per_step_infeasible_fraction": 0.019421226812704185,
+          "per_step_infeasible_fraction_unweighted": 0.108856201171875
+        },
+        "step": 2500,
+        "loss": 7.044276237487793,
+        "elapsed_s": 334.4
+      },
+      {
+        "mean_charge": 0.3403051415801459,
+        "charge_error": 0.3403051415801459,
+        "charge_variance": 8.163395348731672,
+        "infeasible_mass": 0.0,
+        "kl_from_data": 1.620557199084903,
+        "kl_from_tilt": 1.3734531766864968,
+        "violation_rate": 0.822977182109937,
+        "entropy_nats": 9.184380167104422,
+        "deployed": {
+          "mean_charge": 0.012464707354381864,
+          "charge_error": 0.012464707354381864,
+          "charge_variance": 1.471567123206814,
+          "infeasible_mass": 1.2877399095623885e-30,
+          "kl_from_data": Infinity,
+          "kl_from_tilt": Infinity,
+          "violation_rate": 0.5892954697676359,
+          "entropy_nats": 9.173716970654512,
+          "per_step_infeasible_fraction": 0.01771135890014841,
+          "per_step_infeasible_fraction_unweighted": 0.108856201171875
+        },
+        "step": 3000,
+        "loss": 7.443696975708008,
+        "elapsed_s": 399.5
+      },
+      {
+        "mean_charge": 0.9065799916361893,
+        "charge_error": 0.9065799916361893,
+        "charge_variance": 7.825783711957288,
+        "infeasible_mass": 0.0,
+        "kl_from_data": 1.5721286469150442,
+        "kl_from_tilt": 1.4708223409496015,
+        "violation_rate": 0.8516097365916095,
+        "entropy_nats": 9.146737416297752,
+        "deployed": {
+          "mean_charge": 0.01905359529160938,
+          "charge_error": 0.01905359529160938,
+          "charge_variance": 1.5595458038620498,
+          "infeasible_mass": 1.338942628956035e-30,
+          "kl_from_data": Infinity,
+          "kl_from_tilt": Infinity,
+          "violation_rate": 0.6175022971071671,
+          "entropy_nats": 9.159600390705585,
+          "per_step_infeasible_fraction": 0.019463791962740437,
+          "per_step_infeasible_fraction_unweighted": 0.108856201171875
+        },
+        "step": 3500,
+        "loss": 6.816225051879883,
+        "elapsed_s": 464.9
+      },
+      {
+        "mean_charge": 1.0211006338319395,
+        "charge_error": 1.0211006338319395,
+        "charge_variance": 7.616704313542864,
+        "infeasible_mass": 0.0,
+        "kl_from_data": 1.515423345474407,
+        "kl_from_tilt": 1.4436024530231342,
+        "violation_rate": 0.8326083913867532,
+        "entropy_nats": 9.178711623436435,
+        "deployed": {
+          "mean_charge": 0.018695234160600933,
+          "charge_error": 0.018695234160600933,
+          "charge_variance": 1.5571713604105495,
+          "infeasible_mass": 1.32623025840308e-30,
+          "kl_from_data": Infinity,
+          "kl_from_tilt": Infinity,
+          "violation_rate": 0.6169153289543938,
+          "entropy_nats": 9.193153152563106,
+          "per_step_infeasible_fraction": 0.018876550674053957,
+          "per_step_infeasible_fraction_unweighted": 0.108856201171875
+        },
+        "step": 4000,
+        "loss": 6.833670616149902,
+        "elapsed_s": 529.9
+      }
+    ],
+    "final": {
+      "mean_charge": 1.0211006338319395,
+      "charge_error": 1.0211006338319395,
+      "charge_variance": 7.616704313542864,
+      "infeasible_mass": 0.0,
+      "kl_from_data": 1.515423345474407,
+      "kl_from_tilt": 1.4436024530231342,
+      "violation_rate": 0.8326083913867532,
+      "entropy_nats": 9.178711623436435,
+      "deployed": {
+        "mean_charge": 0.018695234160600933,
+        "charge_error": 0.018695234160600933,
+        "charge_variance": 1.5571713604105495,
+        "infeasible_mass": 1.32623025840308e-30,
+        "kl_from_data": Infinity,
+        "kl_from_tilt": Infinity,
+        "violation_rate": 0.6169153289543938,
+        "entropy_nats": 9.193153152563106,
+        "per_step_infeasible_fraction": 0.018876550674053957,
+        "per_step_infeasible_fraction_unweighted": 0.108856201171875
+      },
+      "step": 4000,
+      "loss": 6.833670616149902,
+      "elapsed_s": 529.9
+    },
+    "reference": {
+      "tilt_kl_from_data": 0.3347217446544234,
+      "tilt_mean_charge": 2.085831507514513e-14,
+      "data_mean_charge": 2.5164330452453636
+    },
+    "wall_clock_s": 529.9
+  }
+}

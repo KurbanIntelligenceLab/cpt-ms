@@ -1,0 +1,183 @@
+{
+  "schema_version": "1.0",
+  "artifact_name": "A2_train_A1",
+  "script": "scripts/train/train_a2.py",
+  "git_commit": "UNVERSIONED",
+  "config": {
+    "arm": "A1",
+    "steps": 4000,
+    "smoke": false
+  },
+  "config_hash": "c05389a58a8578e0",
+  "seeds": [
+    2
+  ],
+  "created_utc": "2026-08-09T00:39:53.982057+00:00",
+  "python": "3.11.13",
+  "platform": "Linux-6.8.0-136-generic-x86_64-with-glibc2.35",
+  "payload_sha256": "dd0e57695fd22f752c42bbe63645fca2526cbd79d01deb1c7dee3c2f38dcb76e",
+  "payload": {
+    "arm": "A1",
+    "train_config": {
+      "arm": "A1",
+      "d_model": 128,
+      "n_layer": 4,
+      "n_head": 4,
+      "steps": 4000,
+      "batch": 256,
+      "lr": 0.0003,
+      "warmup": 200,
+      "seed": 2,
+      "eval_every": 500,
+      "charge_target": 0.0
+    },
+    "task_config": {
+      "symbols": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "charges": [
+        2,
+        1,
+        -1,
+        -2
+      ],
+      "length": 8,
+      "max_count": 3,
+      "charge_target": 0.0,
+      "markov_seed": 0,
+      "markov_bias": 1.6,
+      "markov_temperature": 0.8
+    },
+    "device": "cuda",
+    "gpu": "NVIDIA GeForce RTX 5090",
+    "n_parameters": 795268,
+    "history": [
+      {
+        "mean_charge": 2.324700780740432,
+        "charge_error": 2.324700780740432,
+        "charge_variance": 9.130769133672457,
+        "infeasible_mass": 0.038236491392899766,
+        "kl_from_data": Infinity,
+        "kl_from_tilt": Infinity,
+        "violation_rate": 0.9013799206777389,
+        "entropy_nats": 9.681253231872677,
+        "step": 500,
+        "loss": 1.228768229484558,
+        "elapsed_s": 7.8
+      },
+      {
+        "mean_charge": 2.6376347788418295,
+        "charge_error": 2.6376347788418295,
+        "charge_variance": 8.527509880519663,
+        "infeasible_mass": 0.010547504804763795,
+        "kl_from_data": Infinity,
+        "kl_from_tilt": Infinity,
+        "violation_rate": 0.9140761840223728,
+        "entropy_nats": 9.606659897107873,
+        "step": 1000,
+        "loss": 1.196424961090088,
+        "elapsed_s": 16.8
+      },
+      {
+        "mean_charge": 2.395326662947801,
+        "charge_error": 2.395326662947801,
+        "charge_variance": 9.031344811221182,
+        "infeasible_mass": 0.012274197528254961,
+        "kl_from_data": Infinity,
+        "kl_from_tilt": Infinity,
+        "violation_rate": 0.9113930174986344,
+        "entropy_nats": 9.684677281312599,
+        "step": 1500,
+        "loss": 1.1956347227096558,
+        "elapsed_s": 26.7
+      },
+      {
+        "mean_charge": 2.6071112554810942,
+        "charge_error": 2.6071112554810942,
+        "charge_variance": 8.307021918719864,
+        "infeasible_mass": 0.003082538765566873,
+        "kl_from_data": Infinity,
+        "kl_from_tilt": Infinity,
+        "violation_rate": 0.9109322659945891,
+        "entropy_nats": 9.645345713696617,
+        "step": 2000,
+        "loss": 1.22011137008667,
+        "elapsed_s": 36.3
+      },
+      {
+        "mean_charge": 2.5601300648101253,
+        "charge_error": 2.5601300648101253,
+        "charge_variance": 8.553234664096724,
+        "infeasible_mass": 0.0015915648088310414,
+        "kl_from_data": Infinity,
+        "kl_from_tilt": Infinity,
+        "violation_rate": 0.9159706651257189,
+        "entropy_nats": 9.634906701172913,
+        "step": 2500,
+        "loss": 1.2087891101837158,
+        "elapsed_s": 46.1
+      },
+      {
+        "mean_charge": 2.2765498609501,
+        "charge_error": 2.2765498609501,
+        "charge_variance": 9.112723483828848,
+        "infeasible_mass": 0.0010556854332860863,
+        "kl_from_data": Infinity,
+        "kl_from_tilt": Infinity,
+        "violation_rate": 0.9025729660705668,
+        "entropy_nats": 9.706218539367708,
+        "step": 3000,
+        "loss": 1.2151752710342407,
+        "elapsed_s": 55.5
+      },
+      {
+        "mean_charge": 2.5197496161355,
+        "charge_error": 2.5197496161355,
+        "charge_variance": 8.611864041350401,
+        "infeasible_mass": 0.0008673124174269077,
+        "kl_from_data": Infinity,
+        "kl_from_tilt": Infinity,
+        "violation_rate": 0.9133753875316948,
+        "entropy_nats": 9.617762235464088,
+        "step": 3500,
+        "loss": 1.2007770538330078,
+        "elapsed_s": 64.2
+      },
+      {
+        "mean_charge": 2.4564216536210615,
+        "charge_error": 2.4564216536210615,
+        "charge_variance": 8.774115099729194,
+        "infeasible_mass": 0.0009251902193350291,
+        "kl_from_data": Infinity,
+        "kl_from_tilt": Infinity,
+        "violation_rate": 0.9098561384736216,
+        "entropy_nats": 9.699335288753861,
+        "step": 4000,
+        "loss": 1.215397834777832,
+        "elapsed_s": 73.7
+      }
+    ],
+    "final": {
+      "mean_charge": 2.4564216536210615,
+      "charge_error": 2.4564216536210615,
+      "charge_variance": 8.774115099729194,
+      "infeasible_mass": 0.0009251902193350291,
+      "kl_from_data": Infinity,
+      "kl_from_tilt": Infinity,
+      "violation_rate": 0.9098561384736216,
+      "entropy_nats": 9.699335288753861,
+      "step": 4000,
+      "loss": 1.215397834777832,
+      "elapsed_s": 73.7
+    },
+    "reference": {
+      "tilt_kl_from_data": 0.3347217446544234,
+      "tilt_mean_charge": 2.085831507514513e-14,
+      "data_mean_charge": 2.5164330452453636
+    },
+    "wall_clock_s": 73.7
+  }
+}

@@ -113,12 +113,27 @@ def prefix_masks(task, seqs: np.ndarray, cfg: TaskConfig) -> np.ndarray:
 
 
 @torch.no_grad()
-def induced_distribution_from_model(model, task, cfg, tcfg, device) -> np.ndarray:
+def induced_distribution_from_model(
+    model, task, cfg, tcfg, device, *, project_at_inference: bool = False
+) -> np.ndarray:
     """Exact induced distribution over all sequences, by enumeration.
 
     The task is small enough to score every sequence, so the trained model's
     distribution is obtained exactly rather than estimated by sampling. That removes
     sampling error from every downstream comparison against the closed-form optimum.
+
+    `project_at_inference` distinguishes two genuinely different quantities, and
+    conflating them is the easy mistake here:
+
+      False — what the BACKBONE INTERNALIZED. The model is read with the mask only.
+              For A3 this answers "did training through the projection teach the
+              network the constraint", which is the interesting scientific question
+              but is NOT the system anyone would deploy.
+      True  — the DEPLOYED SYSTEM: model plus the same projection it trained with,
+              applied at generation time. This is what an A3 user would actually run.
+
+    Both are reported for A3. Reporting only the first would understate the system;
+    reporting only the second would hide whether the network learned anything.
     """
     model.eval()
     seqs = torch.from_numpy(task.sequences.astype(np.int64)).to(device)
@@ -126,18 +141,49 @@ def induced_distribution_from_model(model, task, cfg, tcfg, device) -> np.ndarra
     inp = torch.cat([torch.full((N, 1), model.bos, device=device, dtype=torch.long),
                      seqs[:, :-1]], dim=1)
     logits = model(inp)
+    mk = None
     if tcfg.arm != "A1":
-        masks = torch.from_numpy(prefix_masks(task, task.sequences, cfg)).to(device)
-        logits = logits.masked_fill(~masks, float("-inf"))
-    logp = torch.log_softmax(logits, dim=-1)
+        mk = torch.from_numpy(prefix_masks(task, task.sequences, cfg)).to(device)
+        logits = logits.masked_fill(~mk, float("-inf"))
+
+    if project_at_inference and mk is not None:
+        phi_t = torch.tensor(np.asarray(cfg.charges, dtype=np.float64),
+                             device=device, dtype=torch.float32)
+        V = logits.shape[-1]
+        flat = logits.reshape(N * L, V)
+        A = phi_t.view(1, 1, V).expand(N * L, 1, V).contiguous()
+        acc = torch.cat([torch.zeros(N, 1, device=device),
+                         phi_t[seqs].cumsum(-1)[:, :-1]], dim=1)
+        rem = torch.arange(L, 0, -1, device=device, dtype=torch.float32).view(1, L)
+        b = ((tcfg.charge_target - acc) / rem).reshape(N * L, 1)
+        mkf = mk.reshape(N * L, V)
+        res = project(flat, A, b, mkf)
+        # Infeasible-step rate: the budget is unattainable when the required
+        # increment lies outside the attainable range of the legal tokens. This is
+        # the mechanism behind the residual error, so it is measured rather than
+        # inferred.
+        lo_att = torch.where(mkf, A[:, 0, :], torch.full_like(flat, float("inf"))).min(-1).values
+        hi_att = torch.where(mkf, A[:, 0, :], torch.full_like(flat, float("-inf"))).max(-1).values
+        bb = b.squeeze(-1)
+        # Weighted by the sequence's own induced probability, NOT an unweighted mean
+        # over the enumeration. The unweighted version is model-independent -- b
+        # depends only on the sequence and the attainable range only on the mask --
+        # so it cannot be compared against WS1's probability-weighted figure. Bit
+        # -identical values across seeds is the signature of that mistake.
+        globals()["_LAST_INFEASIBLE_MATRIX"] = (
+            (bb < lo_att - 1e-9) | (bb > hi_att + 1e-9)
+        ).reshape(N, L).double()
+        logp = torch.log(res.q.clamp_min(1e-30)).reshape(N, L, V)
+    else:
+        logp = torch.log_softmax(logits, dim=-1)
+
     lp = logp.gather(-1, seqs.unsqueeze(-1)).squeeze(-1).sum(-1)
     p = lp.double().exp()
     model.train()
     return (p / p.sum()).cpu().numpy()
 
 
-def evaluate(model, task, cfg, tcfg, device, base, tilt) -> dict:
-    q = induced_distribution_from_model(model, task, cfg, tcfg, device)
+def _metrics(q, task, tcfg, base, tilt) -> dict:
     phi = task.total_charge.astype(np.float64)
     mean = float(q @ phi)
     return {
@@ -152,6 +198,24 @@ def evaluate(model, task, cfg, tcfg, device, base, tilt) -> dict:
         "violation_rate": float(q[phi != tcfg.charge_target].sum()),
         "entropy_nats": float(-(q[q > 0] * np.log(q[q > 0])).sum()),
     }
+
+
+def evaluate(model, task, cfg, tcfg, device, base, tilt) -> dict:
+    """Backbone reading always; deployed reading additionally for A3."""
+    m = _metrics(induced_distribution_from_model(model, task, cfg, tcfg, device),
+                 task, tcfg, base, tilt)
+    if tcfg.arm == "A3":
+        qd = induced_distribution_from_model(model, task, cfg, tcfg, device,
+                                             project_at_inference=True)
+        m["deployed"] = _metrics(qd, task, tcfg, base, tilt)
+        M = globals().get("_LAST_INFEASIBLE_MATRIX")
+        if M is not None:
+            w = torch.from_numpy(qd).to(M.device)          # induced sequence mass
+            m["deployed"]["per_step_infeasible_fraction"] = float(
+                (M.mean(dim=1) * w).sum()
+            )
+            m["deployed"]["per_step_infeasible_fraction_unweighted"] = float(M.mean())
+    return m
 
 
 def main(smoke: bool = False, arm: str = "A2", steps: int | None = None) -> Path:

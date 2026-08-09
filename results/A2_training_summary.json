@@ -1,0 +1,158 @@
+{
+ "payload": {
+  "arms": {
+   "A1_unconstrained": {
+    "infeasible_mass": [
+     0.0008219321929046347,
+     7.723496985517574e-05
+    ],
+    "mean_charge": [
+     2.463934394052073,
+     0.041467381098066476
+    ],
+    "charge_variance": [
+     8.743264554289455,
+     0.12657596837774085
+    ],
+    "kl_from_data": [
+     Infinity,
+     NaN
+    ],
+    "kl_from_tilt": [
+     Infinity,
+     NaN
+    ],
+    "violation_rate": [
+     0.9090559534805949,
+     0.001997636612795798
+    ],
+    "entropy_nats": [
+     9.666449926468333,
+     0.023277364447600403
+    ]
+   },
+   "A2_masked": {
+    "infeasible_mass": [
+     0.0,
+     0.0
+    ],
+    "mean_charge": [
+     2.4693668551730177,
+     0.08065436055835071
+    ],
+    "charge_variance": [
+     8.761954684448675,
+     0.09130004553528415
+    ],
+    "kl_from_data": [
+     0.017637602570297135,
+     0.0012307072446320485
+    ],
+    "kl_from_tilt": [
+     0.31869907958612637,
+     0.02190914861849098
+    ],
+    "violation_rate": [
+     0.9083219548981943,
+     0.001880278501386182
+    ],
+    "entropy_nats": [
+     9.655042927479412,
+     0.01889051906405355
+    ]
+   },
+   "A3_backbone": {
+    "infeasible_mass": [
+     0.0,
+     0.0
+    ],
+    "mean_charge": [
+     0.6287135597839483,
+     0.3498921062839911
+    ],
+    "charge_variance": [
+     9.246102370828547,
+     1.7653303726699399
+    ],
+    "kl_from_data": [
+     1.6027558027075723,
+     0.3610976086702306
+    ],
+    "kl_from_tilt": [
+     1.4299077511861988,
+     0.30104979700678663
+    ],
+    "violation_rate": [
+     0.848136731268601,
+     0.016703588493106557
+    ],
+    "entropy_nats": [
+     9.124609303281533,
+     0.18476251362934307
+    ]
+   },
+   "A3_deployed": {
+    "infeasible_mass": [
+     1.3505752357008319e-30,
+     2.747422095694433e-32
+    ],
+    "mean_charge": [
+     0.017030578359027496,
+     0.0013838184039763773
+    ],
+    "charge_variance": [
+     1.5470888520471797,
+     0.011190788165537242
+    ],
+    "kl_from_data": [
+     Infinity,
+     NaN
+    ],
+    "kl_from_tilt": [
+     Infinity,
+     NaN
+    ],
+    "violation_rate": [
+     0.6154906003822407,
+     0.0079804548007734
+    ],
+    "entropy_nats": [
+     9.162649745454447,
+     0.024994927411368235
+    ],
+    "per_step_infeasible_fraction_weighted": [
+     0.01871726313091988,
+     0.0007360265793143004
+    ],
+    "per_step_infeasible_fraction_unweighted": [
+     0.108856201171875,
+     0.0
+    ]
+   }
+  },
+  "reference": {
+   "data_mean_charge": 2.5164330452453636,
+   "tilt_mean_charge": 2.085831507514513e-14,
+   "tilt_kl_from_data": 0.3347217446544234,
+   "ws1_exact_projection_on_data_mean": 0.10279134161286849,
+   "ws1_exact_projection_on_data_var": 3.1025173925512823,
+   "ws1_exact_projection_infeasible_fraction": 0.3713
+  },
+  "n_seeds": 3,
+  "seeds": [
+   0,
+   1,
+   2
+  ],
+  "steps": 4000,
+  "notes": "Two readings are reported for A3 and must not be conflated. The BACKBONE reading applies the mask only, answering whether training through the projection taught the network the constraint. The DEPLOYED reading applies the same projection the model trained with, which is the system a user runs. The infeasible-step fraction is reported probability-weighted by the induced distribution; the unweighted mean over the enumeration is model-independent (b depends only on the sequence and the attainable range only on the mask) and is not comparable to WS1's weighted figure.",
+  "wall_clock_s_mean": {
+   "A1": 68.26666666666667,
+   "A2": 90.7,
+   "A3": 526.4666666666667
+  },
+  "wall_clock_ratio_A3_over_A2": 5.804483645718486
+ },
+ "created_utc": null,
+ "git_commit": "PENDING"
+}
