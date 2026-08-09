@@ -114,7 +114,8 @@ def prefix_masks(task, seqs: np.ndarray, cfg: TaskConfig) -> np.ndarray:
 
 @torch.no_grad()
 def induced_distribution_from_model(
-    model, task, cfg, tcfg, device, *, project_at_inference: bool = False
+    model, task, cfg, tcfg, device, *, project_at_inference: bool = False,
+    fast_hessian: bool = False,
 ) -> np.ndarray:
     """Exact induced distribution over all sequences, by enumeration.
 
@@ -157,7 +158,8 @@ def induced_distribution_from_model(
         rem = torch.arange(L, 0, -1, device=device, dtype=torch.float32).view(1, L)
         b = ((tcfg.charge_target - acc) / rem).reshape(N * L, 1)
         mkf = mk.reshape(N * L, V)
-        res = project(flat, A, b, mkf)
+        res = project(flat, A, b, mkf,
+                      fast_hessian_dtype=(torch.float32 if fast_hessian else None))
         # Infeasible-step rate: the budget is unattainable when the required
         # increment lies outside the attainable range of the legal tokens. This is
         # the mechanism behind the residual error, so it is measured rather than
@@ -200,6 +202,37 @@ def _metrics(q, task, tcfg, base, tilt) -> dict:
     }
 
 
+def _sampled_detectability(q_exact, q_fast, task, tcfg, *, n_samples, seed) -> dict:
+    """Would a reviewer detect the fp32-Hessian route from generated samples?
+
+    Draws n_samples from each deployed distribution and compares the metrics that
+    actually get reported — validity, violation rate, mean charge — with a
+    two-proportion test on the violation rate. A null result here is only
+    meaningful with the sample size stated, so it is recorded.
+    """
+    rng = np.random.default_rng(seed)
+    phi = task.total_charge.astype(np.float64)
+    ie = rng.choice(len(q_exact), size=n_samples, p=q_exact / q_exact.sum())
+    iff = rng.choice(len(q_fast), size=n_samples, p=q_fast / q_fast.sum())
+    viol_e = float((phi[ie] != tcfg.charge_target).mean())
+    viol_f = float((phi[iff] != tcfg.charge_target).mean())
+    pb = (viol_e + viol_f) / 2
+    se = np.sqrt(2 * pb * (1 - pb) / n_samples) if 0 < pb < 1 else np.inf
+    z = abs(viol_e - viol_f) / se if se > 0 else 0.0
+    return {
+        "n_samples": n_samples,
+        "violation_rate_exact": viol_e,
+        "violation_rate_fast": viol_f,
+        "violation_rate_abs_diff": abs(viol_e - viol_f),
+        "two_proportion_z": float(z),
+        "detectable_at_0_05": bool(z > 1.959964),
+        "mean_charge_exact": float(phi[ie].mean()),
+        "mean_charge_fast": float(phi[iff].mean()),
+        "infeasible_count_exact": int((~task.feasible_S)[ie].sum()),
+        "infeasible_count_fast": int((~task.feasible_S)[iff].sum()),
+    }
+
+
 def evaluate(model, task, cfg, tcfg, device, base, tilt) -> dict:
     """Backbone reading always; deployed reading additionally for A3."""
     m = _metrics(induced_distribution_from_model(model, task, cfg, tcfg, device),
@@ -208,6 +241,31 @@ def evaluate(model, task, cfg, tcfg, device, base, tilt) -> dict:
         qd = induced_distribution_from_model(model, task, cfg, tcfg, device,
                                              project_at_inference=True)
         m["deployed"] = _metrics(qd, task, tcfg, base, tilt)
+        # Train/inference precision mismatch: the fp32-Hessian route would deploy a
+        # distribution perturbed inside the tolerance ball relative to the one the
+        # model trained against. This project's thesis is that train/inference
+        # mismatch is the problem worth solving, so shipping one inside the solver
+        # needs a measurement, not an argument. Both deployed distributions are
+        # computed from the SAME trained weights, so any difference is the
+        # precision, not training noise.
+        qf = induced_distribution_from_model(model, task, cfg, tcfg, device,
+                                             project_at_inference=True,
+                                             fast_hessian=True)
+        m["deployed_fast_hessian"] = _metrics(qf, task, tcfg, base, tilt)
+        # Direct sampled-metric test, not only the distributional bound: draw from
+        # both deployed distributions and test the metrics a reviewer would report.
+        # The distributions are exact, so sampling error is the ONLY source of
+        # difference beyond the precision effect.
+        m["precision_mismatch_sampled"] = _sampled_detectability(
+            qd, qf, task, tcfg, n_samples=1_000_000, seed=tcfg.seed)
+        m["precision_mismatch"] = {
+            "total_variation": float(0.5 * np.abs(qf - qd).sum()),
+            "max_abs_prob_diff": float(np.abs(qf - qd).max()),
+            "mean_charge_diff": float((qf @ task.total_charge.astype(np.float64))
+                                      - (qd @ task.total_charge.astype(np.float64))),
+            "infeasible_mass_diff": float(qf[~task.feasible_S].sum()
+                                          - qd[~task.feasible_S].sum()),
+        }
         M = globals().get("_LAST_INFEASIBLE_MATRIX")
         if M is not None:
             w = torch.from_numpy(qd).to(M.device)          # induced sequence mass

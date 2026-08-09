@@ -70,9 +70,32 @@ not the divergence, are the informative comparison in that row.
 
 ## Cost
 
-A3 wall-clock is 526.5 s per run against A2's 90.7 s, a 5.8x factor, with the projection
+A3 wall-clock is 543.5 s per run against A2's 90.7 s, a 6.0x factor, with the projection
 applied at every position and no actionable-position scoping. That is consistent with the CP2
-benchmark and is the configuration the scoping decision addresses.
+benchmark and is the configuration the scoping decision addresses. These runs carry the extra
+precision-mismatch evaluation, which is why the figure is above the 526.5 s of the runs without
+it; the training loop is unchanged and every reported distribution is identical.
+
+## Train/inference precision mismatch: measured, not argued
+
+The proposed m >= 2 fallback — fast Hessian with gradients disabled at inference — would deploy a
+distribution perturbed inside the solver's tolerance ball relative to the one training used. Since
+this project's thesis is that train/inference mismatch is the problem worth solving, shipping one
+inside our own solver needs a measurement.
+
+Both deployed distributions are computed from the SAME trained weights, so any difference is the
+precision and not training noise.
+
+| Quantity | Result |
+|---|---|
+| Total variation between deployed fp64 and fp32 distributions | 2.1e-10 +/- 2.9e-10 |
+| Violation-rate two-proportion z, 1,000,000 samples per arm | 0.51 mean, 0.96 worst |
+| Detectable at alpha = 0.05 | No, on every seed |
+| Infeasible samples, either arm | 0 of 1,000,000 |
+
+For scale, a study of 1e6 samples resolves a total variation of order 1e-3. The measured
+difference is roughly seven orders of magnitude below that. **The route stays open**, and the
+null result is stated with its sample size rather than as a bare assertion.
 
 ## Method notes
 
