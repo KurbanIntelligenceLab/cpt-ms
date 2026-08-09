@@ -322,49 +322,78 @@
    "per_token_step_us": 4.8969
   },
   "actionable_scoping": {
-   "note": "Projection cost when applied only at positions where the constraint is actionable, which is where a per-step projection can change the constraint at all. Fractions are the measured actionable fractions from results/WS2_family_determinability.json.",
+   "note": "Projection cost when applied only at actionable positions. Every row is MEASURED at its own token count; none is extrapolated from a per-token figure. Both Hessian precisions are reported because the accurate float64 default is the one that will train.",
+   "reconciliation": "Per-token cost is NOT constant in batch size, so the per-token table (batch 256) and these rows (up to 8192) are different measurements and must not be combined. At 256 rows the solve is launch-overhead dominated at 7.66 us/row; by 1048 rows it has amortized to ~2.5 us/row and stays flat to 8192. Extrapolating the 256-row figure to a full 8192-token step overstates cost by 3.0x, which is the source of the ~3x discrepancy in the superseded table. Cause (b) of the three candidates raised: the projection batches across positions, so per-token cost falls at scale.",
+   "step_ms": 40.115,
    "rows": [
     {
      "actionable_fraction": 1.0,
      "n_tokens": 8192,
-     "m1_ms": 21.22,
-     "m1_share_of_step": 0.529,
-     "m2_ms": 28.1,
-     "m2_share_of_step": 0.701
+     "m1_fp64_hessian_ms": 20.9013,
+     "m1_fp64_share": 0.5210345257385017,
+     "m1_fp32_hessian_ms": 21.2223,
+     "m1_fp32_share": 0.5290365200049857,
+     "m2_fp64_hessian_ms": 67.2142,
+     "m2_fp64_share": 1.6755378287423657,
+     "m2_fp32_hessian_ms": 28.1254,
+     "m2_fp32_share": 0.7011192820640657
     },
     {
      "actionable_fraction": 0.39,
      "n_tokens": 3194,
-     "m1_ms": 8.07,
-     "m1_share_of_step": 0.201,
-     "m2_ms": 10.73,
-     "m2_share_of_step": 0.268
+     "m1_fp64_hessian_ms": 7.9782,
+     "m1_fp64_share": 0.198883210769039,
+     "m1_fp32_hessian_ms": 8.0933,
+     "m1_fp32_share": 0.20175246167269098,
+     "m2_fp64_hessian_ms": 26.0405,
+     "m2_fp64_share": 0.6491462046615979,
+     "m2_fp32_hessian_ms": 10.7622,
+     "m2_fp32_share": 0.2682836844073289
     },
     {
      "actionable_fraction": 0.283,
      "n_tokens": 2318,
-     "m1_ms": 5.54,
-     "m1_share_of_step": 0.138,
-     "m2_ms": 7.54,
-     "m2_share_of_step": 0.188
+     "m1_fp64_hessian_ms": 5.464,
+     "m1_fp64_share": 0.13620840084756325,
+     "m1_fp32_hessian_ms": 5.5511,
+     "m1_fp32_share": 0.13837965848186462,
+     "m2_fp64_hessian_ms": 18.8244,
+     "m2_fp64_share": 0.46926087498441976,
+     "m2_fp32_hessian_ms": 7.5571,
+     "m2_fp32_share": 0.18838589056462668
     },
     {
      "actionable_fraction": 0.128,
      "n_tokens": 1048,
-     "m1_ms": 2.75,
-     "m1_share_of_step": 0.069,
-     "m2_ms": 3.5,
-     "m2_share_of_step": 0.087
+     "m1_fp64_hessian_ms": 2.6378,
+     "m1_fp64_share": 0.06575595163903776,
+     "m1_fp32_hessian_ms": 2.693,
+     "m1_fp32_share": 0.0671319955129004,
+     "m2_fp64_hessian_ms": 9.1377,
+     "m2_fp64_share": 0.22778761061946903,
+     "m2_fp32_hessian_ms": 3.4933,
+     "m2_fp32_share": 0.08708213885080393
     },
     {
      "actionable_fraction": 0.041,
      "n_tokens": 335,
-     "m1_ms": 2.01,
-     "m1_share_of_step": 0.05,
-     "m2_ms": 2.17,
-     "m2_share_of_step": 0.054
+     "m1_fp64_hessian_ms": 1.928,
+     "m1_fp64_share": 0.04806182226099962,
+     "m1_fp32_hessian_ms": 1.9838,
+     "m1_fp32_share": 0.04945282313349121,
+     "m2_fp64_hessian_ms": 3.614,
+     "m2_fp64_share": 0.09009098840832605,
+     "m2_fp32_hessian_ms": 2.121,
+     "m2_fp32_share": 0.052872990153309235
     }
-   ]
+   ],
+   "per_row_us_by_batch": {
+    "256": 7.66,
+    "335": 5.76,
+    "1048": 2.52,
+    "3194": 2.5,
+    "8192": 2.55
+   }
   },
   "fp64_penalty": {
    "fp32_tflops": 69.34,
@@ -376,9 +405,14 @@
   },
   "verdict": {
    "as_preregistered_vs_masked_softmax": "FAIL (3672-7260%)",
-   "vs_training_step_all_positions": "FAIL (52.9-70.1%)",
-   "vs_training_step_actionable_only": "PASS (13.8-26.8% at density fractions)",
+   "vs_training_step_all_positions_m1": "52.1%",
+   "vs_training_step_all_positions_m2": "167.6%",
+   "vs_training_step_actionable_density_m1": "13.6%-19.9%",
+   "vs_training_step_actionable_density_m2": "46.9%-64.9%",
    "requires_team_decision": true
+  },
+  "superseded": {
+   "note": "The first published scoping table combined a per-token figure measured at batch 256 with shares measured at up to 8192 rows, and its m=2 rows silently used the opt-in fast Hessian while being presented as the default. Both defects are corrected above. The m=1 shares were correct; the m=2 shares were optimistic by the fast-vs-accurate factor (70.1% reported against 167.6% measured at every position)."
   }
  }
 }

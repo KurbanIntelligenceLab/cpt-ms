@@ -20,47 +20,77 @@ exactly that way on the RTX 5090 the project now owns:
 That is 122x to 242x over budget. All entries converge; the residual is at machine epsilon. The
 layer is correct and slow.
 
-## Why the denominator is the wrong one, and why saying so now is uncomfortable
+## The table did not reproduce, and there were two defects, not one
 
-A masked softmax over a 4096 vocabulary takes 0.2 us per token. It is close to the cheapest
-operation in the network. Any added work compared against it looks catastrophic, which makes the
-ratio a statement about the baseline rather than about affordability.
+The review is correct that the published table does not follow from its own inputs, and the
+diagnosis is candidate (b): the projection batches across positions, so per-token cost is not
+constant in batch size. Measured directly:
 
-The question the threshold was written to answer is whether the projection is affordable to train
-with. Against a full training step of a model at the plan's own A2 scale — a 29.7M-parameter
-causal decoder, V=4096, 8 layers, batch 16 x 512, measured on the same card at 40.1 ms per
-forward-backward-optimizer step:
+| Rows in the batch | Per-row projection cost, m=1 |
+|---|---|
+| 256 | 7.66 us |
+| 335 | 5.76 us |
+| 1,048 | 2.52 us |
+| 3,194 | 2.50 us |
+| 8,192 | 2.55 us |
 
-| Scope | m=1 | m=2 |
-|---|---|---|
-| Projection at every position | 52.9% | 70.1% |
-| Projection at actionable positions only, density fraction 0.390 | 20.1% | 26.8% |
-| Projection at actionable positions only, density fraction 0.283 | 13.8% | 18.8% |
-| Projection at actionable positions only, charge fraction 0.128 | 6.9% | 8.7% |
-| Projection at actionable positions only, charge fraction 0.041 | 5.0% | 5.4% |
+At 256 rows the solve is launch-overhead dominated; by ~1,000 rows it has amortized and stays flat.
+Extrapolating the 256-row figure to a full 8,192-token step overstates cost by **3.0x**, which is
+exactly the factor the review identified. The per-token table (batch 256) and the scoping table
+(up to 8,192 rows) are different measurements and must never be combined, and publishing them
+adjacent to each other without saying so was the defect.
 
-Restricting to actionable positions is not a trick to get under the line. It follows from the
-project's own actionability measurement: at a non-actionable position no format-legal substitution
-changes the constraint, so the projection provably cannot affect the outcome there and running it
-is wasted work. The CP0 threshold is already scoped to actionable positions for exactly this
-reason. Applying the same scoping to the cost measurement is consistent, not convenient.
+The share figures themselves were computed from directly measured times at each token count, so
+the m=1 rows do reproduce. **But re-measuring surfaced a second and worse defect: the published
+m=2 rows silently used the opt-in fast Hessian while being presented as the accurate default.**
+Every row below is re-measured at its own token count, with both precisions labelled.
 
-**But I am proposing it after seeing that the pre-registered version fails, and that is precisely
-the move pre-registration exists to prevent.** The argument is sound on its own terms and would
-have been sound before the measurement; it is still a post-hoc change to a registered threshold,
-and the correct handling is a team decision recorded as an amendment with the reason and the date,
-not a quiet substitution. The failing number stays in the artifact either way.
+| Scope | rows | m=1 (fp64 Hess) | m=2 (fp64 Hess) | m=2 (fp32 Hess, opt-in) |
+|---|---|---|---|---|
+| Every position | 8,192 | 52.1% | 167.6% | 70.1% |
+| Actionable, density 0.390 | 3,194 | 19.9% | 64.9% | 26.8% |
+| Actionable, density 0.283 | 2,318 | 13.6% | 46.9% | 18.8% |
+| Actionable, charge 0.128 | 1,048 | 6.6% | 22.8% | 8.7% |
+| Actionable, charge 0.041 | 335 | 4.8% | 9.0% | 5.3% |
 
-## What I recommend
+Denominator is a 29.7M-parameter causal decoder at the plan's own A2 scale (V=4096, 8 layers,
+batch 16 x 512), measured at 40.115 ms per forward-backward-optimizer step on the same card.
 
-Amend CP2 to state the threshold against a full training step at the A2 model scale, with the
-projection applied at actionable positions, and record the as-pre-registered figure alongside as
-a hardware characterization rather than a gate. Under that definition the layer passes at 13.8%
-to 26.8% for the density dial, which is the primary dial per `WS2_dial_assignment.md`.
+Both corrections cut against the recommendation. The honest position is now weaker than the one
+first presented: at two active constraints with the accurate solver the projection costs 167.6% of
+a training step if applied everywhere, and 46.9% to 64.9% even scoped to the density dial's
+actionable window. Only the single-constraint case is comfortably affordable at 13.6% to 19.9%.
 
-If the team prefers to hold the original denominator, then CP2 fails and the honest report is that
-training-time projection costs two orders of magnitude more than a masked softmax per token — with
-the training-step context given as the reason that ratio does not by itself block the method.
+## The amendment, on the review's grounds rather than mine
+
+The review's framing is better than the one I used and I accept it. This is not a threshold that
+proved too tight; the pre-registered denominator cannot answer the question it was written for.
+Masked softmax is 0.197 us/token against 4.895 us/token of total per-token training cost — about
+4% of a step. A ratio against a 4% component is dominated by the smallness of the denominator and
+would have failed for essentially any layer doing real work. That is a category error in the
+measurement.
+
+Recorded as: denominator replaced because the original quantity does not measure affordability;
+the as-registered figure retained as hardware characterization, not a gate. Both numbers stay in
+`results/CP2_overhead_benchmark.json` permanently.
+
+Actionable-position scoping stands on the grounds CP0 already uses: at a non-actionable position
+no format-legal substitution changes the constraint, so the projection provably cannot affect the
+outcome. That is wasted compute, not skipped compute.
+
+## What the corrected numbers mean for the design
+
+Leading with the density dial as instructed: **m=1 at 13.6% to 19.9% is affordable; m=2 at 46.9%
+to 64.9% is not comfortably so.** This is a design constraint rather than a blocker, and it points
+somewhere specific — the per-constraint cost is dominated by the Hessian contraction, which scales
+with the square of the active-constraint count while the residual scales linearly. Running one
+active constraint per step, or accepting the fast Hessian for the m >= 2 configurations with
+gradients disabled at inference only, are the two routes. Neither needs deciding before A2, which
+uses a single dial.
+
+The charge dial's 4.8% is cheap for the reason the review flags: B1ref's 0.041 actionability is
+the narrowest window in the matrix, so the low cost reflects rarely running rather than running
+cheaply. It should not be quoted as the headline.
 
 ## Hardware finding that explains the magnitude
 
