@@ -142,7 +142,10 @@ class CrystalVocab:
     # doubling again buys 0.5 points for a 77% larger vocabulary.
     N_LEN, N_ANG, N_CNT = 256, 128, 16
 
-    def __init__(self, elements: list[str]):
+    def __init__(self, elements: list[str], order: str = "cell_first"):
+        if order not in ("cell_first", "comp_first"):
+            raise ValueError(f"unknown order {order!r}")
+        self.order = order
         self.elements = elements
         self.tokens: list[str] = ["<BOS>", "<COMP>", "<END_COMP>", "<CELL>", "<END_CELL>", "<EOS>"]
         self.tokens += [f"el:{e}" for e in elements]
@@ -155,16 +158,44 @@ class CrystalVocab:
         return len(self.tokens)
 
     def encode(self, c: Crystal) -> list[int]:
-        t = ["<BOS>", "<COMP>"]
+        """Serialize. `order` selects composition-first (B1ref) or cell-first.
+
+        Cell-first is not a cosmetic choice. Density is mass/volume, a RATIO, so a
+        target density fixes a TOTAL MASS budget only once the volume is known. Under
+        composition-first the volume is still undetermined while the element tokens
+        are being emitted, so no linear per-step expectation over the mass channel can
+        express the density constraint — targeting a fixed mass per token instead
+        drives the composition toward the lightest elements, which is what the first
+        crystal A3 run did.
+
+        Under cell-first the volume closes before any element token, so the running
+        budget rho*V/1.6605 minus mass-so-far is determined and the constraint takes
+        exactly the form the synthetic task validated.
+        """
+        comp = []
         for e, n in sorted(c.formula.items()):
-            t += [f"el:{e}", f"cnt:{min(n, self.N_CNT)}"]
-        t += ["<END_COMP>", "<CELL>"]
+            comp += [f"el:{e}", f"cnt:{min(n, self.N_CNT)}"]
+        cell = []
         for L in c.lengths:
-            t.append(f"len:{_bucket(L, 2.0, 30.0, self.N_LEN)}")
+            cell.append(f"len:{_bucket(L, 2.0, 30.0, self.N_LEN)}")
         for a in c.angles:
-            t.append(f"ang:{_bucket(a, 20.0, 160.0, self.N_ANG)}")
-        t += ["<END_CELL>", "<EOS>"]
+            cell.append(f"ang:{_bucket(a, 20.0, 160.0, self.N_ANG)}")
+        if self.order == "cell_first":
+            t = ["<BOS>", "<CELL>"] + cell + ["<END_CELL>", "<COMP>"] + comp + ["<END_COMP>", "<EOS>"]
+        else:
+            t = ["<BOS>", "<COMP>"] + comp + ["<END_COMP>", "<CELL>"] + cell + ["<END_CELL>", "<EOS>"]
         return [self.index[x] for x in t]
+
+    @staticmethod
+    def cell_volume(lengths, angles) -> float | None:
+        """Triclinic cell volume in A^3, or None if the angles are incoherent."""
+        a, b, cc = lengths
+        al, be, ga = np.radians(angles)
+        v2 = (1 - np.cos(al) ** 2 - np.cos(be) ** 2 - np.cos(ga) ** 2
+              + 2 * np.cos(al) * np.cos(be) * np.cos(ga))
+        if v2 <= 0:
+            return None
+        return float(a * b * cc * np.sqrt(v2))
 
     def decode_density(self, ids: list[int]) -> float | None:
         """Density implied by a token sequence, or None if it is incomplete.

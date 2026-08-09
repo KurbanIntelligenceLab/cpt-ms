@@ -59,6 +59,8 @@ class CrystalTrainConfig:
     n_eval_samples: int = 4096
     density_target: float = 5.0     # g/cm^3, set from the data below the median
     train_limit: int | None = None
+    order: str = "cell_first"      # density needs the volume before the composition
+    expected_elements: float = 3.0  # mean distinct elements per MP-20 structure
 
 
 class CrystalDecoder(nn.Module):
@@ -87,8 +89,9 @@ class GrammarMask:
     a straight-through estimator, exactly as on the synthetic task.
     """
 
-    def __init__(self, V: CrystalVocab, max_elements: int = 6):
+    def __init__(self, V: CrystalVocab, max_elements: int = 6, order: str = "cell_first"):
         self.V = V
+        self.order = order
         self.max_elements = max_elements
         self.el = np.array([t.startswith("el:") for t in V.tokens])
         self.cnt = np.array([t.startswith("cnt:") for t in V.tokens])
@@ -119,7 +122,7 @@ class GrammarMask:
                     elif tok.startswith("cnt:"):
                         n_el += 1; state = "want_el"
                     elif tok == "<END_COMP>":
-                        state = "want_cell"
+                        state = "eos" if self.order == "cell_first" else "want_cell"
                     elif tok == "<CELL>":
                         state = "want_len"
                     elif tok.startswith("len:"):
@@ -127,10 +130,10 @@ class GrammarMask:
                     elif tok.startswith("ang:"):
                         n_ang += 1; state = "want_ang" if n_ang < 3 else "want_end_cell"
                     elif tok == "<END_CELL>":
-                        state = "eos"
+                        state = "want_comp" if self.order == "cell_first" else "eos"
                 m = out[r, t]
                 if state == "bos":
-                    m[self.i["<COMP>"]] = True
+                    m[self.i["<CELL>" if self.order == "cell_first" else "<COMP>"]] = True
                 elif state == "want_el":
                     m[self.el] = True
                     for e in seen:
@@ -144,6 +147,8 @@ class GrammarMask:
                     m[self.cnt] = True
                 elif state == "want_cell":
                     m[self.i["<CELL>"]] = True
+                elif state == "want_comp":
+                    m[self.i["<COMP>"]] = True
                 elif state == "want_len":
                     m[self.len_] = True
                 elif state == "want_ang":
@@ -153,6 +158,84 @@ class GrammarMask:
                 else:
                     m[self.i["<EOS>"]] = True
         return out
+
+
+def mass_channel(ids: np.ndarray, V: CrystalVocab) -> np.ndarray:
+    """Per-token mass contribution GIVEN the prefix. Shape (n, vocab).
+
+    The constraint channel is prefix-dependent here, which the synthetic task did
+    not require. An element token `el:E` contributes nothing on its own — the mass
+    it adds is decided by the count token that follows, as ATOMIC_MASS[E] * n. So
+    at a count position with pending element E the channel value of `cnt:n` is
+    ATOMIC_MASS[E] * n, and at an element position the channel is the element's own
+    mass as a proxy for the mass about to be committed.
+
+    A fixed per-token channel makes every count position carry mass zero, so the
+    attainable range collapses to {0} and any nonzero budget is infeasible there.
+    That is a property of the serialization, not of the constraint.
+    """
+    n = ids.shape[0]
+    out = np.zeros((n, len(V)), dtype=np.float32)
+    cnt_idx = [(i, int(t[4:])) for i, t in enumerate(V.tokens) if t.startswith("cnt:")]
+    el_mass = np.array([ATOMIC_MASS.get(t[3:], 0.0) if t.startswith("el:") else 0.0
+                        for t in V.tokens], dtype=np.float32)
+    for r in range(n):
+        pending = None
+        for t in range(ids.shape[1]):
+            tok = V.tokens[ids[r, t]]
+            if tok.startswith("el:"):
+                pending = tok[3:]
+            elif tok.startswith("cnt:"):
+                pending = None
+        if pending is not None:
+            m = ATOMIC_MASS.get(pending, 0.0)
+            for i, k in cnt_idx:
+                out[r, i] = m * k
+        else:
+            out[r] = el_mass
+    return out
+
+
+def _mass_budget(ids: np.ndarray, V: CrystalVocab, cfg) -> tuple[np.ndarray, np.ndarray]:
+    """Remaining mass to reach the target density, and remaining element slots.
+
+    Returns (budget_u, slots). Budget is NaN until the cell block closes, because
+    until then the volume — and therefore the total mass a target density implies —
+    is not determined. That is the actionability boundary WS-2 measured, appearing
+    here as an explicit precondition rather than as a silent wrong answer.
+
+    Slots is the number of element tokens still expected. It cannot be known exactly
+    (the model decides how many elements to emit), so it is estimated from the mean
+    element count in the data. An estimate is sound here because the budget is
+    re-derived at every step from the mass actually emitted so far: an over- or
+    under-estimate corrects itself on the next token rather than accumulating.
+    """
+    n, L = ids.shape
+    budget = np.full(n, np.nan, dtype=np.float64)
+    slots = np.zeros(n, dtype=np.float64)
+    for r in range(n):
+        lens, angs, mass, n_el, cell_closed = [], [], 0.0, 0, False
+        cur_el = None
+        for t in range(L):
+            tok = V.tokens[ids[r, t]]
+            if tok.startswith("len:"):
+                j = int(tok[4:]); lens.append(2.0 + (j + 0.5) * 28.0 / V.N_LEN)
+            elif tok.startswith("ang:"):
+                j = int(tok[4:]); angs.append(20.0 + (j + 0.5) * 140.0 / V.N_ANG)
+            elif tok == "<END_CELL>":
+                cell_closed = len(lens) == 3 and len(angs) == 3
+            elif tok.startswith("el:"):
+                cur_el = tok[3:]
+            elif tok.startswith("cnt:") and cur_el:
+                mass += ATOMIC_MASS.get(cur_el, 0.0) * int(tok[4:])
+                n_el += 1; cur_el = None
+        if cell_closed:
+            vol = V.cell_volume(lens, angs)
+            if vol:
+                total = cfg.density_target * vol / 1.66053906660
+                budget[r] = max(total - mass, 0.0)
+                slots[r] = max(cfg.expected_elements - n_el, 1)
+    return budget, slots
 
 
 def pad_batch(seqs: list[list[int]], pad: int) -> np.ndarray:
@@ -193,22 +276,36 @@ def sample(model, V, gm, cfg, device, n, *, use_mask: bool, project_at_inference
             logits = logits.masked_fill(~mk, float("-inf"))
 
         if project_at_inference:
-            # One active constraint on the mass channel, which is the composition
-            # half of the density dial and the part that is per-step actionable.
+            # RUNNING MASS BUDGET, not a fixed mass per token.
+            #
+            # Density is mass/volume, so a target density fixes a total mass budget
+            # rho*V/1.66054 once the cell is known. Cell-first ordering makes V
+            # determined before any element token, so the per-step target is the
+            # remaining mass spread over the remaining element slots -- the same
+            # running-budget form the synthetic task validated.
+            #
+            # Targeting a constant density value on the mass channel instead (the
+            # first version of this code) asks for 5 u per token, lighter than
+            # lithium, and drives the composition toward the lightest elements.
             B, Vsz = logits.shape
-            A = mass_t.view(1, 1, Vsz).expand(B, 1, Vsz).contiguous()
             live = mk if use_mask else torch.ones_like(logits, dtype=torch.bool)
+            budget, slots = _mass_budget(ids.cpu().numpy(), V, cfg)
+            budget = torch.from_numpy(budget).to(device).float()
+            slots = torch.from_numpy(slots).to(device).float()
+            active = (slots > 0) & torch.isfinite(budget) & ~done
+            ch = torch.from_numpy(mass_channel(ids.cpu().numpy(), V)).to(device)
+            A = ch.unsqueeze(1).contiguous()
             attain = torch.where(live, A[:, 0, :], torch.full_like(logits, float("nan")))
             lo = torch.nan_to_num(attain, nan=float("inf")).min(-1).values
             hi = torch.nan_to_num(attain, nan=float("-inf")).max(-1).values
-            b = torch.full((B, 1), float(cfg.density_target), device=device)
-            b = b.clamp(min=lo.unsqueeze(-1), max=hi.unsqueeze(-1))
-            feas = (b.squeeze(-1) >= lo - 1e-6) & (b.squeeze(-1) <= hi + 1e-6)
+            per_step = torch.where(active, budget / slots.clamp_min(1), lo)
+            feas = active & (per_step >= lo - 1e-6) & (per_step <= hi + 1e-6)
+            b = per_step.clamp(min=lo, max=hi).unsqueeze(-1)
             res = project(logits, A, b, live)
             q = torch.where(res.converged.unsqueeze(-1) & feas.unsqueeze(-1),
                             res.q, torch.softmax(logits, -1))
-            n_infeasible += (~feas & ~done).float()
-            n_projected += (feas & ~done).float()
+            n_infeasible += (active & ~feas).float()
+            n_projected += feas.float()
         else:
             q = torch.softmax(logits, dim=-1)
 
@@ -265,8 +362,8 @@ def main(smoke: bool = False, arm: str = "A2", steps: int | None = None) -> Path
         cfg.eval_every, cfg.n_eval_samples, cfg.train_limit = 150, 512, 2000
 
     train = load_split("train", limit=cfg.train_limit)
-    V = CrystalVocab(ELEMENTS)
-    gm = GrammarMask(V)
+    V = CrystalVocab(ELEMENTS, order=cfg.order)
+    gm = GrammarMask(V, order=cfg.order)
     enc = [V.encode(c) for c in train]
     max_len = max(len(e) for e in enc)
     data = pad_batch(enc, V.index["<EOS>"])
@@ -294,13 +391,25 @@ def main(smoke: bool = False, arm: str = "A2", steps: int | None = None) -> Path
         if cfg.arm == "A3":
             B, L, Vs = logits.shape
             flat = logits.reshape(B * L, Vs)
-            A = mass_t.view(1, 1, Vs).expand(B * L, 1, Vs).contiguous()
             mkf = mk.reshape(B * L, Vs)
+            # Same running-budget target as inference, computed per prefix. Training
+            # and deployment must solve the identical problem, or the layer is
+            # trained against a constraint the deployed system never applies.
+            bud = np.empty((B, L)); slt = np.empty((B, L))
+            chan = np.empty((B, L, Vs), dtype=np.float32)
+            xc = x.cpu().numpy()
+            for t in range(L):
+                bb_, ss_ = _mass_budget(xc[:, :t + 1], V, cfg)
+                bud[:, t], slt[:, t] = bb_, ss_
+                chan[:, t] = mass_channel(xc[:, :t + 1], V)
+            A = torch.from_numpy(chan).to(dev).reshape(B * L, 1, Vs).contiguous()
             attain = torch.where(mkf, A[:, 0, :], torch.full_like(flat, float("nan")))
             lo = torch.nan_to_num(attain, nan=float("inf")).min(-1).values
             hi = torch.nan_to_num(attain, nan=float("-inf")).max(-1).values
-            b = torch.full((B * L, 1), float(cfg.density_target), device=dev)
-            b = b.clamp(min=lo.unsqueeze(-1), max=hi.unsqueeze(-1))
+            bt = torch.from_numpy(bud).to(dev).float().reshape(-1)
+            st = torch.from_numpy(slt).to(dev).float().reshape(-1)
+            act = (st > 0) & torch.isfinite(bt)
+            b = torch.where(act, bt / st.clamp_min(1), lo).clamp(min=lo, max=hi).unsqueeze(-1)
             res = project(flat, A, b, mkf)
             q = torch.where(res.converged.unsqueeze(-1), res.q,
                             torch.softmax(flat, -1))

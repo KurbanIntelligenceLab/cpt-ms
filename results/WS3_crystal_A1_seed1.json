@@ -1,0 +1,149 @@
+{
+  "schema_version": "1.0",
+  "artifact_name": "WS3_crystal_A1",
+  "script": "scripts/train/train_crystal.py",
+  "git_commit": "UNVERSIONED",
+  "config": {
+    "arm": "A1",
+    "steps": 6000,
+    "smoke": false
+  },
+  "config_hash": "d669af2689cbac1c",
+  "seeds": [
+    1
+  ],
+  "created_utc": "2026-08-09T16:03:13.187423+00:00",
+  "python": "3.11.13",
+  "platform": "Linux-6.8.0-136-generic-x86_64-with-glibc2.35",
+  "payload_sha256": "b9b6ce1829a8b59ae8e5ba7e57252b20119d4edcce27a236419fd7a38e6445a4",
+  "payload": {
+    "arm": "A1",
+    "train_config": {
+      "arm": "A1",
+      "d_model": 256,
+      "n_layer": 6,
+      "n_head": 8,
+      "steps": 6000,
+      "batch": 128,
+      "lr": 0.0003,
+      "warmup": 300,
+      "seed": 1,
+      "eval_every": 1000,
+      "n_eval_samples": 4096,
+      "density_target": 5.0,
+      "train_limit": null
+    },
+    "device": "cuda",
+    "gpu": "NVIDIA GeForce RTX 5090",
+    "n_parameters": 5002228,
+    "vocab_size": 500,
+    "n_train_structures": 26910,
+    "max_len": 26,
+    "data_density": {
+      "mean": 6.678904185463716,
+      "median": 6.3171382098885935,
+      "sd": 2.941714667400053
+    },
+    "history": [
+      {
+        "n_samples": 4096,
+        "structural_validity_rate": 0.94287109375,
+        "density_computable_rate": 0.925537109375,
+        "mean_density": 6.6961799225500265,
+        "median_density": 5.9519127616496865,
+        "density_sd": 3.721320769031188,
+        "density_error_vs_target": 1.6961799225500265,
+        "step": 1000,
+        "loss": 1.0057085752487183,
+        "elapsed_s": 28.0,
+        "per_step_infeasible_fraction": 0.0,
+        "mean_steps_projected": 0.0
+      },
+      {
+        "n_samples": 4096,
+        "structural_validity_rate": 0.971923828125,
+        "density_computable_rate": 0.966796875,
+        "mean_density": 6.886157639825547,
+        "median_density": 6.378531386954624,
+        "density_sd": 3.4689964674524507,
+        "density_error_vs_target": 1.886157639825547,
+        "step": 2000,
+        "loss": 0.7895764708518982,
+        "elapsed_s": 55.3,
+        "per_step_infeasible_fraction": 0.0,
+        "mean_steps_projected": 0.0
+      },
+      {
+        "n_samples": 4096,
+        "structural_validity_rate": 0.96484375,
+        "density_computable_rate": 0.95654296875,
+        "mean_density": 6.751281729436708,
+        "median_density": 6.221484501190588,
+        "density_sd": 3.36610639827803,
+        "density_error_vs_target": 1.751281729436708,
+        "step": 3000,
+        "loss": 0.6596753001213074,
+        "elapsed_s": 82.7,
+        "per_step_infeasible_fraction": 0.0,
+        "mean_steps_projected": 0.0
+      },
+      {
+        "n_samples": 4096,
+        "structural_validity_rate": 0.9794921875,
+        "density_computable_rate": 0.97607421875,
+        "mean_density": 6.5237452931282744,
+        "median_density": 5.97453267301211,
+        "density_sd": 3.296537794700138,
+        "density_error_vs_target": 1.5237452931282744,
+        "step": 4000,
+        "loss": 0.5463706254959106,
+        "elapsed_s": 109.9,
+        "per_step_infeasible_fraction": 0.0,
+        "mean_steps_projected": 0.0
+      },
+      {
+        "n_samples": 4096,
+        "structural_validity_rate": 0.971923828125,
+        "density_computable_rate": 0.96826171875,
+        "mean_density": 7.153770810567886,
+        "median_density": 6.707980554793938,
+        "density_sd": 3.414797887563641,
+        "density_error_vs_target": 2.1537708105678863,
+        "step": 5000,
+        "loss": 0.5266969203948975,
+        "elapsed_s": 136.5,
+        "per_step_infeasible_fraction": 0.0,
+        "mean_steps_projected": 0.0
+      },
+      {
+        "n_samples": 4096,
+        "structural_validity_rate": 0.982666015625,
+        "density_computable_rate": 0.97802734375,
+        "mean_density": 6.76595818640885,
+        "median_density": 6.261798455803026,
+        "density_sd": 3.2786351858456446,
+        "density_error_vs_target": 1.7659581864088496,
+        "step": 6000,
+        "loss": 0.4850708544254303,
+        "elapsed_s": 163.4,
+        "per_step_infeasible_fraction": 0.0,
+        "mean_steps_projected": 0.0
+      }
+    ],
+    "final": {
+      "n_samples": 4096,
+      "structural_validity_rate": 0.982666015625,
+      "density_computable_rate": 0.97802734375,
+      "mean_density": 6.76595818640885,
+      "median_density": 6.261798455803026,
+      "density_sd": 3.2786351858456446,
+      "density_error_vs_target": 1.7659581864088496,
+      "step": 6000,
+      "loss": 0.4850708544254303,
+      "elapsed_s": 163.4,
+      "per_step_infeasible_fraction": 0.0,
+      "mean_steps_projected": 0.0
+    },
+    "wall_clock_s": 163.4
+  }
+}

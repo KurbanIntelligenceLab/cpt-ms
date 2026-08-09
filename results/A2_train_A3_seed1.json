@@ -12,10 +12,10 @@
   "seeds": [
     1
   ],
-  "created_utc": "2026-08-09T06:14:33.294551+00:00",
+  "created_utc": "2026-08-09T15:38:05.994217+00:00",
   "python": "3.11.13",
   "platform": "Linux-6.8.0-136-generic-x86_64-with-glibc2.35",
-  "payload_sha256": "3660b6101c5a32487faf5dc55c1583da8a2ee49a4a982bdaae000bf7f8b66109",
+  "payload_sha256": "c0e9216e03b7a9abe36bbecd5b84cb882240a96516031c082af3a4dc867142ab",
   "payload": {
     "arm": "A3",
     "train_config": {
@@ -68,9 +68,9 @@
           "mean_charge": 0.00364827255028029,
           "charge_error": 0.00364827255028029,
           "charge_variance": 1.5946407810207799,
-          "infeasible_mass": 1.4013728386432819e-30,
-          "kl_from_data": Infinity,
-          "kl_from_tilt": Infinity,
+          "infeasible_mass": 0.0,
+          "kl_from_data": 1.7888721397966132,
+          "kl_from_tilt": 1.455089708987225,
           "violation_rate": 0.5827911403295665,
           "entropy_nats": 9.031944870906331,
           "per_step_infeasible_fraction": 0.01758435259263343,
@@ -80,9 +80,9 @@
           "mean_charge": 0.0036482644588482723,
           "charge_error": 0.0036482644588482723,
           "charge_variance": 1.5946407922859254,
-          "infeasible_mass": 1.4013728545851717e-30,
-          "kl_from_data": Infinity,
-          "kl_from_tilt": Infinity,
+          "infeasible_mass": 0.0,
+          "kl_from_data": 1.7888719979090122,
+          "kl_from_tilt": 1.4550895650163382,
           "violation_rate": 0.5827911495336524,
           "entropy_nats": 9.031945012368036
         },
@@ -102,11 +102,11 @@
           "total_variation": 9.979768501063119e-09,
           "max_abs_prob_diff": 4.366456896574833e-10,
           "mean_charge_diff": -8.091432017465205e-09,
-          "infeasible_mass_diff": 1.5941889845946702e-38
+          "infeasible_mass_diff": 0.0
         },
         "step": 500,
         "loss": 7.387018203735352,
-        "elapsed_s": 70.6
+        "elapsed_s": 69.0
       },
       {
         "mean_charge": -0.9770267054847557,
@@ -121,9 +121,9 @@
           "mean_charge": 0.011563584326863066,
           "charge_error": 0.011563584326863066,
           "charge_variance": 1.4581184901946649,
-          "infeasible_mass": 1.2974753461325965e-30,
-          "kl_from_data": Infinity,
-          "kl_from_tilt": Infinity,
+          "infeasible_mass": 0.0,
+          "kl_from_data": 1.6595711767365569,
+          "kl_from_tilt": 1.3278266863050017,
           "violation_rate": 0.5787721759868159,
           "entropy_nats": 9.111620473894376,
           "per_step_infeasible_fraction": 0.017613252934465147,
@@ -133,9 +133,9 @@
           "mean_charge": 0.011563583454176718,
           "charge_error": 0.011563583454176718,
           "charge_variance": 1.4581184919478256,
-          "infeasible_mass": 1.297475354053793e-30,
-          "kl_from_data": Infinity,
-          "kl_from_tilt": Infinity,
+          "infeasible_mass": 0.0,
+          "kl_from_data": 1.6595711612036834,
+          "kl_from_tilt": 1.3278266705474395,
           "violation_rate": 0.5787721771459022,
           "entropy_nats": 9.11162048890074
         },
@@ -155,11 +155,11 @@
           "total_variation": 1.374192716729602e-09,
           "max_abs_prob_diff": 2.642353481201523e-10,
           "mean_charge_diff": -8.726863485325476e-10,
-          "infeasible_mass_diff": 7.921196550379815e-39
+          "infeasible_mass_diff": 0.0
         },
         "step": 1000,
         "loss": 7.314088821411133,
-        "elapsed_s": 139.4
+        "elapsed_s": 138.6
       },
       {
         "mean_charge": 0.25164042331950975,
@@ -174,11 +174,11 @@
           "mean_charge": 0.017552014588884727,
           "charge_error": 0.017552014588884727,
           "charge_variance": 1.497617332910752,
-          "infeasible_mass": 1.312551043255765e-30,
-          "kl_from_data": Infinity,
-          "kl_from_tilt": Infinity,
+          "infeasible_mass": 0.0,
+          "kl_from_data": 1.648663657524865,
+          "kl_from_tilt": 1.3184609969258276,
           "violation_rate": 0.6026448701951777,
-          "entropy_nats": 9.209429799843365,
+          "entropy_nats": 9.209429799843363,
           "per_step_infeasible_fraction": 0.01896134488262253,
           "per_step_infeasible_fraction_unweighted": 0.108856201171875
         },
@@ -186,11 +186,11 @@
           "mean_charge": 0.017552014567061486,
           "charge_error": 0.017552014567061486,
           "charge_variance": 1.4976173329166083,
-          "infeasible_mass": 1.312551050745853e-30,
-          "kl_from_data": Infinity,
-          "kl_from_tilt": Infinity,
+          "infeasible_mass": 0.0,
+          "kl_from_data": 1.6486636571665785,
+          "kl_from_tilt": 1.3184609965619223,
           "violation_rate": 0.6026448702036158,
-          "entropy_nats": 9.20942980021901
+          "entropy_nats": 9.209429800219008
         },
         "precision_mismatch_sampled": {
           "n_samples": 1000000,
@@ -208,11 +208,11 @@
           "total_variation": 2.1584080284258793e-11,
           "max_abs_prob_diff": 1.433286244288147e-11,
           "mean_charge_diff": -2.182324113086942e-11,
-          "infeasible_mass_diff": 7.490087953641825e-39
+          "infeasible_mass_diff": 0.0
         },
         "step": 1500,
         "loss": 7.575097560882568,
-        "elapsed_s": 207.6
+        "elapsed_s": 204.9
       },
       {
         "mean_charge": 0.28843867575022397,
@@ -227,11 +227,11 @@
           "mean_charge": 0.021385033306227225,
           "charge_error": 0.021385033306227225,
           "charge_variance": 1.5225868121170412,
-          "infeasible_mass": 1.3137957814035058e-30,
-          "kl_from_data": Infinity,
-          "kl_from_tilt": Infinity,
+          "infeasible_mass": 0.0,
+          "kl_from_data": 1.628628100178608,
+          "kl_from_tilt": 1.2994123196714165,
           "violation_rate": 0.6068100802962948,
-          "entropy_nats": 9.147915315947854,
+          "entropy_nats": 9.147915315947852,
           "per_step_infeasible_fraction": 0.0184157881811481,
           "per_step_infeasible_fraction_unweighted": 0.108856201171875
         },
@@ -239,9 +239,9 @@
           "mean_charge": 0.021385033324560238,
           "charge_error": 0.021385033324560238,
           "charge_variance": 1.5225868121421542,
-          "infeasible_mass": 1.3137957877076354e-30,
-          "kl_from_data": Infinity,
-          "kl_from_tilt": Infinity,
+          "infeasible_mass": 0.0,
+          "kl_from_data": 1.6286280999721594,
+          "kl_from_tilt": 1.2994123194696878,
           "violation_rate": 0.6068100803005407,
           "entropy_nats": 9.147915316143411
         },
@@ -261,11 +261,11 @@
           "total_variation": 1.1437262702292406e-11,
           "max_abs_prob_diff": 9.30592651611292e-12,
           "mean_charge_diff": 1.8333012191673603e-11,
-          "infeasible_mass_diff": 6.304129651764424e-39
+          "infeasible_mass_diff": 0.0
         },
         "step": 2000,
         "loss": 6.67363166809082,
-        "elapsed_s": 275.1
+        "elapsed_s": 272.7
       },
       {
         "mean_charge": 0.6462804960243299,
@@ -280,9 +280,9 @@
           "mean_charge": 0.014868732926719017,
           "charge_error": 0.014868732926719017,
           "charge_variance": 1.5372169784265428,
-          "infeasible_mass": 1.3249199619180492e-30,
-          "kl_from_data": Infinity,
-          "kl_from_tilt": Infinity,
+          "infeasible_mass": 0.0,
+          "kl_from_data": 1.6225303747583575,
+          "kl_from_tilt": 1.291636854696196,
           "violation_rate": 0.6107711588264632,
           "entropy_nats": 9.15576423637646,
           "per_step_infeasible_fraction": 0.018691940247668664,
@@ -292,9 +292,9 @@
           "mean_charge": 0.014868732923813612,
           "charge_error": 0.014868732923813612,
           "charge_variance": 1.5372169784318932,
-          "infeasible_mass": 1.3249199714114095e-30,
-          "kl_from_data": Infinity,
-          "kl_from_tilt": Infinity,
+          "infeasible_mass": 0.0,
+          "kl_from_data": 1.6225303747078725,
+          "kl_from_tilt": 1.2916368546449637,
           "violation_rate": 0.6107711588274244,
           "entropy_nats": 9.155764236429878
         },
@@ -314,11 +314,11 @@
           "total_variation": 3.1699630575213264e-12,
           "max_abs_prob_diff": 8.692158858519469e-13,
           "mean_charge_diff": -2.9054050831867073e-12,
-          "infeasible_mass_diff": 9.493360241004382e-39
+          "infeasible_mass_diff": 0.0
         },
         "step": 2500,
         "loss": 7.046224594116211,
-        "elapsed_s": 343.4
+        "elapsed_s": 340.6
       },
       {
         "mean_charge": 0.9354447443582228,
@@ -330,12 +330,12 @@
         "violation_rate": 0.8372242601601827,
         "entropy_nats": 9.154847594657756,
         "deployed": {
-          "mean_charge": 0.015780306366653528,
-          "charge_error": 0.015780306366653528,
+          "mean_charge": 0.015780306366653524,
+          "charge_error": 0.015780306366653524,
           "charge_variance": 1.5150704990192774,
-          "infeasible_mass": 1.3196499814560415e-30,
-          "kl_from_data": Infinity,
-          "kl_from_tilt": Infinity,
+          "infeasible_mass": 0.0,
+          "kl_from_data": 1.6441308009273543,
+          "kl_from_tilt": 1.313471981957587,
           "violation_rate": 0.6039475568701558,
           "entropy_nats": 9.188233015568716,
           "per_step_infeasible_fraction": 0.018767799368788526,
@@ -345,11 +345,11 @@
           "mean_charge": 0.015780306357568566,
           "charge_error": 0.015780306357568566,
           "charge_variance": 1.5150704990366404,
-          "infeasible_mass": 1.3196499904050351e-30,
-          "kl_from_data": Infinity,
-          "kl_from_tilt": Infinity,
+          "infeasible_mass": 0.0,
+          "kl_from_data": 1.644130800797591,
+          "kl_from_tilt": 1.3134719818254847,
           "violation_rate": 0.6039475568728397,
-          "entropy_nats": 9.188233015701122
+          "entropy_nats": 9.188233015701124
         },
         "precision_mismatch_sampled": {
           "n_samples": 1000000,
@@ -366,12 +366,12 @@
         "precision_mismatch": {
           "total_variation": 7.454225531442449e-12,
           "max_abs_prob_diff": 3.688624611411007e-12,
-          "mean_charge_diff": -9.08496194940156e-12,
-          "infeasible_mass_diff": 8.948993622672728e-39
+          "mean_charge_diff": -9.084958479954608e-12,
+          "infeasible_mass_diff": 0.0
         },
         "step": 3000,
         "loss": 6.60330867767334,
-        "elapsed_s": 411.4
+        "elapsed_s": 407.9
       },
       {
         "mean_charge": 1.128409596518709,
@@ -386,9 +386,9 @@
           "mean_charge": 0.014839830442282797,
           "charge_error": 0.014839830442282797,
           "charge_variance": 1.5038736490764995,
-          "infeasible_mass": 1.2788465379254627e-30,
-          "kl_from_data": Infinity,
-          "kl_from_tilt": Infinity,
+          "infeasible_mass": 0.0,
+          "kl_from_data": 1.6565862468032622,
+          "kl_from_tilt": 1.3256852852730054,
           "violation_rate": 0.6026852583554922,
           "entropy_nats": 9.179709211746832,
           "per_step_infeasible_fraction": 0.01839100209024581,
@@ -398,11 +398,11 @@
           "mean_charge": 0.014839830450378939,
           "charge_error": 0.014839830450378939,
           "charge_variance": 1.5038736490891471,
-          "infeasible_mass": 1.2788465441360173e-30,
-          "kl_from_data": Infinity,
-          "kl_from_tilt": Infinity,
+          "infeasible_mass": 0.0,
+          "kl_from_data": 1.6565862467178447,
+          "kl_from_tilt": 1.3256852851896723,
           "violation_rate": 0.6026852583572313,
-          "entropy_nats": 9.17970921183525
+          "entropy_nats": 9.179709211835252
         },
         "precision_mismatch_sampled": {
           "n_samples": 1000000,
@@ -420,11 +420,11 @@
           "total_variation": 5.1229239198536696e-12,
           "max_abs_prob_diff": 1.7709830009894283e-12,
           "mean_charge_diff": 8.096141812519164e-12,
-          "infeasible_mass_diff": 6.210554618725281e-39
+          "infeasible_mass_diff": 0.0
         },
         "step": 3500,
         "loss": 7.503119945526123,
-        "elapsed_s": 479.3
+        "elapsed_s": 475.0
       },
       {
         "mean_charge": 0.693596672711291,
@@ -439,11 +439,11 @@
           "mean_charge": 0.01530711586712027,
           "charge_error": 0.01530711586712027,
           "charge_variance": 1.531483134865615,
-          "infeasible_mass": 1.33652291193731e-30,
-          "kl_from_data": Infinity,
-          "kl_from_tilt": Infinity,
+          "infeasible_mass": 0.0,
+          "kl_from_data": 1.639945645377776,
+          "kl_from_tilt": 1.309164994943548,
           "violation_rate": 0.6050824071160021,
-          "entropy_nats": 9.131929486359217,
+          "entropy_nats": 9.131929486359219,
           "per_step_infeasible_fraction": 0.01774679204885018,
           "per_step_infeasible_fraction_unweighted": 0.108856201171875
         },
@@ -451,9 +451,9 @@
           "mean_charge": 0.015307115281473787,
           "charge_error": 0.015307115281473787,
           "charge_variance": 1.5314831357645273,
-          "infeasible_mass": 1.3365229205295745e-30,
-          "kl_from_data": Infinity,
-          "kl_from_tilt": Infinity,
+          "infeasible_mass": 0.0,
+          "kl_from_data": 1.6399456350952302,
+          "kl_from_tilt": 1.309164984510217,
           "violation_rate": 0.605082407701464,
           "entropy_nats": 9.131929495861609
         },
@@ -473,11 +473,11 @@
           "total_variation": 6.177885378716729e-10,
           "max_abs_prob_diff": 2.660910753348421e-10,
           "mean_charge_diff": -5.856464826980989e-10,
-          "infeasible_mass_diff": 8.592264547122635e-39
+          "infeasible_mass_diff": 0.0
         },
         "step": 4000,
         "loss": 7.219011306762695,
-        "elapsed_s": 547.3
+        "elapsed_s": 542.2
       }
     ],
     "final": {
@@ -493,11 +493,11 @@
         "mean_charge": 0.01530711586712027,
         "charge_error": 0.01530711586712027,
         "charge_variance": 1.531483134865615,
-        "infeasible_mass": 1.33652291193731e-30,
-        "kl_from_data": Infinity,
-        "kl_from_tilt": Infinity,
+        "infeasible_mass": 0.0,
+        "kl_from_data": 1.639945645377776,
+        "kl_from_tilt": 1.309164994943548,
         "violation_rate": 0.6050824071160021,
-        "entropy_nats": 9.131929486359217,
+        "entropy_nats": 9.131929486359219,
         "per_step_infeasible_fraction": 0.01774679204885018,
         "per_step_infeasible_fraction_unweighted": 0.108856201171875
       },
@@ -505,9 +505,9 @@
         "mean_charge": 0.015307115281473787,
         "charge_error": 0.015307115281473787,
         "charge_variance": 1.5314831357645273,
-        "infeasible_mass": 1.3365229205295745e-30,
-        "kl_from_data": Infinity,
-        "kl_from_tilt": Infinity,
+        "infeasible_mass": 0.0,
+        "kl_from_data": 1.6399456350952302,
+        "kl_from_tilt": 1.309164984510217,
         "violation_rate": 0.605082407701464,
         "entropy_nats": 9.131929495861609
       },
@@ -527,17 +527,17 @@
         "total_variation": 6.177885378716729e-10,
         "max_abs_prob_diff": 2.660910753348421e-10,
         "mean_charge_diff": -5.856464826980989e-10,
-        "infeasible_mass_diff": 8.592264547122635e-39
+        "infeasible_mass_diff": 0.0
       },
       "step": 4000,
       "loss": 7.219011306762695,
-      "elapsed_s": 547.3
+      "elapsed_s": 542.2
     },
     "reference": {
       "tilt_kl_from_data": 0.3347217446544234,
       "tilt_mean_charge": 2.085831507514513e-14,
       "data_mean_charge": 2.5164330452453636
     },
-    "wall_clock_s": 547.3
+    "wall_clock_s": 542.2
   }
 }
