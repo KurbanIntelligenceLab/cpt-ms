@@ -63,6 +63,35 @@ def _ols(x: np.ndarray, y: np.ndarray) -> dict:
     }
 
 
+def rejection_cost(target: float, tol: float = 0.5) -> dict:
+    """Expected draws for rejection sampling from the data distribution.
+
+    This is the efficiency baseline, computed exactly from MP-20 rather than
+    estimated: the fraction of structures within tol of the target is the acceptance
+    rate, and its reciprocal is the expected number of draws per accepted sample.
+
+    It is deliberately generous to the baseline — it assumes a generator that
+    reproduces the data distribution perfectly, which A2 approximates but does not
+    achieve. A projection that beats THIS is beating an idealized filter.
+    """
+    from scripts.crystal.mp20 import load_split
+    global _DENSITY_CACHE
+    try:
+        d = _DENSITY_CACHE
+    except NameError:
+        d = np.array([c.density for c in load_split("train")])
+        _DENSITY_CACHE = d
+    acc = float(((d > target - tol) & (d < target + tol)).mean())
+    return {
+        "target": target,
+        "tolerance": tol,
+        "acceptance_rate": acc,
+        "expected_draws": (1.0 / acc) if acc > 0 else None,
+        "data_fraction_percent": acc * 100.0,
+        "in_data_bulk": acc >= 0.05,
+    }
+
+
 def load_sweep(pattern: str) -> list[dict]:
     rows = []
     for f in sorted(glob.glob(pattern)):
@@ -132,8 +161,23 @@ def main(pattern: str, smoke: bool = False) -> Path:
         else "compensation NOT supported: offset does not scale with pull"
     )
 
+    # Efficiency baseline per target, so the frontier's three legs match the
+    # synthetic study: accuracy, divergence cost, and cost against rejection.
+    rejection = {f"{t:g}": rejection_cost(t) for t in sorted(set(tgt.tolist()))}
+    bulk = [k for k, v in rejection.items() if v["in_data_bulk"]]
+
     payload = {
         "n_runs": len(rows),
+        "rejection_baseline": rejection,
+        "efficiency_note": (
+            "Rejection sampling from the data distribution costs "
+            f"{min(v['expected_draws'] for v in rejection.values()):.1f} to "
+            f"{max(v['expected_draws'] for v in rejection.values()):.1f} draws across "
+            f"these targets; {len(bulk)} of {len(rejection)} sit in the data bulk "
+            "(acceptance >= 5%), where the projection's advantage is fidelity and "
+            "determinism rather than sampling efficiency. The efficiency argument "
+            "requires tail targets."
+        ),
         "targets": sorted(set(tgt.tolist())),
         "control_target": ctrl,
         "data_density_mean": data_mean,

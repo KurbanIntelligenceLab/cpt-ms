@@ -67,3 +67,33 @@ def test_slope_stderr_is_reported_so_near_one_can_be_judged():
     fit = _ols(x, x + rng.normal(0, 0.05, len(x)))
     assert np.isfinite(fit["slope_stderr"]) and fit["slope_stderr"] > 0
     assert fit["dof"] == len(x) - 2
+
+
+def test_rejection_cost_matches_a_direct_count():
+    """The efficiency baseline must be the data's own acceptance rate, not a model."""
+    from scripts.crystal.analyze_sweep import rejection_cost
+    from scripts.crystal.mp20 import load_split
+    d = np.array([c.density for c in load_split("train")])
+    for t in (3.0, 5.0, 10.0):
+        r = rejection_cost(t, tol=0.5)
+        direct = float(((d > t - 0.5) & (d < t + 0.5)).mean())
+        assert abs(r["acceptance_rate"] - direct) < 1e-12
+        assert abs(r["expected_draws"] - 1.0 / direct) < 1e-9
+
+
+def test_bulk_targets_are_cheap_for_rejection():
+    """Pins the design gap: inside the data bulk, rejection is not expensive.
+
+    The efficiency leg of the frontier only bites where rejection is costly. If a
+    sweep covers only bulk targets it cannot produce an efficiency result, and this
+    test exists so that limitation is asserted rather than discovered late.
+    """
+    from scripts.crystal.analyze_sweep import rejection_cost
+    for t in (3.0, 5.0, 6.317, 8.0):
+        assert rejection_cost(t)["expected_draws"] < 25, (
+            f"target {t} was assumed cheap for rejection but is not"
+        )
+    for t in (1.5, 16.0):
+        assert rejection_cost(t)["expected_draws"] > 50, (
+            f"tail target {t} should be expensive for rejection"
+        )
