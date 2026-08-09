@@ -504,6 +504,13 @@ def main(smoke: bool = False, arm: str = "A2", steps: int | None = None) -> Path
                                 use_mask=True, project_at_inference=True,
                                 max_len=max_len + 2, rng=rng)
                 m["deployed"] = structural_metrics(sd, V, gm, cfg) | dg
+                # COMPENSATION TEST. If the backbone biases its unaided predictions
+                # to offset a projection that reliably pulls one way, the offset
+                # should scale with the pull. Both are recorded per target so the
+                # sweep can regress one on the other.
+                if m["mean_density"] is not None and m["deployed"]["mean_density"] is not None:
+                    m["projection_pull"] = m["mean_density"] - m["deployed"]["mean_density"]
+                    m["backbone_offset_vs_data"] = m["mean_density"] - float(data_density.mean())
             history.append(m)
             print(f"  step {step:5d} loss {m['loss']:.4f} valid {m['structural_validity_rate']:.4f} "
                   f"density {m['mean_density'] if m['mean_density'] else float('nan'):.3f}",

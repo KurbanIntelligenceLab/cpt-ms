@@ -76,9 +76,28 @@ does not accumulate — measured now on MP-20 with a real backbone and approxima
 only on an exactly enumerable task.
 
 **The steering effect is large relative to every floor it must clear.** Deployed density lands
-0.190 from target against the A2 baseline's 1.783, i.e. 9.4x closer, a separation of 12.9
-seed-standard-deviations. In relative terms the shift from 6.783 to 4.810 is 29.1%, against a
-1.1% discretization error floor — 26x the floor.
+0.190 from target against the A2 baseline's 1.783, i.e. 9.4x closer. In relative terms the shift
+from 6.783 to 4.810 is 29.1%, against a 1.1% discretization error floor — 26x the floor.
+
+Separation from the baseline is **Cohen's d = 14.4** pooled across arms with sample standard
+deviations, n = 3 seeds per arm, with Welch's t = 17.66, p = 0.0017. Welch rather than Student
+because the arm variances differ by 13.9x. Two figures should not be quoted as separations: an
+earlier draft reported 12.9, which used the deployed arm's standard deviation alone; and 17.66
+is the t-statistic, which carries a factor of sqrt(n/2) from the standard error and is not in
+units of standard deviations.
+
+**The 9.4x decomposes into layer and training, and both parts are published.**
+
+| Stage | Density error vs target | Gap closed | Share |
+|---|---|---|---|
+| A2 baseline, no layer | 1.783 | — | — |
+| Layer on the untrained backbone | 0.710 | 1.072 | 67% |
+| Trained through the layer | 0.190 | 0.520 | 33% |
+
+The layer alone accounts for two thirds of the gap closed and training through it for the
+remaining third. The complementarity claim attaches specifically to that third, and the
+infeasibility drop is its independent mechanism figure: quoting 9.4x without the split would
+invite a reviewer to compute it and find it unstated.
 
 ### Two defects in formulation 2, both found by testing the constraint against the data
 
