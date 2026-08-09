@@ -24,3 +24,6 @@ results/run_ledger.jsonl
 
 # scratch intermediates
 results/_*.json
+
+# MP-20 CSVs are ~58MB and re-downloadable from the CDVAE repo
+data/

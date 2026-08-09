@@ -175,7 +175,18 @@ def induced_distribution_from_model(
         globals()["_LAST_INFEASIBLE_MATRIX"] = (
             (bb < lo_att - 1e-9) | (bb > hi_att + 1e-9)
         ).reshape(N, L).double()
-        logp = torch.log(res.q.clamp_min(1e-30)).reshape(N, L, V)
+        # No clamp when SCORING. The projection returns exactly 0.0 at masked
+        # entries, so an illegal token must score as log(0) = -inf and contribute
+        # exactly zero mass. Clamping to a positive floor gives every illegal token
+        # a probability of that floor instead, and a sequence with one illegal token
+        # then carries ~1e-30 -- which is a representable number, not underflow, and
+        # is precisely the residual that appeared in the first deployed reading.
+        # It was an artifact of the evaluation, never a property of the layer.
+        #
+        # The training path keeps its clamp: there the log feeds a loss whose
+        # gradient must stay finite, and the targets are drawn from the feasible
+        # support so no illegal token is ever scored.
+        logp = torch.log(res.q).reshape(N, L, V)
     else:
         logp = torch.log_softmax(logits, dim=-1)
 
