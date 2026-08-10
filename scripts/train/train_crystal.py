@@ -253,9 +253,9 @@ def _mass_budget(ids: np.ndarray, V: CrystalVocab, cfg) -> tuple[np.ndarray, np.
         for t in range(L):
             tok = V.tokens[ids[r, t]]
             if tok.startswith("len:"):
-                j = int(tok[4:]); lens.append(2.0 + (j + 0.5) * 28.0 / V.N_LEN)
+                j = int(tok[4:]); lens.append(V.LEN_LO + (j + 0.5) * (V.LEN_HI - V.LEN_LO) / V.N_LEN)
             elif tok.startswith("ang:"):
-                j = int(tok[4:]); angs.append(20.0 + (j + 0.5) * 140.0 / V.N_ANG)
+                j = int(tok[4:]); angs.append(V.ANG_LO + (j + 0.5) * (V.ANG_HI - V.ANG_LO) / V.N_ANG)
             elif tok == "<END_CELL>":
                 cell_closed = len(lens) == 3 and len(angs) == 3
             elif tok.startswith("el:"):

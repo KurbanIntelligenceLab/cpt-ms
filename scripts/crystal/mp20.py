@@ -140,7 +140,26 @@ class CrystalVocab:
     # 64/32 -> 4.4%, 128/64 -> 2.4%, 256/128 -> 1.1%, 512/256 -> 0.6%. At 256/128
     # the vocabulary is 500 tokens and the error is small enough not to confound;
     # doubling again buys 0.5 points for a 77% larger vocabulary.
-    N_LEN, N_ANG, N_CNT = 256, 128, 16
+    # Resolution is set WITH the range, not independently of it. Widening the
+    # ranges to cover the data spreads the same bucket count over more span, which
+    # raised overall median error from 1.17% to 1.67% at 256/128. At 512/256 over
+    # the corrected ranges the error is 0.84% overall and 1.44% in the high-density
+    # tail -- better than the original narrow-range setting on both, for an 884-token
+    # vocabulary against 500.
+    N_LEN, N_ANG, N_CNT = 512, 256, 16
+
+    # Bucket ranges must COVER the data, not merely span its typical values.
+    # MP-20 cell angles run [7.01, 170.18] degrees. An earlier range of [20, 160]
+    # clamped 0.8% of angles at the floor and 0.4% at the ceiling, which inflates the
+    # decoded cell volume and understates density. The effect is negligible in the
+    # bulk (1.7% of structures below 10 g/cm^3) but reaches 21.4% of structures in
+    # the [20, 25) band -- precisely where the extreme steering targets sit. Widened
+    # to [5, 175] so no real angle is clamped.
+    # Same defect on lengths, found by the coverage test rather than by inspection:
+    # MP-20 lengths run [2.44, 44.49] A, and a ceiling of 30 clamped 205 of them,
+    # understating the cell volume and OVERSTATING density on 0.7% of structures.
+    ANG_LO, ANG_HI = 5.0, 175.0
+    LEN_LO, LEN_HI = 2.0, 46.0
 
     def __init__(self, elements: list[str], order: str = "cell_first"):
         if order not in ("cell_first", "comp_first"):
@@ -177,9 +196,9 @@ class CrystalVocab:
             comp += [f"el:{e}", f"cnt:{min(n, self.N_CNT)}"]
         cell = []
         for L in c.lengths:
-            cell.append(f"len:{_bucket(L, 2.0, 30.0, self.N_LEN)}")
+            cell.append(f"len:{_bucket(L, self.LEN_LO, self.LEN_HI, self.N_LEN)}")
         for a in c.angles:
-            cell.append(f"ang:{_bucket(a, 20.0, 160.0, self.N_ANG)}")
+            cell.append(f"ang:{_bucket(a, self.ANG_LO, self.ANG_HI, self.N_ANG)}")
         if self.order == "cell_first":
             t = ["<BOS>", "<CELL>"] + cell + ["<END_CELL>", "<COMP>"] + comp + ["<END_COMP>", "<EOS>"]
         else:
@@ -212,9 +231,9 @@ class CrystalVocab:
                 formula[cur_el] = formula.get(cur_el, 0) + int(tok[4:])
                 cur_el = None
             elif tok.startswith("len:"):
-                j = int(tok[4:]); lens.append(2.0 + (j + 0.5) * (30.0 - 2.0) / self.N_LEN)
+                j = int(tok[4:]); lens.append(self.LEN_LO + (j + 0.5) * (self.LEN_HI - self.LEN_LO) / self.N_LEN)
             elif tok.startswith("ang:"):
-                j = int(tok[4:]); angs.append(20.0 + (j + 0.5) * (160.0 - 20.0) / self.N_ANG)
+                j = int(tok[4:]); angs.append(self.ANG_LO + (j + 0.5) * (self.ANG_HI - self.ANG_LO) / self.N_ANG)
         if len(lens) != 3 or len(angs) != 3 or not formula:
             return None
         a, b, cc = lens
