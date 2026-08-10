@@ -1,8 +1,12 @@
 # Related work
 
-Draft. Each claim about a cited paper is taken from that paper's own abstract or body,
-not from a secondary summary; where a claim came from a third party's description it was
-checked at the source before being written here.
+Draft. Claims about cited papers are taken from the paper's own abstract or body rather
+than a secondary summary. Sources fetched and matched verbatim so far: HardNet
+(arXiv:2410.10807, both the universal-approximation and end-to-end-training claims) and
+DAE-HardNet (arXiv:2512.05881, both the convergence magnitude and the droppable-layer
+conclusion). Claims attributed to Park et al. and Papay et al. are drawn from their
+abstracts and still need the same full-text check before submission; they are flagged here
+rather than presented as verified.
 
 ## Constrained decoding, and why per-step masking is not conditioning
 
@@ -57,12 +61,13 @@ through.
 ## Differentiable projection layers
 
 A substantial literature attaches a differentiable projection to a network's output so
-that predictions satisfy constraints while remaining trainable end to end. HardNet appends
-a closed-form enforcement layer and shows the construction retains universal approximation,
-and its authors note that unlike methods which alter outputs only at inference, end-to-end
-training with the layer in place improves performance. Others solve the projection as a
-differentiable convex program, or restore feasibility by iterated linearization to a
-tolerance.
+that predictions satisfy constraints while remaining trainable end to end. HardNet
+(arXiv:2410.10807) appends a differentiable closed-form enforcement layer to the network's
+output and shows the construction retains universal approximation; its abstract states
+that unlike approaches which modify outputs only at inference time, HardNet enables
+end-to-end training with hard constraint guarantees, leading to improved performance.
+Others solve the projection as a differentiable convex program, or restore feasibility by
+iterated linearization to a tolerance.
 
 Two things separate our setting from that literature. First, the object being projected is
 a *distribution over a discrete vocabulary* at each decoding step, not a real-valued
