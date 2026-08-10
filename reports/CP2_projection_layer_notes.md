@@ -181,7 +181,7 @@ All 183 tests in the suite pass: 22 here, 7 in `tests/test_plausibility_screen.p
 `tests/test_parser_determinability.py`, 14 in `tests/test_actionability.py`, 9 in
 `tests/test_ledger_preflight.py`, 9 in `tests/test_tilt_lemmas.py`, 8 in
 `tests/test_synthetic_targets.py`, 8 in `tests/test_provenance.py`, 8 in
-`tests/test_induced_distribution.py`, 7 in `tests/test_steering_frontier.py`, and 3 in
+`tests/test_induced_distribution.py`, 7 in `tests/test_steering_frontier.py`, and 4 in
 `tests/test_report_consistency.py`. Five of the provenance tests build throwaway
 repositories and skip where `git init` is unavailable, so they exercise fully on a
 developer machine and report as skipped in a restricted sandbox.

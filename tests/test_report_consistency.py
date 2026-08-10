@@ -61,20 +61,37 @@ def counts():
 
 
 def test_per_file_counts_in_reports_are_current(counts):
-    """Any '<N> tests in `tests/<file>`' claim must match that file."""
+    """Any '<N> [tests] in `tests/<file>`' claim must match that file.
+
+    Two loopholes in an earlier version of this check let real errors ship through a
+    green suite, and both are closed here.
+
+    The word 'tests' was REQUIRED before 'in'. Enumerations write it once and then
+    elide it ('22 here, 7 in `a.py`, 9 in `b.py`'), so every entry after the first was
+    invisible to the check — which is most of them.
+
+    Whitespace was matched with `\\s+`, which spans newlines, but the elided form was
+    not matched at all, so a claim broken across a line break ('and 3 in\\n`tests/
+    test_report_consistency.py`') escaped twice over. That exact claim was wrong by one
+    and survived.
+    """
     pattern = re.compile(
-        r"([A-Za-z]+|\d+)\s+tests?\s+in\s+`tests/([A-Za-z0-9_]+\.py)`", re.I
+        r"(\d+|[A-Za-z]+)\s+(?:tests?\s+)?in\s+`tests/([A-Za-z0-9_]+\.py)`", re.I
     )
-    problems = []
+    problems, checked = [], 0
     for md in sorted(REPORTS.glob("*.md")):
         text = md.read_text()
         for m in pattern.finditer(text):
             claimed, fname = _as_int(m.group(1)), m.group(2)
             if claimed is None or fname not in counts:
                 continue
+            checked += 1
             if claimed != counts[fname]:
                 problems.append(f"{md.name}: claims {claimed} for {fname}, actual {counts[fname]}")
     assert not problems, "; ".join(problems)
+    # The elided form dominates the enumerations, so a low count here means the regex
+    # has regressed to matching only the spelled-out entries.
+    assert checked >= 15, f"only {checked} per-file claims parsed; the check is not binding"
 
 
 def test_multi_file_count_claims_are_current(counts):
