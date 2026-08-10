@@ -425,9 +425,19 @@ def structural_metrics(seqs, V, gm, cfg, train_formulas=None,
     is therefore measured alongside accuracy, and the two are reported together:
 
       distinct_elements / element_entropy  -- chemical breadth of the samples
-      element_tv_vs_full_data             -- departure from the full data's chemistry
       unique_formula_fraction             -- collapse onto repeated compositions
       novel_formula_fraction              -- formulas absent from the TRAINING set
+      element_tv_vs_full_data             -- SHIFT from the full data's chemistry
+
+    The last is NOT a diversity measure and must not be read as one. Any arm hitting a
+    target away from the data mean must shift its chemistry to get there, so both arms
+    have a large TV by construction, and the two can order either way: measured across
+    targets 3.0 and 5.0 the conditional arm had the larger TV at one and the smaller at
+    the other. What TV does establish is reproduction: the conditional arm's TV tracks
+    the TV between its own filtered training slice and the full data to within 0.004
+    (0.3919 vs 0.3836 at target 3.0; 0.2028 vs 0.1988 at 5.0), which is what
+    reproducing a slice looks like. Diversity is carried by the unique- and
+    novel-formula fractions, which do not confound the two.
 
     A high-accuracy, low-coverage arm and a lower-accuracy, high-coverage arm are
     different propositions, and a single error figure cannot distinguish them.
