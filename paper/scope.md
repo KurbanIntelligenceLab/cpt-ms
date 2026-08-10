@@ -82,6 +82,22 @@ returning toward the data at both extremes. In one run it generated a mean densi
 exceeding the maximum in MP-20 itself. Backbone and deployed readings are therefore both
 reported everywhere, since either alone misleads, in opposite directions.
 
+**Thermodynamic stability of generated structures is not assessed.** The serialization is
+composition plus cell with no atomic positions, and an energy model requires positions;
+obtaining them is crystal structure prediction, which the method does not attempt. Relaxing
+from random positions would measure the initialization rather than the generated crystal.
+What is measured instead is composition-level and cell-level plausibility — charge
+neutrality, electronegativity ordering, and packing — each reported against a reference
+obtained by scoring real MP-20 structures through the identical path. That reference is not
+1.0: real materials satisfy the charge screen at a rate of 0.715, because oxidation-state
+enumeration covers only common states, so an arm reported against an assumed ceiling would
+be penalized for a property of the screen rather than of the model.
+
+An ML-potential energy screen (CHGNet) was calibrated against MP-20's DFT labels and agrees
+to 21 meV/atom on held-out structures, which is below the 30 meV/atom near-hull window. It
+is used for reference structures only, is labelled an ML-potential screen rather than DFT
+throughout, and no DFT calculation is reported in this work.
+
 ## What is not claimed
 
 The layer is not claimed to improve in-distribution sample quality; an external benchmark

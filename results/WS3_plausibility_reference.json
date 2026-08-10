@@ -1,0 +1,39 @@
+{
+  "schema_version": "1.0",
+  "artifact_name": "WS3_plausibility_reference",
+  "script": "scripts/crystal/plausibility_screen.py",
+  "git_commit": "ea90db947752d14f1022c187fba08e3bee40cb9c-dirty",
+  "config": {
+    "limit": 800,
+    "smoke": false
+  },
+  "config_hash": "cd8b03a098f7ef83",
+  "seeds": [
+    0
+  ],
+  "created_utc": "2026-08-10T20:04:08.713176+00:00",
+  "python": "3.11.15",
+  "platform": "macOS-26.5.2-arm64-arm-64bit",
+  "payload_sha256": "74ec23011d2aca83ae670dde0df911227375b62e3c997362fc7a9a641f75d747",
+  "payload": {
+    "screens": [
+      "charge_neutrality",
+      "electronegativity_order",
+      "packing_plausibility"
+    ],
+    "why_not_energy": "Generated serialization is composition + cell with no atomic positions. An energy model requires positions; obtaining them is crystal structure prediction, which the model does not attempt. Relaxing from random positions would measure the initialization, not the generated crystal. The calibrated CHGNet screen therefore applies to reference structures only.",
+    "packing_window_a3_per_atom": {
+      "lo_1pct": 8.919033410425,
+      "hi_99pct": 46.301696929933335,
+      "data_mean": 19.942091099634595,
+      "data_sd": 8.230433399355524
+    },
+    "data_reference": {
+      "n_screened": 800,
+      "charge_balanced_rate": 0.715,
+      "electronegativity_ordered_rate": 0.64,
+      "packing_plausible_rate": 0.9775
+    },
+    "note": "The data reference is scored through the IDENTICAL path as any generated sample, so it is a measured ceiling rather than an assumed 100%."
+  }
+}
