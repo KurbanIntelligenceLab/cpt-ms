@@ -183,6 +183,6 @@ Six tests in `tests/test_crystal_mask.py`: the mask accepts every real transitio
 structures; it is strictly narrower than the vocabulary; an untrained masked model is
 structurally valid at 1.0; the sampler does not duplicate tokens; an untrained unmasked model
 is *not* valid, so the arms are distinguishable; and decoded density round-trips within the
-discretization error. Four tests in `tests/test_feasibility_exactness.py` pin the exactness
+discretization error. Five tests in `tests/test_feasibility_exactness.py` pin the exactness
 claim, including one asserting that a clamped scorer leaks at the clamp scale — so the
 diagnosis is itself a regression test.

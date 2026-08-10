@@ -11,12 +11,19 @@ projects.
 
 | Target | GPU | VRAM | Cores | RAM | Project |
 |---|---|---|---|---|---|
-| gpu-5090-vlm-project-1 | RTX 5090 | 32.6 GB | 24 | 61 GB | CoCr, persistent, marked keep |
+| gpu-5090-vlm-project-1 | RTX 5090 | 32 GB | not recorded | not recorded | CoCr, persistent, marked keep |
 | gpu-5090-vlm-project-3 | RTX 5090 | 32.6 GB | 128 | 516 GB | CoCr ICLR/A4 branch |
 | gpu-cliffordstf | RTX 4090 | 24.5 GB | 192 | 1032 GB | CliffordSTF |
 | gpu-cliffordstf-tuned | RTX 4090 | 24.5 GB | 128 | 516 GB | CliffordSTF |
 | stemgym-gpu | RTX 4090 | 24.5 GB | 256 | 516 GB | STEMGym (notes record the box as destroyed) |
 | mlxc-experiments | RTX 4090 | 24.5 GB | 12 | 64 GB | MLXC-DFTB (notes record the box as destroyed) |
+
+Core and RAM figures come from each target's live probe. `gpu-5090-vlm-project-1` returned
+no probe block, and its provider notes record cores and RAM only for a superseded contract
+(46133195); the alias now resolves to a different box (46941802) whose entry gives GPU model,
+endpoint and price but no core or memory count. Those cells are therefore marked unrecorded
+rather than carrying the older contract's numbers, which would misdescribe the current
+machine. Nothing in this report's conclusion depends on them.
 
 Two aliases point at endpoints their own provider notes record as torn down, so the live
 count is four, none of them ours. A standing policy on this account prohibits any agent

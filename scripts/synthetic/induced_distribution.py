@@ -243,6 +243,12 @@ def main(smoke: bool = False) -> Path:
             "hard_violation_rate": violation_rate(task, p),
             "kl_from_base_S_nats": kl(p, base_S),
             "tv_to_base_S": tv(p, base_S),
+            # MEASURED, not asserted. The Regime-S exactness claim was previously
+            # reported from a hardcoded 0.0 in an audit script, with a verification
+            # check that defaulted to passing when the field was absent — so it
+            # passed vacuously. The mass outside the feasible set is now computed
+            # from the distribution itself, so the claim has a value to check.
+            "mass_outside_S": float(p[~task.feasible_S].sum()),
         }
 
     rows = {

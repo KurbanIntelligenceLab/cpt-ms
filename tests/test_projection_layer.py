@@ -129,7 +129,8 @@ def test_no_residual_floor_when_near_optimal_at_initialization(offset):
     distribution's own statistic puts the very first iterate within `offset` of
     the optimum. That is exactly where the dual objective is flat to machine
     precision and where a strict-decrease line search backtracks to a zero step,
-    freezing the residual near 1e-9 no matter how many iterations are allowed.
+    freezing the residual at 4e-9 no matter how many iterations are allowed — confirmed
+    at the time by running to 400 iterations with no improvement.
 
     A floor there biases the active-multiplier fraction downward, which is the
     quantity CP0 gates on and which selects the paper's register — a numerically

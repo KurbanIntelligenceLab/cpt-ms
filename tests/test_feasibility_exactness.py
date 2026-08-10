@@ -109,3 +109,30 @@ def test_the_clamp_value_is_representable_not_underflow():
     assert 1e-30 > np.nextafter(0.0, 1.0)
     assert 1e-30 > float(np.finfo(np.float64).tiny) / 1e100
     assert np.float64(1e-30) != 0.0
+
+
+def test_regime_S_exactness_is_measured_not_hardcoded():
+    """The exactness claim must read a field the artifact actually carries.
+
+    This was previously reported from a literal 0.0 printed by an audit script, with a
+    verification check written as `D['induced'][key] if key in D['induced'] else True`
+    — which passed vacuously because the key did not exist. A check that cannot fail
+    measures nothing, so the field is now emitted and read.
+    """
+    import json
+    from pathlib import Path
+    art = Path("results/WS1_induced_vs_tilt.json")
+    if not art.exists():
+        pytest.skip("artifact absent; run scripts.synthetic.induced_distribution")
+    dists = json.load(open(art))["payload"]["distributions"]
+    checked = 0
+    for name, d in dists.items():
+        if not isinstance(d, dict):
+            continue
+        assert "mass_outside_S" in d, (
+            f"{name} has no mass_outside_S; the exactness claim would have nothing to "
+            "check and any verification of it would pass vacuously"
+        )
+        assert d["mass_outside_S"] == 0.0, f"{name} leaks {d['mass_outside_S']:.3e}"
+        checked += 1
+    assert checked >= 3, f"only {checked} distributions checked; expected base_S/tilt/induced"
