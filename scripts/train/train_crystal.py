@@ -291,6 +291,7 @@ def sample(model, V, gm, cfg, device, n, *, use_mask: bool, project_at_inference
     done = torch.zeros(n, dtype=torch.bool, device=device)
     n_infeasible = torch.zeros(n, device=device)
     n_projected = torch.zeros(n, device=device)
+    n_degenerate = torch.zeros(n, device=device)
     eos = V.index["<EOS>"]
     mass_t = torch.tensor([ATOMIC_MASS.get(t[3:], 0.0) if t.startswith("el:") else 0.0
                            for t in V.tokens], device=device, dtype=torch.float32)
@@ -357,7 +358,34 @@ def sample(model, V, gm, cfg, device, n, *, use_mask: bool, project_at_inference
         else:
             q = torch.softmax(logits, dim=-1)
 
-        nxt = torch.multinomial(q.clamp_min(0).nan_to_num(), 1).squeeze(-1)
+        # Sanitize before sampling, and fall back on a row that has no mass left.
+        #
+        # `clamp_min(0).nan_to_num()` was not enough and it failed intermittently:
+        # clamp leaves NaN as NaN, nan_to_num then maps it to 0, so an all-NaN row
+        # becomes an all-ZERO row and multinomial raises a device-side assert. Two
+        # runs of twenty died this way, on different seeds at different targets --
+        # seed-dependent rather than target-dependent, which is the signature of a
+        # rare degenerate solve rather than of an unreachable target.
+        #
+        # A row can lose all mass legitimately: where the projection is asked for a
+        # near-degenerate distribution the solved q can underflow across every legal
+        # token. The masked softmax is always a valid distribution at those
+        # positions, so it is the correct fallback, and rows falling back are counted
+        # rather than silently repaired.
+        q = torch.nan_to_num(q, nan=0.0, posinf=0.0, neginf=0.0).clamp_min(0)
+        bad = q.sum(-1) <= 0
+        if bool(bad.any()):
+            safe = torch.softmax(logits, dim=-1)
+            safe = torch.nan_to_num(safe, nan=0.0, posinf=0.0, neginf=0.0).clamp_min(0)
+            # If even the masked softmax is degenerate the row is finished; emit EOS.
+            still_bad = bad & (safe.sum(-1) <= 0)
+            q = torch.where(bad.unsqueeze(-1), safe, q)
+            if bool(still_bad.any()):
+                onehot = torch.zeros_like(q)
+                onehot[:, eos] = 1.0
+                q = torch.where(still_bad.unsqueeze(-1), onehot, q)
+            n_degenerate += bad.float()
+        nxt = torch.multinomial(q, 1).squeeze(-1)
         nxt = torch.where(done, torch.full_like(nxt, eos), nxt)
         ids = torch.cat([ids, nxt.unsqueeze(-1)], dim=1)
         done = done | (nxt == eos)
@@ -370,6 +398,11 @@ def sample(model, V, gm, cfg, device, n, *, use_mask: bool, project_at_inference
     return seqs, {
         "per_step_infeasible_fraction": float((n_infeasible / tot).mean()),
         "mean_steps_projected": float(n_projected.mean()),
+        # Rows that lost all probability mass and fell back to the masked softmax.
+        # Reported rather than hidden: a nonzero rate means the solve is degenerating
+        # somewhere and the fallback is doing work the projection should be doing.
+        "degenerate_row_rate": float((n_degenerate / tot).mean()),
+        "sequences_with_any_degenerate_step": float((n_degenerate > 0).float().mean()),
     }
 
 

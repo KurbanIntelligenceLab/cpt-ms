@@ -97,3 +97,30 @@ def test_bulk_targets_are_cheap_for_rejection():
         assert rejection_cost(t)["expected_draws"] > 50, (
             f"tail target {t} should be expensive for rejection"
         )
+
+
+def test_offset_and_pull_share_a_term_so_their_regression_is_invalid():
+    """The compensation test must not regress a quantity on itself plus a term.
+
+    `backbone_offset_vs_data = backbone - data_mean` and
+    `projection_pull = backbone - deployed` both carry the backbone density with a
+    positive sign, so offset - pull == deployed - data_mean identically. Regressing
+    one on the other therefore has an algebraic slope near 1 regardless of whether
+    any compensation exists, and the first version of this test reported slope 0.585
+    with t = 3.66 on that basis alone.
+
+    The valid regressor is the TARGET, which shares no term with the offset.
+    """
+    rng = np.random.default_rng(7)
+    backbone = rng.normal(9.0, 2.0, 40)
+    deployed = rng.normal(5.0, 1.0, 40)
+    data_mean = 6.679
+    offset = backbone - data_mean
+    pull = backbone - deployed
+    # The identity holds for ANY inputs -- that is exactly why the regression is void.
+    assert np.abs((offset - pull) - (deployed - data_mean)).max() < 1e-12
+    fit = _ols(pull, offset)
+    assert fit["slope"] > 0.3 and fit["slope_t_vs_zero"] > 2.0, (
+        "purely random inputs must still produce a 'supported' verdict, which is the "
+        "proof that this regression cannot test compensation"
+    )
