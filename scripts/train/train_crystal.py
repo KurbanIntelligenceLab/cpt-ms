@@ -31,6 +31,8 @@ import time
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
+from collections import Counter
+
 import numpy as np
 import torch
 import torch.nn as nn
@@ -62,6 +64,13 @@ class CrystalTrainConfig:
     order: str = "cell_first"      # density needs the volume before the composition
     expected_atoms: float = 10.4    # mean atoms per MP-20 structure
     channel: str = "static"   # "static" = formulation 2; "prefix" = formulation 3
+    # A4: conditional-training baseline. Train the masked model on the SUBSET of MP-20
+    # within `filter_tol` of the target instead of applying any constraint at decode
+    # time. This is the "just retrain on filtered data" objection, and it is the
+    # baseline a reviewer reaches for first, so it gets the same budget as A2/A3 and
+    # its own arm rather than a footnote. Steps are held equal, which is deliberately
+    # generous: the filtered set is smaller, so A4 sees each structure more often.
+    filter_tol: float = 0.5
 
 
 class CrystalDecoder(nn.Module):
@@ -406,9 +415,26 @@ def sample(model, V, gm, cfg, device, n, *, use_mask: bool, project_at_inference
     }
 
 
-def structural_metrics(seqs, V, gm, cfg) -> dict:
-    """Validity and density statistics over generated sequences."""
+def structural_metrics(seqs, V, gm, cfg, train_formulas=None,
+                       full_element_freq=None) -> dict:
+    """Validity, density, and DISTRIBUTIONAL COVERAGE of generated sequences.
+
+    Accuracy at the target is not sufficient to compare arms. A model trained only on
+    structures near the target can hit it precisely while generating a narrow slice of
+    chemistry; a steered model reaches the target from the full distribution. Coverage
+    is therefore measured alongside accuracy, and the two are reported together:
+
+      distinct_elements / element_entropy  -- chemical breadth of the samples
+      element_tv_vs_full_data             -- departure from the full data's chemistry
+      unique_formula_fraction             -- collapse onto repeated compositions
+      novel_formula_fraction              -- formulas absent from the TRAINING set
+
+    A high-accuracy, low-coverage arm and a lower-accuracy, high-coverage arm are
+    different propositions, and a single error figure cannot distinguish them.
+    """
     dens, valid, complete = [], 0, 0
+    el_counter: Counter = Counter()
+    formulas: list[tuple] = []
     for s in seqs:
         toks = [V.tokens[i] for i in s]
         ok = (toks.count("<COMP>") == 1 and toks.count("<END_COMP>") == 1
@@ -419,6 +445,14 @@ def structural_metrics(seqs, V, gm, cfg) -> dict:
               == sum(t.startswith("cnt:") for t in toks)
               and sum(t.startswith("el:") for t in toks) >= 1)
         valid += ok
+        if ok:
+            f = {}
+            els = [t[3:] for t in toks if t.startswith("el:")]
+            cnts = [int(t[4:]) for t in toks if t.startswith("cnt:")]
+            for e, k in zip(els, cnts):
+                f[e] = f.get(e, 0) + k
+                el_counter[e] += k
+            formulas.append(tuple(sorted(f.items())))
         d = V.decode_density(s) if ok else None
         if d is not None and np.isfinite(d) and 0 < d < 100:
             complete += 1
@@ -433,6 +467,33 @@ def structural_metrics(seqs, V, gm, cfg) -> dict:
         "density_sd": float(d.std()) if len(d) else None,
         "density_error_vs_target": (float(d.mean() - cfg.density_target)
                                     if len(d) else None),
+        **_coverage(el_counter, formulas, train_formulas, full_element_freq),
+    }
+
+
+def _coverage(el_counter, formulas, train_formulas, full_element_freq) -> dict:
+    """Chemical breadth of a sample, and its departure from the reference chemistry."""
+    tot = sum(el_counter.values())
+    if not tot:
+        return {"distinct_elements": 0, "element_entropy_nats": None,
+                "element_tv_vs_full_data": None, "unique_formula_fraction": None,
+                "novel_formula_fraction": None}
+    freq = {e: k / tot for e, k in el_counter.items()}
+    ent = -sum(p * np.log(p) for p in freq.values() if p > 0)
+    tv = None
+    if full_element_freq:
+        keys = set(freq) | set(full_element_freq)
+        tv = 0.5 * sum(abs(freq.get(k, 0.0) - full_element_freq.get(k, 0.0)) for k in keys)
+    uniq = len(set(formulas)) / len(formulas) if formulas else None
+    novel = None
+    if train_formulas is not None and formulas:
+        novel = sum(f not in train_formulas for f in formulas) / len(formulas)
+    return {
+        "distinct_elements": len(freq),
+        "element_entropy_nats": float(ent),
+        "element_tv_vs_full_data": (float(tv) if tv is not None else None),
+        "unique_formula_fraction": (float(uniq) if uniq is not None else None),
+        "novel_formula_fraction": (float(novel) if novel is not None else None),
     }
 
 
@@ -443,12 +504,41 @@ def main(smoke: bool = False, arm: str = "A2", steps: int | None = None) -> Path
         cfg.eval_every, cfg.n_eval_samples, cfg.train_limit = 150, 512, 2000
 
     train = load_split("train", limit=cfg.train_limit)
+    # A4 conditional training: restrict the TRAINING SET to structures near the target
+    # and apply no decode-time constraint. The full-data density statistics are kept
+    # separately, because every arm must be scored against the same reference — scoring
+    # A4 against its own filtered mean would flatter it by construction.
+    full_train = list(train)
+    full_density = np.array([c.density for c in train])
+    n_full = len(train)
+    if cfg.arm == "A4":
+        train = [c for c in train
+                 if abs(c.density - cfg.density_target) <= cfg.filter_tol]
+        if len(train) < 100:
+            raise ValueError(
+                f"A4 filter at target {cfg.density_target} +/- {cfg.filter_tol} left "
+                f"{len(train)} structures of {n_full}; too few to train on"
+            )
     V = CrystalVocab(ELEMENTS, order=cfg.order)
     gm = GrammarMask(V, order=cfg.order)
     enc = [V.encode(c) for c in train]
     max_len = max(len(e) for e in enc)
     data = pad_batch(enc, V.index["<EOS>"])
-    data_density = np.array([c.density for c in train])
+    # Scoring reference is ALWAYS the full data, never the arm's own training subset:
+    # A4 trains on a filtered slice, and scoring it against that slice's mean would
+    # flatter it by construction. For A1/A2/A3 the two are identical.
+    data_density = full_density
+    # Reference chemistry for coverage metrics: element frequencies over the FULL split
+    # so every arm is compared against the same distribution, and the formula set of
+    # THIS arm's training data so novelty means "not in what this model saw".
+    _full_el: Counter = Counter()
+    for c in full_train:
+        for e, k in c.formula.items():
+            _full_el[e] += k
+    _tot_el = sum(_full_el.values())
+    full_element_freq = {e: k / _tot_el for e, k in _full_el.items()}
+    train_formulas = {tuple(sorted(c.formula.items())) for c in train}
+    COV = dict(train_formulas=train_formulas, full_element_freq=full_element_freq)
 
     torch.manual_seed(cfg.seed)
     rng = np.random.default_rng(cfg.seed)
@@ -466,7 +556,7 @@ def main(smoke: bool = False, arm: str = "A2", steps: int | None = None) -> Path
     if cfg.arm == "A3":
         s0, d0 = sample(model, V, gm, cfg, dev, cfg.n_eval_samples, use_mask=True,
                         project_at_inference=True, max_len=max_len + 2, rng=rng)
-        init_ref = structural_metrics(s0, V, gm, cfg) | d0 | {"step": 0}
+        init_ref = structural_metrics(s0, V, gm, cfg, **COV) | d0 | {"step": 0}
         print(f"  step     0 (init) infeasible {d0['per_step_infeasible_fraction']:.4f} "
               f"density {init_ref['mean_density'] if init_ref['mean_density'] else float('nan'):.3f}",
               flush=True)
@@ -529,14 +619,14 @@ def main(smoke: bool = False, arm: str = "A2", steps: int | None = None) -> Path
             seqs, diag = sample(model, V, gm, cfg, dev, cfg.n_eval_samples,
                                 use_mask=(cfg.arm != "A1"), project_at_inference=False,
                                 max_len=max_len + 2, rng=rng)
-            m = structural_metrics(seqs, V, gm, cfg)
+            m = structural_metrics(seqs, V, gm, cfg, **COV)
             m |= {"step": step, "loss": float(loss.item()),
                   "elapsed_s": round(time.time() - t0, 1)} | diag
             if cfg.arm == "A3":
                 sd, dg = sample(model, V, gm, cfg, dev, cfg.n_eval_samples,
                                 use_mask=True, project_at_inference=True,
                                 max_len=max_len + 2, rng=rng)
-                m["deployed"] = structural_metrics(sd, V, gm, cfg) | dg
+                m["deployed"] = structural_metrics(sd, V, gm, cfg, **COV) | dg
                 # COMPENSATION TEST. If the backbone biases its unaided predictions
                 # to offset a projection that reliably pulls one way, the offset
                 # should scale with the pull. Both are recorded per target so the
@@ -558,6 +648,13 @@ def main(smoke: bool = False, arm: str = "A2", steps: int | None = None) -> Path
         "vocab_size": len(V),
         "n_train_structures": len(train),
         "max_len": max_len,
+        "training_set": {
+            "n_structures": len(train), "n_full_split": n_full,
+            "fraction_of_split": len(train) / n_full,
+            "filtered": cfg.arm == "A4",
+            "filter_tol": (cfg.filter_tol if cfg.arm == "A4" else None),
+            "train_density_mean": float(np.mean([c.density for c in train])),
+        },
         "data_density": {
             "mean": float(data_density.mean()), "median": float(np.median(data_density)),
             "sd": float(data_density.std()),
@@ -578,7 +675,7 @@ def main(smoke: bool = False, arm: str = "A2", steps: int | None = None) -> Path
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--smoke", action="store_true")
-    ap.add_argument("--arm", default="A2", choices=["A1", "A2", "A3"])
+    ap.add_argument("--arm", default="A2", choices=["A1", "A2", "A3", "A4"])
     ap.add_argument("--steps", type=int, default=None)
     a = ap.parse_args()
     print(main(smoke=a.smoke, arm=a.arm, steps=a.steps))
