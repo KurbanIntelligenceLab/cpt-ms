@@ -131,4 +131,4 @@ re-running each truncated prefix from scratch and comparing states; each determi
 position against a brute-force scan confirming no earlier prefix suffices; and the
 Regime-S mask against monotone shrinkage. A closing marker on an incomplete lattice block
 is asserted not to determine a volume, so a truncated stream cannot report a cell it never
-emitted. All pass, within a suite of 180.
+emitted. All pass, within a suite of 181.

@@ -122,12 +122,14 @@ not assessed.
 
 ## Verification
 
-Fourteen tests across `tests/test_energy_screen.py` and
-`tests/test_plausibility_screen.py`. The energy tests assert the artifact declares itself
-not-DFT, that agreement is reported on a held-out split, that the reference fit is not
-rank-deficient, that MAE is small relative to the label spread rather than in absolute
+Sixteen tests across `tests/test_energy_screen.py` (9) and
+`tests/test_plausibility_screen.py` (7). The energy tests assert the artifact declares
+itself not-DFT, that agreement is reported on a held-out split, that the reference fit is
+not rank-deficient, that MAE is small relative to the label spread rather than in absolute
 terms alone, and that a missing element reference returns nothing rather than silently
-scoring as zero. The plausibility tests assert the data reference is measured and strictly
+scoring as zero. Two were added with the GPAW correction above: the disclaimer must not
+claim DFT is unavailable and must name GPAW, and it must name the real blocker for
+generated samples. The plausibility tests assert the data reference is measured and strictly
 below 1.0, that the energy limitation is recorded in the artifact itself, that a known
 balanced composition passes and an all-cation composition fails, and that an impossibly
 dense cell fails regardless of its chemistry.

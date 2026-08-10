@@ -77,6 +77,42 @@ def test_per_file_counts_in_reports_are_current(counts):
     assert not problems, "; ".join(problems)
 
 
+def test_multi_file_count_claims_are_current(counts):
+    """'<N> tests across `a.py` and `b.py`' must equal the sum of those files.
+
+    Regression for a real miss: a report claimed "Fourteen tests across
+    tests/test_energy_screen.py and tests/test_plausibility_screen.py" after two
+    tests had been added to the first file, making the true total sixteen. The
+    per-file check above did not catch it because it matches the phrasing
+    "N tests in `file`" and this sentence says "across X and Y" — so a stale
+    total sat in a shipped report through a green suite. Any aggregate over named
+    files is now checked against the sum of its own operands.
+    """
+    pattern = re.compile(
+        r"([A-Za-z]+|\d+)\s+tests?\s+across\s+((?:`tests/[A-Za-z0-9_]+\.py`"
+        r"(?:\s*\(\d+\))?[\s,]*(?:and\s*)?)+)",
+        re.I,
+    )
+    fname_re = re.compile(r"`tests/([A-Za-z0-9_]+\.py)`")
+    problems, checked = [], 0
+    for md in sorted(REPORTS.glob("*.md")):
+        for m in pattern.finditer(md.read_text()):
+            claimed = _as_int(m.group(1))
+            files = fname_re.findall(m.group(2))
+            if claimed is None or len(files) < 2:
+                continue
+            if any(f not in counts for f in files):
+                continue
+            total = sum(counts[f] for f in files)
+            checked += 1
+            if claimed != total:
+                problems.append(
+                    f"{md.name}: claims {claimed} across {files}, actual {total}"
+                )
+    assert not problems, "; ".join(problems)
+    assert checked >= 1, "no multi-file count claim parsed; the check is not binding"
+
+
 def test_token_position_claims_match_the_artifact():
     """Reports must not carry token ranges that contradict their own source.
 
