@@ -82,26 +82,83 @@ averaging +3.393 where the pull is positive and +1.451 where it is negative.
 
 **The valid test regresses the offset on the TARGET**, which shares no term with it.
 Compensation predicts a negative slope: a lower target demands a stronger downward pull
-and should push the backbone further up.
+and should push the backbone further up. Two aggregations are reported because they give
+different numbers and a reader recomputing from the table above will get the first:
 
-| Regression | Slope | Std err | t | R^2 |
+| Regression of backbone offset on target | Slope | Std err | t | R^2 |
 |---|---|---|---|---|
-| backbone offset on target | +0.0245 | 0.1422 | +0.17 | 0.0019 |
+| seed-averaged, 10 target rows (matches the table) | +0.0080 | 0.1286 | +0.06 | 0.0005 |
+| per-run, 18 runs | +0.0245 | 0.1422 | +0.17 | 0.0019 |
 
-The slope is indistinguishable from zero and has the wrong sign for compensation. The
-backbone sits at 9.75 on average, +3.07 above the data mean, with no dependence on the
-target at all (R^2 0.002), while the deployed distribution does track the target.
+Both are indistinguishable from zero and both have the wrong sign for compensation.
+**Compensation is rejected**, and the pull-sign-reversal argument above is decisive on its
+own without either regression.
 
-**So the backbone inversion is real but it is not compensation.** It is a fixed upward
-bias, present at every target, not an adaptive offset tuned to the projection's pull.
-What causes it remains open; what is now closed is that it does not scale with the
-quantity it would need to scale with.
+### The offset is not constant, and a linear test was the wrong instrument
 
-**This retires the replacement risk from the risk register.** That risk was that the
-combined system might be correct only at the target it trained for, on the reasoning that
-a learned compensation would be target-specific. A target-independent bias does not carry
-that failure mode. The risk register entry should be replaced with the narrower and now
-measured statement that steering has an upward ceiling near 10.4 g/cm^3.
+An earlier version of this note reported the offset as "+3.07 at every target". That was
+the mean presented as though it were a constant, and it was wrong: **the offset ranges
++1.12 to +8.91** across targets. Concluding "no relationship" from a linear fit to a
+non-monotone relationship is the same class of error as the invalid regression above, and
+it is recorded here as such.
+
+The structure, with the outlier run discussed below excluded:
+
+| Model | Parameters | R^2 | Adjusted R^2 |
+|---|---|---|---|
+| linear in target | 2 | 0.020 | — |
+| quadratic in target | 3 | 0.828 | 0.770 |
+| linear in \|target - ceiling\| | 2 | 0.810 | 0.783 |
+
+The linear-in-target fit gives slope -0.021, t = -0.37: no linear trend, as reported. The
+quadratic fit is strong and robust — leave-one-out over the nine rows holds R^2 between
+0.789 and 0.926.
+
+**But the vertex is not at the data median.** The fitted vertex sits at target 9.93, and
+every leave-one-out refit places it between 9.15 and 10.33 — never near the data median of
+6.317. The highest observed offset does occur at target 6.317, which is the peak *value*
+rather than the vertex *location*; those are different quantities and conflating them
+would put the mechanism in the wrong place.
+
+**The mechanism is the steering ceiling, not the data centre.** Regressing the offset on
+the distance from the target to the achievable ceiling of 10.405 gives R^2 = 0.810 with
+one parameter fewer than the quadratic, and a better adjusted R^2. Among the candidate
+regressors — target (0.020), absolute steering error (0.144), infeasible fraction (0.086),
+deployed density (0.005) — ceiling distance at 0.810 is the only one that explains the
+shape.
+
+Read mechanistically: the backbone drifts furthest above the data mean when the requested
+target is closest to the density the model can actually reach. Far below the ceiling the
+projection has ample room and pulls the backbone back toward feasibility; far above it the
+budget is infeasible so often that the constraint stops binding and the backbone reverts
+toward the data. Neither extreme leaves the backbone free to drift.
+
+So the inversion is **real, not compensation, and not constant** — it varies
+non-monotonically with steering difficulty, and specifically with proximity to the
+reachable ceiling.
+
+### The target-10.0 excursion is single-seed
+
+The seed-averaged backbone at target 10.0 is 15.591, which is 5.6 above its neighbours'
+mean of 10.030. It is one run, not a target property:
+
+| Target 10.0 | Backbone | Deployed | Infeasible | Validity |
+|---|---|---|---|---|
+| seed 0 | 22.894 | 8.888 | 0.1149 | 1.0000 |
+| seed 1 | 8.288 | 7.772 | 0.1300 | 1.0000 |
+
+Seed 1 sits squarely with its neighbours; seed 0 is 4.2 standard deviations above the
+median of all eighteen backbone values, with the next highest at 10.566. It also exceeds
+the maximum density in MP-20 itself (21.976) — possible only because the unprojected
+backbone is unconstrained, and a reminder that the backbone reading is not a distribution
+anyone would deploy.
+
+Both fits are therefore reported with and without it. Dropping the whole target gives
+quadratic R^2 0.828; dropping only the outlier run and retaining target 10.0 through
+seed 1 gives 0.517. The curvature survives either way, but its strength depends on the
+treatment, which is why both are stated. **Note also that the deployed density at target
+10.0 is unaffected by the excursion** — 8.888 against 7.772, both far below the request —
+so the frontier's headline asymmetry does not rest on this run.
 
 ## Two runs failed, and the cause is fixed
 
@@ -122,7 +179,7 @@ it, so a run that produced an artifact never took the degenerate path.
 
 ## Verification
 
-10 tests in `tests/test_sweep_analysis.py` validated the regression estimator against
+12 tests in `tests/test_sweep_analysis.py` validated the regression estimator against
 constructed data with known slopes before it read these numbers, including one asserting
 that a statistically significant but negligible slope must not be reported as
 compensation. Those tests confirmed the estimator; they could not have caught the

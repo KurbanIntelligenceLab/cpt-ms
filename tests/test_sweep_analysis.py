@@ -124,3 +124,48 @@ def test_offset_and_pull_share_a_term_so_their_regression_is_invalid():
         "purely random inputs must still produce a 'supported' verdict, which is the "
         "proof that this regression cannot test compensation"
     )
+
+
+def _quad(x, y):
+    X = np.column_stack([np.ones(len(x)), x, x ** 2])
+    b = np.linalg.lstsq(X, y, rcond=None)[0]
+    e = y - X @ b
+    r2 = 1 - float(e @ e) / float(((y - y.mean()) ** 2).sum())
+    return b, r2, (-b[1] / (2 * b[2]) if b[2] else float("nan"))
+
+
+def test_a_linear_fit_cannot_rule_out_a_non_monotone_relationship():
+    """A near-zero linear slope is not evidence of no relationship.
+
+    The backbone offset varies as an inverted U in the target: the linear fit gives
+    R^2 = 0.02 while the quadratic gives 0.83 on the same rows. Reporting "no
+    relationship" from the linear test alone is the same class of error as
+    regressing a quantity on itself, and this test makes the shape check mandatory
+    by showing a synthetic inverted U that the linear test declares flat.
+    """
+    x = np.linspace(1.0, 20.0, 12)
+    y = 4.0 - 0.04 * (x - 10.0) ** 2          # symmetric about 10, so no linear trend
+    lin = _ols(x, y)
+    _, r2q, vertex = _quad(x, y)
+    assert abs(lin["slope"]) < 0.05 and lin["r_squared"] < 0.05, (
+        "fixture must look flat to a linear fit"
+    )
+    assert r2q > 0.99, "the quadratic must recover the curvature the linear fit missed"
+    assert abs(vertex - 10.0) < 0.2, f"vertex {vertex:.2f} should recover the true 10.0"
+
+
+def test_quadratic_vertex_is_not_the_argmax_of_the_observations():
+    """Peak VALUE and vertex LOCATION are different quantities.
+
+    Conflating them puts the mechanism at the wrong place on the axis: the largest
+    observed offset sits at one target while the fitted vertex sits elsewhere.
+    """
+    x = np.array([1.5, 2.0, 3.0, 5.0, 6.317, 8.0, 13.0, 16.0, 20.0])
+    y = np.array([1.408, 1.512, 2.355, 2.517, 3.743, 3.582, 3.119, 1.779, 1.124])
+    _, r2q, vertex = _quad(x, y)
+    assert r2q > 0.8, "these are the measured offsets; curvature should be strong"
+    argmax_x = float(x[np.argmax(y)])
+    assert abs(vertex - argmax_x) > 1.0, (
+        f"vertex {vertex:.2f} and argmax {argmax_x:.2f} must not be reported as the "
+        "same quantity"
+    )
