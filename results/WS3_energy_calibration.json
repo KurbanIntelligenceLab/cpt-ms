@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "artifact_name": "WS3_energy_calibration",
   "script": "scripts/crystal/energy_screen.py",
-  "git_commit": "782dcf1e203433688355f27f81f6a051574f7714-dirty",
+  "git_commit": "53d9c98e75c822d0320f6956c741cd8dba9afd3f-dirty",
   "config": {
     "n_calib": 3000,
     "seed": 0,
@@ -13,14 +13,14 @@
   "seeds": [
     0
   ],
-  "created_utc": "2026-08-10T19:53:41.293351+00:00",
+  "created_utc": "2026-08-10T20:11:33.581957+00:00",
   "python": "3.11.15",
   "platform": "macOS-26.5.2-arm64-arm-64bit",
-  "payload_sha256": "5e5ece3b197e0a855b237ad04b44613388ccf481523aca38d0c817498e430356",
+  "payload_sha256": "5f822d11e68ac401c67a2a7d04cc14946426e8ac1d57abf693ef56fd359f6bc9",
   "payload": {
     "surrogate": "CHGNet v0.3.0",
     "is_dft": false,
-    "disclaimer": "ML-potential screen, not DFT. No DFT engine is available in this environment. Every downstream stability number derived from this calibration must be labelled an ML-potential screen.",
+    "disclaimer": "ML-potential screen, not DFT. Every downstream stability number derived from this calibration must be labelled an ML-potential screen. A working DFT engine (GPAW 25.7.0, verified running on the compute box) IS available; the surrogate is used because MP-20 already carries DFT labels for these reference structures, not because DFT is unavailable. Neither DFT nor this surrogate applies to GENERATED samples, whose serialization carries no atomic positions.",
     "calibration": {
       "n_scored": 3000,
       "n_fit_split": 1500,

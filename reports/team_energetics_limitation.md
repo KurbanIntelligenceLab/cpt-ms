@@ -6,13 +6,30 @@ reason is structural rather than a tooling gap that more compute would close.
 ## Summary
 
 The ML-potential energy screen is built and calibrated well — held-out agreement of 21
-meV/atom against MP-20's own DFT labels. It cannot be applied to our generated samples.
-The serialization the model produces is composition plus cell with no atomic positions,
-and an energy model requires positions. Obtaining them is crystal structure prediction, a
-separate problem the model does not attempt. Three position-free screens are built
-instead, and the measured data reference turns out to matter more than the screens: real
-MP-20 structures score 0.715 on charge neutrality, so any generated arm must be reported
-against that ceiling rather than against 1.0.
+meV/atom against MP-20's own DFT labels. Neither it nor DFT can be applied to our
+generated samples. The serialization the model produces is composition plus cell with no
+atomic positions, and both an ML potential and a DFT calculation require positions.
+Obtaining them is crystal structure prediction, a separate problem the model does not
+attempt. Three position-free screens are built instead, and the measured data reference
+turns out to matter more than the screens: real MP-20 structures score 0.715 on charge
+neutrality, so any generated arm must be reported against that ceiling rather than against
+1.0.
+
+**Correction to an earlier version of this note.** It stated that no DFT engine was
+available in this environment. That was asserted without testing the plan's own designated
+engine: I had probed for `vasp_std`, `pw.x` and `castep.serial` and for ML-potential
+packages, but never for GPAW. GPAW **is** available. It installs from conda-forge on the
+compute box and runs: version 25.7.0 with libxc 7.1.2, PAW datasets, MPI and OpenMP
+enabled, and a PBE calculation on Si diamond (2 atoms, 300 eV cutoff, 3x3x3 k-points)
+completes in 3.2 s. A local source build does fail on macOS/arm64 with a compiler-flag
+error, but the box is where DFT would run and there it works.
+
+The substitution of an ML potential for DFT is therefore **not** justified by engine
+unavailability. It is justified only for reference structures, where DFT labels already
+exist in MP-20 and recomputing them buys nothing. For generated samples the blocker is
+the absence of atomic positions, which blocks DFT and the ML potential identically. The
+availability of a working DFT engine does not change that, and no claim below depended on
+the incorrect statement.
 
 ## What was built and what it is good for
 
@@ -34,9 +51,10 @@ other.
 
 MAE is 2.0% of the label spread and below the 30 meV/atom window conventionally used for
 near-hull stability. The artifact carries `is_dft: false` and a test asserts it, so no
-downstream claim can drift into calling this DFT. No DFT engine is available in this
-environment and one consumer GPU is the wrong hardware for plane-wave DFT at these sample
-sizes; this substitution was made on instruction and is labelled everywhere.
+downstream claim can drift into calling this DFT. The surrogate is used for these
+reference structures because MP-20 already carries DFT labels for them and recomputing
+them buys nothing — not because DFT is unavailable, which is what an earlier version of
+this note wrongly claimed.
 
 This screen is sound for reference structures. It is not applicable to our generated
 samples.

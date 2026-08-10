@@ -1,10 +1,18 @@
 """Energy screening of generated structures with an ML potential (WS-3 / CP5).
 
-NOT DFT. No DFT engine is available in this environment, and one consumer GPU is the
-wrong hardware for plane-wave DFT at the sample sizes here. This module screens with
-CHGNet and every number it produces is labelled an ML-potential screen. That is the
-standard practice the crystal-generation benchmarks use for screening at scale, but it
-is a surrogate and the paper says so.
+NOT DFT. This module screens with CHGNet and every number it produces is labelled an
+ML-potential screen. That is the standard practice the crystal-generation benchmarks use
+for screening at scale, but it is a surrogate and the paper says so.
+
+A working DFT engine IS available: GPAW 25.7.0 installs from conda-forge on the compute
+box, with libxc, PAW datasets and MPI, and runs a PBE calculation on Si diamond in 3.2 s.
+An earlier version of this docstring claimed no DFT engine was available; that was
+asserted without ever testing GPAW, the research plan's own designated engine, and it was
+wrong. The surrogate is used here because MP-20 already carries DFT labels for reference
+structures, so recomputing them buys nothing -- not because DFT is unavailable.
+
+The reason neither DFT nor an ML potential reaches our GENERATED samples is that the
+serialization has no atomic positions; see plausibility_screen.py.
 
 The surrogate is calibrated against MP-20's own DFT labels before it is used to judge
 anything, because a screen whose agreement with DFT is unmeasured is not a screen.
@@ -133,9 +141,13 @@ def main(n_calib: int = 3000, seed: int = 0, smoke: bool = False) -> Path:
         "surrogate": "CHGNet v0.3.0",
         "is_dft": False,
         "disclaimer": (
-            "ML-potential screen, not DFT. No DFT engine is available in this "
-            "environment. Every downstream stability number derived from this "
-            "calibration must be labelled an ML-potential screen."
+            "ML-potential screen, not DFT. Every downstream stability number derived "
+            "from this calibration must be labelled an ML-potential screen. A working "
+            "DFT engine (GPAW 25.7.0, verified running on the compute box) IS "
+            "available; the surrogate is used because MP-20 already carries DFT labels "
+            "for these reference structures, not because DFT is unavailable. Neither "
+            "DFT nor this surrogate applies to GENERATED samples, whose serialization "
+            "carries no atomic positions."
         ),
         "calibration": {
             "n_scored": len(recs), "n_fit_split": len(fit_recs),

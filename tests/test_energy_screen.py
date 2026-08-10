@@ -79,3 +79,25 @@ def test_reference_fit_refuses_an_empty_split():
     with pytest.raises(ValueError):
         fit_references([{"comp": {"Fe": 1.0}, "n_atoms": 1, "e_total": -8.0,
                          "label_ef": 0.0}], min_occ=99)
+
+
+def test_disclaimer_does_not_claim_dft_is_unavailable(cal):
+    """The surrogate must be justified by what it is for, not by a false scarcity.
+
+    An earlier version of this disclaimer asserted no DFT engine was available. That was
+    never tested against GPAW, the research plan's designated engine, and it is false:
+    GPAW 25.7.0 installs and runs on the compute host. The surrogate's justification is
+    that MP-20 already carries DFT labels for these reference structures. Stating a
+    capability gap that does not exist would misrepresent the work's constraints.
+    """
+    d = cal["disclaimer"]
+    assert "No DFT engine is available" not in d
+    assert "GPAW" in d, "the disclaimer must record that a DFT engine IS available"
+    assert "not because DFT is unavailable" in d
+
+
+def test_disclaimer_names_the_real_blocker_for_generated_samples(cal):
+    """The blocker is missing atomic positions, which stops DFT and the surrogate alike."""
+    d = cal["disclaimer"]
+    assert "atomic positions" in d
+    assert "GENERATED" in d

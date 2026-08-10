@@ -96,7 +96,10 @@ be penalized for a property of the screen rather than of the model.
 An ML-potential energy screen (CHGNet) was calibrated against MP-20's DFT labels and agrees
 to 21 meV/atom on held-out structures, which is below the 30 meV/atom near-hull window. It
 is used for reference structures only, is labelled an ML-potential screen rather than DFT
-throughout, and no DFT calculation is reported in this work.
+throughout, and no DFT calculation is reported in this work. A working DFT engine is
+available (GPAW 25.7.0, verified on the compute host); it is not used because the
+reference structures already carry DFT labels and the generated samples lack the atomic
+positions any energy method requires.
 
 ## What is not claimed
 
