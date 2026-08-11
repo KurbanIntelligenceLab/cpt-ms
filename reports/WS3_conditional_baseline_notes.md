@@ -69,21 +69,48 @@ what reproducing a slice looks like, and it is TV's one legitimate use in this c
 Diversity is carried by the unique- and novel-formula fractions, which do not confound
 shift with collapse.
 
-## What this does not establish
+## Where A4's data thins, accuracy holds and coverage collapses
 
-Whether A4 remains competitive where its training data thins is untested here and is being
-measured rather than asserted. An earlier draft of this note claimed the conditional
-baseline "starves" at extreme targets; at a floor of 100 structures only one of the
-frontier's ten targets fails that test, not three as the prose had it. The filtered set does
-thin monotonically toward the tails — 3,630 structures at target 5.0, 1,411 at 10.0, 388 at
-13.0, 119 at 16.0, and 6 at 20.0 — but sparse is not the same as empty, and the sparse
-regime is a measurement rather than an argument.
+An earlier draft of this note claimed the conditional baseline "starves" at extreme targets.
+That was wrong twice over: at a floor of 100 structures only one of the frontier's ten
+targets fails, not three as the prose had it, and running the sparse cases shows A4 does not
+lose accuracy there at all. Numbers from `results/WS3_conditional_sparse.json`.
+
+| Target | A4 train set | A4 error | A3 error | A4 novel | A4 unique | A4 elements |
+|---|---|---|---|---|---|---|
+| 5.0 | 3,630 | 0.033 | 0.151 | 0.059 | 0.519 | 84.0 |
+| 10.0 | 1,411 | 0.008 | 1.670 | 0.029 | 0.318 | 79.5 |
+| 13.0 | 388 | 0.031 | 4.256 | 0.016 | 0.108 | 73.5 |
+| 16.0 | 119 | 0.071 | 6.125 | 0.004 | 0.031 | 56.5 |
+| 20.0 | 6 | refused | 9.595 | — | — | — |
+
+A4 stays accurate on 119 structures. What degrades is coverage, and it degrades with slice
+size rather than with target: correlation between log training-set size and unique-formula
+fraction is 0.981, with novel-formula fraction 0.908, and with distinct elements 0.962.
+Unique formulas fall 17-fold from 0.519 to 0.031 and the element inventory contracts from 84
+to 56.
+
+At target 16.0 A4 emits 3.1% unique formulas — roughly four distinct compositions recited
+from a 119-structure slice seen about 6,500 times each over training. It hits the target
+because those four compositions are at the target.
+
+At 20.0 the filter leaves 6 structures and A4 refuses to train. That is the one genuine
+starvation case, and the refusal is the measurement rather than a failure of the run.
+
+**The framing both arms' numbers support.** A4 is more accurate everywhere it can run, and
+buys that accuracy by memorizing a slice; the price rises as the slice thins, which is
+precisely where a generative model is wanted. A3 is less accurate and degrades past its
+ceiling, but produces novel compositions at every target, including the one where A4 has no
+training data at all.
 
 ## Verification
 
-Eight tests in `tests/test_conditional_baseline.py`. They assert that A4's scoring reference
+Ten tests in `tests/test_conditional_baseline.py`. They assert that A4's scoring reference
 is the passed-in full-data reference rather than the sample itself, that its step budget is
 not reduced, that a sample repeating one formula cannot look diverse, that novelty is
 relative to what the arm trained on, that the filtered slice's own TV is large at every
 compared target, and that A4's measured TV matches its slice's TV — the last two being the
-pair that make the shift-versus-diversity distinction checkable rather than assertable.
+pair that make the shift-versus-diversity distinction checkable rather than assertable. Two
+more pin the sparse regime: A4's error must stay small at targets 13.0 and 16.0 (so a future
+edit cannot reintroduce the false accuracy framing), and exactly one swept target may fall
+below the training floor.

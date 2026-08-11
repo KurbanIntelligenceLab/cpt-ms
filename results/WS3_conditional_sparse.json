@@ -1,0 +1,94 @@
+{
+  "schema_version": "1.0",
+  "artifact_name": "WS3_conditional_sparse",
+  "script": "scripts/train/train_crystal.py",
+  "git_commit": "be47243ef1b72035f858f85c16b5087aa02b218a",
+  "config": {
+    "targets": [
+      13.0,
+      16.0,
+      20.0
+    ],
+    "seeds": [
+      0,
+      1
+    ],
+    "filter_tol": 0.5,
+    "floor": 20
+  },
+  "config_hash": "9339242531f42665",
+  "seeds": [
+    0,
+    1
+  ],
+  "created_utc": "2026-08-11T19:27:40.528309+00:00",
+  "python": "3.11.15",
+  "platform": "macOS-26.5.2-arm64-arm-64bit",
+  "payload_sha256": "c82a608392912a4ea9c6d7e301b9a523aae852a7292336d78b5f54a725668d51",
+  "payload": {
+    "question": "Does the conditional baseline degrade or refuse where its training slice thins? Measured rather than asserted: an earlier draft claimed it starves at extreme targets without running it.",
+    "rows": {
+      "13.0": [
+        {
+          "seed": 0,
+          "n_train": 388,
+          "density": 13.042260321606054,
+          "valid": 1.0,
+          "novel": 0.01416015625,
+          "unique": 0.107177734375,
+          "distinct_elements": 74,
+          "entropy": 3.7545209550827248
+        },
+        {
+          "seed": 1,
+          "n_train": 388,
+          "density": 13.019648028972853,
+          "valid": 1.0,
+          "novel": 0.01708984375,
+          "unique": 0.109130859375,
+          "distinct_elements": 73,
+          "entropy": 3.7152178515398964
+        }
+      ],
+      "16.0": [
+        {
+          "seed": 0,
+          "n_train": 119,
+          "density": 16.099372250304185,
+          "valid": 1.0,
+          "novel": 0.00439453125,
+          "unique": 0.0322265625,
+          "distinct_elements": 58,
+          "entropy": 3.019044506328576
+        },
+        {
+          "seed": 1,
+          "n_train": 119,
+          "density": 16.04336430892604,
+          "valid": 1.0,
+          "novel": 0.002685546875,
+          "unique": 0.03076171875,
+          "distinct_elements": 55,
+          "entropy": 3.035419359765709
+        }
+      ]
+    },
+    "refusal": {
+      "target": 20.0,
+      "n_structures": 6,
+      "floor": 20,
+      "message": "A4 filter at target 20.0 +/- 0.5 left 6 structures of 26910; too few to train on",
+      "note": "The only genuine starvation among the frontier's ten targets."
+    },
+    "finding": "A4 does NOT lose accuracy as its slice thins -- error is 0.031 at target 13.0 (388 structures) and 0.071 at 16.0 (119). What collapses is coverage.",
+    "coverage_vs_slice_size": {
+      "corr_log_n_novel": 0.9077711529061349,
+      "corr_log_n_unique": 0.9809421111904038,
+      "corr_log_n_distinct_elements": 0.9622184566880739,
+      "unique_max": 0.519,
+      "unique_min": 0.031,
+      "distinct_elements_max": 84.5,
+      "distinct_elements_min": 56.5
+    }
+  }
+}

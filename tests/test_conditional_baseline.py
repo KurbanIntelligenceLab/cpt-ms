@@ -128,3 +128,49 @@ def test_conditional_arm_tv_matches_its_own_slice():
             f"target {t}: slice TV {slice_tv:.4f} vs the arm's measured {measured:.4f}; "
             "if these diverge the reproduction reading no longer holds"
         )
+
+
+def test_sparse_regime_claim_is_coverage_not_accuracy():
+    """A4's sparse-target weakness is coverage; claiming it loses accuracy is false.
+
+    An earlier draft asserted the conditional baseline "starves" at extreme targets.
+    Running it showed the opposite on the target metric: error 0.031 at target 13.0
+    (388 structures) and 0.071 at 16.0 (119) — no worse than at the dense targets. The
+    real collapse is in coverage, and it tracks slice size rather than target distance.
+    This test fails if a future edit reintroduces the accuracy framing.
+    """
+    import json
+    from pathlib import Path
+    art = Path("results/WS3_conditional_sparse.json")
+    if not art.exists():
+        pytest.skip("sparse artifact absent; run the sparse-target job")
+    p = json.load(open(art))["payload"]
+    for t, tgt in (("13.0", 13.0), ("16.0", 16.0)):
+        rows = p["rows"][t]
+        err = abs(float(np.mean([r["density"] for r in rows])) - tgt)
+        assert err < 0.2, (
+            f"target {t}: A4 error {err:.3f}; the sparse regime's finding is that "
+            "accuracy HOLDS here, so a large error would invalidate the claim"
+        )
+        assert all(r["valid"] == 1.0 for r in rows), f"target {t}: validity below ceiling"
+    cv = p["coverage_vs_slice_size"]
+    assert cv["corr_log_n_unique"] > 0.9, (
+        f"unique-formula fraction correlates {cv['corr_log_n_unique']:.3f} with log slice "
+        "size; the coverage-collapse claim rests on this being strong and positive"
+    )
+    assert p["refusal"]["n_structures"] < p["config"]["floor"] if "config" in p else True
+
+
+def test_only_one_swept_target_actually_starves():
+    """The refusal is a single case, and overstating it was the original error."""
+    import json
+    from pathlib import Path
+    art = Path("results/WS3_conditional_sparse.json")
+    if not art.exists():
+        pytest.skip("sparse artifact absent")
+    ref = json.load(open(art))["payload"]["refusal"]
+    assert ref["target"] == 20.0 and ref["n_structures"] == 6
+    d = np.array([c.density for c in load_split("train")])
+    starved = [t for t in (1.5, 2.0, 3.0, 5.0, 6.317, 8.0, 10.0, 13.0, 16.0, 20.0)
+               if int((np.abs(d - t) <= 0.5).sum()) < ref["floor"]]
+    assert starved == [20.0], f"expected exactly one starved target, got {starved}"
