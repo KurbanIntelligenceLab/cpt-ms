@@ -524,7 +524,11 @@ def main(smoke: bool = False, arm: str = "A2", steps: int | None = None) -> Path
     if cfg.arm == "A4":
         train = [c for c in train
                  if abs(c.density - cfg.density_target) <= cfg.filter_tol]
-        if len(train) < 100:
+        # Floor of 20, not 100. An earlier floor of 100 was a guess, and it was about
+        # to carry a claim that A4 "starves" at sparse targets -- asserting a failure
+        # without running it. The sparse regime is now measured; below 20 structures
+        # there is genuinely nothing to train on and the refusal is itself the result.
+        if len(train) < 20:
             raise ValueError(
                 f"A4 filter at target {cfg.density_target} +/- {cfg.filter_tol} left "
                 f"{len(train)} structures of {n_full}; too few to train on"
