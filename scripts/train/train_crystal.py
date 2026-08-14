@@ -507,9 +507,17 @@ def _coverage(el_counter, formulas, train_formulas, full_element_freq) -> dict:
     }
 
 
-def main(smoke: bool = False, arm: str = "A2", steps: int | None = None) -> Path:
+def main(smoke: bool = False, arm: str = "A2", steps: int | None = None,
+         density_target: float | None = None, seed: int | None = None,
+         ckpt: str | Path | None = None) -> Path:
     dev = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     cfg = CrystalTrainConfig(arm=arm, steps=steps or (300 if smoke else 6000))
+    # The target and seed are explicit arguments rather than config-file edits because
+    # the retargeting matrix needs several checkpoints that differ only in those two.
+    if density_target is not None:
+        cfg.density_target = float(density_target)
+    if seed is not None:
+        cfg.seed = int(seed)
     if smoke:
         cfg.eval_every, cfg.n_eval_samples, cfg.train_limit = 150, 512, 2000
 
@@ -678,6 +686,37 @@ def main(smoke: bool = False, arm: str = "A2", steps: int | None = None) -> Path
         "init_reference": init_ref,
         "wall_clock_s": round(time.time() - t0, 1),
     }
+    # WEIGHT PERSISTENCE. Every run before this one trained, evaluated in-process and
+    # discarded its weights, so a checkpoint could not be redeployed at a target other
+    # than the one it trained for. Zero-shot retargeting needs exactly that, so the
+    # weights are saved with everything required to rebuild the model without reloading
+    # the training data: max_len and the vocab order fix the geometry, and the config
+    # records the target this checkpoint was TRAINED at, which is not necessarily the
+    # target it will later be DEPLOYED at.
+    if ckpt is not None:
+        ckpt = Path(ckpt)
+        ckpt.parent.mkdir(parents=True, exist_ok=True)
+        torch.save(
+            {
+                "state_dict": {k: v.cpu() for k, v in model.state_dict().items()},
+                "train_config": asdict(cfg),
+                "trained_density_target": cfg.density_target,
+                "max_len": max_len,
+                "vocab_order": cfg.order,
+                "vocab_size": len(V),
+                "n_parameters": sum(p.numel() for p in model.parameters()),
+                "elements": list(ELEMENTS),
+                "schema_version": 1,
+            },
+            ckpt,
+        )
+        payload["checkpoint"] = {
+            "path": str(ckpt),
+            "trained_density_target": cfg.density_target,
+            "max_len": max_len,
+            "vocab_order": cfg.order,
+            "bytes": ckpt.stat().st_size,
+        }
     return emit(
         f"WS3_crystal_{cfg.arm}" + ("_smoke" if smoke else ""),
         payload,
@@ -691,5 +730,10 @@ if __name__ == "__main__":
     ap.add_argument("--smoke", action="store_true")
     ap.add_argument("--arm", default="A2", choices=["A1", "A2", "A3", "A4"])
     ap.add_argument("--steps", type=int, default=None)
+    ap.add_argument("--density-target", type=float, default=None)
+    ap.add_argument("--seed", type=int, default=None)
+    ap.add_argument("--ckpt", default=None,
+                    help="path to save model weights for later zero-shot retargeting")
     a = ap.parse_args()
-    print(main(smoke=a.smoke, arm=a.arm, steps=a.steps))
+    print(main(smoke=a.smoke, arm=a.arm, steps=a.steps,
+               density_target=a.density_target, seed=a.seed, ckpt=a.ckpt))
