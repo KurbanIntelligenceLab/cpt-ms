@@ -40,8 +40,8 @@ one model per target, mean absolute error over the seven sub-ceiling targets is
 | frontier, train-per-target | 7 | 0.662 | 1.00x |
 
 The checkpoint trained at 10.0 covers the whole sub-ceiling family more accurately than
-seven separately trained models, at one seventh of the training compute. That is not a
-result we should lean on hard from one seed, and Result 3 explains why.
+seven separately trained models, at one seventh of the training compute. That single-seed reading is superseded by the
+three-seed replication below, which reaches the same conclusion on firmer ground.
 
 ## Result 2 — Regime S survives retargeting exactly
 
@@ -73,15 +73,14 @@ So what the frontier measured as a ceiling of the method is the reach of the par
 backbone those runs happened to train. A backbone sitting at 22.8 reaches half again as
 far as one sitting at 8.5.
 
-**This is single-seed and must not be published as it stands.** The 22.8 backbone
+**This was single-seed when first measured; the replication below settles it.** The 22.8 backbone
 reproduces the frontier's own seed-0 excursion at target 10.0 — the frontier's two seeds
 there were 22.894 and 8.288, an eightfold spread already disclosed as single-seed in
 `WS3_steering_frontier_notes.md`. Deploying the same seed-0 weights across ten targets
 confirms the projection is deterministic given the backbone; it does not establish that a
-high backbone is reachable generically. Seeds 1 and 2 at target 10.0 are running to
-settle it. Until they land, the defensible claim is the conditional one: reach scales with
-where the backbone sits, and the published ceiling is not known to be a property of the
-method.
+high backbone is reachable generically. Seeds 1 and 2 have since been run; see the replication section
+below, which finds the excursion does not reproduce and reduces this to a soft-ceiling
+claim.
 
 ## Result 4 — Infeasibility rises with the ask, as it should
 
@@ -126,8 +125,55 @@ task showed by enumeration.
 | 10.0 | 16.0 | 13.222 | 2.778 | 22.713 | 0.2428 | 0.981 | 0.960 |
 | 10.0 | 20.0 | 15.495 | 4.505 | 22.681 | 0.3769 | 0.982 | 0.977 |
 
+## Seed replication — what survives and what does not
+
+`results/WS4_retargeting_seed_replication.json`
+
+The seed-0 result above raised two claims that a single seed cannot settle. Seeds 1 and 2
+of the target-10.0 checkpoint were trained and retargeted identically to test both.
+
+| seed | backbone density (mask only) | max achieved with projection | sub-ceiling MAE |
+|---|---|---|---|
+| 0 | 22.769 ± 0.153 | 15.495 | 0.441 |
+| 1 | 8.381 ± 0.103 | 10.439 | 0.789 |
+| 2 | 8.692 ± 0.116 | 10.596 | 0.720 |
+
+**The ceiling claim is weaker than seed 0 suggested, and it is not gone.** Seed 0's
+backbone at 22.769 reproduces the frontier's own seed-0 excursion and is not generic: seeds 1
+and 2 land at 8.381 and 8.692, close to the data mean. Their reach is correspondingly
+lower, 10.439 and 10.596, against seed 0's 15.495. The published ceiling of 10.405 is
+exceeded at all three seeds, but by 0.03 and 0.19 g/cm^3 at seeds 1 and 2 rather than by
+5.09. So the ceiling is soft rather than absent: it moves with the backbone, and the
+dramatic version of that claim rests on an initialization the other seeds do not
+reproduce. Across the five checkpoints now available the backbone-to-reach correlation is
+0.992, but drop the excursion and the remaining four span a backbone range of only
+8.38 to 8.69, where the correlation is 0.217 — the relationship is established by one
+extreme point, not by a spread.
+
+**The amortization claim survives, and it strengthens.** Averaged over three seeds, one
+checkpoint deployed at seven sub-ceiling targets reaches MAE 0.650 ± 0.151 g/cm^3, against
+0.662 for the frontier's seven separately trained models:
+
+| deploy target | retargeted error (3 seeds) | frontier error (train-per-target) | better |
+|---|---|---|---|
+| 1.5 | 0.292 ± 0.036 | 0.348 | retargeted |
+| 2.0 | 0.329 ± 0.027 | 0.266 | frontier |
+| 3.0 | 0.301 ± 0.080 | 0.240 | frontier |
+| 5.0 | 0.208 ± 0.115 | 0.151 | frontier |
+| 6.317 | 0.574 ± 0.194 | 0.719 | retargeted |
+| 8.0 | 1.080 ± 0.339 | 1.240 | retargeted |
+| 10.0 | 1.764 ± 0.533 | 1.670 | frontier |
+
+The retargeted model is better at 3 of 7 targets, the mean paired difference is
+-0.012 g/cm^3, and a Wilcoxon signed-rank test over the seven paired targets gives
+p = 1.0. One training run is statistically indistinguishable from seven at one seventh
+of the training compute. That is a stronger statement than the seed-0 reading of "0.67x
+the error", which was a favourable draw rather than a result.
+
+Structural validity remains exactly 1.0000 across every cell of all three seeds.
+
 ## What this does not establish
 
-Three checkpoints at one seed each, on one crystal serialization. The ceiling result rests
-on a backbone whose value is a known single-seed excursion. No claim is made about
+Three training targets on one crystal serialization; the target-10.0 checkpoint carries
+three seeds, the 3.0 and 5.0 checkpoints one each. No claim is made about
 retargeting across constraint families — every cell here retargets density to density.
