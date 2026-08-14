@@ -170,6 +170,42 @@ class GrammarMask:
         return out
 
 
+def weight_channel(ids: np.ndarray, V: CrystalVocab,
+                   table: dict[str, float]) -> np.ndarray:
+    """Per-token contribution of ANY additive per-element quantity, given the prefix.
+
+    This is `mass_channel` generalized over the weight table. Charge balance, valence
+    electron count and mass are all sums of a per-element weight times its count, so
+    they share one channel construction; only the table differs. Keeping a single
+    implementation matters because the prefix logic below is the subtle part -- an
+    element token commits nothing until its count arrives -- and two copies of it would
+    drift.
+
+    `mass_channel` is retained as the ATOMIC_MASS specialization so existing callers and
+    every published density artifact keep their exact code path.
+    """
+    n = ids.shape[0]
+    out = np.zeros((n, len(V)), dtype=np.float32)
+    cnt_idx = [(i, int(t[4:])) for i, t in enumerate(V.tokens) if t.startswith("cnt:")]
+    el_w = np.array([table.get(t[3:], 0.0) if t.startswith("el:") else 0.0
+                     for t in V.tokens], dtype=np.float32)
+    for r in range(n):
+        pending = None
+        for t in range(ids.shape[1]):
+            tok = V.tokens[ids[r, t]]
+            if tok.startswith("el:"):
+                pending = tok[3:]
+            elif tok.startswith("cnt:"):
+                pending = None
+        if pending is not None:
+            w = table.get(pending, 0.0)
+            for i, k in cnt_idx:
+                out[r, i] = w * k
+        else:
+            out[r] = el_w
+    return out
+
+
 def mass_channel(ids: np.ndarray, V: CrystalVocab) -> np.ndarray:
     """Per-token mass contribution GIVEN the prefix. Shape (n, vocab).
 

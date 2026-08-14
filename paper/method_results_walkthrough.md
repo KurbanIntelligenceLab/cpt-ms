@@ -455,7 +455,7 @@ on the synthetic task and absent on crystals.
 Nothing quantitative in the reports is typed by hand: every number is read from an artifact in
 `results/`, each artifact carries its script, config hash, seeds, commit, environment and payload
 checksum, and narrative verdict fields inside artifacts are generated from the values they
-describe. The suite is 201 tests: 199 pass and 2 skip pending the retargeting artifact. Several of those tests exist because a claim in a
+describe. The suite is 209 tests, all passing. Several of those tests exist because a claim in a
 report was found to be wrong — a stale test count that survived a green suite through a regex
 gap, a Regime-S exactness figure that verified because the field was absent, a per-file count that
 was corrected in the wrong direction — and each is now pinned by a check that fails against the
