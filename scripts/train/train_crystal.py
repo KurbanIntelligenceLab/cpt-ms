@@ -40,7 +40,8 @@ import torch.nn as nn
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from scripts.common.artifacts import emit
-from scripts.crystal.mp20 import ATOMIC_MASS, ELEMENTS, CrystalVocab, load_split
+from scripts.crystal.mp20 import (ATOMIC_MASS, ELEMENTS, VALENCE, CrystalVocab,
+                                  load_split)
 from scripts.layer.projection import project
 
 SCRIPT = "scripts/train/train_crystal.py"
@@ -71,6 +72,13 @@ class CrystalTrainConfig:
     # its own arm rather than a footnote. Steps are held equal, which is deliberately
     # generous: the filtered set is smaller, so A4 sees each structure more often.
     filter_tol: float = 0.5
+    # A7: TWO simultaneous Regime E constraints, density and valence electron density.
+    # The second target is per cubic angstrom, so its unit factor is 1 while mass needs
+    # the amu/A^3 -> g/cm^3 conversion. CP-7 measured that the two channels are linearly
+    # independent only at ELEMENT positions -- at a count position both are proportional
+    # to the count -- and density steering already restricts actionability to element
+    # positions, so the second constraint costs no actionable positions.
+    valence_target: float = 0.48    # e/A^3; data mean is 0.4839
 
 
 class CrystalDecoder(nn.Module):
@@ -265,6 +273,58 @@ def _element_position(ids: np.ndarray, V: CrystalVocab) -> np.ndarray:
                 state = None
         out[r] = state == "el"
     return out
+
+
+def _additive_budget(ids: np.ndarray, V: CrystalVocab, cfg, table: dict[str, float],
+                     target: float, unit_factor: float) -> tuple[np.ndarray, np.ndarray]:
+    """Remaining amount of an additive per-element quantity, and remaining atom slots.
+
+    `_mass_budget` generalized over the weight table, exactly as `weight_channel`
+    generalizes `mass_channel`. The quantity is sum over the formula of table[element]
+    times its count; the target is a DENSITY, so the total the target implies is
+    `target * volume / unit_factor`. For mass, `unit_factor` converts g/cm^3 to amu/A^3.
+    For a count-valued quantity such as valence electrons the target is already per
+    cubic angstrom, so `unit_factor` is 1.
+
+    Everything else follows `_mass_budget` unchanged: NaN until the cell block closes,
+    because the volume is not determined before then, and the denominator is remaining
+    ATOMS rather than element tokens so the target sits on the same per-atom footing as
+    the channel.
+    """
+    n, L = ids.shape
+    budget = np.full(n, np.nan, dtype=np.float64)
+    slots = np.zeros(n, dtype=np.float64)
+    for r in range(n):
+        lens, angs, amount, n_el, cell_closed = [], [], 0.0, 0, False
+        cur_el = None
+        for t in range(L):
+            tok = V.tokens[ids[r, t]]
+            # len:/ang: payloads are BIN INDICES, not physical values. Reading them as
+            # floats inflates the cell volume by a factor of hundreds and silently
+            # produces a budget that looks plausible; the bin centre is the value the
+            # rest of the code means.
+            if tok.startswith("len:"):
+                j = int(tok[4:])
+                lens.append(V.LEN_LO + (j + 0.5) * (V.LEN_HI - V.LEN_LO) / V.N_LEN)
+            elif tok.startswith("ang:"):
+                j = int(tok[4:])
+                angs.append(V.ANG_LO + (j + 0.5) * (V.ANG_HI - V.ANG_LO) / V.N_ANG)
+            elif tok == "<END_CELL>":
+                cell_closed = len(lens) == 3 and len(angs) == 3
+            elif tok.startswith("el:"):
+                cur_el = tok[3:]
+            elif tok.startswith("cnt:") and cur_el:
+                k = int(tok[4:])
+                amount += table.get(cur_el, 0.0) * k
+                n_el += k
+                cur_el = None
+        if cell_closed:
+            vol = V.cell_volume(lens, angs)
+            if vol:
+                total = target * vol / unit_factor
+                budget[r] = max(total - amount, 0.0)
+                slots[r] = max(cfg.expected_atoms - n_el, 1)
+    return budget, slots
 
 
 def _mass_budget(ids: np.ndarray, V: CrystalVocab, cfg) -> tuple[np.ndarray, np.ndarray]:
@@ -478,7 +538,7 @@ def structural_metrics(seqs, V, gm, cfg, train_formulas=None,
     A high-accuracy, low-coverage arm and a lower-accuracy, high-coverage arm are
     different propositions, and a single error figure cannot distinguish them.
     """
-    dens, valid, complete = [], 0, 0
+    dens, vdens, valid, complete = [], [], 0, 0
     el_counter: Counter = Counter()
     formulas: list[tuple] = []
     for s in seqs:
@@ -503,7 +563,15 @@ def structural_metrics(seqs, V, gm, cfg, train_formulas=None,
         if d is not None and np.isfinite(d) and 0 < d < 100:
             complete += 1
             dens.append(d)
+            # Valence electron density on the SAME acceptance condition as mass density,
+            # so the two are measured over an identical sample and their errors are
+            # directly comparable. Computing it over a different subset would make the
+            # two dials incomparable for no reason.
+            vdv = V.decode_weighted_density(s, VALENCE)
+            if vdv is not None and np.isfinite(vdv):
+                vdens.append(vdv)
     d = np.asarray(dens)
+    vd = np.asarray(vdens)
     return {
         "n_samples": len(seqs),
         "structural_validity_rate": valid / len(seqs),
@@ -513,6 +581,10 @@ def structural_metrics(seqs, V, gm, cfg, train_formulas=None,
         "density_sd": float(d.std()) if len(d) else None,
         "density_error_vs_target": (float(d.mean() - cfg.density_target)
                                     if len(d) else None),
+        "mean_valence_density": float(vd.mean()) if len(vd) else None,
+        "valence_density_sd": float(vd.std()) if len(vd) else None,
+        "valence_error_vs_target": (float(vd.mean() - cfg.valence_target)
+                                    if len(vd) else None),
         **_coverage(el_counter, formulas, train_formulas, full_element_freq),
     }
 
@@ -545,13 +617,15 @@ def _coverage(el_counter, formulas, train_formulas, full_element_freq) -> dict:
 
 def main(smoke: bool = False, arm: str = "A2", steps: int | None = None,
          density_target: float | None = None, seed: int | None = None,
-         ckpt: str | Path | None = None) -> Path:
+         ckpt: str | Path | None = None, valence_target: float | None = None) -> Path:
     dev = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     cfg = CrystalTrainConfig(arm=arm, steps=steps or (300 if smoke else 6000))
     # The target and seed are explicit arguments rather than config-file edits because
     # the retargeting matrix needs several checkpoints that differ only in those two.
     if density_target is not None:
         cfg.density_target = float(density_target)
+    if valence_target is not None:
+        cfg.valence_target = float(valence_target)
     if seed is not None:
         cfg.seed = int(seed)
     if smoke:
@@ -611,7 +685,7 @@ def main(smoke: bool = False, arm: str = "A2", steps: int | None = None,
     # 19.9x on the synthetic task. Measuring it only at convergence cannot answer
     # that, so it is measured at step 0 against the identical untrained weights.
     init_ref = None
-    if cfg.arm == "A3":
+    if cfg.arm in ("A3", "A7"):
         s0, d0 = sample(model, V, gm, cfg, dev, cfg.n_eval_samples, use_mask=True,
                         project_at_inference=True, max_len=max_len + 2, rng=rng)
         init_ref = structural_metrics(s0, V, gm, cfg, **COV) | d0 | {"step": 0}
@@ -619,6 +693,7 @@ def main(smoke: bool = False, arm: str = "A2", steps: int | None = None,
               f"density {init_ref['mean_density'] if init_ref['mean_density'] else float('nan'):.3f}",
               flush=True)
 
+    joint_stats = None
     history, t0 = [], time.time()
     for step in range(1, cfg.steps + 1):
         idx = rng.integers(0, len(data), cfg.batch)
@@ -630,7 +705,7 @@ def main(smoke: bool = False, arm: str = "A2", steps: int | None = None,
             mk = torch.from_numpy(gm.masks_for(x.cpu().numpy())[:, 1:, :]).to(dev)
             logits = logits.masked_fill(~mk, float("-inf"))
 
-        if cfg.arm == "A3":
+        if cfg.arm in ("A3", "A7"):
             B, L, Vs = logits.shape
             flat = logits.reshape(B * L, Vs)
             mkf = mk.reshape(B * L, Vs)
@@ -660,10 +735,98 @@ def main(smoke: bool = False, arm: str = "A2", steps: int | None = None,
             ept = torch.from_numpy(elp).to(dev).reshape(-1)
             act = (st > 0) & torch.isfinite(bt) & ept
             b = torch.where(act, bt / st.clamp_min(1), lo).clamp(min=lo, max=hi).unsqueeze(-1)
-            res = project(flat, A, b, mkf)
-            q = torch.where((res.converged & act).unsqueeze(-1), res.q,
-                            torch.softmax(flat, -1))
-            logp = torch.log(q.clamp_min(1e-30)).reshape(B, L, Vs)
+
+            if cfg.arm == "A7":
+                # Second constraint, assembled identically so the two are solved as one
+                # joint problem rather than sequentially. Sequential projection would
+                # satisfy whichever constraint was applied last, which is not the KL
+                # optimum for the pair and is not what CP-7 verified.
+                bud2 = np.empty((B, L)); slt2 = np.empty((B, L))
+                chan2 = np.empty((B, L, Vs), dtype=np.float32)
+                for t in range(L):
+                    bb2, ss2 = _additive_budget(xc[:, :t + 1], V, cfg, VALENCE,
+                                                cfg.valence_target, 1.0)
+                    bud2[:, t], slt2[:, t] = bb2, ss2
+                    chan2[:, t] = weight_channel(xc[:, :t + 1], V, VALENCE)
+                A2c = torch.from_numpy(chan2).to(dev).reshape(B * L, 1, Vs)
+                att2 = torch.where(mkf, A2c[:, 0, :], torch.full_like(flat, float("nan")))
+                lo2 = torch.nan_to_num(att2, nan=float("inf")).min(-1).values
+                hi2 = torch.nan_to_num(att2, nan=float("-inf")).max(-1).values
+                bt2 = torch.from_numpy(bud2).to(dev).float().reshape(-1)
+                st2 = torch.from_numpy(slt2).to(dev).float().reshape(-1)
+                b2 = torch.where((st2 > 0) & torch.isfinite(bt2),
+                                 bt2 / st2.clamp_min(1), lo2)
+                b2 = b2.clamp(min=lo2, max=hi2).unsqueeze(-1)
+                # Solve jointly only where BOTH channels vary on the allowed support;
+                # where the second is degenerate the pair is rank 1 and the joint solve
+                # is one constraint written twice, so fall back to density alone rather
+                # than feed the solver a singular Hessian.
+                spread2 = (hi2 - lo2) > 1e-9
+                # JOINT FEASIBILITY IS NOT IMPLIED BY TWO FEASIBLE MARGINS. Both targets
+                # can sit inside their own attainable ranges while no single distribution
+                # meets both, which is exactly the "individually attainable only" regime
+                # CP-7 mapped on synthetic grids. On real prefixes the common cause is an
+                # EXHAUSTED budget: once one quantity has reached its target the running
+                # budget for it is 0 while the other is still positive, so the pair demands
+                # a ratio of 0 or infinity that no convex combination of per-token ratios
+                # can produce. Measured on a 4-sequence batch, 5 of 19 actionable positions
+                # were infeasible this way with rank 2 everywhere -- so this is a target
+                # problem, not a conditioning one.
+                #
+                # Feeding those positions to the joint solver produces a non-converged
+                # result that would then be silently discarded, which throws away a
+                # perfectly good SINGLE-constraint projection at a position where density
+                # steering is still feasible. So joint positions are restricted to those
+                # whose required ratio is attainable, and the rest fall back to density
+                # alone and are counted.
+                # Deciding joint feasibility CHEAPLY is not possible here. The obvious
+                # test -- is the required ratio b2/b1 inside the range of per-token
+                # ratios c_i/a_i -- is necessary but not sufficient: checked against an
+                # exact linear program on 400 random two-row systems it agrees on only
+                # 266, calling 134 infeasible systems feasible. An exact test is an LP
+                # per position, which is far more expensive than the projection it would
+                # be guarding.
+                #
+                # So feasibility is not predicted, it is OBSERVED: the dual solve already
+                # reports non-convergence, and for a target outside the attainable set
+                # that is the correct verdict rather than a numerical failure. A position
+                # is treated as joint when the joint solve converged there, and falls back
+                # to the single-constraint projection otherwise. The counts below record
+                # how often that happens, so the fallback rate is a reported quantity
+                # rather than a hidden one.
+                both_pos = (bt > 0) & (bt2 > 0)
+                eligible = act & spread2 & both_pos
+                A = torch.cat([A, A2c], dim=1)
+                b = torch.cat([b, b2], dim=-1)
+                res_j = project(flat, A, b, mkf)
+                res_1 = project(flat, A[:, :1, :], b[:, :1], mkf)
+                joint = eligible & res_j.converged
+                # Per-row choice: the joint solution where it converged, otherwise the
+                # single-constraint projection where THAT converged, otherwise the masked
+                # softmax. The ordering matters -- discarding a good density projection
+                # because the joint solve failed would make A7 worse than A3 at positions
+                # where the second target simply was not jointly attainable.
+                q = torch.where(joint.unsqueeze(-1), res_j.q,
+                                torch.where((res_1.converged & act).unsqueeze(-1),
+                                            res_1.q, torch.softmax(flat, -1)))
+                n_joint = int(joint.sum())
+                logp = torch.log(q.clamp_min(1e-30)).reshape(B, L, Vs)
+                joint_stats = {
+                    "n_actionable_positions": int(act.sum()),
+                    "n_joint_positions": n_joint,
+                    "n_density_only_positions": int((act & ~joint).sum()),
+                    "n_excluded_rank1": int((act & ~spread2).sum()),
+                    "n_excluded_budget_exhausted": int((act & spread2 & ~both_pos).sum()),
+                    "n_eligible_for_joint": int(eligible.sum()),
+                    "n_jointly_infeasible": int((eligible & ~res_j.converged).sum()),
+                    "joint_fallback_rate": (float((eligible & ~res_j.converged).sum())
+                                            / max(int(eligible.sum()), 1)),
+                }
+            else:
+                res = project(flat, A, b, mkf)
+                q = torch.where((res.converged & act).unsqueeze(-1), res.q,
+                                torch.softmax(flat, -1))
+                logp = torch.log(q.clamp_min(1e-30)).reshape(B, L, Vs)
         else:
             logp = torch.log_softmax(logits, dim=-1)
 
@@ -680,7 +843,7 @@ def main(smoke: bool = False, arm: str = "A2", steps: int | None = None,
             m = structural_metrics(seqs, V, gm, cfg, **COV)
             m |= {"step": step, "loss": float(loss.item()),
                   "elapsed_s": round(time.time() - t0, 1)} | diag
-            if cfg.arm == "A3":
+            if cfg.arm in ("A3", "A7"):
                 sd, dg = sample(model, V, gm, cfg, dev, cfg.n_eval_samples,
                                 use_mask=True, project_at_inference=True,
                                 max_len=max_len + 2, rng=rng)
@@ -720,6 +883,8 @@ def main(smoke: bool = False, arm: str = "A2", steps: int | None = None,
         "history": history,
         "final": history[-1],
         "init_reference": init_ref,
+        "joint_projection": joint_stats,
+        "valence_target": (cfg.valence_target if cfg.arm == "A7" else None),
         "wall_clock_s": round(time.time() - t0, 1),
     }
     # WEIGHT PERSISTENCE. Every run before this one trained, evaluated in-process and
@@ -764,12 +929,14 @@ def main(smoke: bool = False, arm: str = "A2", steps: int | None = None,
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--smoke", action="store_true")
-    ap.add_argument("--arm", default="A2", choices=["A1", "A2", "A3", "A4"])
+    ap.add_argument("--arm", default="A2", choices=["A1", "A2", "A3", "A4", "A7"])
     ap.add_argument("--steps", type=int, default=None)
     ap.add_argument("--density-target", type=float, default=None)
+    ap.add_argument("--valence-target", type=float, default=None)
     ap.add_argument("--seed", type=int, default=None)
     ap.add_argument("--ckpt", default=None,
                     help="path to save model weights for later zero-shot retargeting")
     a = ap.parse_args()
     print(main(smoke=a.smoke, arm=a.arm, steps=a.steps,
-               density_target=a.density_target, seed=a.seed, ckpt=a.ckpt))
+               density_target=a.density_target, seed=a.seed, ckpt=a.ckpt,
+               valence_target=a.valence_target))

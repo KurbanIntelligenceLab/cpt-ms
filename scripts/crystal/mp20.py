@@ -36,6 +36,27 @@ ELEMENTS = [
     "Yb","Lu","Hf","Ta","W","Re","Os","Ir","Pt","Au","Hg","Tl","Pb","Bi","Po","At","Rn",
     "Fr","Ra","Ac","Th","Pa","U","Np","Pu",
 ]
+# Valence electron count per element, generated once from SMACT 4.0.0 rather than
+# imported at runtime: the training loop must not depend on smact, and a static table is
+# reviewable in the diff. Covers every element in ELEMENTS. Note these are total valence
+# electron counts including filled d shells (Fe is 8, Cu is 11), which is the convention
+# SMACT's num_valence uses; the constraint only needs the quantity to be additive and
+# consistently defined, not to follow a particular chemical convention.
+VALENCE = {  # valence electron count per element, from SMACT 4.0.0
+    "H":1,"He":2,"Li":1,"Be":2,"B":3,"C":4,"N":5,"O":6,"F":7,
+    "Ne":8,"Na":1,"Mg":2,"Al":3,"Si":4,"P":5,"S":6,"Cl":7,"Ar":8,
+    "K":1,"Ca":2,"Sc":3,"Ti":4,"V":5,"Cr":6,"Mn":7,"Fe":8,"Co":9,
+    "Ni":10,"Cu":11,"Zn":12,"Ga":13,"Ge":14,"As":15,"Se":16,"Br":17,"Kr":18,
+    "Rb":1,"Sr":2,"Y":3,"Zr":4,"Nb":5,"Mo":6,"Tc":7,"Ru":8,"Rh":9,
+    "Pd":10,"Ag":11,"Cd":12,"In":13,"Sn":14,"Sb":15,"Te":16,"I":17,"Xe":18,
+    "Cs":1,"Ba":2,"La":3,"Ce":4,"Pr":5,"Nd":6,"Pm":7,"Sm":8,"Eu":9,
+    "Gd":10,"Tb":11,"Dy":12,"Ho":13,"Er":14,"Tm":15,"Yb":16,"Lu":17,"Hf":18,
+    "Ta":19,"W":20,"Re":21,"Os":22,"Ir":23,"Pt":24,"Au":25,"Hg":26,"Tl":27,
+    "Pb":28,"Bi":29,"Po":30,"At":31,"Rn":32,"Fr":1,"Ra":2,"Ac":3,"Th":4,
+    "Pa":5,"U":6,"Np":7,"Pu":8,
+}
+
+
 ATOMIC_MASS = {  # u; only what MP-20 needs, filled from standard values
     "H":1.008,"He":4.003,"Li":6.94,"Be":9.012,"B":10.81,"C":12.011,"N":14.007,"O":15.999,
     "F":18.998,"Ne":20.180,"Na":22.990,"Mg":24.305,"Al":26.982,"Si":28.085,"P":30.974,
@@ -246,3 +267,36 @@ class CrystalVocab:
         vol = a * b * cc * np.sqrt(v2)
         mass = sum(ATOMIC_MASS[e] * n for e, n in formula.items())
         return mass / vol * 1.66053906660
+
+    def decode_weighted_density(self, ids: list[int],
+                                table: dict[str, float]) -> float | None:
+        """Density of any additive per-element quantity, in units of table-value per A^3.
+
+        Shares `decode_density`'s parsing and volume so the two quantities are read off
+        exactly the same decoded cell. A second parser would be free to disagree about
+        bucket centres or cell validity, and then the two dials would be measured on
+        different structures. No unit conversion is applied: for a count-valued table the
+        result is already per cubic angstrom.
+        """
+        formula, lens, angs, cur_el = {}, [], [], None
+        for i in ids:
+            tok = self.tokens[i]
+            if tok.startswith("el:"):
+                cur_el = tok[3:]
+            elif tok.startswith("cnt:") and cur_el:
+                formula[cur_el] = formula.get(cur_el, 0) + int(tok[4:])
+                cur_el = None
+            elif tok.startswith("len:"):
+                j = int(tok[4:]); lens.append(self.LEN_LO + (j + 0.5) * (self.LEN_HI - self.LEN_LO) / self.N_LEN)
+            elif tok.startswith("ang:"):
+                j = int(tok[4:]); angs.append(self.ANG_LO + (j + 0.5) * (self.ANG_HI - self.ANG_LO) / self.N_ANG)
+        if len(lens) != 3 or len(angs) != 3 or not formula:
+            return None
+        a, b, cc = lens
+        al, be, ga = np.radians(angs)
+        v2 = (1 - np.cos(al) ** 2 - np.cos(be) ** 2 - np.cos(ga) ** 2
+              + 2 * np.cos(al) * np.cos(be) * np.cos(ga))
+        if v2 <= 0:
+            return None
+        vol = a * b * cc * np.sqrt(v2)
+        return sum(table.get(e, 0.0) * n for e, n in formula.items()) / vol
