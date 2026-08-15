@@ -566,6 +566,23 @@ confidence interval of [-0.111, 0.086]. The design could have detected 0.135 g/c
 power, which is 20% of the per-target arm's mean error of 0.662. Two one-sided
 tests against the derived margin of 0.189 give p = 0.0023.
 
+Two additions came from external review. The margin now lives in
+`preregistration/WS4_equivalence_margin.md` and is read from there by the analysis script, which
+fails if the file is absent or disagrees with the rule it states — a constant in the script could
+be edited after seeing the result, which is not a pre-specification. And a paired bootstrap over
+10,000 resamples gives [-0.090, 0.058] against the parametric [-0.111, 0.086]; the parametric
+interval is the wider of the two and is the one the prose quotes, since normality of seven
+differences is not checkable at that sample size.
+
+The Wilcoxon result is now reported with its floor, which is the part that would have been
+caught. At n = 7 the smallest attainable two-sided p is 2/2^7 = 0.015625 under any data
+whatsoever, so p = 1.0 reflects the test's resolution at this sample size as much as the
+data. That is why the claim rests on the equivalence procedure and not on the difference test.
+
+A margin of 0.15 was proposed externally as "the seed standard deviation already reported at
+target 5.0". That value is 0.1147 and no single target yields 0.15, so the pre-registration uses
+the mean across targets and records the rejected alternative with the reason.
+
 | margin (g/cm^3) | TOST p | equivalent |
 |---|---|---|
 | 0.10 | 0.0362 | yes |
@@ -582,12 +599,96 @@ The difference tests are kept alongside — Wilcoxon p = 1.0, paired t p = 0.772
 because a reader looking for the conventional comparison should find it rather than infer
 that it was replaced.
 
+## Step 19 — Best-of-n, the baseline that beats us on accuracy
+
+`results/WS6_best_of_n.json`
+
+Method. Conditional training is not the strongest amortizer available. Best-of-n needs no
+training: draw n samples from the unsteered model — mask on, projection off — and keep whichever
+lands closest to the target. One model serves every target, so it amortizes perfectly by
+construction and a reviewer will run it whether or not the paper does.
+
+One pool of 1024 samples is drawn once and reused for every target and every n, so n is not
+confounded with sampling noise, and the expected error is estimated by repeated subsampling of n
+draws rather than by the pool's best single draw, which would have overstated the baseline. The
+comparator is the projection arm's published frontier error at the same target.
+
+Results.
+
+| target | projection | n=1 | n=4 | n=16 | n=64 | n to match | unique @ n=64 |
+|---|---|---|---|---|---|---|---|
+| 1.5 | 0.348 | 6.905 | 3.045 | 1.438 | 0.484 | >64 | 0.225 |
+| 2.0 | 0.266 | 7.127 | 2.348 | 1.008 | 0.290 | >64 | 0.220 |
+| 3.0 | 0.240 | 5.090 | 1.910 | 0.575 | 0.138 | 64 | 0.225 |
+| 5.0 | 0.151 | 4.303 | 1.006 | 0.250 | 0.073 | 64 | 0.205 |
+| 6.317 | 0.719 | 3.910 | 0.843 | 0.252 | 0.062 | 16 | 0.215 |
+| 8.0 | 1.240 | 3.729 | 1.139 | 0.391 | 0.097 | 4 | 0.220 |
+| 10.0 | 1.670 | 4.112 | 1.571 | 0.516 | 0.130 | 4 | 0.230 |
+| 13.0 | 4.256 | 5.844 | 2.342 | 0.683 | 0.177 | 4 | 0.240 |
+| 16.0 | 6.125 | 7.906 | 4.269 | 1.480 | 0.448 | 4 | 0.245 |
+| 20.0 | 9.595 | 11.854 | 6.972 | 3.149 | 0.950 | 4 | 0.250 |
+
+Best-of-n reaches the projection at 8 of 10 targets within n = 64 and at 5 targets within n = 4.
+On accuracy the projection loses, and the paper says so.
+
+The counter is measured rather than argued. Selection buys accuracy by discarding, so the
+accepted set concentrates on the pool's tail near the target: unique-formula fraction among
+accepted outputs falls from 0.805 at n = 1 to 0.205 at n = 64, consistently across all ten
+targets. The projection's unique fraction at the same target is 0.782 — above best-of-16 and more
+than three times best-of-64. Selection filters a distribution and its diversity degrades as the
+target gets harder to hit; shaping moves the distribution and its diversity does not. Best-of-n
+also pays n forward passes per accepted output at every target indefinitely, against one training
+run and one forward pass.
+
+What this licenses is narrower than accuracy parity: among the arms measured here the projection
+is the only one reaching target accuracy without either a per-target training run or a per-output
+sampling multiplier, and the only one whose output diversity is independent of target difficulty.
+
+## Step 20 — The automaton-size objection, computed and refuted
+
+`results/CP8_automaton_size.json`
+
+Method. Methods that compile a constraint into a deterministic automaton over tokens amortize
+across constraints without retraining, which is the word this paper uses for its own claim. The
+intuitive distinction is that a real-valued running budget needs an intractable automaton. That
+is arithmetic, so it was computed rather than asserted — and it was computed against the framing
+it was written to support.
+
+Results. The objection does not hold. The budget spans 4397 amu and the serialization's own
+discretization floor is 0.0020 relative, since cell parameters are emitted as bin indices and a
+finer tolerance is not expressible by this task at all.
+
+| relative tolerance | budget states | with parse position | vs model params | below task floor |
+|---|---|---|---|---|
+| 1e-01 | 10 | 8,840 | 0.00x | no |
+| 1e-02 | 100 | 88,400 | 0.02x | no |
+| 1e-03 | 1,000 | 884,000 | 0.18x | yes |
+| 1e-04 | 10,000 | 8,840,000 | 1.77x | yes |
+
+At the finest expressible tolerance the automaton is 88,400 states, 0.02x the controlled
+model's parameter count and entirely buildable. The size argument is recorded as refuted rather
+than deleted, because it was the intuitive objection and the measurement does not support it.
+
+The real distinction is per-instance construction: the bound compiles into the transition
+structure, so each target is a separate automaton — about 884,000 states across the ten
+frontier targets — while the dual solve takes the target as a runtime argument. Automaton methods
+amortize across constraints at a fixed model; this work amortizes across targets of one
+constraint at a fixed model. Neither subsumes the other.
+
 ## What the results support as claims
 
 Regime S is exact and holds by construction, on synthetic data and on real crystals, trained and
 untrained, at every target including those where steering fails outright. This is a property of
 the mask, not a statistical property of a trained model, and it is independent of every steering
 result.
+
+Amortization is no longer claimed as accuracy parity, because the strongest baseline wins on
+accuracy. Best-of-n from the unsteered model reaches the projection at 8 of 10 targets given
+enough samples, and it needs no training at all. What survives is that the projection is the only
+arm measured that reaches target accuracy without either a per-target training run or a
+per-output sampling multiplier, and the only one whose output diversity does not collapse as the
+target gets harder to hit: 0.205 unique formulas under best-of-64 against 0.782. That claim was
+measured against the harder comparator and is more durable for it.
 
 Regime E steers within and below the bulk of the training distribution, and the projection and the
 training are complementary rather than redundant, with the split published as 67/33 and the
@@ -648,8 +749,18 @@ carry one seed each. The A6 comparator that fine-tunes toward the sequence-level
 specified and scoped in code but not trained, so the surrogate-versus-optimum comparison is exact
 on the synthetic task and absent on crystals.
 
-The two-constraint grid is one row of three. Density targets 5.0 and 8.0 were not reached before
-the job's time ceiling, and the 8.0 row is the one that could soften the composition result: a high
+The two-constraint grid is not yet complete, and the partial result already qualifies the
+composition claim. Two of the three cells at density target 8.0 have landed and pass-through there
+is 11.5% against 6.2% in the published density-3.0 row — nearly double, with jointly solvable
+positions rising from 265 to 329 of 518 and budget-exhausted exclusions falling from
+212 to 92. That is the direction predicted for compatible targets: a high density target and a
+high valence target pull the same way, so their budgets compete less. The published claim is
+therefore scoped to one row, correctly, and the third cell of the 8.0 row plus the 5.0 row will
+determine whether it narrows from "these two quantities do not compose" to "they compose only when
+their targets are mutually compatible". Even at 11.5%, pass-through remains far from the dial being
+controllable, so the qualification is expected to be about degree rather than about direction. The
+5.0 and 8.0 rows were not reached before the first job's time ceiling; the 8.0 row is the one that
+could soften the composition result: a high
 density target and a high valence target pull in the same direction, so their budgets should
 compete less. If pass-through is higher there, the claim narrows from "these two quantities do not
 compose" to "they compose only when their targets are mutually compatible". The composition result
