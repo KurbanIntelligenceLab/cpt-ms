@@ -8,6 +8,7 @@ survive a change in the underlying measurement.
 from __future__ import annotations
 
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -205,3 +206,82 @@ def test_valence_reference_matches_cp7():
                - st["valence_electron_density"]["sd"]) < 5e-4
     assert abs(p["data_reference"]["valence_mean"]
                - st["valence_electron_density"]["mean"]) < 5e-4
+
+
+def test_fixed_valence_columns_use_partial_rows_correctly():
+    """A partial row is valid for the direction analysis and invalid for pass-through.
+
+    Pass-through is a range over valence targets, so one cell cannot produce it. The
+    deviation-from-control comparison at a shared valence target across density rows needs only
+    one cell per row. This test pins both halves: the partial row must be absent from
+    pass-through and present in the columns.
+    """
+    p = _payload()
+    cols = p["summary"].get("fixed_valence_columns")
+    if not cols:
+        pytest.skip("no fixed-valence columns")
+    partial = [r for r in p["rows"] if not r.get("complete")]
+    for r in partial:
+        assert "pass_through" not in r, (
+            f"density {r['density_target']} has {r['n_cells']} cell(s) but carries a "
+            f"pass-through value, which needs a range over valence targets"
+        )
+        dts_in_cols = {row["density_target"] for c in cols for row in c["rows"]}
+        if r["n_cells"] >= 1:
+            assert r["density_target"] in dts_in_cols, (
+                f"density {r['density_target']} is partial but contributes to no column; its "
+                f"cell is usable for the direction comparison and is being discarded"
+            )
+
+
+def test_direction_is_measured_against_each_cells_own_control():
+    """Deviation must be from the matching single-constraint control, not a global mean.
+
+    The achieved valence rises with the density target even with no valence constraint, so an
+    absolute level would show apparent steering where there is none.
+    """
+    p = _payload()
+    cols = p["summary"].get("fixed_valence_columns") or []
+    if not cols:
+        pytest.skip("no fixed-valence columns")
+    controls = p["controls"]
+    for c in cols:
+        for r in c["rows"]:
+            ctrl = (controls.get(str(r["density_target"]))
+                    or controls.get(r["density_target"]) or {})
+            assert abs(r["control_valence"] - ctrl["deployed_valence"]) < 1e-12, (
+                f"column at valence {c['valence_target']}, density {r['density_target']} "
+                f"compares against {r['control_valence']} but that density's control is "
+                f"{ctrl['deployed_valence']}"
+            )
+            want = r["valence_achieved"] - r["control_valence"]
+            assert abs(r["deviation_from_control"] - want) < 1e-12
+
+
+def test_the_directional_asymmetry_is_reported_if_present():
+    """Lowering the quantity is always affordable; raising it is not once the budget is spent.
+
+    If this asymmetry is in the data it must be in the notes, because it is a mechanism claim a
+    reader can check and a later edit could quietly drop.
+    """
+    p = _payload()
+    cols = p["summary"].get("fixed_valence_columns") or []
+    if not cols:
+        pytest.skip("no fixed-valence columns")
+    rows = [r for c in cols for r in c["rows"]]
+    down = [r for r in rows if r["asked_direction"] == "down"]
+    up = [r for r in rows if r["asked_direction"] == "up"]
+    if not down or not up:
+        pytest.skip("only one requested direction present")
+    d_ok = sum(r["moved_correct_direction"] for r in down) / len(down)
+    u_ok = sum(r["moved_correct_direction"] for r in up) / len(up)
+    if d_ok > u_ok and NOTES.exists():
+        txt = re.sub(r"\s+", " ", NOTES.read_text())
+        assert f"{sum(r['moved_correct_direction'] for r in down)} of {len(down)}" in txt, (
+            "the direction tally must be stated; it is the sharpest mechanism evidence in the "
+            "grid and does not depend on completing any row"
+        )
+        assert "exhaust" in txt.lower(), (
+            "the notes must connect the asymmetry to budget exhaustion, which is the "
+            "mechanism that explains it"
+        )

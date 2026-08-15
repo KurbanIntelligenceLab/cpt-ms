@@ -264,6 +264,41 @@ pass-through is 11.3% and the response is monotone, though still far from contro
 but jointly solvable positions fall where the constraints conflict and rise where they agree, of 518
 actionable positions per cell.
 
+## The direction the second constraint is asked to move
+
+The pass-through measure needs two valence cells in a row, so the partial density-5.0 row
+contributes nothing to it. The cells at a shared valence target across density rows are directly
+comparable, though, and each is paired with its own single-constraint control — which turns out to
+be the more informative comparison, because the achieved valence is dragged by the density
+constraint alone and an absolute level hides that.
+
+| valence target | density target | achieved | control | deviation | asked | moved correctly |
+|---|---|---|---|---|---|---|
+| 0.282 | 3.0 | 0.2447 | 0.2424 | +0.0023 | up | yes |
+| 0.282 | 5.0 | 0.3062 | 0.3141 | -0.0079 | down | yes |
+| 0.282 | 8.0 | 0.3251 | 0.3956 | -0.0705 | down | yes |
+| 0.484 | 3.0 | 0.2603 | 0.2424 | +0.0179 | up | yes |
+| 0.484 | 8.0 | 0.3482 | 0.3956 | -0.0474 | up | no |
+| 0.686 | 3.0 | 0.2353 | 0.2424 | -0.0071 | up | no |
+| 0.686 | 8.0 | 0.3707 | 0.3956 | -0.0248 | up | no |
+
+At valence target 0.282 the constraint moves in the requested direction at all three density
+targets, and the deviation from control grows with the density target (correlation -0.9614). At
+0.484 and 0.686 — both above every control, so both asking the constraint to raise valence — it
+moves the wrong way at density 8.0 in each case.
+
+Aggregating by direction rather than by row: asked to lower valence, the constraint moves correctly
+2 of 2 times; asked to raise it, 2 of 5. The asymmetry follows from what the budget
+is. The running budget is a remaining quantity, so lowering a per-volume density means spending less
+of it, which is always available — choose lighter or fewer atoms. Raising it means spending more than
+the prefix has left, which is not available once the budget is exhausted, and exhaustion is the
+largest exclusion class in every cell (53 to 262 of 518 actionable positions).
+
+This refines the compatibility reading rather than replacing it. Compatibility governs how many
+positions admit a joint solution; direction governs whether the constraint can act at the positions
+that do. Both point at the same underlying fact: the second constraint spends a budget the first has
+already committed.
+
 ## The expressible class has a boundary
 
 `results/CP7_second_channel.json`

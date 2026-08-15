@@ -140,6 +140,50 @@ def main(results_dir: str | Path = "results", smoke: bool = False) -> Path:
                 and c["density_target"] in matched]
     ctrl_err = [abs(controls[t]["deployed_density"] - t) for t in matched]
 
+    # FIXED-TARGET COLUMN. A row needs two valence cells for pass-through, so a partial row
+    # contributes nothing to that measure. But the cells at a SHARED valence target across
+    # density rows are directly comparable, and they test the constraint's effect more
+    # cleanly than pass-through does: each cell is paired with its own single-constraint
+    # control, so the comparison is deviation-from-control rather than an absolute level
+    # that the density constraint drags around on its own.
+    by_vt: dict[float, list[dict]] = {}
+    for c in cells:
+        by_vt.setdefault(c["valence_target"], []).append(c)
+    columns = []
+    for vt, cs in sorted(by_vt.items()):
+        if len(cs) < 2:
+            continue
+        rows_c = []
+        for c in sorted(cs, key=lambda x: x["density_target"]):
+            ctrl = controls.get(c["density_target"]) or controls.get(str(c["density_target"])) or {}
+            ctrl_v = ctrl.get("deployed_valence")
+            if ctrl_v is None or c["deployed_valence"] is None:
+                continue
+            asked_down = vt < ctrl_v
+            moved_down = c["deployed_valence"] < ctrl_v
+            rows_c.append({
+                "density_target": c["density_target"],
+                "valence_achieved": c["deployed_valence"],
+                "control_valence": ctrl_v,
+                "deviation_from_control": c["deployed_valence"] - ctrl_v,
+                "asked_direction": "down" if asked_down else "up",
+                "moved_correct_direction": asked_down == moved_down,
+            })
+        if len(rows_c) < 2:
+            continue
+        dts = np.array([r["density_target"] for r in rows_c], dtype=float)
+        dev = np.array([r["deviation_from_control"] for r in rows_c], dtype=float)
+        columns.append({
+            "valence_target": vt,
+            "n_density_rows": len(rows_c),
+            "rows": rows_c,
+            "all_moved_correct_direction": all(r["moved_correct_direction"] for r in rows_c),
+            "corr_density_target_deviation": (float(np.corrcoef(dts, dev)[0, 1])
+                                              if len(rows_c) > 2 else None),
+            "note": ("cells at one valence target across density rows, each against its own "
+                     "single-constraint control; a partial row still contributes here"),
+        })
+
     summary = {
         "n_cells": len(cells),
         "n_controls": len(controls),
@@ -154,6 +198,7 @@ def main(results_dir: str | Path = "results", smoke: bool = False) -> Path:
                                 for r in complete},
         "monotone_by_row": {str(r["density_target"]): r.get("monotone_in_target")
                             for r in complete},
+        "fixed_valence_columns": columns,
         "verdict": None,
     }
     if complete:

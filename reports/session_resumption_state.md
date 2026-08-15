@@ -22,7 +22,7 @@ Items that could not be verified are marked as such rather than assumed.
 Working tree at `/Users/jp/cpt-ms` is clean. HEAD is `845012c`, "Sparse-target runs: A4 keeps
 its accuracy and loses its coverage", on branch `jp/dev`.
 
-The full suite passes: **267 tests collected**, all passing when `git init` is available; 5 provenance tests skip
+The full suite passes: **270 tests collected**, all passing when `git init` is available; 5 provenance tests skip
 in sandboxes that block it in the `cpt-proj`
 environment. The transcript's last count was 185 with 5 skips; the five are conditional on
 optional artifacts and on git being usable, and all of those conditions hold locally.

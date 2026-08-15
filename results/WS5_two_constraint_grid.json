@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "artifact_name": "WS5_two_constraint_grid",
   "script": "scripts/crystal/analyze_a7_grid.py",
-  "git_commit": "0d9aa5531c1349f49e6e939d407898f16830991c-dirty",
+  "git_commit": "3538c7969ebc337ea294ceb6784a7bc83546bd4a-dirty",
   "config": {
     "results_dir": "results",
     "smoke": false
@@ -11,10 +11,10 @@
   "seeds": [
     0
   ],
-  "created_utc": "2026-08-15T16:12:59.715014+00:00",
+  "created_utc": "2026-08-15T18:48:40.022566+00:00",
   "python": "3.11.15",
   "platform": "macOS-26.5.2-arm64-arm-64bit",
-  "payload_sha256": "e656f148783b1bf8d8a3fff4805c39ccd8694be83912f68abfa5b085f3e0abca",
+  "payload_sha256": "8af39c1d3d20654eddd8d82e1718a4b88941be3b705c64398a91945be8c40b20",
   "payload": {
     "question": "Does a second additive expectation constraint steer when trained jointly with density, and what happens to joint feasibility as the second target moves away from the data?",
     "cells": [
@@ -68,6 +68,23 @@
         "n_budget_exhausted": 236,
         "fallback_rate": 0.8262411347517731,
         "source": "A7grid_d3.0_v0.686.json"
+      },
+      {
+        "density_target": 5.0,
+        "valence_target": 0.282,
+        "deployed_density": 4.428641996074052,
+        "deployed_valence": 0.30617850786298506,
+        "backbone_density": 6.421794064016213,
+        "backbone_valence": 0.4440415468337495,
+        "validity": 1.0,
+        "unique_formula_fraction": 0.76904296875,
+        "novel_formula_fraction": 0.921142578125,
+        "n_actionable": 518,
+        "n_joint": 268,
+        "n_jointly_infeasible": 28,
+        "n_budget_exhausted": 222,
+        "fallback_rate": 0.0945945945945946,
+        "source": "A7grid_d5.0_v0.282.json"
       },
       {
         "density_target": 8.0,
@@ -192,6 +209,12 @@
         ]
       },
       {
+        "density_target": 5.0,
+        "n_cells": 1,
+        "complete": false,
+        "note": "fewer than two valence cells; pass-through undefined"
+      },
+      {
         "density_target": 8.0,
         "n_cells": 3,
         "complete": true,
@@ -236,18 +259,17 @@
       }
     ],
     "summary": {
-      "n_cells": 6,
+      "n_cells": 7,
       "n_controls": 3,
       "n_complete_rows": 2,
       "matched_density_targets": [
         3.0,
+        5.0,
         8.0
       ],
-      "density_mae_A7_matched": 0.5322348236539529,
-      "density_mae_A3_matched": 0.7190090557254389,
-      "unmatched_control_targets": [
-        5.0
-      ],
+      "density_mae_A7_matched": 0.537823849407095,
+      "density_mae_A3_matched": 0.5068661137146125,
+      "unmatched_control_targets": [],
       "validity_all_cells": [
         1.0
       ],
@@ -259,6 +281,91 @@
         "3.0": false,
         "8.0": true
       },
+      "fixed_valence_columns": [
+        {
+          "valence_target": 0.282,
+          "n_density_rows": 3,
+          "rows": [
+            {
+              "density_target": 3.0,
+              "valence_achieved": 0.24473566613604963,
+              "control_valence": 0.24239095347499776,
+              "deviation_from_control": 0.0023447126610518787,
+              "asked_direction": "up",
+              "moved_correct_direction": true
+            },
+            {
+              "density_target": 5.0,
+              "valence_achieved": 0.30617850786298506,
+              "control_valence": 0.31405419213081265,
+              "deviation_from_control": -0.007875684267827587,
+              "asked_direction": "down",
+              "moved_correct_direction": true
+            },
+            {
+              "density_target": 8.0,
+              "valence_achieved": 0.32506415411484924,
+              "control_valence": 0.39558007977284215,
+              "deviation_from_control": -0.07051592565799292,
+              "asked_direction": "down",
+              "moved_correct_direction": true
+            }
+          ],
+          "all_moved_correct_direction": true,
+          "corr_density_target_deviation": -0.9614054833683637,
+          "note": "cells at one valence target across density rows, each against its own single-constraint control; a partial row still contributes here"
+        },
+        {
+          "valence_target": 0.484,
+          "n_density_rows": 2,
+          "rows": [
+            {
+              "density_target": 3.0,
+              "valence_achieved": 0.26031240728416505,
+              "control_valence": 0.24239095347499776,
+              "deviation_from_control": 0.017921453809167293,
+              "asked_direction": "up",
+              "moved_correct_direction": true
+            },
+            {
+              "density_target": 8.0,
+              "valence_achieved": 0.3482258053287785,
+              "control_valence": 0.39558007977284215,
+              "deviation_from_control": -0.04735427444406365,
+              "asked_direction": "up",
+              "moved_correct_direction": false
+            }
+          ],
+          "all_moved_correct_direction": false,
+          "corr_density_target_deviation": null,
+          "note": "cells at one valence target across density rows, each against its own single-constraint control; a partial row still contributes here"
+        },
+        {
+          "valence_target": 0.686,
+          "n_density_rows": 2,
+          "rows": [
+            {
+              "density_target": 3.0,
+              "valence_achieved": 0.23529557009055455,
+              "control_valence": 0.24239095347499776,
+              "deviation_from_control": -0.00709538338444321,
+              "asked_direction": "up",
+              "moved_correct_direction": false
+            },
+            {
+              "density_target": 8.0,
+              "valence_achieved": 0.37074472863575453,
+              "control_valence": 0.39558007977284215,
+              "deviation_from_control": -0.024835351137087625,
+              "asked_direction": "up",
+              "moved_correct_direction": false
+            }
+          ],
+          "all_moved_correct_direction": false,
+          "corr_density_target_deviation": null,
+          "note": "cells at one valence target across density rows, each against its own single-constraint control; a partial row still contributes here"
+        }
+      ],
       "verdict": "Mixed: see pass_through_by_row and monotone_by_row; neither the steering nor the no-steering criterion is met on all complete rows.",
       "max_pass_through": 0.1130707290121418,
       "any_row_monotone": true

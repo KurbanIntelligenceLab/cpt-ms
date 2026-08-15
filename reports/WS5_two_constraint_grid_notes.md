@@ -53,10 +53,43 @@ the fraction of positions at which a joint solution exists at all.
 Density steering is unaffected in both rows, and structural validity stays exact throughout, so
 nothing about the second constraint disturbs the first or the support restriction.
 
+## Direction, which the partial row does contribute to
+
+Pass-through needs two valence cells in a row, so the single density-5.0 cell adds nothing there. But
+cells at a shared valence target across density rows are comparable, each against its own control,
+and that comparison is sharper because the achieved valence is dragged by the density constraint on
+its own.
+
+| valence target | density target | achieved | control | deviation | asked | correct |
+|---|---|---|---|---|---|---|
+| 0.282 | 3.0 | 0.2447 | 0.2424 | +0.0023 | up | yes |
+| 0.282 | 5.0 | 0.3062 | 0.3141 | -0.0079 | down | yes |
+| 0.282 | 8.0 | 0.3251 | 0.3956 | -0.0705 | down | yes |
+| 0.484 | 3.0 | 0.2603 | 0.2424 | +0.0179 | up | yes |
+| 0.484 | 8.0 | 0.3482 | 0.3956 | -0.0474 | up | no |
+| 0.686 | 3.0 | 0.2353 | 0.2424 | -0.0071 | up | no |
+| 0.686 | 8.0 | 0.3707 | 0.3956 | -0.0248 | up | no |
+
+At valence target 0.282 the constraint moves the requested way at all three density targets, with the
+deviation growing as the density target rises (correlation -0.9614). At the two higher targets, both
+of which ask the constraint to raise valence above every control, it moves the wrong way at density
+8.0.
+
+By direction: asked to lower valence, correct 2 of 2; asked to raise it, 2 of 5. The budget is a
+remaining quantity, so lowering a per-volume density means spending less of it, which is always
+available; raising it means spending more than the prefix has left, which is not available once the
+budget is exhausted — the largest exclusion class in every cell, 53 to 262 of 518 positions.
+
+Compatibility governs how many positions admit a joint solution; direction governs whether the
+constraint can act at those that do. Both reduce to the second constraint spending a budget the first
+has already committed.
+
 ## Scope
 
-Two of three density rows, three valence targets each, one seed per cell, one serialization. The
-density-5.0 row is running and will add a third point between the two extremes. One seed per cell
+Two complete density rows plus one cell of a third, three valence targets each, one seed per cell,
+one serialization. The job reached its time ceiling with the density-5.0 row one cell in; that cell
+is used in the direction analysis above, where a single cell is valid, and excluded from pass-through,
+where it is not. One seed per cell
 means the pass-through figures carry no error bar; the mechanism correlations are across three
 targets within a row rather than across seeds, and the opposite signs of the joint-position
 correlation are large enough that seed noise is unlikely to explain them, but that is an
