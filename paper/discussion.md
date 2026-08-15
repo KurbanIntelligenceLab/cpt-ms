@@ -87,6 +87,15 @@ path — a reference that is not 1.0, because the charge screen rejects real mat
 measurable rate, so an arm scored against an assumed ceiling would be penalized for a
 property of the screen.
 
+## What is not claimed
+
+The layer is not claimed to improve in-distribution sample quality; an external benchmark
+reports that constraints do not, and nothing here contradicts that. No claim is made about
+constraints the linear-functional form cannot express, nor about quantities not determinable
+from a prefix. Expectation constraints are satisfied in expectation and not per sample.
+Thermodynamic stability of generated structures is not assessed, and no DFT calculation is
+reported. The compensation hypothesis was tested and rejected rather than left open.
+
 ## What follows
 
 The immediate question is whether the composition limit is a property of the constraint pair

@@ -1,7 +1,19 @@
 # Scope
 
-Draft. Every quantitative claim below is sourced to an artifact in `results/` and
-verified against it; the verification scripts live alongside the reports in `reports/`.
+SUPERSEDED as a paper section. This document was written before `results.md` and
+`discussion.md` existed and it now duplicates them: 13 of its 19 quantitative figures
+appear in `results.md`, and the six that did not have been folded into `results.md`
+(sample quality against the plausibility reference, the energy-screen calibration, the
+backbone's non-monotonicity) and `discussion.md` (the not-claimed list).
+
+It is kept because its four-part frame — what the method is, what is established, what it
+does not do, what is not claimed — is the shape the argument still has, and because it
+records the claim boundaries as they stood before the amortization and composition results
+changed them. It is not part of the manuscript and should not be edited to track new
+results; `results.md` and `discussion.md` are authoritative.
+
+Every quantitative claim below is sourced to an artifact in `results/` and verified against
+it; the verification scripts live alongside the reports in `reports/`.
 
 ## What the method is
 

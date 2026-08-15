@@ -49,6 +49,22 @@ At a density target of 5.0 g/cm^3 the deployed system reaches 4.810 against an u
 baseline of 6.783, an error of 0.190 against 1.783. Removing the projection at inference
 inverts rather than degrades the result: the same model read without its layer gives 9.200.
 
+The complementarity of the layer and the training is measured rather than assumed. The
+total improvement of 1.593 g/cm^3 over the unsteered baseline decomposes into 1.072 from
+applying the layer to an untrained backbone and 0.520 from training through it, a 67/33
+split. The second part's mechanism is measured independently: the probability-weighted
+infeasible-step fraction falls from 0.3430 at initialization to 0.0496 at convergence, so
+training moves the backbone into a region where the running budget is attainable rather
+than teaching it to satisfy the constraint directly. Removing the projection at inference
+gives an error of 4.200 against the unsteered baseline's 1.783 — worse than not steering at
+all, which is the sharpest evidence that the layer is a training component rather than a
+decoder.
+
+On the synthetic task, where the target is computed by enumeration rather than estimated,
+the same arm reaches mean charge 0.0170 against a target of 0, against 0.1028 for the
+exact projection applied to raw data — 6.0 times closer, with the infeasible-step
+fraction lower by a factor of 19.8.
+
 Across ten targets the asymmetry is systematic. Mean absolute error is 0.345 g/cm^3 at or
 below the data mean of 6.679 and 4.577 above it, and achieved density saturates at
 10.405 regardless of the request. The cause is measured rather than inferred: the
@@ -132,6 +148,39 @@ destroys it. On 4,000 structures the screen calls 71.08% balanced and the linear
 7.95%; they agree on 36.78%, and the proxy recovers 11.12% of the balanced set with
 2,527 false negatives against 2 false positives. A target built on that proxy would
 steer a quantity nearly unrelated to the screen the paper reports.
+
+## Constraint satisfaction is not sample quality
+
+`results/WS2_parse_validity.json`, `results/WS3_plausibility_reference.json`,
+`results/WS3_energy_calibration.json`
+
+Syntactic and semantic validity are measured separately, because reporting either alone
+misleads in a different direction. Of masked samples 500 of 500 parse, while 47% build into
+a structure given that they parse; the shortfall is physically incoherent cell geometry,
+which the grammar never claimed to prevent. Charging the grammar for that would understate
+it, and quoting only the parse rate would overstate what the method delivers.
+
+Plausibility is scored against a reference obtained by pushing 800 real MP-20 structures
+through the identical path, and that reference is not 1.0: real materials satisfy the charge
+screen at 0.7150, electronegativity ordering at 0.6400, and packing at 0.9775. An arm scored
+against an assumed ceiling of 1.0 would be penalized for a property of the screen rather
+than of the model.
+
+An ML-potential energy screen was calibrated against MP-20's DFT labels and agrees to
+21.0 meV/atom on 1,456 held-out structures, with correlation 0.99958 — 2.0% of the
+label spread. It is used for reference structures only, is labelled an ML-potential screen
+rather than DFT throughout, and no DFT calculation is reported in this work.
+
+## The backbone's unaided distribution is not well behaved
+
+`results/WS3_steering_frontier_rows.json`
+
+Backbone and deployed readings are reported at every cell because either alone misleads.
+The backbone drifts furthest above the data mean when the target sits near the achievable
+ceiling, fitting distance-to-ceiling at R^2 = 0.810 over nine rows, and returns toward the
+data at both extremes. In one run it produced a mean density exceeding the maximum in MP-20
+itself. The compensation hypothesis — that the backbone learns an offset calibrated to the
+projection's pull — was tested and rejected.
 
 ## Against the strongest baseline the result is a trade
 
