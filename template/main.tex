@@ -1,0 +1,443 @@
+\pdfoutput=1 % MUST stay within the first 5 lines: tells arXiv to use pdfLaTeX.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Kurban Intelligence Lab -- arXiv preprint template
+%% Build:  make        (or: latexmk -pdf main.tex)
+%% Submit: make arxiv  -> arxiv-submission.tar.gz, ready to upload
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[11pt]{article}
+
+% Options: font=libertinus|times|charter · citestyle=numeric|authoryear
+%          paper=letterpaper|a4paper · status={Preprint} · blind · review · nologo
+\usepackage[font=libertinus, citestyle=numeric]{kurbanlab}
+
+\input{affiliations}   % the lab's shared institution registry
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% FRONT MATTER
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\title{A Geometry-Aware Message Passing Framework for Property Prediction in Nanostructured Materials}
+\Subtitle{Consistent gains under distribution shift, at a fraction of the training cost}
+\RunningTitle{Geometry-aware message passing for nanostructured materials}
+
+%% --- AUTHORS -----------------------------------------------------------------
+%% \Author[<options>]{Name}{affiliation keys, comma separated}
+%% options: equal · corresponding[=email] · orcid=0000-... · footnote=\dagger
+%% Affiliation numbers are assigned in order of first use. Never type a number.
+\Author{Can Polat}{tamu}
+\Author[equal]{Mert Onur Cakiroglu}{iub}
+\Author[corresponding=hkurban@hbku.edu.qa, orcid=0000-0003-3142-2866]{Hasan Kurban}{hbku}
+%%-----------------------------------------------------------------
+
+\Keywords{graph neural networks; materials informatics; equivariance; distribution shift}
+\CodeURL{https://github.com/KurbanIntelligenceLab/geometry-aware-mpnn}
+\Venue{Under review}          % or: \Venue{To appear at NeurIPS 2026}
+% \ArxivID{2607.01234}        % add after you get the identifier, then re-upload
+% \Status{Preprint}           % set via the package option status={...}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Machine-learned interatomic potentials have transformed high-throughput materials
+screening, yet models trained on equilibrium structures degrade sharply when applied
+to the strained, defective geometries that matter in practice. We introduce a
+geometry-aware message passing framework that decouples radial and angular channels
+and enforces equivariance only where it is needed, cutting parameter count by
+$3.4\times$ without sacrificing expressivity. Across four benchmarks we observe
+consistent improvements under distribution shift, with the largest gains on
+out-of-distribution defect configurations. We further show that the learned
+representations transfer to downstream property prediction with minimal fine-tuning,
+and we release code, trained weights, and evaluation splits.
+\end{abstract}
+
+\printkeywords
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+\label{sec:intro}
+
+Open the paper with the problem, not with the field.\footnote{Footnotes get a short
+brand-colored rule and extra separation --- use them for asides, not citations.}
+State what is broken, why the
+obvious fix fails, and what this work does about it~\citep{gilmer2017neural}. The
+template's job is to stay out of the way while you do that.
+
+A \texttt{\textbackslash paragraph} makes a good run-in lead for a claim.
+
+\paragraph{Contributions} We make three:
+\begin{enumerate}
+  \item A decoupled radial--angular message passing scheme that is equivariant by
+        construction on the angular channel only (\cref{sec:method}).
+  \item A theoretical characterisation of when partial equivariance suffices
+        (\cref{thm:expressivity}).
+  \item Empirical gains on four benchmarks under distribution shift
+        (\cref{sec:experiments}), with code and weights released.
+\end{enumerate}
+
+\begin{kilkey}
+Use this box sparingly --- once or twice per paper, for the sentence you want a
+skimming reviewer to actually read. It is the one element on the page that is
+allowed to shout.
+\end{kilkey}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Related work}
+\label{sec:related}
+
+Group related work thematically, not chronologically. Numeric citations compress
+nicely~\citep{gilmer2017neural, schutt2018schnet, batzner2022e3nn}; switch to
+author--year with \texttt{citestyle=authoryear} if a venue demands it.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Method}
+\label{sec:method}
+
+Let $\mathcal{G} = (\mathcal{V}, \mathcal{E})$ be an atomic graph with node features
+$\vect{h}_i \in \R^{d}$ and relative positions $\vect{r}_{ij} = \vect{x}_j - \vect{x}_i$.
+A single layer updates
+\begin{equation}
+  \label{eq:update}
+  \vect{h}_i^{(t+1)}
+    = \phi\!\left(\vect{h}_i^{(t)},\;
+      \sum_{j \in \mathcal{N}(i)}
+      \underbrace{\psi_r\!\left(\lVert \vect{r}_{ij} \rVert\right)}_{\text{radial}}
+      \odot
+      \underbrace{\psi_a\!\left(\hat{\vect{r}}_{ij}\right)}_{\text{angular}}
+      \odot \vect{h}_j^{(t)}\right),
+\end{equation}
+where $\odot$ is the Hadamard product and $\hat{\vect{r}}_{ij}$ the unit direction.
+Because $\psi_r$ depends only on the distance, it is invariant; equivariance is
+therefore required of $\psi_a$ alone --- which is exactly the saving we exploit.
+
+\begin{definition}[Local environment]
+\label{def:env}
+The \emph{$k$-body local environment} of node $i$ is the multiset of relative
+positions $\{\vect{r}_{ij} : j \in \mathcal{N}(i)\}$, taken up to global rotation.
+Two nodes are \emph{indistinguishable} if their environments agree on every $k$-body
+correlation up to degree $\ell$.
+\end{definition}
+
+\begin{assumption}[Bounded local geometry]
+\label{as:bounded}
+Every neighbourhood $\mathcal{N}(i)$ lies within a ball of radius $r_{\max}$ and
+contains at most $k$ atoms.
+\end{assumption}
+
+\begin{theorem}[Expressivity under partial equivariance]
+\label{thm:expressivity}
+Under \cref{as:bounded}, the family defined by \cref{eq:update} separates any two
+local environments (\cref{def:env}) distinguishable by the $k$-body correlation
+function, provided $\psi_a$ spans spherical harmonics up to degree $\ell \geq 2$.
+\end{theorem}
+
+\begin{proof}
+Sketch the argument here and defer the full derivation to \cref{sec:proofs}. The
+brand-violet square that closes this block marks the end of a completed argument.
+\end{proof}
+
+For a claim you finish later, use \texttt{proofsketch} instead: it carries no
+closing square, so the reader knows the argument is deferred, not done.
+
+\begin{lemma}[Radial invariance]
+\label{lem:radial}
+The radial channel $\psi_r(\lVert\vect{r}_{ij}\rVert)$ is invariant to any rotation
+of the input configuration.
+\end{lemma}
+
+\begin{proofsketch}
+$\lVert\vect{r}_{ij}\rVert$ is a norm, hence rotation-invariant; $\psi_r$ acts on it
+pointwise. The full argument, including the boundary case $r_{ij}\!\to\!0$, is in
+\cref{sec:proofs}.
+\end{proofsketch}
+
+\begin{remark}
+Partial equivariance is a modelling choice, not a limitation of the data: on the
+angular channel it is required, on the radial channel it is free. Separating the two
+is what buys the $3.4\times$ parameter reduction.
+\end{remark}
+
+\begin{algorithm}[t]
+\caption{Geometry-aware message passing (one layer)}
+\label{alg:gamp}
+\begin{algorithmic}[1]
+  \Require node features $\{\vect{h}_i\}$, positions $\{\vect{x}_i\}$, cutoff $r_{\max}$
+  \Ensure updated features $\{\vect{h}_i'\}$
+  \For{each node $i \in \mathcal{V}$}
+    \State $\mathcal{N}(i) \gets \{ j : \lVert \vect{x}_j - \vect{x}_i \rVert < r_{\max} \}$
+    \State $\vect{m}_i \gets \sum_{j \in \mathcal{N}(i)} \psi_r(\lVert \vect{r}_{ij}\rVert)
+             \odot \psi_a(\hat{\vect{r}}_{ij}) \odot \vect{h}_j$
+    \State $\vect{h}_i' \gets \phi(\vect{h}_i, \vect{m}_i)$
+  \EndFor
+  \State \Return $\{\vect{h}_i'\}$
+\end{algorithmic}
+\end{algorithm}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Experiments}
+\label{sec:experiments}
+
+\begin{figure}[t]
+  \centering
+  \kilgraphics{figures/example-figure.pdf}
+  \caption{\textbf{Convergence and per-benchmark accuracy.}
+    \textbf{a}, Validation accuracy over training; shaded bands are $\pm 1$ s.d. over
+    five seeds. \textbf{b}, Macro-F1 on four benchmarks. The lead-in sentence is bold,
+    the rest is not --- readers scan the bold and stop if it does not concern them.}
+  \label{fig:results}
+\end{figure}
+
+\Cref{fig:results} reports convergence and final accuracy; \cref{tab:main} breaks the
+result down per dataset. The out-of-distribution split contains relaxed \ce{TiO2} and
+\ce{ZnO} supercells with oxygen vacancies; force errors stay below
+\qty{28}{\milli\electronvolt\per\angstrom} at a band gap of \qty{3.2}{\electronvolt}
+(units via \texttt{siunitx}: \verb|\qty{3.2}{\electronvolt}|; formulas via
+\texttt{mhchem}: \verb|\ce{TiO2}|). Regenerate the figure with
+\texttt{python figures/make-figure.py} --- it already uses the lab palette.
+
+\begin{table}[t]
+  \centering
+  \caption{\textbf{Main results.} Macro-F1 ($\uparrow$), mean over five seeds.
+    \best{Bold} is best, \runnerup{underlined} is second.}
+  \label{tab:main}
+  \small
+  \begin{tabular}{@{}lcccc@{}}
+    \toprule
+    \kilth{Model} & \kilth{QM9} & \kilth{MD17} & \kilth{OC20} & \kilth{MatBench} \\
+    \midrule
+    SchNet                & 0.71 & 0.68 & 0.63 & 0.74 \\
+    NequIP                & \runnerup{0.76} & \runnerup{0.74} & \runnerup{0.70} & \runnerup{0.79} \\
+    \textbf{Ours}         & \best{0.88}\gain{12} & \best{0.85}\gain{11}
+                          & \best{0.81}\gain{11} & \best{0.90}\gain{11} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsection{Ablations}
+\label{sec:ablations}
+
+Strip one component at a time and report what breaks. A short code excerpt is fine
+when the idea is easier read than described:
+
+\begin{lstlisting}[caption={Angular channel, in full. Keywords set in violet, strings
+  in teal, numeric literals in amber; a wrapped line gets a
+  $\hookrightarrow$ marker, and pasted unicode (the µ below) survives.}]
+def angular(self, r_hat, lmax=2, eps=1e-6):
+    """Spherical harmonics up to degree lmax; equivariant by construction."""
+    assert r_hat.norm(dim=-1).sub(1).abs().max() < eps, 'unit vectors only'
+    feats = torch.cat([sph_harm(l, r_hat) for l in range(lmax + 1)], dim=-1)
+    return feats  # per-channel scale learned downstream; grid spacing in µm, tuned once on the held-out split and then frozen
+\end{lstlisting}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Discussion}
+\label{sec:discussion}
+
+Say what the result does \emph{not} show. Reviewers trust papers that police
+themselves, and it costs one paragraph.\todo{margin notes like this one appear only
+in \texttt{review} builds --- write yourself reminders freely}
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+One paragraph. No new claims.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% BACK MATTER
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{kilrepro}
+All experiments run on a single A100 (40\,GB) in under six hours. Seeds, splits, and
+environment files are in the repository; \texttt{make reproduce} regenerates every
+number in \cref{tab:main}.
+\end{kilrepro}
+
+\begin{contributions}
+C.P.\ and A.R.\ contributed equally: C.P.\ designed the angular channel and ran the
+QM9 and MD17 experiments; A.R.\ built the training infrastructure and the OC20
+pipeline. M.-L.C.\ contributed the theoretical analysis. S.A.-N.\ curated the defect
+benchmark. H.K.\ supervised the project and wrote the paper with input from all
+authors.
+\end{contributions}
+
+\begin{acknowledgments}
+We thank the members of the Kurban Intelligence Lab for discussions, and the HBKU
+research computing team for support. (In \texttt{blind} mode this section is dropped
+automatically --- you cannot forget to strip it.)
+\end{acknowledgments}
+
+\begin{funding}
+This work was supported by [grant number], [funder].
+\end{funding}
+
+\begin{availability}
+% This section SURVIVES blind mode (most venues require it), so the URL is yours
+% to anonymize -- \ifbool{KIL@blind}{...}{...} does it for you, every time.
+Code, trained weights, and evaluation splits:
+\ifbool{KIL@blind}
+  {\url{https://anonymous.4open.science/r/XXXXXX}}
+  {\url{https://github.com/KurbanIntelligenceLab/geometry-aware-mpnn}}.
+Datasets are public and cited in \cref{sec:experiments}.
+\end{availability}
+
+\begin{conflicts}
+The authors declare no competing interests.
+\end{conflicts}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibliography{references}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\appendix
+\section{Proofs}
+\label{sec:proofs}
+
+Appendix sections are lettered; figures, tables and equations restart at A1
+automatically.
+
+The pattern below is the one to copy for a deferred proof: restate the result with
+the \emph{starred} environment so it carries the original number rather than minting
+a new one, then give the full argument under a \emph{named} proof.
+
+\begin{theorem*}[Restatement of \cref{thm:expressivity}]
+Under \cref{as:bounded}, the family defined by \cref{eq:update} separates any two
+local environments distinguishable by the $k$-body correlation function, provided
+$\psi_a$ spans spherical harmonics up to degree $\ell \geq 2$.
+\end{theorem*}
+
+\begin{proof}[Proof of \cref{thm:expressivity}]
+Expand $\psi_a$ in the spherical-harmonic basis and match coefficients degree by
+degree; \cref{lem:radial} removes the radial channel from the argument, leaving a
+finite linear system whose solvability is exactly the stated degree condition. The
+gradient bound in \cref{eq:appendix} then controls the estimation error.
+\end{proof}
+
+\begin{equation}
+  \label{eq:appendix}
+  \E\!\left[\lVert \nabla_{\theta} \mathcal{L} \rVert^2\right] \leq \sigma^2 / B.
+\end{equation}
+
+\section{Additional results}
+\label{sec:extra}
+
+This appendix doubles as a pattern library: side-by-side panels, decimal-aligned
+numbers, merged cells, and a table footnote --- copy whichever you need.
+
+\begin{figure}[t]
+  \centering
+  \begin{subfigure}[t]{0.48\linewidth}
+    \kilgraphics{figures/example-panel-a.pdf}
+    \caption{Convergence.}
+    \label{fig:panel-a}
+  \end{subfigure}\hfill
+  \begin{subfigure}[t]{0.48\linewidth}
+    \kilgraphics{figures/example-panel-b.pdf}
+    \caption{Per-benchmark accuracy.}
+    \label{fig:panel-b}
+  \end{subfigure}
+  \caption{\textbf{Subfigures.} Each panel gets its own caption and label, so
+    \cref{fig:panel-a} and \cref{fig:panel-b} resolve independently.}
+  \label{fig:panels}
+\end{figure}
+
+\begin{table}[t]
+  \centering
+  \caption{\textbf{Training configuration.} \texttt{S} columns align on the decimal
+    point; \texttt{\textbackslash multirow} merges the stage cells.}
+  \label{tab:hparams}
+  \small
+  \begin{tabular}{@{}ll S[table-format=1.4] S[table-format=3.0] c@{}}
+    \toprule
+    \kilth{Stage} & \kilth{Component} & {\kilth{LR}} & {\kilth{Epochs}} & \kilth{Frozen}\\
+    \midrule
+    \multirow{2}{*}{Pretrain} & Encoder & 0.001  & 300 & --        \\
+                              & Head    & 0.001  & 300 & --        \\
+    \addlinespace
+    \multirow{2}{*}{Fine-tune}& Encoder & 0.0002 &  60 & \dag      \\
+                              & Head    & 0.001  &  60 & --        \\
+    \bottomrule
+  \end{tabular}
+  \tabnote{\dag~Frozen for the first 10 epochs, then released. Five seeds each.}
+\end{table}
+
+\FloatBarrier % keeps the patterns above from drifting into whatever follows
+
+\section{Theorem environments}
+\label{sec:thm-gallery}
+
+Every statement type in the lab style, in one place. All share a single counter, so
+they number in one honest sequence and \verb|\cref| resolves each by its own name.
+Italic bodies mark formal, to-be-proved results; upright bodies mark statements that
+are read rather than proved. Copy whichever fits.
+
+\begin{proposition}
+\label{prop:demo}
+Formal results are set in italic: \texttt{theorem}, \texttt{lemma},
+\texttt{proposition}, \texttt{corollary}, \texttt{conjecture}, \texttt{claim}.
+\end{proposition}
+
+\begin{corollary}
+A \texttt{corollary} shares the counter with the result it follows from, so
+\cref{prop:demo} and this statement read as one numbered thread.
+\end{corollary}
+
+\begin{conjecture}
+The bound in \cref{eq:appendix} is tight for every neighbourhood size $k$. Stated as
+a \texttt{conjecture} because we have not proved it.
+\end{conjecture}
+
+\begin{claim}
+\label{clm:demo}
+A \texttt{claim} is a lightweight formal assertion, useful mid-proof.
+\end{claim}
+
+\begin{proof}[Proof of \cref{clm:demo}]
+A named proof takes the statement it settles as its optional argument.
+\end{proof}
+
+\begin{condition}
+Upright statements read, not prove: \texttt{condition}, \texttt{property},
+\texttt{problem}, \texttt{question}, \texttt{example}, \texttt{fact},
+\texttt{observation}, \texttt{notation}.
+\end{condition}
+
+\begin{property}
+Closure under composition is a \texttt{property}, not a theorem, when it needs no
+argument to see.
+\end{property}
+
+\begin{example}
+Set $k = 4$ and $\ell = 2$: \cref{thm:expressivity} then separates any two
+tetrahedral environments. An \texttt{example} grounds an abstract claim in a case.
+\end{example}
+
+\begin{observation}
+Empirically, degree $\ell = 2$ already saturates accuracy on all four benchmarks. An
+\texttt{observation} records something noticed, short of a formal result.
+\end{observation}
+
+\begin{fact}
+A \texttt{fact} states something standard and uncontested, cited or self-evident.
+\end{fact}
+
+\begin{problem}
+Extend the separation guarantee to periodic crystals. Stated as an open
+\texttt{problem} for future work.
+\end{problem}
+
+\begin{question}
+Does partial equivariance help outside materials, on molecular property prediction? A
+\texttt{question} frames a direction without committing to an answer.
+\end{question}
+
+\begin{notation}
+Throughout, $\lVert\cdot\rVert$ is the Euclidean norm and $\hat{\vect{r}}$ the unit
+vector. A \texttt{notation} block fixes symbols once, up front.
+\end{notation}
+
+\begin{remark}
+A \texttt{remark} carries a quieter slate head, so it sits back from the formal
+results around it. Use it for asides the reader can skip without losing the argument.
+\end{remark}
+
+\FloatBarrier
+
+\end{document}

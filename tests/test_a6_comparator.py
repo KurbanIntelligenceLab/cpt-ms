@@ -92,20 +92,60 @@ def test_mean_sd_pairs_are_indexed_not_averaged():
         )
 
 
-def test_the_variance_reduction_is_real_and_quoted():
-    """The mechanism behind the claim: per-step bounding concentrates the total."""
-    p = _p("A2_training_summary.json")
-    a3 = p["arms"]["A3_deployed"]["charge_variance"][0]
-    a2 = p["arms"]["A2_masked"]["charge_variance"][0]
-    assert a3 < a2, (
-        f"A3's charge variance {a3:.3f} is not below A2's {a2:.3f}; the concentration "
-        f"mechanism the claim rests on is absent"
+def test_concentration_is_measured_against_the_optimum_not_the_unconstrained_arm():
+    """The claim is concentration relative to the SEQUENCE-LEVEL OPTIMUM.
+
+    An earlier draft compared A3's charge variance against the unconstrained arm, which is a
+    true statement answering a different question: any constraint concentrates relative to no
+    constraint. The claim being made is that the projection concentrates where the optimum
+    does not, so the comparison must name the optimum. A reviewer caught this; the test keeps
+    it caught.
+    """
+    a2p = _p("A2_training_summary.json")
+    a6p = _p("WS7_a6_tilt_comparator.json")
+    a3 = a2p["arms"]["A3_deployed"]["charge_variance"][0]
+    a2 = a2p["arms"]["A2_masked"]["charge_variance"][0]
+    tilt = a6p["reference"]["tilt"]["charge_variance"]
+    a6 = a6p["summary"]["charge_variance"]["mean"]
+    a6_sd = a6p["summary"]["charge_variance"]["sd"]
+    assert a3 < tilt, (
+        f"A3's charge variance {a3:.3f} is not below the optimum's {tilt:.3f}; the "
+        f"concentration claim as stated does not hold"
+    )
+    assert a6 - 3 * a6_sd > a3, (
+        f"the A3-vs-A6 variance gap is inside three A6 seed sds ({a6:.3f} +/- {a6_sd:.3f} "
+        f"against {a3:.3f}); it must not be reported as established"
     )
     if NOTES.exists():
         txt = re.sub(r"\s+", " ", NOTES.read_text())
-        assert f"{a2 / a3:.1f}" in txt, (
-            "the variance reduction factor must be stated, since it is what the surrogate "
-            "buys in exchange for its excess divergence"
+        assert f"{tilt / a3:.2f}" in txt, (
+            f"the notes must state the factor against the OPTIMUM ({tilt / a3:.2f}), which is "
+            f"the claim; the factor against the unconstrained arm ({a2 / a3:.1f}) is a "
+            f"different and weaker statement"
+        )
+        assert f"{tilt:.3f}" in txt and f"{a6:.3f}" in txt, (
+            "both the exact optimum's and A6's variance must appear; a blank cell there was "
+            "the original defect"
+        )
+
+
+def test_the_optimum_anti_concentrates_relative_to_the_data():
+    """The optimum's variance EXCEEDS the distribution it started from.
+
+    This is the mechanism, and it is stronger than 'the optimum does not concentrate'. If a
+    later run reversed it, the prose would be wrong in a way no other test would catch.
+    """
+    a6p = _p("WS7_a6_tilt_comparator.json")
+    tilt = a6p["reference"]["tilt"]["charge_variance"]
+    base = a6p["reference"]["base_S_conditioned"]["charge_variance"]
+    assert tilt > base, (
+        f"the optimum's charge variance {tilt:.3f} does not exceed the S-conditioned data's "
+        f"{base:.3f}; the anti-concentration statement in the prose is unsupported"
+    )
+    if NOTES.exists():
+        txt = re.sub(r"\s+", " ", NOTES.read_text())
+        assert f"{100 * (tilt / base - 1):.1f}%" in txt, (
+            "the notes must quote how far above the data the optimum sits"
         )
 
 

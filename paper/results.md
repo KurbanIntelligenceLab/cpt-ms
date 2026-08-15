@@ -179,8 +179,9 @@ comparison informative.
 |---|---|---|---|
 | A2, mask only | +2.4694 ± 0.0807 | 0.9083 | 8.762 |
 | A3 deployed, projection | +0.0170 ± 0.0014 | 0.6155 | 1.547 |
-| A6, trained toward the tilt | -0.0619 ± 0.1220 | 0.8751 | — |
-| tilt, exact optimum | +0.0000 | 0.8755 | — |
+| A6, trained toward the tilt | -0.0619 ± 0.1220 | 0.8751 | 10.362 ± 0.242 |
+| tilt, exact optimum | +0.0000 | 0.8755 | 10.452 |
+| data, S-conditioned | +2.5164 | 0.9109 | 8.564 |
 
 Both arms satisfy the expectation constraint, and A6's seed spread is wider than the gap between
 them, so no ordering on mean charge is established. The difference that is not seed noise is
@@ -192,13 +193,20 @@ The reading that follows is not that the surrogate approximates the tilt better.
 the tilt than the induced distribution is. It is that the surrogate approximates a different
 distribution, and on this task the different distribution is closer to what a request for a
 constraint usually means. Bounding an expected increment at every step bounds the total in
-expectation and also concentrates it: A3's charge variance is 1.547 against A2's 8.762, a factor of
-5.7. The tilt has no such mechanism — it is the KL-closest distribution with the right mean, and
-the cheapest way to buy a mean of zero from a distribution centred at +2.469 is to move mass to
-both extremes, which is why it violates more per sequence than the model it started from.
+expectation and also concentrates it, and the comparison that establishes this is against the
+optimum rather than the unconstrained arm: A3's charge variance is 1.547 against the exact tilt's
+10.452 and A6's 10.362 ± 0.242, a factor of 6.76 lower than the optimum, a gap exceeding three
+A6 seed standard deviations.
+
+The direction of the optimum's effect is itself the finding. The tilt is the KL-closest distribution
+with the right mean, and the cheapest way to buy a mean of zero from a distribution centred at
++2.469 is to move mass to both extremes — so it raises charge variance 22.1% above the
+S-conditioned data it started from, while the projection lowers it 81.9%. Ordered: projection
+1.547, data 8.564, optimum 10.452. That is why the optimum violates more per sequence than
+the model it started from.
 
 The surrogate's 1.025-nat excess divergence is therefore not a pure loss. It purchases a variance
-reduction the sequence-level optimum does not offer, and a per-sequence violation rate 1.42 times
+reduction the sequence-level optimum not only fails to provide but reverses, and a per-sequence violation rate 1.42 times
 lower than that optimum. Whether that trade is wanted depends on whether "most samples satisfy the
 constraint" or "the average satisfies it" is the requirement.
 

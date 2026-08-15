@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "artifact_name": "WS7_a6_tilt_comparator",
   "script": "scripts/synthetic/train_a6.py",
-  "git_commit": "dd1a93acacc795b88f91c17e8125714714adeacb-dirty",
+  "git_commit": "a8eb1b36947bca493c2aaa8fd366673902942d08-dirty",
   "config": {
     "steps": 4000,
     "seeds": [
@@ -19,10 +19,10 @@
     1,
     2
   ],
-  "created_utc": "2026-08-15T18:40:58.610101+00:00",
+  "created_utc": "2026-08-15T20:43:38.686435+00:00",
   "python": "3.11.15",
   "platform": "macOS-26.5.2-arm64-arm-64bit",
-  "payload_sha256": "8b2b54df6612632879f87f012fa4f749019ac78ec02a264c692f7e1acb505b29",
+  "payload_sha256": "9a1d0e1feb46dfe9f3807d59ce7388dc195ff208ce0a65cbdd6a3f76c9b8e316",
   "payload": {
     "arm": "A6: MLE on exact samples from the sequence-level tilt, mask active",
     "why_this_training_rule": "the tilt is closed-form here, so MLE on its exact samples is DPG's fixed point with unit importance weights -- A6 therefore gets the best case of the method it stands for, and no gradient-estimator artefact can be blamed for the result",
@@ -36,6 +36,7 @@
     "reference": {
       "tilt": {
         "mean_charge": 1.1102230246251565e-16,
+        "charge_variance": 10.451958002729187,
         "kl_from_tilt": 0.0,
         "kl_to_tilt": 0.0,
         "tv_vs_tilt": 0.0,
@@ -46,6 +47,7 @@
       },
       "base_S_conditioned": {
         "mean_charge": 2.5164330452453623,
+        "charge_variance": 8.56361361318514,
         "kl_from_tilt": 0.33472174465442883,
         "kl_to_tilt": 0.3131795201058082,
         "tv_vs_tilt": 0.32339368639638033,
@@ -58,8 +60,9 @@
     "runs": [
       {
         "seed": 0,
-        "wall_clock_s": 803.8,
+        "wall_clock_s": 234.8,
         "mean_charge": -0.14804046411416227,
+        "charge_variance": 10.495788802407326,
         "kl_from_tilt": 0.012084359150077405,
         "kl_to_tilt": 0.01223571123227516,
         "tv_vs_tilt": 0.06147656191741633,
@@ -70,8 +73,9 @@
       },
       {
         "seed": 1,
-        "wall_clock_s": 424.9,
+        "wall_clock_s": 254.0,
         "mean_charge": -0.11535111556570482,
+        "charge_variance": 10.082800864169768,
         "kl_from_tilt": 0.016323407906249886,
         "kl_to_tilt": 0.016649962223213396,
         "tv_vs_tilt": 0.07128359608838367,
@@ -82,8 +86,9 @@
       },
       {
         "seed": 2,
-        "wall_clock_s": 273.0,
+        "wall_clock_s": 271.1,
         "mean_charge": 0.07771871539669939,
+        "charge_variance": 10.507015800986956,
         "kl_from_tilt": 0.02162244878363467,
         "kl_to_tilt": 0.021283343441905727,
         "tv_vs_tilt": 0.08127268775748965,
@@ -97,6 +102,10 @@
       "mean_charge": {
         "mean": -0.061890954761055904,
         "sd": 0.1220053006155821
+      },
+      "charge_variance": {
+        "mean": 10.361868489188018,
+        "sd": 0.2417448362928797
       },
       "kl_from_tilt": {
         "mean": 0.016676738613320655,

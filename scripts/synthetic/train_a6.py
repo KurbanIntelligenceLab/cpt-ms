@@ -66,8 +66,15 @@ def main(steps: int | None = None, seeds=None, smoke: bool = False) -> Path:
 
     def stats(q: np.ndarray) -> dict:
         m = q > 0
+        mu = float((q * charge).sum())
         return {
-            "mean_charge": float((q * charge).sum()),
+            "mean_charge": mu,
+            # CHARGE VARIANCE IS THE CONCENTRATION QUANTITY, and it belongs on every arm
+            # including the exact optimum. The claim is that per-step bounding concentrates
+            # the constrained total RELATIVE TO THE SEQUENCE-LEVEL OPTIMUM; comparing only
+            # against the unconstrained arm answers a different question. Exact here,
+            # because the distribution is enumerated rather than sampled.
+            "charge_variance": float((q * (charge - mu) ** 2).sum()),
             "kl_from_tilt": kl(tilt, q),
             "kl_to_tilt": kl(q, tilt),
             "tv_vs_tilt": tv(q, tilt),
@@ -113,7 +120,7 @@ def main(steps: int | None = None, seeds=None, smoke: bool = False) -> Path:
         return {"mean": float(np.mean(vals)),
                 "sd": float(np.std(vals, ddof=1)) if len(vals) > 1 else 0.0}
 
-    fields = ["mean_charge", "kl_from_tilt", "kl_to_tilt", "tv_vs_tilt",
+    fields = ["mean_charge", "charge_variance", "kl_from_tilt", "kl_to_tilt", "tv_vs_tilt",
               "kl_from_base", "mass_outside_S", "hard_violation_rate"]
 
     payload = {

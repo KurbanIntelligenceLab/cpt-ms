@@ -38,8 +38,9 @@ comparison is not between a working method and a broken one.
 |---|---|---|---|
 | A2, mask only | +2.4694 ± 0.0807 | 0.9083 | 8.762 |
 | A3 deployed, projection | +0.0170 ± 0.0014 | 0.6155 | 1.547 |
-| A6, trained toward the tilt | -0.0619 ± 0.1220 | 0.8751 | — |
-| tilt, exact optimum | +0.0000 | 0.8755 | — |
+| A6, trained toward the tilt | -0.0619 ± 0.1220 | 0.8751 | 10.362 ± 0.242 |
+| tilt, exact optimum | +0.0000 | 0.8755 | 10.452 |
+| data, S-conditioned | +2.5164 | 0.9109 | 8.564 |
 
 Both arms satisfy the expectation constraint. A3's mean charge is 3.6 times closer to zero than
 A6's, but A6's seed spread (0.1220) is larger than that gap, so the ordering on mean charge is
@@ -57,10 +58,17 @@ different thing, and on this task the different thing is closer to what someone 
 constraint usually wants.
 
 Bounding an expected increment at every step bounds the total in expectation, and it also
-concentrates it: A3's charge variance is 1.547 against A2's 8.762, a factor of 5.7 reduction. The
-sequence-level tilt has no such mechanism — it is the KL-closest distribution with the right mean,
-and the cheapest way to buy a mean of zero from a distribution centred at +2.469 is to move mass to
-both extremes. That is why the tilt violates more per sequence than the model it started from.
+concentrates it. The comparison that matters is against the optimum, not against the unconstrained
+arm: A3's charge variance is 1.547 against the exact tilt's 10.452 and A6's 10.362 ± 0.242, a factor of
+6.76 lower than the optimum it approximates. The gap exceeds three A6 seed standard deviations.
+
+The sequence-level tilt has no concentrating mechanism, and the direction of its effect is the
+finding. It is the KL-closest distribution with the right mean, and the cheapest way to buy a mean of
+zero from a distribution centred at +2.469 is to move mass to both extremes. So the optimum does not
+merely fail to concentrate: it raises charge variance 22.1% above the S-conditioned data
+distribution it started from (10.452 against 8.564), while the projection lowers it 81.9%. The
+three-way ordering is projection 1.547, data 8.564, optimum 10.452. That is why the tilt
+violates more per sequence than the model it started from.
 
 So the surrogate's 1.025-nat excess divergence from the tilt, measured earlier, is not a pure loss.
 It buys a variance reduction the tilt does not offer and a per-sequence violation rate 1.42 times
