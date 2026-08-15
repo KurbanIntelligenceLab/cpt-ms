@@ -139,3 +139,47 @@ def test_preregistered_decision_rule_is_two_part_and_satisfied():
             "equivalence is claimed at the margin but the pre-registered second condition "
             "(p < 0.05 at a 0.10 margin) is not met"
         )
+
+
+def test_crossing_counts_in_prose_match_the_artifact():
+    """The n-to-match counts are easy to hardcode and were once wrong.
+
+    A reviewer caught 'four targets' where the artifact gives five. These counts are now
+    recomputed from the best-of-n rows against the published frontier and asserted against
+    the prose, so a literal cannot drift from the data again.
+    """
+    bon = _load("WS6_best_of_n.json")
+    front = RES / "WS3_steering_frontier_rows.json"
+    if not front.exists():
+        pytest.skip("frontier artifact absent")
+    rows = json.loads(front.read_text())["payload"]["rows"]
+    by_t: dict[float, list[float]] = {}
+    for v in rows.values():
+        by_t.setdefault(v["target"], []).append(v["deployed_density"])
+    proj = {t: abs(sum(v) / len(v) - t) for t, v in by_t.items()}
+
+    be: dict[float, dict[int, float]] = {}
+    for r in bon["rows"]:
+        be.setdefault(r["target"], {})[r["n"]] = r["mean_best_error"]
+
+    ns = sorted(bon["n_values"])
+    cross = {t: next((n for n in ns if be[t][n] <= proj[t]), None)
+             for t in proj if t in be}
+    n_any = sum(1 for v in cross.values() if v is not None)
+    n_at_smallest_useful = sum(1 for v in cross.values() if v == 4)
+
+    for name in ("reports/WS6_external_baselines_notes.md", "paper/results.md"):
+        f = ROOT / name
+        if not f.exists():
+            continue
+        txt = re.sub(r"\s+", " ", f.read_text())
+        assert f"{n_any} of {len(cross)} targets" in txt, (
+            f"{name} does not carry the recomputed crossing count "
+            f"{n_any} of {len(cross)}"
+        )
+        if "n = 4" in txt:
+            assert f"at {n_at_smallest_useful} targets within n = 4" in txt or \
+                   f"at {n_at_smallest_useful} targets it needs only n = 4" in txt, (
+                f"{name} states an n=4 crossing count that disagrees with the artifact's "
+                f"{n_at_smallest_useful}"
+            )

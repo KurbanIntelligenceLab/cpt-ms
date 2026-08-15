@@ -148,7 +148,7 @@ all: draw n samples from the unsteered model and keep whichever lands closest to
 One model serves every target, so it amortizes perfectly by construction.
 
 Measured against the projection's published frontier error, best-of-n reaches it at
-8 of 10 targets within n = 64, and at four targets within n = 4. Drawn from a pool of
+8 of 10 targets within n = 64, and at 5 targets within n = 4. Drawn from a pool of
 1024 samples from the same checkpoint's backbone reading, with expected error estimated by
 repeated subsampling rather than by the pool's best single draw, the errors at target 5.0 run
 4.303, 1.006, 0.250 and 0.073 for n of 1, 4, 16 and 64, against the projection's 0.151.

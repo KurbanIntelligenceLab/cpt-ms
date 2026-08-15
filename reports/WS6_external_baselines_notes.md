@@ -29,7 +29,7 @@ Results.
 | 16.0 | 6.125 | 7.906 | 4.269 | 1.480 | 0.448 | 4 | 0.245 |
 | 20.0 | 9.595 | 11.854 | 6.972 | 3.149 | 0.950 | 4 | 0.250 |
 
-Best-of-n reaches the projection's accuracy at 8 of 10 targets within n = 64, and at four
+Best-of-n reaches the projection's accuracy at 8 of 10 targets within n = 64, and at 5
 targets it needs only n = 4. This is a stronger baseline than conditional training and it
 amortizes perfectly across targets, since one unsteered model serves every target. Reporting
 it is not optional and dismissing it would be indefensible.
