@@ -139,6 +139,57 @@ satisfying one budget are the atoms the other needs. Density steering is unaffec
 throughout (3.281, 3.041, 3.071 against target 3.0, against a control at 3.175) and
 structural validity stays exactly 1.0000.
 
+## Best-of-n is the strongest amortizer, and it wins on accuracy
+
+`results/WS6_best_of_n.json`
+
+Conditional training is not the strongest baseline available. Best-of-n needs no training at
+all: draw n samples from the unsteered model and keep whichever lands closest to the target.
+One model serves every target, so it amortizes perfectly by construction.
+
+Measured against the projection's published frontier error, best-of-n reaches it at
+8 of 10 targets within n = 64, and at four targets within n = 4. Drawn from a pool of
+1024 samples from the same checkpoint's backbone reading, with expected error estimated by
+repeated subsampling rather than by the pool's best single draw, the errors at target 5.0 run
+4.303, 1.006, 0.250 and 0.073 for n of 1, 4, 16 and 64, against the projection's 0.151.
+On accuracy alone the projection loses.
+
+Accuracy alone is the wrong comparison, and the reason is measurable rather than rhetorical.
+Best-of-n buys accuracy by discarding samples, so the accepted set concentrates on the pool's
+tail near the target: unique-formula fraction among accepted outputs falls from 0.805 at
+n = 1 to 0.205 at n = 64, consistently across all ten targets. The projection arm's unique
+fraction at the same target is 0.782 — above best-of-16 and more than three times best-of-64.
+Selection filters a distribution and its diversity degrades as the target gets harder to hit;
+shaping moves the distribution and its diversity does not.
+
+The costs also fall in different places. Best-of-n pays n forward passes per accepted output,
+at every target, indefinitely; the projection pays one training run and one forward pass per
+output. At n = 64 that is a standing 64x inference multiplier against a one-time training cost.
+
+The claim this supports is therefore narrower than accuracy parity. Among the arms measured
+here, the projection is the only one that reaches target accuracy without either a per-target
+training run or a per-output sampling multiplier, and the only one whose output diversity is
+independent of how hard the target is to hit.
+
+## Amortized control by finite automaton is a different constraint class, not a smaller one
+
+`results/CP8_automaton_size.json`
+
+Methods that compile a constraint into a deterministic automaton over tokens amortize across
+constraints without retraining, which is the word this paper uses for its own claim, so the
+distinction needs stating. The intuitive one — that a real-valued running budget needs an
+intractable automaton — is arithmetic, and it does not hold. The budget spans 4397 amu and
+the serialization's own discretization floor is 0.0020 relative, since cell parameters are
+emitted as bin indices; at the finest expressible tolerance the budget needs 100 states and
+88,400 once multiplied by parse position, which is 0.02x the controlled model's
+parameter count and entirely buildable.
+
+The real distinction is per-instance construction. The budget bound is compiled into the
+transition structure, so each target is a separate automaton — about 884,000 states across the
+ten frontier targets — while the dual solve takes the target as a runtime argument. Automaton
+methods amortize across constraints at a fixed model; this work amortizes across targets of one
+constraint at a fixed model. Neither subsumes the other.
+
 ## The expressible class has a boundary
 
 `results/CP7_second_channel.json`

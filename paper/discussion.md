@@ -22,7 +22,16 @@ because the running budget eventually demands more mass per atom than any legal 
 supplies, and training's ability to repair that infeasibility decays to nothing at the
 extreme.
 
-Amortization is the result that changes what the method is for. Because the target enters
+Amortization is the result that changes what the method is for, and measuring it against the
+strongest available baseline narrowed the claim rather than confirming it. Best-of-n from the
+unsteered model needs no training and serves every target from one checkpoint, and given enough
+samples it is more accurate than the projection at most targets. Any framing of amortization as
+an accuracy advantage is therefore unavailable. What survives is narrower and, being measured
+against the harder comparator, more durable: the projection reaches target accuracy without a
+per-target training run and without a per-output sampling multiplier, and it does so without the
+diversity collapse that selection incurs, because it shapes the distribution rather than
+filtering it. Selection's diversity degrades precisely as the target gets harder to hit, which
+is where a generative model is wanted. Because the target enters
 the dual solve as an argument, one checkpoint covers a family of targets at parity with
 separately trained models, and the comparison is a null result in the favourable direction:
 one training run is statistically indistinguishable from seven. Conditional training remains

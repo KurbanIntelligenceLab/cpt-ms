@@ -1,0 +1,82 @@
+{
+  "schema_version": "1.0",
+  "artifact_name": "CP8_automaton_size",
+  "script": "scripts/crystal/automaton_size.py",
+  "git_commit": "cf70977b8b6f981bd30bd41f444e91444ee2df63-dirty",
+  "config": {
+    "tolerances": [
+      0.1,
+      0.01,
+      0.001,
+      0.0001
+    ],
+    "model_params": 5000000
+  },
+  "config_hash": "40837f7cfcb6e944",
+  "seeds": [
+    0
+  ],
+  "created_utc": "2026-08-15T04:23:52.912263+00:00",
+  "python": "3.11.15",
+  "platform": "macOS-26.5.2-arm64-arm-64bit",
+  "payload_sha256": "b88fc4553738a200b216b5cda9b19cdef60949fba5c12ea61c3a833012cb9128",
+  "payload": {
+    "argument": "A DFA can approximate a real-valued budget by bucketing it; the question is how many buckets, and whether the resulting automaton is smaller or larger than the model it is meant to control.",
+    "budget_range_amu": {
+      "min": 21.782,
+      "max": 4419.036,
+      "span": 4397.254
+    },
+    "vocabulary": {
+      "n_tokens": 884,
+      "n_length_bins": 512,
+      "n_angle_bins": 256,
+      "discretization_floor_relative": 0.001953125,
+      "floor_note": "cell parameters are emitted as bin indices, so a tolerance finer than one bin is not expressible by this serialization and would be a spurious demand on any controller, DFA or otherwise"
+    },
+    "rows": [
+      {
+        "relative_tolerance": 0.1,
+        "absolute_tolerance_amu": 439.72540000000004,
+        "budget_states": 10,
+        "at_or_below_task_floor": false,
+        "with_parse_state_product": 8840,
+        "states_over_model_params": 0.001768
+      },
+      {
+        "relative_tolerance": 0.01,
+        "absolute_tolerance_amu": 43.97254,
+        "budget_states": 100,
+        "at_or_below_task_floor": false,
+        "with_parse_state_product": 88400,
+        "states_over_model_params": 0.01768
+      },
+      {
+        "relative_tolerance": 0.001,
+        "absolute_tolerance_amu": 4.397254,
+        "budget_states": 1000,
+        "at_or_below_task_floor": true,
+        "with_parse_state_product": 884000,
+        "states_over_model_params": 0.1768
+      },
+      {
+        "relative_tolerance": 0.0001,
+        "absolute_tolerance_amu": 0.4397254,
+        "budget_states": 10000,
+        "at_or_below_task_floor": true,
+        "with_parse_state_product": 8840000,
+        "states_over_model_params": 1.768
+      }
+    ],
+    "model_params_for_scale": 5000000,
+    "consequence": "The size objection does not hold. At the finest tolerance this serialization can express (1e-02 relative, 44.0 amu \u2014 anything finer is below the 0.0020 cell-parameter bin floor and not expressible), tracking the budget needs 100 states and 88,400 once multiplied by parse position, which is 0.02x the model's parameter count and entirely buildable. The distinction is per-instance construction, not size: the budget bound is compiled into the transition structure, so each of the 10 frontier targets is a separate automaton \u2014 about 884,000 states in total \u2014 while the dual solve takes the target as a runtime argument. DFA methods amortize across constraints at a fixed model; this paper amortizes across targets of one constraint. Neither subsumes the other.",
+    "size_argument_verdict": "REFUTED by this computation",
+    "per_target_automata": {
+      "n_frontier_targets": 10,
+      "states_each": 88400,
+      "states_total": 884000
+    },
+    "dial_is_continuous": true,
+    "note_on_amortization": "Ctrl-G and GeLaTo amortize across CONSTRAINTS at a fixed model; the claim in this paper amortizes across TARGETS of one constraint at a fixed model. Neither subsumes the other and the two are compatible."
+  }
+}

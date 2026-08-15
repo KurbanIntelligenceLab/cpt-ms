@@ -31,9 +31,12 @@ training-time label, one checkpoint deployed at seven density targets it never t
 equivalent to seven separately trained models
 (0.650 ± 0.151 against 0.662 g cm$^{-3}$; two-one-sided-tests $p$ = 0.0023 against a margin set
 by the method's own seed spread, 95% CI on the paired difference [-0.111, 0.086]).
-Conditional training remains more accurate per target, so the contribution is a different
-cost structure rather than a better number — and it is strongest where that baseline is
-weakest, since the data slice a conditional model needs thins or vanishes at unusual targets.
+The contribution is a cost structure rather than a better number: conditional training remains
+more accurate per target, and best-of-n from the unsteered model — which amortizes perfectly
+and needs no training — matches the projection at 8 of 10 targets given enough samples. What
+distinguishes the projection is that it reaches target accuracy without either a per-target
+training run or a per-output sampling multiplier, and without the diversity collapse selection
+incurs: unique-formula fraction among best-of-64 outputs is 0.20 against the projection's 0.78.
 
 Two boundaries are reported as results rather than as future work. Several constraints are
 solved simultaneously and exactly, verified at up to 4 constraints against two independent
@@ -68,7 +71,10 @@ than degrades the result. Our central claim is amortization. Because the target 
 dual solve as an argument rather than a training-time label, one checkpoint deployed at
 seven density targets it never saw is equivalent to seven separately trained models
 (0.650 ± 0.151 against 0.662 g cm$^{-3}$, TOST $p$ = 0.0023, 95% CI [-0.111, 0.086]). Conditional training stays
-more accurate per target, so this is a different cost structure rather than a better number.
+more accurate per target and best-of-n matches the projection given enough samples, so this is
+a cost structure rather than a better number: the projection is the only arm needing neither a
+per-target training run nor a per-output sampling multiplier, and selection's accuracy costs
+diversity (0.20 unique formulas at n = 64 against 0.78).
 
 We report two boundaries as results. Exact multi-constraint solving is not multi-constraint
 steering: two additive per-element quantities correlated at 0.725 fail to steer jointly

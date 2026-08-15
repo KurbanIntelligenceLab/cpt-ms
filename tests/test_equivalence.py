@@ -47,12 +47,29 @@ def test_margin_is_the_arms_own_seed_spread_not_a_chosen_number():
 
     Tying it to the retargeted arm's own within-target seed sd means it cannot be tuned
     to pass without changing the arm itself.
+
+    The pre-registered file carries the value to three decimals, which is the number the
+    analysis is bound to; the tolerance below is that rounding and nothing looser. A margin
+    that had drifted from the rule by more than a rounding step would fail here, which is
+    the property this test exists to enforce.
     """
     p = _p()
     rows = json.loads(REP.read_text())["payload"]["paired_vs_frontier"]
     want = float(np.mean([r["retarget_sd"] for r in rows]))
-    assert abs(p["equivalence"]["margin"] - want) < 1e-9, (
-        f"margin {p['equivalence']['margin']} is not the arm's mean seed sd {want}"
+    got = p["equivalence"]["margin"]
+    assert abs(got - want) <= 5e-4, (
+        f"margin {got} is not the arm's mean seed sd {want:.6f} to the pre-registered "
+        f"precision; the margin was changed or the data moved"
+    )
+    assert got == round(want, 3), (
+        f"margin {got} is not the 3-decimal rounding of the rule value {want:.6f}"
+    )
+    # And it must be the value the pre-registration actually states, not a recomputation
+    # that happens to agree: the point of pre-registering is that the file binds.
+    prereg = ROOT / "preregistration" / "WS4_equivalence_margin.md"
+    m = re.search(r"EQUIVALENCE_MARGIN_G_PER_CM3\s*=\s*([0-9.]+)", prereg.read_text())
+    assert m and float(m.group(1)) == got, (
+        "the artifact margin disagrees with the pre-registered file"
     )
 
 

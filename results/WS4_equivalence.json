@@ -2,21 +2,22 @@
   "schema_version": "1.0",
   "artifact_name": "WS4_equivalence",
   "script": "scripts/crystal/equivalence_test.py",
-  "git_commit": "e88d0deb4bf91b7ef521e843541189bb0a4054cd-dirty",
+  "git_commit": "cf70977b8b6f981bd30bd41f444e91444ee2df63-dirty",
   "config": {
     "results_dir": "results",
-    "margin_rule": "mean retarget seed sd"
+    "margin_rule": "mean retarget seed sd",
+    "margin_read_from": "WS4_equivalence_margin.md"
   },
-  "config_hash": "ee2feb4e39212323",
+  "config_hash": "3dd0b8e9d6e3749a",
   "seeds": [
     0,
     1,
     2
   ],
-  "created_utc": "2026-08-15T04:14:33.055839+00:00",
+  "created_utc": "2026-08-15T04:22:25.526382+00:00",
   "python": "3.11.15",
   "platform": "macOS-26.5.2-arm64-arm-64bit",
-  "payload_sha256": "4029a0f4fdea32a9059bdb89efebe2ef20e6531974c1f4b9f7b0a748d410c8f8",
+  "payload_sha256": "940d8a6ce54cb482afaf4649662a39a87262d4d3185e1e332a9e899a6c14f98d",
   "payload": {
     "question": "Is one retargeted checkpoint equivalent to per-target training, or is the null result simply underpowered?",
     "n_paired_targets": 7,
@@ -35,9 +36,16 @@
       -0.11091974876339111,
       0.08648787167933245
     ],
+    "ci95_bootstrap": [
+      -0.08951491031419123,
+      0.057760239370193464
+    ],
+    "bootstrap_resamples": 10000,
     "difference_tests": {
       "wilcoxon_stat": 14.0,
       "wilcoxon_p": 1.0,
+      "wilcoxon_min_attainable_two_sided_p": 0.015625,
+      "wilcoxon_interpretation": "at n = 7 the smallest attainable two-sided p is 2/2^7 = 0.015625 under any data; a large p here reflects the test's resolution at this sample size as much as the data, which is why the equivalence claim rests on the TOST rather than on this p-value",
       "paired_t": -0.3028386110355154,
       "paired_t_p": 0.7722377025800835
     },
@@ -48,16 +56,20 @@
     },
     "equivalence": {
       "margin_definition": "mean within-target seed sd of the retargeted arm; a difference below the method's own reproducibility is not actionable",
-      "margin": 0.1891555248180438,
-      "tost_p": 0.0023179657135590274,
+      "margin": 0.189,
+      "margin_source": "preregistration/WS4_equivalence_margin.md",
+      "margin_matches_stated_rule": true,
+      "tost_p": 0.002327652477498273,
       "equivalent_at_margin": true,
       "sensitivity_to_margin": {
         "0.10": 0.03621962676838089,
         "0.15": 0.007109074974470599,
         "0.20": 0.001742281117676387,
         "0.25": 0.0005290760784268782
-      }
+      },
+      "decision_rule": "pre-registered: claim equivalence only if TOST p < 0.05 at the margin AND still p < 0.05 at a 0.10 margin",
+      "decision_rule_satisfied": true
     },
-    "verdict": "Equivalence established at a margin of 0.189 g/cm^3 (TOST p = 0.0023). The 95% CI on the paired difference is [-0.111, 0.086], so the claim is a bounded equivalence rather than an unrejected null. The design could have detected 0.135 g/cm^3 at 80% power, which is 20% of the per-target arm's own mean error."
+    "verdict": "Equivalence established at a margin of 0.189 g/cm^3 (TOST p = 0.0023). The 95% CI on the paired difference is [-0.111, 0.086], so the claim is a bounded equivalence rather than an unrejected null. The design could have detected 0.135 g/cm^3 at 80% power, which is 20% of the per-target arm's own mean error. The pre-registered second condition is met: equivalence survives at a 0.10 margin (p = 0.0362), so the conclusion is not an artifact of the margin. The Wilcoxon result is p = 1.0 against a floor of 0.015625 attainable at n = 7, which is why it is not the basis of the claim."
   }
 }
