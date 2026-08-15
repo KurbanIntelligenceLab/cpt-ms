@@ -115,7 +115,7 @@ trained at 10.0 reached 15.495, well past the 10.405 ceiling, with a backbone at
 10.596. Every seed exceeds the ceiling, so it is soft rather than hard, but the size
 of the excursion belongs to the checkpoint rather than to the method.
 
-## Simultaneous constraints: exact, but not composable
+## Simultaneous constraints: exact, and composable only where targets agree
 
 `results/CP6_multiconstraint.json`, `results/CP7_second_channel.json`,
 `results/WS5_two_constraint_grid.json`
@@ -136,19 +136,27 @@ prefixes at worst residual 7.67e-13, but only at element positions: of the posit
 channel variation, 260 carry two independent constraints and 196 carry only one, because at
 a count position both channels are proportional to the count.
 
-Trained jointly, the second dial does not steer. Over a requested range of 0.404 the
-achieved values span 0.0250 — pass-through 6.2% — and the response is not monotone
-(0.2447, 0.2603, 0.2353 for increasing targets), with the largest deviation from an
-unconstrained control being 0.0179, or 8.9% of one data standard deviation.
+Trained jointly, how much the second dial moves depends on whether the two targets pull the same
+way. Where they conflict it is inert: at density target 3.0, a requested range of 0.404 yields an
+achieved range of 0.0250 — pass-through 6.2% — and the response is not monotone
+(0.2447, 0.2603, 0.2353 for increasing targets), deviating from an unconstrained control by
+0.0179, or 8.9% of one data standard deviation. Where they agree — density target 8.0, where a
+high density and a high valence electron density both call for heavier or more numerous atoms per
+volume — pass-through rises to 11.3%, the response is monotone
+(0.3251, 0.3482, 0.3707), and the deviation from control is 0.0705, 3.9 times the
+conflicting row and 34.9% of one standard deviation. Neither row makes the dial controllable.
 
-The mechanism is competition for one token budget. Fallback to the single constraint rises
-0.102 → 0.518 → 0.826 with the second target (correlation 0.9963) while jointly solvable
-positions fall 230 → 136 → 49 (correlation -0.9998). Of exactly 518 actionable positions per
-cell, 236 to 262 are excluded because one running budget has reached zero while the other
-is still positive. Both quantities are additive in element identity and count, so the atoms
-satisfying one budget are the atoms the other needs. Density steering is unaffected
-throughout (3.281, 3.041, 3.071 against target 3.0, against a control at 3.175) and
-structural validity stays exactly 1.0000.
+The mechanism separates the rows more cleanly than the pass-through does. Fallback to the
+single-constraint solve rises with the second target in both, correlating at 0.9963 and 0.9997.
+But jointly solvable positions move in opposite directions: they fall with the target where the
+constraints conflict (correlation -0.9998, from 230 to 49 of 518 actionable positions) and rise
+where they agree (correlation +0.7842, from 265 to 319), while budget-exhausted exclusions fall
+from 212 to 53 across the compatible row as the two demands align. Both quantities are additive in
+element identity and count, so the atoms satisfying one budget are the atoms the other needs; how
+badly they compete is set by whether the targets ask for the same atoms.
+
+Density steering is unaffected in both rows and structural validity is exactly 1.0000 in all six
+cells, so the second constraint disturbs neither the first nor the support restriction.
 
 ## Best-of-n is the strongest amortizer, and it wins on accuracy
 
@@ -203,15 +211,14 @@ constraint at a fixed model. Neither subsumes the other.
 
 ![Composition failure and its mechanism]({{artifact:art_63f81e90-de87-4aef-9788-e9055f96c6dc}})
 
-**Figure 2.** Two additive constraints on a shared token budget do not compose. (a) Achieved
-against requested valence electron density. The complete density-3.0 row passes through
-6.2% of the request and is not monotone — the largest request gives the smallest achieved
-value — sitting essentially on the unconstrained control of 0.242. The partial density-8.0 row,
-where both targets pull the same way, reaches 11.5%: higher, and still far from controllable.
-(b) The mechanism. Fallback to the single-constraint solve rises with the second target while
-jointly solvable positions fall, of 518 actionable positions per cell. At density 8.0 the
-competition is weaker in both respects, which is what makes compatibility rather than
-composability the distinction the completed grid will test.
+**Figure 2.** Composition depends on target compatibility. (a) Achieved against requested valence
+electron density. Where the two constraints conflict (density target 3.0) pass-through is 6.2%, the
+response is non-monotone — the largest request gives the smallest achieved value — and the row sits
+essentially on the unconstrained control of 0.242. Where they agree (density target 8.0)
+pass-through is 11.3% and the response is monotone, though still far from controllable.
+(b) The mechanism. Fallback to the single-constraint solve rises with the second target in both rows,
+but jointly solvable positions fall where the constraints conflict and rise where they agree, of 518
+actionable positions per cell.
 
 ## The expressible class has a boundary
 

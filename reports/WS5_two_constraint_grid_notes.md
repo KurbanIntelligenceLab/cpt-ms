@@ -1,103 +1,63 @@
-# WS-5: two constraints do not compose when they share a token budget
+# WS-5: two constraints compose only when their targets are compatible
 
 `results/WS5_two_constraint_grid.json`
 
-A7 trains through a joint projection of mass density and valence electron density. The
-question is whether the second dial steers. It does not, and the mechanism is measured
-rather than inferred: the two quantities compete for the same token budget, so the harder
-the second target, the more often no distribution satisfies both and the projection
-reverts to density alone.
+Two complete rows of the grid, and they disagree in a way that narrows the claim rather than
+confirming or refuting it.
 
-## What ran
+## The two rows
 
-Three single-constraint A3 controls at density targets 3.0, 5.0 and 8.0, then the A7 grid
-at density 3.0 crossed with valence targets 0.282, 0.484 and 0.686 — the data mean and plus or
-minus one standard deviation (0.4839 ± 0.2019 e/A^3). Each run is 6,000 steps, seed 0,
-on one RTX 5090.
+| density target | valence target | achieved valence | fallback rate | joint positions | unique formulas |
+|---|---|---|---|---|---|
+| 3.0 | 0.282 | 0.2447 | 0.102 | 230 | — |
+| 3.0 | 0.484 | 0.2603 | 0.518 | 136 | — |
+| 3.0 | 0.686 | 0.2353 | 0.826 | 49 | — |
+| 8.0 | 0.282 | 0.3251 | 0.134 | 265 | — |
+| 8.0 | 0.484 | 0.3482 | 0.228 | 329 | — |
+| 8.0 | 0.686 | 0.3707 | 0.314 | 319 | — |
 
-The density-3.0 row is complete. The density 5.0 and 8.0 rows are not: each A7 cell costs
-about two hours against A3's forty minutes, and the job reached its nine-hour ceiling with
-the fourth A7 cell in progress. Its partial output was discarded rather than reported.
-Every number below therefore describes one complete row, and the conclusion is stated for
-that row alone.
+Structural validity is exactly 1.0000 in all six cells, as in every other arm.
 
-## The second dial does not respond
+## What the second row changes
 
-| valence target | achieved valence | density achieved | joint positions | jointly infeasible | fallback rate | validity |
-|---|---|---|---|---|---|---|
-| 0.282 | 0.2447 | 3.281 | 230 | 26 | 0.102 | 1.0000 |
-| 0.484 | 0.2603 | 3.041 | 136 | 146 | 0.518 | 1.0000 |
-| 0.686 | 0.2353 | 3.071 | 49 | 233 | 0.826 | 1.0000 |
-| none (A3 control) | 0.2424 | 3.175 | — | — | — | 1.0000 |
+The published claim rested on the density-3.0 row: pass-through of 6.2%, a non-monotone
+response with the largest request producing the smallest achieved value, and a deviation from the
+unconstrained control of 0.0179 — 8.9% of one data standard deviation. Read alone it says the
+second dial does not move.
 
-Requested valence range 0.404; achieved range 0.0250. Pass-through is 6.2%.
+The density-8.0 row was run because a high density target and a high valence target pull the same
+way, so their token budgets should compete less. They do. Pass-through is 11.3%, the response is
+monotone, and the deviation from control is 0.0705 — 34.9% of one standard deviation, 3.9 times
+the compatible-target-free row.
 
-The response is **not monotone**: 0.2447, 0.2603, 0.2353 for increasing targets. The largest
-target produced the smallest achieved value. Measured against the control, which carries no
-valence constraint at all, the biggest deviation any cell achieves is 0.0179, or 8.9% of
-one data standard deviation. A non-monotone response of that size is not weak control; it
-is the absence of control.
+The mechanism separates the two rows cleanly, and it is the mechanism rather than the pass-through
+that carries the finding. Fallback to the single-constraint solve rises with the second target in
+both rows, correlating at 0.9963 and 0.9997. But jointly solvable positions move in opposite
+directions: they fall with the target at density 3.0 (correlation -0.9998, from 230 to
+49 of 518) and rise at density 8.0 (correlation +0.7842, from 265 to 319). Budget-exhausted
+exclusions fall from 212 to 53 across the 8.0 row as the two demands align.
 
-## The mechanism: two dials, one budget
+## The claim that survives
 
-Joint feasibility collapses as the second target moves away from what density already
-implies. Fallback rate rises 0.102 → 0.518 → 0.826 with correlation 0.9963 against the
-valence target, while joint positions used fall 230 → 136 → 49, a 79% drop, at
-correlation -0.9998.
+Not "two additive constraints on a shared token budget do not compose" — that was the one-row
+reading and the second row contradicts it. And not "they compose", because 11.3% pass-through is
+not a controllable dial: requesting a 0.404 change in valence electron density yields 0.0457.
 
-The cause is visible in the position accounting. Of exactly 518 actionable positions in every
-cell, 236 to 262 were excluded because one running budget had already reached zero
-while the other was still positive. Both quantities are additive functions of element
-identity and count, correlated at 0.725 across the training split, so the atoms that
-satisfy the density budget are the same atoms the valence budget needs. Satisfying one
-consumes the other's remaining freedom. At the hardest corner — low mass density with high
-valence electron density, which asks for fewer or lighter atoms per volume but more valence
-electrons per volume — 82.6% of eligible positions are jointly infeasible.
+What holds is compatibility-dependence. Two constraints reading the same tokens through correlated
+weight tables compete for one budget, and how much they compete depends on whether their targets
+pull the same way. Where they conflict the second dial is inert and non-monotone; where they agree
+it moves monotonically and about 4 times as far, while remaining far short of control. Composition
+is neither free nor impossible: it degrades with target conflict, and the degradation is visible in
+the fraction of positions at which a joint solution exists at all.
 
-This is the "individually attainable only" regime CP-7 mapped on synthetic grids, now
-observed on real crystal prefixes as the binding constraint on composition.
+Density steering is unaffected in both rows, and structural validity stays exact throughout, so
+nothing about the second constraint disturbs the first or the support restriction.
 
-## What is unaffected
+## Scope
 
-Density steering does not degrade. Achieved densities are 3.281, 3.041 and 3.071 against
-target 3.0, bracketing the control's 3.175. Structural validity is exactly 1.0000 in
-every A7 cell and every control, so Regime S is untouched by adding a second Regime E
-constraint — as it must be, since the mask is enforced by construction.
-
-At the one density target present in both arms, A7's mean density error is 0.131 against
-the control's 0.175. That difference is not a claim: it rests on one target with one seed
-each, and it is smaller than the seed spread the frontier work measured. It is reported to
-show the second constraint did not cost density accuracy, not to suggest it helped. The
-controls at density 5.0 and 8.0 are excluded from that comparison because A7 has no
-matching cells; including them would credit A7 with the absence of the 8.0 cell, whose
-control error of 1.263 reflects the reachable ceiling rather than anything about
-constraint count.
-
-## What this supports as a claim
-
-The layer solves several expectation constraints simultaneously and exactly — CP-7
-verified that at solver precision on real prefixes, and it remains true. What does not
-follow is that several constraints can be STEERED simultaneously. Exact joint projection at
-the positions where a joint solution exists is compatible with no control over the second
-quantity, because whether a joint solution exists is itself determined by the constraints
-and the prefix, not by the solver.
-
-For two additive per-element quantities on this serialization the honest statement is that
-they do not compose: correlation 0.725 makes them near-substitutes for the same token
-budget, and the budget is exhausted on one dial before the other can be moved. Constraint
-composition is bounded by how independently the constrained quantities can be varied by the
-tokens the model actually emits, and that is a property of the serialization and the
-constraint pair, not of the projection.
-
-## What would change the conclusion
-
-Two rows of the grid are missing, and the density 8.0 row is the one that could soften
-this. A high density target and a high valence target pull in the same direction, so their
-budgets should compete less and pass-through should be higher. If it is, the claim narrows
-from "these two quantities do not compose" to "they compose only when their targets are
-mutually compatible", which is a more useful statement. Those six cells are the immediate
-next run.
-
-A constraint pair chosen for independence rather than availability would be the stronger
-test. Nothing here shows that expectation constraints in general fail to compose; it shows
-that two constraints reading the same tokens through correlated weight tables do not.
+Two of three density rows, three valence targets each, one seed per cell, one serialization. The
+density-5.0 row is running and will add a third point between the two extremes. One seed per cell
+means the pass-through figures carry no error bar; the mechanism correlations are across three
+targets within a row rather than across seeds, and the opposite signs of the joint-position
+correlation are large enough that seed noise is unlikely to explain them, but that is an
+expectation rather than a measurement.

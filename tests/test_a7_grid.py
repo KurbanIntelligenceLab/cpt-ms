@@ -86,9 +86,9 @@ def test_regime_s_survives_a_second_regime_e_constraint():
 def test_fallback_rate_rises_with_the_second_target():
     """The competition mechanism, not just the outcome.
 
-    If joint feasibility stopped collapsing as the second target moves away from what
-    density implies, the explanation in the notes would no longer hold even if the
-    pass-through number happened to stay low.
+    Fallback must rise with the second target in EVERY row: a harder second ask means more
+    positions where no distribution satisfies both budgets, regardless of compatibility.
+    This is the part of the mechanism that does not depend on which row you look at.
     """
     p = _payload()
     for r in p["rows"]:
@@ -100,10 +100,46 @@ def test_fallback_rate_rises_with_the_second_target():
             f"{r['density_target']}: {fb}"
         )
         assert r["corr_target_fallback"] > 0.8, r["corr_target_fallback"]
-        nj = r["joint_positions"]
-        assert nj[-1] < nj[0], (
-            f"joint positions did not collapse as the target hardened: {nj}"
-        )
+
+
+def test_joint_position_direction_tracks_target_compatibility():
+    """The finding the second row produced, pinned so it cannot be flattened back.
+
+    Joint positions do NOT simply collapse with the second target. They fall where the two
+    targets conflict (low density wanting light or few atoms, high valence wanting many
+    electrons per volume) and rise where they agree. An earlier version of this test asserted
+    the collapse unconditionally, which was the one-row reading; asserting the
+    compatibility-dependent direction is what the completed rows support.
+    """
+    p = _payload()
+    rows = {r["density_target"]: r for r in p["rows"] if r.get("complete")}
+    if len(rows) < 2:
+        pytest.skip("fewer than two complete rows")
+
+    # The conflicting row is the one whose density target is furthest BELOW the data mean;
+    # the compatible row is above it. Derived from the artifact, not hardcoded.
+    mean = p["data_reference"]["density_mean"] if "density_mean" in p.get(
+        "data_reference", {}) else 6.679
+    below = [t for t in rows if t < mean]
+    above = [t for t in rows if t >= mean]
+    if not below or not above:
+        pytest.skip("no row on each side of the data mean")
+
+    lo, hi = rows[max(below)], rows[min(above)]
+    assert lo["corr_target_joint_positions"] < -0.5, (
+        f"at density {lo['density_target']} (below the data mean, so conflicting with a high "
+        f"valence ask) joint positions should FALL with the second target; correlation is "
+        f"{lo['corr_target_joint_positions']}"
+    )
+    assert hi["corr_target_joint_positions"] > 0.5, (
+        f"at density {hi['density_target']} (above the data mean, so compatible) joint "
+        f"positions should RISE with the second target; correlation is "
+        f"{hi['corr_target_joint_positions']}"
+    )
+    assert hi["pass_through"] > lo["pass_through"], (
+        f"the compatible row must pass through more of the request than the conflicting one: "
+        f"{hi['pass_through']:.4f} vs {lo['pass_through']:.4f}"
+    )
 
 
 def test_pass_through_is_computed_from_the_cells():
@@ -127,12 +163,35 @@ def test_notes_do_not_overclaim_the_incomplete_grid():
     txt = NOTES.read_text()
     p = _payload()
     n_complete = sum(1 for r in p["rows"] if r.get("complete"))
-    if n_complete < 3:
-        assert ("are not" in txt and "ceiling" in txt), (
-            "the notes must disclose that rows are missing while the grid is incomplete"
+    n_rows_planned = 3
+    if n_complete < n_rows_planned:
+        # The disclosure must state the count, not merely gesture at incompleteness.
+        words = {1: "One", 2: "Two", 3: "Three"}
+        forms = [f"{n_complete} rows of {n_rows_planned}",
+                 f"{n_complete} of {n_rows_planned}",
+                 f"{words.get(n_complete, n_complete)} of three",
+                 f"{words.get(n_complete, n_complete)} complete rows",
+                 "not yet complete"]
+        assert any(f in txt for f in forms), (
+            f"{n_complete} of {n_rows_planned} rows are complete; the notes must say so "
+            f"rather than reading as a finished grid"
         )
         for bad in ["all three rows", "the full grid shows", "across all nine cells"]:
             assert bad not in txt, f"notes overclaim with {bad!r} on an incomplete grid"
+    if n_complete >= 2:
+        # With two rows the single-row conclusion is falsified and must not be ASSERTED.
+        # A sentence that explicitly disavows it ("Not 'they do not compose' -- that was the
+        # one-row reading") is the correct way to retire a claim, so only unquoted assertions
+        # count as a violation.
+        for line in txt.splitlines():
+            if "do not compose" not in line:
+                continue
+            disavowed = ('Not "' in line or "Not '" in line or "not \u201c" in line.lower()
+                         or "\u201c" in line or "one-row" in line)
+            assert disavowed, (
+                f"two complete rows disagree, so this line asserts the retired one-row "
+                f"claim: {line.strip()[:100]!r}"
+            )
 
 
 def test_valence_reference_matches_cp7():

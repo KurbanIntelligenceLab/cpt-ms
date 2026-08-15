@@ -63,17 +63,39 @@ def test_amortization_figures_match_the_artifact():
 
 
 def test_composition_figures_match_the_artifact():
+    """Every complete row's load-bearing figures must appear, not just the first row's.
+
+    The prose quotes per-row pass-through, the endpoint joint-position counts, and the two
+    mechanism correlations; the full per-cell series lives in the figure, so requiring all six
+    fallback rates to be typed into prose would force noise rather than catch drift. An earlier
+    version of this test read rows[0] only, which would have passed while a second row's
+    numbers were absent or wrong.
+    """
     p = _payload("WS5_two_constraint_grid.json")
     rows = [r for r in p["rows"] if r.get("complete")]
     if not rows:
         pytest.skip("no complete grid row")
-    r = rows[0]
     txt = _text("results.md")
-    assert f"{r['pass_through'] * 100:.1f}%" in txt, "pass-through figure drifted"
-    for x in r["fallback_rates"]:
-        assert f"{x:.3f}" in txt, f"fallback rate {x:.3f} missing"
-    for x in r["joint_positions"]:
-        assert str(x) in txt, f"joint position count {x} missing"
+    for r in rows:
+        assert f"{r['pass_through'] * 100:.1f}%" in txt, (
+            f"pass-through for density {r['density_target']} "
+            f"({r['pass_through'] * 100:.1f}%) is missing from results.md"
+        )
+        nj = r["joint_positions"]
+        for x in (nj[0], nj[-1]):
+            assert str(x) in txt, (
+                f"endpoint joint-position count {x} for density {r['density_target']} missing"
+            )
+        c = r["corr_target_joint_positions"]
+        assert (f"{c:.4f}" in txt or f"{c:+.4f}" in txt), (
+            f"the joint-position correlation {c:.4f} for density {r['density_target']} is "
+            f"missing; it is the quantity that distinguishes the rows"
+        )
+    if len(rows) >= 2:
+        assert "compatib" in txt.lower(), (
+            "with two disagreeing rows the prose must attribute the difference to target "
+            "compatibility rather than reporting one row's outcome"
+        )
 
 
 def test_expressibility_figures_match_the_artifact():

@@ -100,10 +100,26 @@ def test_composition_caption_numbers_match_the_artifact():
 
 
 def test_partial_rows_are_labelled_as_partial():
-    """A partial row plotted beside a complete one must say so, in the figure and the text."""
+    """A partial row plotted beside a complete one must say so.
+
+    Driven by the artifact rather than by a hardcoded row: whichever rows are incomplete must
+    be disclosed, and a row that has since COMPLETED must no longer be described as partial.
+    """
+    art = ROOT / "results" / "WS5_two_constraint_grid.json"
+    if not art.exists():
+        pytest.skip("grid artifact absent")
+    rows = json.loads(art.read_text())["payload"]["rows"]
     txt = re.sub(r"\s+", " ", _text())
-    if "density-8.0" in txt or "density target 8.0" in txt:
-        assert "2 of 3" in txt or "partial" in txt, (
-            "the density-8.0 row is incomplete; plotting it as a peer of the complete row "
-            "without saying so overstates it"
-        )
+    for r in rows:
+        label = f"density target {r['density_target']}"
+        if label not in txt:
+            continue
+        if not r.get("complete"):
+            assert f"{r['n_cells']} of 3" in txt or "partial" in txt, (
+                f"{label} is incomplete ({r['n_cells']} of 3 cells) but is plotted and "
+                f"described as a peer of the complete rows"
+            )
+        else:
+            assert f"{r['n_cells']} of 3 cells" not in txt, (
+                f"{label} is now complete but the text still describes it as partial"
+            )

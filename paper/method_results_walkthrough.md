@@ -505,43 +505,51 @@ position with pending element E the tokens are cnt:k, so mass contributes MASS[E
 valence contributes VALENCE[E]·k, both proportional to k, and the pair is exactly collinear
 there.
 
-## Step 17 — Two constraints do not compose when they share a token budget
+## Step 17 — Two constraints compose only where their targets agree
 
 `results/WS5_two_constraint_grid.json`
 
-Method. An arm that trains through the joint projection of both constraints, on a grid of
-three density targets crossed with three valence targets at the data mean and plus or minus
-one standard deviation, with a single-constraint control at each density target so any
-difference is attributable to the second constraint rather than to training noise. The
-decisive quantity is pass-through — the range of achieved values over the range of
-requested values — and monotonicity, because a dial reporting plausible values at every
-target has not necessarily been steered.
+Method. The A7 arm trains through a joint projection of mass density and valence electron density,
+with single-constraint controls at each density target so any difference is attributable to the
+second constraint rather than to training noise. Two complete rows: density target 3.0 crossed with
+three valence targets, and density target 8.0 crossed with the same three. The 8.0 row was run
+because a high density target and a high valence target both call for heavier or more numerous
+atoms per volume, so their token budgets should compete less if compatibility is what governs
+composition.
 
-Results. The second dial does not respond. Requested valence range 0.404, achieved range
-0.0250, pass-through 6.2%. The response is not monotone: 0.2447, 0.2603, 0.2353 for
-increasing targets, so the largest target produced the smallest achieved value. Against the
-control, which carries no valence constraint at all, the largest deviation any cell reaches
-is 0.0179, or 8.9% of one data standard deviation.
+Results.
 
-The mechanism is competition for one token budget. Fallback rate rises 0.102 → 0.518 → 0.826
-with the valence target at correlation 0.9963, while joint positions used fall 230 → 136 → 49,
-a 79% drop, at correlation -0.9998. Of exactly 518 actionable positions in every cell,
-236 to 262 were excluded because one running budget had reached zero while the other was
-still positive. Both quantities are additive in element identity and count and correlate at
-0.725, so the atoms that satisfy the density budget are the atoms the valence budget
-needs.
+| density target | valence target | achieved | fallback rate | joint positions of 518 |
+|---|---|---|---|---|
+| 3.0 | 0.282 | 0.2447 | 0.102 | 230 |
+| 3.0 | 0.484 | 0.2603 | 0.518 | 136 |
+| 3.0 | 0.686 | 0.2353 | 0.826 | 49 |
+| 8.0 | 0.282 | 0.3251 | 0.134 | 265 |
+| 8.0 | 0.484 | 0.3482 | 0.228 | 329 |
+| 8.0 | 0.686 | 0.3707 | 0.314 | 319 |
 
-Density steering is unaffected: 3.281, 3.041 and 3.071 against target 3.0, bracketing the
-control's 3.175, with structural validity exactly 1.0000 in every cell and control.
+The rows disagree, and the disagreement is the finding. Where the constraints conflict, pass-through
+is 6.2% and the response is not monotone — the largest request produces the smallest achieved
+value — with a deviation from the unconstrained control of 0.0179, or 8.9% of one data standard
+deviation. Where they agree, pass-through is 11.3%, the response is monotone, and the deviation is
+0.0705 — 3.9 times the conflicting row and 34.9% of one standard deviation. Neither row makes
+the dial controllable: a requested range of 0.404 yields 0.0457 at best.
 
-Only the density-3.0 row is complete: each joint-constraint run costs about three times a
-single-constraint run and the job reached its time ceiling with the fourth cell in progress,
-whose partial output was discarded. The conclusion is stated for that row alone.
+The mechanism separates the rows more cleanly than pass-through does. Fallback to the
+single-constraint solve rises with the second target in both, correlating at 0.9963 and 0.9997.
+Jointly solvable positions move in opposite directions: falling with the target where the
+constraints conflict (-0.9998, from 230 to 49) and rising where they agree
+(+0.7842, from 265 to 319), with budget-exhausted exclusions falling from 212 to 53 across
+the compatible row. Both quantities are additive in element identity and count, so the atoms
+satisfying one budget are the atoms the other needs.
 
-The distinction this forces is worth stating precisely. The layer solves several
-expectation constraints simultaneously and exactly. It does not follow that several can be
-steered, because whether a joint solution exists at a given position is determined by the
-constraints and the prefix rather than by the solver.
+Density steering is unaffected in both rows and structural validity is exactly 1.0000 in all six
+cells, so the second constraint disturbs neither the first nor the support restriction.
+
+The claim this licenses is narrower than either extreme. Not that two additive constraints on a
+shared token budget fail to compose, which was the one-row reading the second row contradicts; and
+not that they compose, since 11.3% is not control. Composition degrades with target conflict, and
+the degradation is visible in the fraction of positions at which a joint solution exists at all.
 
 ## Step 18 — Whether the equivalence claim is powered
 
@@ -752,7 +760,7 @@ against two independent oracles with the Hessian conditioning reported alongside
 
 Constraint COMPOSITION is bounded, and the bound is a property of the constrained quantities
 rather than of the solver. Joint attainability rises with vocabulary size; on real crystals two
-additive per-element quantities correlated at 0.725 do not compose, because they compete for the
+additive per-element quantities correlated at 0.725 compose only where their targets agree, because they compete for the
 same token budget and one is exhausted before the other can be moved. Exact joint projection at
 the positions where a joint solution exists is compatible with no control over the second
 quantity.
@@ -784,23 +792,14 @@ carry one seed each. The A6 comparator that fine-tunes toward the sequence-level
 specified and scoped in code but not trained, so the surrogate-versus-optimum comparison is exact
 on the synthetic task and absent on crystals.
 
-The two-constraint grid is not yet complete, and the partial result already qualifies the
-composition claim. Two of the three cells at density target 8.0 have landed and pass-through there
-is 11.5% against 6.2% in the published density-3.0 row — nearly double, with jointly solvable
-positions rising from 265 to 329 of 518 and budget-exhausted exclusions falling from
-212 to 92. That is the direction predicted for compatible targets: a high density target and a
-high valence target pull the same way, so their budgets compete less. The published claim is
-therefore scoped to one row, correctly, and the third cell of the 8.0 row plus the 5.0 row will
-determine whether it narrows from "these two quantities do not compose" to "they compose only when
-their targets are mutually compatible". Even at 11.5%, pass-through remains far from the dial being
-controllable, so the qualification is expected to be about degree rather than about direction. The
-5.0 and 8.0 rows were not reached before the first job's time ceiling; the 8.0 row is the one that
-could soften the composition result: a high
-density target and a high valence target pull in the same direction, so their budgets should
-compete less. If pass-through is higher there, the claim narrows from "these two quantities do not
-compose" to "they compose only when their targets are mutually compatible". The composition result
-also rests on one constraint pair chosen for availability rather than for independence; nothing here
-shows that expectation constraints in general fail to compose.
+The two-constraint grid is two rows of three. Both complete rows are reported in Step 17 and they
+already fixed the claim's scope: composition is compatibility-dependent rather than absent. The
+density-5.0 row is running and will add a point between the two extremes, which should show whether
+pass-through varies smoothly with target compatibility or jumps. Every cell carries one seed, so the
+pass-through figures have no error bar; the mechanism correlations are across three targets within a
+row rather than across seeds, and the opposite signs of the joint-position correlation are large
+enough that seed noise is an unlikely explanation, but that is an expectation rather than a
+measurement.
 
 The retargeting matrix carries three seeds at one training target and one seed at the other two.
 The equivalence test in Step 18 therefore pairs over the 7 deployment targets of the
@@ -817,7 +816,7 @@ waits for five or six serializations budgeted together.
 Nothing quantitative in the reports is typed by hand: every number is read from an artifact in
 `results/`, each artifact carries its script, config hash, seeds, commit, environment and payload
 checksum, and narrative verdict fields inside artifacts are generated from the values they
-describe. The suite is 256 tests, all passing where `git init` is available (5 provenance tests skip
+describe. The suite is 257 tests, all passing where `git init` is available (5 provenance tests skip
 without it). Several of those tests exist because a claim in a
 report was found to be wrong — a stale test count that survived a green suite through a regex
 gap, a Regime-S exactness figure that verified because the field was absent, a per-file count that

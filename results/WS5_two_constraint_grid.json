@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "artifact_name": "WS5_two_constraint_grid",
   "script": "scripts/crystal/analyze_a7_grid.py",
-  "git_commit": "80f19812b8e4bfdd1bf4fe17833433c5f3999c79-dirty",
+  "git_commit": "0d9aa5531c1349f49e6e939d407898f16830991c-dirty",
   "config": {
     "results_dir": "results",
     "smoke": false
@@ -11,10 +11,10 @@
   "seeds": [
     0
   ],
-  "created_utc": "2026-08-14T22:13:52.595639+00:00",
+  "created_utc": "2026-08-15T16:12:59.715014+00:00",
   "python": "3.11.15",
   "platform": "macOS-26.5.2-arm64-arm-64bit",
-  "payload_sha256": "506a68f1e5c8f57f1e5ee8ecf5e49b632fe90fa6082b55e0c745834cb976db35",
+  "payload_sha256": "e656f148783b1bf8d8a3fff4805c39ccd8694be83912f68abfa5b085f3e0abca",
   "payload": {
     "question": "Does a second additive expectation constraint steer when trained jointly with density, and what happens to joint feasibility as the second target moves away from the data?",
     "cells": [
@@ -68,6 +68,57 @@
         "n_budget_exhausted": 236,
         "fallback_rate": 0.8262411347517731,
         "source": "A7grid_d3.0_v0.686.json"
+      },
+      {
+        "density_target": 8.0,
+        "valence_target": 0.282,
+        "deployed_density": 7.295637615539554,
+        "deployed_valence": 0.32506415411484924,
+        "backbone_density": 19.342625913034404,
+        "backbone_valence": 0.6844836125944722,
+        "validity": 1.0,
+        "unique_formula_fraction": 0.945068359375,
+        "novel_formula_fraction": 0.99072265625,
+        "n_actionable": 518,
+        "n_joint": 265,
+        "n_jointly_infeasible": 41,
+        "n_budget_exhausted": 212,
+        "fallback_rate": 0.13398692810457516,
+        "source": "A7grid_d8.0_v0.282.json"
+      },
+      {
+        "density_target": 8.0,
+        "valence_target": 0.484,
+        "deployed_density": 6.683797285658179,
+        "deployed_valence": 0.3482258053287785,
+        "backbone_density": 8.779539989829521,
+        "backbone_valence": 0.42822011235351165,
+        "validity": 1.0,
+        "unique_formula_fraction": 0.881591796875,
+        "novel_formula_fraction": 0.962158203125,
+        "n_actionable": 518,
+        "n_joint": 329,
+        "n_jointly_infeasible": 97,
+        "n_budget_exhausted": 92,
+        "fallback_rate": 0.22769953051643194,
+        "source": "A7grid_d8.0_v0.484.json"
+      },
+      {
+        "density_target": 8.0,
+        "valence_target": 0.686,
+        "deployed_density": 7.219994830345766,
+        "deployed_valence": 0.37074472863575453,
+        "backbone_density": 13.948762791103698,
+        "backbone_valence": 0.60145388364475,
+        "validity": 1.0,
+        "unique_formula_fraction": 0.944091796875,
+        "novel_formula_fraction": 0.9873046875,
+        "n_actionable": 518,
+        "n_joint": 319,
+        "n_jointly_infeasible": 146,
+        "n_budget_exhausted": 53,
+        "fallback_rate": 0.3139784946236559,
+        "source": "A7grid_d8.0_v0.686.json"
       }
     ],
     "controls": {
@@ -139,33 +190,78 @@
         "validity_values": [
           1.0
         ]
+      },
+      {
+        "density_target": 8.0,
+        "n_cells": 3,
+        "complete": true,
+        "valence_targets": [
+          0.282,
+          0.484,
+          0.686
+        ],
+        "valence_achieved": [
+          0.32506415411484924,
+          0.3482258053287785,
+          0.37074472863575453
+        ],
+        "requested_range": 0.4040000000000001,
+        "achieved_range": 0.04568057452090529,
+        "pass_through": 0.1130707290121418,
+        "monotone_in_target": true,
+        "control_valence": 0.39558007977284215,
+        "max_deviation_from_control": 0.07051592565799292,
+        "max_deviation_in_data_sd": 0.3492616426844622,
+        "fallback_rates": [
+          0.13398692810457516,
+          0.22769953051643194,
+          0.3139784946236559
+        ],
+        "corr_target_fallback": 0.9997158405234849,
+        "corr_target_joint_positions": 0.7842301147564331,
+        "joint_positions": [
+          265,
+          329,
+          319
+        ],
+        "density_achieved": [
+          7.295637615539554,
+          6.683797285658179,
+          7.219994830345766
+        ],
+        "density_control": 6.737436407824333,
+        "validity_values": [
+          1.0
+        ]
       }
     ],
     "summary": {
-      "n_cells": 3,
+      "n_cells": 6,
       "n_controls": 3,
-      "n_complete_rows": 1,
+      "n_complete_rows": 2,
       "matched_density_targets": [
-        3.0
-      ],
-      "density_mae_A7_matched": 0.13094622448907214,
-      "density_mae_A3_matched": 0.17545451927521105,
-      "unmatched_control_targets": [
-        5.0,
+        3.0,
         8.0
+      ],
+      "density_mae_A7_matched": 0.5322348236539529,
+      "density_mae_A3_matched": 0.7190090557254389,
+      "unmatched_control_targets": [
+        5.0
       ],
       "validity_all_cells": [
         1.0
       ],
       "pass_through_by_row": {
-        "3.0": 0.06192286434062005
+        "3.0": 0.06192286434062005,
+        "8.0": 0.1130707290121418
       },
       "monotone_by_row": {
-        "3.0": false
+        "3.0": false,
+        "8.0": true
       },
-      "verdict": "The second constraint does not steer: pass-through below 25% on every complete row and no row monotone in its target. Density steering is unaffected, so this is a limit on constraint COMPOSITION for two correlated additive quantities sharing one token budget, not a failure of the layer.",
-      "max_pass_through": 0.06192286434062005,
-      "any_row_monotone": false
+      "verdict": "Mixed: see pass_through_by_row and monotone_by_row; neither the steering nor the no-steering criterion is met on all complete rows.",
+      "max_pass_through": 0.1130707290121418,
+      "any_row_monotone": true
     },
     "data_reference": {
       "valence_mean": 0.4839,
