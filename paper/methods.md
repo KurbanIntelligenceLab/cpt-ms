@@ -16,8 +16,12 @@ $$q^\star = \arg\min_{q} \; \mathrm{KL}(q \,\|\, p_M) \quad
 where $p_M$ is the mask-restricted softmax of $\ell$. The solution is an exponential tilt
 $q^\star \propto p_M \odot \exp(A^\top \lambda)$, and the dual variable $\lambda$ solves
 $A q^\star(\lambda) = b$. This is $m$-dimensional regardless of vocabulary size, which is
-what makes the layer affordable: $m$ is 1 or 2 in every experiment here while $V$ is
-$10^2$ to $10^3$.
+what makes the layer affordable: $m$ is 1 or 2 in the training experiments here and up to
+4 in the solver verification, while $V$ is $10^2$ to $10^3$. The cost of the solve is
+dominated by the number of rows in the batch rather than by $m$: measured on the training
+batch, a two-constraint solve is no more expensive than a one-constraint solve, and the
+two-constraint arm's overhead comes from solving twice — once jointly and once for the
+single-constraint fallback — rather than from the extra constraint.
 
 $\lambda$ is found by damped Newton iteration on the dual, with Hessian
 $\mathrm{Cov}_{q}[a]$. Gradients pass through the implicit function theorem rather than by
@@ -135,14 +139,78 @@ differences are attributable to constraint treatment.
 |---|---|---|---|
 | A1 | no | no | full |
 | A2 | yes | no | full |
-| A3 | yes | yes, trained through | full |
+| A3 | yes | yes, trained through, one constraint | full |
 | A4 | yes | no | filtered to the target |
+| A7 | yes | yes, trained through, two joint constraints | full |
 
 A4 is the conditional-training baseline — the "retrain on filtered data" objection. It is
 scored against the **full** split's statistics, never the slice it trained on, since
 scoring it against its own subset would flatter it by construction. Its step budget is not
 reduced, which is generous: the filtered set is roughly 13% of the split, so it sees each
 structure about eight times more often.
+
+A7 is A3 with a second expectation constraint solved jointly rather than sequentially. The
+two channels are assembled identically and stacked into a single $A$ of shape $2 \times V$,
+so one dual solve satisfies both; solving them in sequence would satisfy whichever was
+applied last and would not be the KL optimum for the pair. The second target is a density
+of the same form, so the budget construction is shared: `_additive_budget` generalizes the
+mass budget over its weight table and is verified to reproduce it exactly for the mass
+table at every prefix length, which is what keeps single-constraint results comparable
+across the change.
+
+## The second constraint family
+
+The first family is mass density. The second is valence electron density — valence electron
+count summed over the formula, divided by cell volume. It was chosen after charge
+neutrality was found inexpressible in this layer's form: as the standard screen defines it,
+a composition is balanced if there *exists* an assignment of formal charges from each
+element's allowed oxidation states summing to zero, which is an existential predicate rather
+than a linear functional, and collapsing it to one charge per element recovers 11.1% of the
+balanced set. Valence electron density is additive in element counts, defined for every
+element in the split, and not directly emitted by the model, which is the property that
+makes it a real test rather than a restatement of density.
+
+Its correlation with mass density is 0.725, which is load-bearing in both directions:
+much lower would make the pair nearly orthogonal and composition unrealistically easy, much
+higher would make them one constraint written twice with a singular dual Hessian.
+
+Whether two channels are independent depends on where the constraint acts. At a count
+position with pending element E the tokens are `cnt:k`, so the mass channel contributes
+$\mathrm{MASS}[E]\,k$ and the valence channel $\mathrm{VALENCE}[E]\,k$ — both proportional
+to $k$, hence exactly collinear. Rank 2 requires an element position, where the two weight
+tables differ across elements. Since density steering already restricts actionable positions
+to element positions, the second constraint costs no actionable positions.
+
+## Joint feasibility
+
+Two individually attainable targets need not be jointly attainable, and the distinction is
+not cheap to predict. The natural test — whether the required ratio of targets lies inside
+the range of per-token channel ratios — is necessary but not sufficient: against an exact
+linear program on 400 random two-row systems it agrees on 266 and calls 134 infeasible
+systems feasible. An exact test is a linear program per position, more expensive than the
+projection it would guard.
+
+Feasibility is therefore observed rather than predicted. For a target outside the attainable
+set the dual solve does not converge, which is the correct verdict rather than a numerical
+failure, and such positions fall back to the single-constraint projection. The fallback rate
+is recorded in the artifact rather than hidden, and the ordering matters: discarding a
+converged single-constraint projection because the joint solve failed would make the
+two-constraint arm worse than the one-constraint arm exactly where the second target was
+unattainable.
+
+## Checkpointing and retargeting
+
+Runs before this work trained, evaluated in-process, and discarded their weights. Weight
+persistence was added so a trained model can be redeployed, and the checkpoint records the
+target it trained at as a field distinct from the target it is later deployed at — the two
+are separate quantities and conflating them would make a retargeting result unreadable.
+The target, seed, and checkpoint path are command-line arguments rather than edited
+configuration, since editing a config between runs is how a run gets mislabelled.
+
+Retargeting deploys one checkpoint at a target it never trained on, changing only the
+deployment target passed to the solver. Both the backbone and deployed readings are recorded
+at every cell, so retargeting through the layer is distinguishable from a backbone that
+happens to sit near the new target.
 
 Every arm is reported at two readings, and neither is a summary of the other. The
 **backbone** reading applies the mask but not the projection; the **deployed** reading

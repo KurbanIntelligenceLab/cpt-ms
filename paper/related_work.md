@@ -118,3 +118,25 @@ to training and changes what the model learns; relative to existing differentiab
 projection layers it operates on a per-step distribution under a sequence-level constraint;
 and relative to filtering baselines it trades a measured accuracy gap for coverage that
 filtering cannot supply.
+
+The sharpest distinction is amortization, and it is the one a reader should weigh. Every
+baseline that achieves a target by shaping its training distribution — conditional training,
+filtered retraining, classifier guidance trained per attribute — needs one model per target
+by construction, and needs enough data near that target to train on. Because the constraint
+target enters the dual solve as an argument rather than as a training-time label, one
+checkpoint here covers a family of targets at parity with separately trained models
+(0.650 ± 0.151 g/cm^3 against 0.662 from 7 runs, Wilcoxon p = 1.0). The
+comparison is deliberately unflattering on accuracy — conditional training remains more
+accurate per target — so the claim is a different cost structure rather than a better
+number, and it is strongest exactly where the baseline is weakest: at sparse targets, where
+the slice a conditional model needs either thins or does not exist.
+
+Two boundaries position the work as much as the capability does. The layer constrains
+additive functionals of the emitted symbols, so constraints defined by a search over latent
+assignments — charge neutrality being the canonical materials example — are outside its
+class rather than unimplemented. And solving several constraints exactly is not the same as
+steering several: whether a joint solution exists at a position is set by the constraints
+and the prefix, and two constraints reading the same tokens through correlated weight tables
+compete for one budget rather than composing. Neither boundary is visible from the
+inference-time constrained-decoding literature, where the constraint is applied to a fixed
+model and the question of what training does with it does not arise.
