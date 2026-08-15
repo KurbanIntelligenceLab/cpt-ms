@@ -158,6 +158,50 @@ badly they compete is set by whether the targets ask for the same atoms.
 Density steering is unaffected in both rows and structural validity is exactly 1.0000 in all six
 cells, so the second constraint disturbs neither the first nor the support restriction.
 
+## The surrogate approximates a different target, and the difference favours it
+
+`results/WS7_a6_tilt_comparator.json`
+
+The per-step projection approximates the sequence-level tilt, and the tilt is not a construct of
+this work: it is the KL-minimal distribution satisfying the moment constraint, the target
+distributional policy gradient trains toward. Measuring what the surrogate loses therefore requires
+a model trained toward the tilt, not just the tilt's closed form. That arm is A6, trained by maximum
+likelihood on exact tilt samples — distributional policy gradient's fixed point with unit importance
+weights, so the comparator gets the best case of the method it stands for and no gradient-estimator
+artefact can be blamed for the outcome. Both arms carry the mask; both induced distributions are
+enumerated over all 65,536 sequences, so every divergence is exact.
+
+A6 reaches its target: 0.0167 ± 0.0048 nats from the tilt, mean charge -0.0619 ± 0.1220
+against a target of zero, no mass outside the mask. It is not a failed run, which is what makes the
+comparison informative.
+
+| arm | mean charge | per-sequence violation | charge variance |
+|---|---|---|---|
+| A2, mask only | +2.4694 ± 0.0807 | 0.9083 | 8.762 |
+| A3 deployed, projection | +0.0170 ± 0.0014 | 0.6155 | 1.547 |
+| A6, trained toward the tilt | -0.0619 ± 0.1220 | 0.8751 | — |
+| tilt, exact optimum | +0.0000 | 0.8755 | — |
+
+Both arms satisfy the expectation constraint, and A6's seed spread is wider than the gap between
+them, so no ordering on mean charge is established. The difference that is not seed noise is
+per-sequence violation: A6 inherits the tilt's 0.8751, as an approximation of that distribution
+should, while A3 deployed violates 0.6155 — a factor of 1.42 fewer than the optimum it is said to
+approximate.
+
+The reading that follows is not that the surrogate approximates the tilt better. A6 is far closer to
+the tilt than the induced distribution is. It is that the surrogate approximates a different
+distribution, and on this task the different distribution is closer to what a request for a
+constraint usually means. Bounding an expected increment at every step bounds the total in
+expectation and also concentrates it: A3's charge variance is 1.547 against A2's 8.762, a factor of
+5.7. The tilt has no such mechanism — it is the KL-closest distribution with the right mean, and
+the cheapest way to buy a mean of zero from a distribution centred at +2.469 is to move mass to
+both extremes, which is why it violates more per sequence than the model it started from.
+
+The surrogate's 1.025-nat excess divergence is therefore not a pure loss. It purchases a variance
+reduction the sequence-level optimum does not offer, and a per-sequence violation rate 1.42 times
+lower than that optimum. Whether that trade is wanted depends on whether "most samples satisfy the
+constraint" or "the average satisfies it" is the requirement.
+
 ## Best-of-n is the strongest amortizer, and it wins on accuracy
 
 `results/WS6_best_of_n.json`

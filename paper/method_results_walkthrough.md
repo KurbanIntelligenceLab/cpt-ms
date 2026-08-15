@@ -53,7 +53,8 @@ constraint at the sequence level.
 Results. The induced distribution reaches mean charge 0.1028 against the tilt's 0. Divergence from
 the tilt is 1.052 nats forward and 35.50 nats reverse, with total variation 0.555. The surrogate
 induces a materially different distribution, not a slightly worse one, and it pays 1.025 nats of
-excess divergence over the optimum.
+excess divergence over the optimum. Step 22 measures what that excess buys, against a model actually
+trained toward the optimum rather than against its closed form.
 
 The mechanism is localized. Across 16,537 enumerated nodes the running budget is unsatisfiable at
 37.13% of steps, and the first infeasible position is step 5 of 8 — infeasibility is absent early
@@ -714,6 +715,46 @@ by this layer only where the prefix determines its budget, so token ordering is 
 of the method rather than an independent axis to vary. A serialization comparison needs two
 orderings that both close the budget before the constrained tokens.
 
+## Step 22 — What the surrogate's excess divergence buys
+
+`results/WS7_a6_tilt_comparator.json`
+
+Method. Step 2 measured the per-step projection against the sequence-level tilt's closed form and
+found 1.025 nats of excess divergence. That measures a gap but not its consequence, because the
+comparison was against a distribution nobody had trained a model toward. A6 is that model: maximum
+likelihood on exact samples from the tilt, which is distributional policy gradient's fixed point with
+unit importance weights, so the comparator gets the best case of the method it stands for rather than
+a reimplementation whose gradient estimator could be blamed. A6 carries the mask; the only difference
+from A3 is that A6 has tilt supervision and no projection, A3 the reverse. Both induced distributions
+are enumerated over all 65,536 sequences.
+
+Results. A6 reaches its target — 0.0167 ± 0.0048 nats from the tilt, total variation
+0.0713, mean charge -0.0619 ± 0.1220, no mass outside the mask.
+
+| arm | mean charge | per-sequence violation | charge variance |
+|---|---|---|---|
+| A2, mask only | +2.4694 ± 0.0807 | 0.9083 | 8.762 |
+| A3 deployed | +0.0170 ± 0.0014 | 0.6155 | 1.547 |
+| A6, toward the tilt | -0.0619 ± 0.1220 | 0.8751 | — |
+| tilt, exact | +0.0000 | 0.8755 | — |
+
+Both satisfy the expectation constraint, and A6's seed spread exceeds the gap between the two mean
+charges, so nothing is claimed about which is closer. The difference outside seed noise is
+per-sequence violation: A6 inherits the tilt's 0.8751 — correctly, since it approximates that
+distribution — while A3 deployed violates 0.6155, a factor of 1.42 lower than the optimum.
+
+The mechanism is concentration. Bounding an expected increment at every step bounds the total in
+expectation and narrows it: A3's charge variance is 1.547 against 8.762 unconstrained, a factor of
+5.7. The tilt has no such mechanism; it is the KL-closest distribution with the right mean, and
+from a distribution centred at +2.469 the cheapest route to a mean of zero is mass at both
+extremes — which is why the optimum violates more per sequence than the model it started from.
+
+The excess divergence is therefore a trade rather than a loss. What it buys is a distribution whose
+individual samples satisfy the constraint more often than the sequence-level optimum's do. This is
+one task and one constraint family, and a constraint whose feasible set is asymmetric about its
+target could behave differently.
+
+
 ## What the results support as claims
 
 Regime S is exact and holds by construction, on synthetic data and on real crystals, trained and
@@ -739,7 +780,12 @@ that framing and the case where the decoder reading of the method fails outright
 
 The per-step surrogate is not the sequence-level optimum, and the gap is characterized rather than
 asserted: a fixed overhead of about 1.07 nats against an optimum whose own cost spans 129-fold, so
-the surrogate's relative waste falls from 97.8% to 32.4% as the constraint pulls harder.
+the surrogate's relative waste falls from 97.8% to 32.4% as the constraint pulls harder. That
+overhead is not a pure loss. Measured against A6 — a model trained toward the optimum, reaching it to
+0.0167 nats — the surrogate concentrates the constrained quantity where the optimum does not:
+charge variance 1.547 against 8.762 unconstrained, and a per-sequence violation rate 1.42 times lower
+than the optimum's. The surrogate approximates a different distribution rather than approximating
+the same one worse, and on this task the difference favours it.
 
 Against the strongest baseline, the honest claim is a trade rather than a win. Conditional
 training is more accurate everywhere it can run and buys that accuracy by reproducing a slice,
@@ -788,9 +834,10 @@ second ordering would train with no actionable positions and measure the unconst
 expressible class is coupled to the serialization; a comparison needs two orderings that both
 close the budget before the constrained tokens. Crystal arms carry three seeds at the fixed target and two per target
 across the frontier, against the five-seed matrix the plan sizes. The two extreme frontier targets
-carry one seed each. The A6 comparator that fine-tunes toward the sequence-level tilt directly is
-specified and scoped in code but not trained, so the surrogate-versus-optimum comparison is exact
-on the synthetic task and absent on crystals.
+carry one seed each. The A6 comparator that trains toward the sequence-level tilt is now run on the
+synthetic task (Step 22) and not on crystals, where the tilt itself would have to be estimated over
+a space that cannot be enumerated — so the surrogate-versus-optimum comparison is exact where it
+exists and would be weaker, not stronger, if extended.
 
 The two-constraint grid is two rows of three. Both complete rows are reported in Step 17 and they
 already fixed the claim's scope: composition is compatibility-dependent rather than absent. The
@@ -816,7 +863,7 @@ waits for five or six serializations budgeted together.
 Nothing quantitative in the reports is typed by hand: every number is read from an artifact in
 `results/`, each artifact carries its script, config hash, seeds, commit, environment and payload
 checksum, and narrative verdict fields inside artifacts are generated from the values they
-describe. The suite is 262 tests, all passing where `git init` is available (5 provenance tests skip
+describe. The suite is 267 tests, all passing where `git init` is available (5 provenance tests skip
 without it). Several of those tests exist because a claim in a
 report was found to be wrong — a stale test count that survived a green suite through a regex
 gap, a Regime-S exactness figure that verified because the field was absent, a per-file count that

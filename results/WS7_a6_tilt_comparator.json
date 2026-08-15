@@ -1,0 +1,128 @@
+{
+  "schema_version": "1.0",
+  "artifact_name": "WS7_a6_tilt_comparator",
+  "script": "scripts/synthetic/train_a6.py",
+  "git_commit": "dd1a93acacc795b88f91c17e8125714714adeacb-dirty",
+  "config": {
+    "steps": 4000,
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "arm": "A6",
+    "training_rule": "MLE on exact tilt samples"
+  },
+  "config_hash": "b49d29c4c38b5122",
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "created_utc": "2026-08-15T18:40:58.610101+00:00",
+  "python": "3.11.15",
+  "platform": "macOS-26.5.2-arm64-arm-64bit",
+  "payload_sha256": "8b2b54df6612632879f87f012fa4f749019ac78ec02a264c692f7e1acb505b29",
+  "payload": {
+    "arm": "A6: MLE on exact samples from the sequence-level tilt, mask active",
+    "why_this_training_rule": "the tilt is closed-form here, so MLE on its exact samples is DPG's fixed point with unit importance weights -- A6 therefore gets the best case of the method it stands for, and no gradient-estimator artefact can be blamed for the result",
+    "steps": 4000,
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "tilt_multiplier": -0.2574681118515768,
+    "reference": {
+      "tilt": {
+        "mean_charge": 1.1102230246251565e-16,
+        "kl_from_tilt": 0.0,
+        "kl_to_tilt": 0.0,
+        "tv_vs_tilt": 0.0,
+        "kl_from_base": 0.3131795201058082,
+        "mass_outside_S": 0.0,
+        "hard_violation_rate": 0.8754696585928741,
+        "support_size": 36120
+      },
+      "base_S_conditioned": {
+        "mean_charge": 2.5164330452453623,
+        "kl_from_tilt": 0.33472174465442883,
+        "kl_to_tilt": 0.3131795201058082,
+        "tv_vs_tilt": 0.32339368639638033,
+        "kl_from_base": 0.0,
+        "mass_outside_S": 0.0,
+        "hard_violation_rate": 0.9108939130892355,
+        "support_size": 36120
+      }
+    },
+    "runs": [
+      {
+        "seed": 0,
+        "wall_clock_s": 803.8,
+        "mean_charge": -0.14804046411416227,
+        "kl_from_tilt": 0.012084359150077405,
+        "kl_to_tilt": 0.01223571123227516,
+        "tv_vs_tilt": 0.06147656191741633,
+        "kl_from_base": 0.35860615763130577,
+        "mass_outside_S": 0.0,
+        "hard_violation_rate": 0.8781846163282158,
+        "support_size": 36120
+      },
+      {
+        "seed": 1,
+        "wall_clock_s": 424.9,
+        "mean_charge": -0.11535111556570482,
+        "kl_from_tilt": 0.016323407906249886,
+        "kl_to_tilt": 0.016649962223213396,
+        "tv_vs_tilt": 0.07128359608838367,
+        "kl_from_base": 0.3697515950771729,
+        "mass_outside_S": 0.0,
+        "hard_violation_rate": 0.872502278774047,
+        "support_size": 36120
+      },
+      {
+        "seed": 2,
+        "wall_clock_s": 273.0,
+        "mean_charge": 0.07771871539669939,
+        "kl_from_tilt": 0.02162244878363467,
+        "kl_to_tilt": 0.021283343441905727,
+        "tv_vs_tilt": 0.08127268775748965,
+        "kl_from_base": 0.31070411130203973,
+        "mass_outside_S": 0.0,
+        "hard_violation_rate": 0.8744910376975322,
+        "support_size": 36120
+      }
+    ],
+    "summary": {
+      "mean_charge": {
+        "mean": -0.061890954761055904,
+        "sd": 0.1220053006155821
+      },
+      "kl_from_tilt": {
+        "mean": 0.016676738613320655,
+        "sd": 0.004778851368881699
+      },
+      "kl_to_tilt": {
+        "mean": 0.01672300563246476,
+        "sd": 0.004524258354129704
+      },
+      "tv_vs_tilt": {
+        "mean": 0.07134428192109654,
+        "sd": 0.00989820244522831
+      },
+      "kl_from_base": {
+        "mean": 0.3463539546701728,
+        "sd": 0.03137257868097952
+      },
+      "mass_outside_S": {
+        "mean": 0.0,
+        "sd": 0.0
+      },
+      "hard_violation_rate": {
+        "mean": 0.875059310933265,
+        "sd": 0.002883477219039004
+      }
+    },
+    "exactness_note": "induced distributions are enumerated over all 65536 sequences, so every divergence is exact rather than estimated"
+  }
+}
