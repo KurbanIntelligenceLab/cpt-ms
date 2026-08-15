@@ -1,0 +1,105 @@
+{
+  "schema_version": "1.0",
+  "artifact_name": "FIG4_infeasibility_vs_target",
+  "script": "scripts/crystal/compute_fig4_infeasibility.py",
+  "git_commit": "a08c4cf83c8ef2cd801224d4c2acfae5fbdd2cb2-dirty",
+  "config": {
+    "source": "WS3_steering_frontier_rows"
+  },
+  "config_hash": "391c64181c902865",
+  "seeds": [
+    0,
+    1
+  ],
+  "created_utc": "2026-08-15T20:58:23.414613+00:00",
+  "python": "3.11.15",
+  "platform": "macOS-26.5.2-arm64-arm-64bit",
+  "payload_sha256": "08345c4dcd871f69f65fe7bd9cb577ca2e1e10da9d86a5f710d41bb189973de1",
+  "payload": {
+    "repair_factor_convention": "ratio of seed-averaged means per target (matches reports/WS3_steering_frontier_notes.md: 29.2x at target 1.5, 0.97x at 20.0)",
+    "per_target": [
+      {
+        "target": 1.5,
+        "n_seeds": 2,
+        "infeas_init_mean": 0.23147089034318924,
+        "infeas_final_mean": 0.007914225570857525,
+        "repair_factor_ratio_of_means": 29.24744667318205,
+        "repair_factor_mean_of_ratios_alt": 29.39005966184046
+      },
+      {
+        "target": 2.0,
+        "n_seeds": 2,
+        "infeas_init_mean": 0.2602056562900543,
+        "infeas_final_mean": 0.011714681051671505,
+        "repair_factor_ratio_of_means": 22.211928360860238,
+        "repair_factor_mean_of_ratios_alt": 22.24839040828066
+      },
+      {
+        "target": 3.0,
+        "n_seeds": 2,
+        "infeas_init_mean": 0.2988975942134857,
+        "infeas_final_mean": 0.02197527326643467,
+        "repair_factor_ratio_of_means": 13.601541632250187,
+        "repair_factor_mean_of_ratios_alt": 13.741524648649888
+      },
+      {
+        "target": 5.0,
+        "n_seeds": 2,
+        "infeas_init_mean": 0.3379345089197159,
+        "infeas_final_mean": 0.04827648401260376,
+        "repair_factor_ratio_of_means": 6.9999817888869,
+        "repair_factor_mean_of_ratios_alt": 7.003362139617814
+      },
+      {
+        "target": 6.317,
+        "n_seeds": 2,
+        "infeas_init_mean": 0.35281893610954285,
+        "infeas_final_mean": 0.06493675895035267,
+        "repair_factor_ratio_of_means": 5.433269873836639,
+        "repair_factor_mean_of_ratios_alt": 5.454408430903593
+      },
+      {
+        "target": 8.0,
+        "n_seeds": 2,
+        "infeas_init_mean": 0.366607666015625,
+        "infeas_final_mean": 0.08752558380365372,
+        "repair_factor_ratio_of_means": 4.1885772146123195,
+        "repair_factor_mean_of_ratios_alt": 4.188639063654844
+      },
+      {
+        "target": 10.0,
+        "n_seeds": 2,
+        "infeas_init_mean": 0.3776771277189255,
+        "infeas_final_mean": 0.12244407832622528,
+        "repair_factor_ratio_of_means": 3.084486672460288,
+        "repair_factor_mean_of_ratios_alt": 3.0928314457295976
+      },
+      {
+        "target": 13.0,
+        "n_seeds": 1,
+        "infeas_init_mean": 0.394807368516922,
+        "infeas_final_mean": 0.20677664875984192,
+        "repair_factor_ratio_of_means": 1.909342137445442,
+        "repair_factor_mean_of_ratios_alt": 1.909342137445442
+      },
+      {
+        "target": 16.0,
+        "n_seeds": 1,
+        "infeas_init_mean": 0.38427969813346863,
+        "infeas_final_mean": 0.3051310181617737,
+        "repair_factor_ratio_of_means": 1.259392442133602,
+        "repair_factor_mean_of_ratios_alt": 1.259392442133602
+      },
+      {
+        "target": 20.0,
+        "n_seeds": 2,
+        "infeas_init_mean": 0.40022610127925873,
+        "infeas_final_mean": 0.41328707337379456,
+        "repair_factor_ratio_of_means": 0.9683973370182741,
+        "repair_factor_mean_of_ratios_alt": 0.9682609010496686
+      }
+    ],
+    "weakest_steering_repair_factor": 29.24744667318205,
+    "strongest_steering_repair_factor": 0.9683973370182741
+  }
+}

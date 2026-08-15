@@ -196,8 +196,8 @@ programme listing. Venue and volume are as the publisher states them, not as sec
 report them.
 
 Ahmed, K., Chang, K.-W., and Van den Broeck, G. A pseudo-semantic loss for autoregressive models
-with logical constraints. *Thirty-Seventh Conference on Neural Information Processing Systems
-(NeurIPS)*, 2023.
+with logical constraints. *Advances in Neural Information Processing Systems 36 (NeurIPS)*, Main
+Conference Track, 2023. Verified against the NeurIPS 2023 proceedings page and arXiv:2312.03905.
 
 Antunes, L. M., Butler, K. T., and Grau-Crespo, R. Crystal structure generation with
 autoregressive large language modeling. *Nature Communications* 15, 10570, 2024.

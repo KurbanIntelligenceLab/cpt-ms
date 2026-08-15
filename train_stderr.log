@@ -1,0 +1,4 @@
+/Users/jp/cpt-ms/scripts/train/train_a2.py:78: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  self.blocks = nn.TransformerEncoder(layer, cfg.n_layer)
+/Users/jp/cpt-ms/scripts/train/train_a2.py:78: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  self.blocks = nn.TransformerEncoder(layer, cfg.n_layer)

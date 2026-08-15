@@ -1,0 +1,92 @@
+{
+  "schema_version": "1.0",
+  "artifact_name": "FIG2_steering_frontier",
+  "script": "scripts/crystal/compute_fig2_steering_frontier.py",
+  "git_commit": "a08c4cf83c8ef2cd801224d4c2acfae5fbdd2cb2-dirty",
+  "config": {
+    "source": "WS3_steering_frontier_rows"
+  },
+  "config_hash": "391c64181c902865",
+  "seeds": [
+    0,
+    1
+  ],
+  "created_utc": "2026-08-15T20:54:55.301603+00:00",
+  "python": "3.11.15",
+  "platform": "macOS-26.5.2-arm64-arm-64bit",
+  "payload_sha256": "44645f1fd6f2a586d93b88c9209467e17467afeb998da558de4561207b7c3edb",
+  "payload": {
+    "aggregation": "seed-averaged per target (matches reports/WS3_steering_frontier_notes.md 'The frontier' table)",
+    "source_artifact": "results/WS3_steering_frontier_rows.json",
+    "n_source_runs": 18,
+    "frontier": [
+      {
+        "target": 1.5,
+        "n_seeds": 2,
+        "deployed_mean": 1.8478035438388247,
+        "deployed_sd": 0.07675631650476797
+      },
+      {
+        "target": 2.0,
+        "n_seeds": 2,
+        "deployed_mean": 2.265929547514812,
+        "deployed_sd": 0.002454589614869346
+      },
+      {
+        "target": 3.0,
+        "n_seeds": 2,
+        "deployed_mean": 3.2402136100959193,
+        "deployed_sd": 0.091583184525597
+      },
+      {
+        "target": 5.0,
+        "n_seeds": 2,
+        "deployed_mean": 4.848935188374567,
+        "deployed_sd": 0.09685182458235549
+      },
+      {
+        "target": 6.317,
+        "n_seeds": 2,
+        "deployed_mean": 5.5983369318984995,
+        "deployed_sd": 0.2862965645923441
+      },
+      {
+        "target": 8.0,
+        "n_seeds": 2,
+        "deployed_mean": 6.759691054909876,
+        "deployed_sd": 0.03147282373420199
+      },
+      {
+        "target": 10.0,
+        "n_seeds": 2,
+        "deployed_mean": 8.330272697757442,
+        "deployed_sd": 0.7893813303671311
+      },
+      {
+        "target": 13.0,
+        "n_seeds": 1,
+        "deployed_mean": 8.74408941492318,
+        "deployed_sd": 0.0
+      },
+      {
+        "target": 16.0,
+        "n_seeds": 1,
+        "deployed_mean": 9.87475693450942,
+        "deployed_sd": 0.0
+      },
+      {
+        "target": 20.0,
+        "n_seeds": 2,
+        "deployed_mean": 10.4047287830039,
+        "deployed_sd": 0.20367658225712326
+      }
+    ],
+    "steering_ceiling": {
+      "target": 20.0,
+      "achieved_density": 10.4047287830039,
+      "achieved_sd": 0.20367658225712326,
+      "definition": "achieved density at the highest requested target, where the arm saturates"
+    },
+    "data_mean_density": 6.678904185463716
+  }
+}

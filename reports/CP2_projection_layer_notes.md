@@ -177,7 +177,7 @@ identity when the constraint already holds; gradients pass autograd's gradcheck 
 two constraints; and a regression test asserting both a tight residual and a low iteration
 count, since the stall presented as hitting the iteration cap.
 
-All 271 tests in the suite pass where `git init` is available (5 provenance tests skip without it): 22 here, 7 in `tests/test_plausibility_screen.py`, 9 in `tests/test_energy_screen.py`, 10 in `tests/test_conditional_baseline.py`, 5 in `tests/test_fidelity_baseline.py`, 4 in `tests/test_tokenizer_coverage.py`, 12 in `tests/test_sweep_analysis.py`, 6 in `tests/test_crystal_mask.py`, 5 in `tests/test_crystal_constraint.py`, 5 in `tests/test_feasibility_exactness.py`, 18 in `tests/test_cif_grammar.py`, 15 in
+All 277 tests in the suite pass where `git init` is available (5 provenance tests skip without it): 22 here, 7 in `tests/test_plausibility_screen.py`, 9 in `tests/test_energy_screen.py`, 10 in `tests/test_conditional_baseline.py`, 5 in `tests/test_fidelity_baseline.py`, 4 in `tests/test_tokenizer_coverage.py`, 12 in `tests/test_sweep_analysis.py`, 6 in `tests/test_crystal_mask.py`, 5 in `tests/test_crystal_constraint.py`, 5 in `tests/test_feasibility_exactness.py`, 18 in `tests/test_cif_grammar.py`, 15 in
 `tests/test_parser_determinability.py`, 14 in `tests/test_actionability.py`, 9 in
 `tests/test_ledger_preflight.py`, 9 in `tests/test_tilt_lemmas.py`, 8 in
 `tests/test_synthetic_targets.py`, 8 in `tests/test_provenance.py`, 8 in
@@ -187,7 +187,8 @@ All 271 tests in the suite pass where `git init` is available (5 provenance test
 `tests/test_a7_grid.py`, 7 in `tests/test_paper_consistency.py`, 6 in
 `tests/test_equivalence.py`, 10 in `tests/test_external_baselines.py`, 6 in
 `tests/test_citations.py`, 6 in `tests/test_figures.py`, 5 in
-`tests/test_serialization.py`, 5 in `tests/test_smc.py`, and 6 in
+`tests/test_serialization.py`, 5 in `tests/test_smc.py`, 6 in
+`tests/test_fig1_charge_marginals.py`, and 6 in
 `tests/test_a6_comparator.py`. Five of the provenance tests build throwaway
 repositories and skip where `git init` is unavailable, so they exercise fully on a
 developer machine and report as skipped in a restricted sandbox.

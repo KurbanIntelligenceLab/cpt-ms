@@ -72,8 +72,9 @@ its own.
 
 At valence target 0.282 the constraint moves the requested way at all three density targets, with the
 deviation growing as the density target rises (correlation -0.9614). At the two higher targets, both
-of which ask the constraint to raise valence above every control, it moves the wrong way at density
-8.0.
+of which ask the constraint to raise valence above every control, it moves the wrong way in three of
+the four cells: at density 8.0 under both, and at density 3.0 under 0.686. Only 0.484 at density 3.0
+succeeds.
 
 By direction: asked to lower valence, correct 2 of 2; asked to raise it, 2 of 5. The budget is a
 remaining quantity, so lowering a per-volume density means spending less of it, which is always

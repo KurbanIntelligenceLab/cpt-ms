@@ -293,7 +293,8 @@ constraint alone and an absolute level hides that.
 At valence target 0.282 the constraint moves in the requested direction at all three density
 targets, and the deviation from control grows with the density target (correlation -0.9614). At
 0.484 and 0.686 — both above every control, so both asking the constraint to raise valence — it
-moves the wrong way at density 8.0 in each case.
+moves the wrong way in three of the four cells: at density 8.0 under both targets, and at density
+3.0 under 0.686 as well. Only 0.484 at density 3.0 succeeds.
 
 Aggregating by direction rather than by row: asked to lower valence, the constraint moves correctly
 2 of 2 times; asked to raise it, 2 of 5. The asymmetry follows from what the budget

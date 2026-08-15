@@ -39,9 +39,13 @@ one model per target, mean absolute error over the seven sub-ceiling targets is
 | trained at 10.0 | 1 | 0.441 | 0.67x |
 | frontier, train-per-target | 7 | 0.662 | 1.00x |
 
-The checkpoint trained at 10.0 covers the whole sub-ceiling family more accurately than
-seven separately trained models, at one seventh of the training compute. That single-seed reading is superseded by the
-three-seed replication below, which reaches the same conclusion on firmer ground.
+On this single seed the checkpoint trained at 10.0 covers the whole sub-ceiling family more accurately
+than seven separately trained models, at one seventh of the training compute. That reading does not
+survive replication, and the difference matters: the three-seed replication below finds the checkpoint
+better at 3 of 7 targets with a paired Wilcoxon p of 1.0, which is statistically
+indistinguishable rather than superior. The claim this section supports is therefore parity at one
+seventh of the training compute, not an accuracy win, and the 0.67x ratio above is a favourable draw
+from one seed rather than a result.
 
 ## Result 2 — Regime S survives retargeting exactly
 
