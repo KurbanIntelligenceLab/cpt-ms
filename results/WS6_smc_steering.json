@@ -1,0 +1,647 @@
+{
+ "schema_version": "1.0",
+ "artifact_name": "WS6_smc_steering",
+ "script": "scripts/crystal/smc_steering.py",
+ "git_commit": "844a07f16b8f97824940532080b83e9c0ea08cde",
+ "config": {
+  "k_values": [
+   1,
+   4,
+   16,
+   64
+  ],
+  "targets": [
+   1.5,
+   2.0,
+   3.0,
+   5.0,
+   6.317,
+   8.0,
+   10.0,
+   13.0,
+   16.0,
+   20.0
+  ],
+  "runs": 12,
+  "checkpoint": "A3_d5.0.pt"
+ },
+ "config_hash": "931bb2f5ecedf5c9",
+ "seeds": [
+  0
+ ],
+ "created_utc": "2026-08-15T16:43:05.295161+00:00",
+ "python": "3.11.15",
+ "platform": "macOS-26.5.2-arm64-arm-64bit",
+ "payload_sha256": "8aafb3654078994c18a56963dc31d44be0b168c31e850e698eda91d13baa92cd",
+ "payload": {
+  "arm": "sequential Monte Carlo steering at inference, untuned",
+  "checkpoint": "A3_d5.0.pt",
+  "trained_density_target": 5.0,
+  "k_values": [
+   1,
+   4,
+   16,
+   64
+  ],
+  "rows": [
+   {
+    "target": 1.5,
+    "K": 1,
+    "runs": 12,
+    "n_valid": 12,
+    "mean_error": 10.161217463698618,
+    "sd_error": 6.5599168279212705,
+    "wall_clock_s_per_output": 0.791990339756012,
+    "forward_passes_per_output": 1
+   },
+   {
+    "target": 1.5,
+    "K": 4,
+    "runs": 12,
+    "n_valid": 12,
+    "mean_error": 3.1102982736604687,
+    "sd_error": 2.6060147411875585,
+    "wall_clock_s_per_output": 1.2960915962855022,
+    "forward_passes_per_output": 4
+   },
+   {
+    "target": 1.5,
+    "K": 16,
+    "runs": 12,
+    "n_valid": 12,
+    "mean_error": 0.9008906348843478,
+    "sd_error": 0.5529879808505811,
+    "wall_clock_s_per_output": 1.873262921969096,
+    "forward_passes_per_output": 16
+   },
+   {
+    "target": 1.5,
+    "K": 64,
+    "runs": 12,
+    "n_valid": 12,
+    "mean_error": 0.5360033862738226,
+    "sd_error": 0.3001692414302234,
+    "wall_clock_s_per_output": 3.4908875028292337,
+    "forward_passes_per_output": 64
+   },
+   {
+    "target": 2.0,
+    "K": 1,
+    "runs": 12,
+    "n_valid": 12,
+    "mean_error": 9.661217463698618,
+    "sd_error": 6.5599168279212705,
+    "wall_clock_s_per_output": 0.7612545092900594,
+    "forward_passes_per_output": 1
+   },
+   {
+    "target": 2.0,
+    "K": 4,
+    "runs": 12,
+    "n_valid": 12,
+    "mean_error": 2.7323280248921153,
+    "sd_error": 1.9654065272692312,
+    "wall_clock_s_per_output": 1.3333982626597087,
+    "forward_passes_per_output": 4
+   },
+   {
+    "target": 2.0,
+    "K": 16,
+    "runs": 12,
+    "n_valid": 12,
+    "mean_error": 0.9166620982245416,
+    "sd_error": 0.4239397291381434,
+    "wall_clock_s_per_output": 2.272081653277079,
+    "forward_passes_per_output": 16
+   },
+   {
+    "target": 2.0,
+    "K": 64,
+    "runs": 12,
+    "n_valid": 12,
+    "mean_error": 0.5432060407355085,
+    "sd_error": 0.3687576492049003,
+    "wall_clock_s_per_output": 2.6327083309491477,
+    "forward_passes_per_output": 64
+   },
+   {
+    "target": 3.0,
+    "K": 1,
+    "runs": 12,
+    "n_valid": 12,
+    "mean_error": 8.661217463698618,
+    "sd_error": 6.5599168279212705,
+    "wall_clock_s_per_output": 0.580411414305369,
+    "forward_passes_per_output": 1
+   },
+   {
+    "target": 3.0,
+    "K": 4,
+    "runs": 12,
+    "n_valid": 12,
+    "mean_error": 1.4238607279349729,
+    "sd_error": 1.149476508489363,
+    "wall_clock_s_per_output": 0.9660069147745768,
+    "forward_passes_per_output": 4
+   },
+   {
+    "target": 3.0,
+    "K": 16,
+    "runs": 12,
+    "n_valid": 12,
+    "mean_error": 0.3444402761815873,
+    "sd_error": 0.2519803029346917,
+    "wall_clock_s_per_output": 1.488124171892802,
+    "forward_passes_per_output": 16
+   },
+   {
+    "target": 3.0,
+    "K": 64,
+    "runs": 12,
+    "n_valid": 12,
+    "mean_error": 0.5245142177686105,
+    "sd_error": 0.31280423235174637,
+    "wall_clock_s_per_output": 2.2210158308347068,
+    "forward_passes_per_output": 64
+   },
+   {
+    "target": 5.0,
+    "K": 1,
+    "runs": 12,
+    "n_valid": 12,
+    "mean_error": 6.678818691405364,
+    "sd_error": 6.540364074616703,
+    "wall_clock_s_per_output": 0.35995717843373615,
+    "forward_passes_per_output": 1
+   },
+   {
+    "target": 5.0,
+    "K": 4,
+    "runs": 12,
+    "n_valid": 12,
+    "mean_error": 0.8379300455816795,
+    "sd_error": 0.820987203550877,
+    "wall_clock_s_per_output": 0.8849656780560812,
+    "forward_passes_per_output": 4
+   },
+   {
+    "target": 5.0,
+    "K": 16,
+    "runs": 12,
+    "n_valid": 12,
+    "mean_error": 0.6397544844669759,
+    "sd_error": 0.4023427939174131,
+    "wall_clock_s_per_output": 1.1714840928713481,
+    "forward_passes_per_output": 16
+   },
+   {
+    "target": 5.0,
+    "K": 64,
+    "runs": 12,
+    "n_valid": 12,
+    "mean_error": 0.4302571050909229,
+    "sd_error": 0.30653707400005525,
+    "wall_clock_s_per_output": 1.8830743233362834,
+    "forward_passes_per_output": 64
+   },
+   {
+    "target": 6.317,
+    "K": 1,
+    "runs": 12,
+    "n_valid": 12,
+    "mean_error": 5.7853188805031905,
+    "sd_error": 6.138155968900421,
+    "wall_clock_s_per_output": 0.2757464249928792,
+    "forward_passes_per_output": 1
+   },
+   {
+    "target": 6.317,
+    "K": 4,
+    "runs": 12,
+    "n_valid": 12,
+    "mean_error": 1.4841248373009908,
+    "sd_error": 1.6105663632728586,
+    "wall_clock_s_per_output": 1.0582982500394185,
+    "forward_passes_per_output": 4
+   },
+   {
+    "target": 6.317,
+    "K": 16,
+    "runs": 12,
+    "n_valid": 12,
+    "mean_error": 0.67466023211804,
+    "sd_error": 0.519387464997878,
+    "wall_clock_s_per_output": 1.0444966753323872,
+    "forward_passes_per_output": 16
+   },
+   {
+    "target": 6.317,
+    "K": 64,
+    "runs": 12,
+    "n_valid": 12,
+    "mean_error": 0.49331668014307967,
+    "sd_error": 0.2898810702986207,
+    "wall_clock_s_per_output": 2.1727500756581626,
+    "forward_passes_per_output": 64
+   },
+   {
+    "target": 8.0,
+    "K": 1,
+    "runs": 12,
+    "n_valid": 12,
+    "mean_error": 5.0809387099364125,
+    "sd_error": 5.430724866987067,
+    "wall_clock_s_per_output": 0.7769370079040527,
+    "forward_passes_per_output": 1
+   },
+   {
+    "target": 8.0,
+    "K": 4,
+    "runs": 12,
+    "n_valid": 12,
+    "mean_error": 1.2477598793979832,
+    "sd_error": 0.8079889304724927,
+    "wall_clock_s_per_output": 1.0046356519063313,
+    "forward_passes_per_output": 4
+   },
+   {
+    "target": 8.0,
+    "K": 16,
+    "runs": 12,
+    "n_valid": 12,
+    "mean_error": 0.8763687255959495,
+    "sd_error": 0.7595674496666807,
+    "wall_clock_s_per_output": 1.797486166159312,
+    "forward_passes_per_output": 16
+   },
+   {
+    "target": 8.0,
+    "K": 64,
+    "runs": 12,
+    "n_valid": 12,
+    "mean_error": 0.48803718487133163,
+    "sd_error": 0.26128669573568325,
+    "wall_clock_s_per_output": 2.07770707209905,
+    "forward_passes_per_output": 64
+   },
+   {
+    "target": 10.0,
+    "K": 1,
+    "runs": 12,
+    "n_valid": 12,
+    "mean_error": 4.711936496732483,
+    "sd_error": 4.671433220127158,
+    "wall_clock_s_per_output": 1.012136737505595,
+    "forward_passes_per_output": 1
+   },
+   {
+    "target": 10.0,
+    "K": 4,
+    "runs": 12,
+    "n_valid": 12,
+    "mean_error": 1.811652130371412,
+    "sd_error": 1.4542324395395225,
+    "wall_clock_s_per_output": 1.1694835027058919,
+    "forward_passes_per_output": 4
+   },
+   {
+    "target": 10.0,
+    "K": 16,
+    "runs": 12,
+    "n_valid": 12,
+    "mean_error": 1.1120318228011128,
+    "sd_error": 0.5313893479812456,
+    "wall_clock_s_per_output": 1.8134870727856953,
+    "forward_passes_per_output": 16
+   },
+   {
+    "target": 10.0,
+    "K": 64,
+    "runs": 12,
+    "n_valid": 12,
+    "mean_error": 0.7326942155194711,
+    "sd_error": 0.46804036526417403,
+    "wall_clock_s_per_output": 2.114997665087382,
+    "forward_passes_per_output": 64
+   },
+   {
+    "target": 13.0,
+    "K": 1,
+    "runs": 12,
+    "n_valid": 12,
+    "mean_error": 5.1727279254842,
+    "sd_error": 3.97469599229413,
+    "wall_clock_s_per_output": 0.48338232437769574,
+    "forward_passes_per_output": 1
+   },
+   {
+    "target": 13.0,
+    "K": 4,
+    "runs": 12,
+    "n_valid": 12,
+    "mean_error": 1.9604124271222563,
+    "sd_error": 1.9232036876732017,
+    "wall_clock_s_per_output": 1.5792687336603801,
+    "forward_passes_per_output": 4
+   },
+   {
+    "target": 13.0,
+    "K": 16,
+    "runs": 12,
+    "n_valid": 12,
+    "mean_error": 1.319550614805048,
+    "sd_error": 0.7815543700893527,
+    "wall_clock_s_per_output": 1.504059096177419,
+    "forward_passes_per_output": 16
+   },
+   {
+    "target": 13.0,
+    "K": 64,
+    "runs": 12,
+    "n_valid": 12,
+    "mean_error": 1.1389366222330868,
+    "sd_error": 0.864459302915059,
+    "wall_clock_s_per_output": 2.0831676522890725,
+    "forward_passes_per_output": 64
+   },
+   {
+    "target": 16.0,
+    "K": 1,
+    "runs": 12,
+    "n_valid": 12,
+    "mean_error": 7.023820034277247,
+    "sd_error": 3.1224906865351256,
+    "wall_clock_s_per_output": 1.0260047515233357,
+    "forward_passes_per_output": 1
+   },
+   {
+    "target": 16.0,
+    "K": 4,
+    "runs": 12,
+    "n_valid": 12,
+    "mean_error": 4.803491586874354,
+    "sd_error": 2.6999693631081607,
+    "wall_clock_s_per_output": 1.0593129992485046,
+    "forward_passes_per_output": 4
+   },
+   {
+    "target": 16.0,
+    "K": 16,
+    "runs": 12,
+    "n_valid": 12,
+    "mean_error": 1.0862105259258905,
+    "sd_error": 0.8789040087244943,
+    "wall_clock_s_per_output": 1.4604891737302144,
+    "forward_passes_per_output": 16
+   },
+   {
+    "target": 16.0,
+    "K": 64,
+    "runs": 12,
+    "n_valid": 12,
+    "mean_error": 1.3173083536196937,
+    "sd_error": 1.3464241002006472,
+    "wall_clock_s_per_output": 2.2176912426948547,
+    "forward_passes_per_output": 64
+   },
+   {
+    "target": 20.0,
+    "K": 1,
+    "runs": 12,
+    "n_valid": 12,
+    "mean_error": 9.690486700943913,
+    "sd_error": 4.055464740998925,
+    "wall_clock_s_per_output": 0.6047238310178121,
+    "forward_passes_per_output": 1
+   },
+   {
+    "target": 20.0,
+    "K": 4,
+    "runs": 12,
+    "n_valid": 12,
+    "mean_error": 5.713886306966246,
+    "sd_error": 3.8013757958945016,
+    "wall_clock_s_per_output": 1.5121976534525554,
+    "forward_passes_per_output": 4
+   },
+   {
+    "target": 20.0,
+    "K": 16,
+    "runs": 12,
+    "n_valid": 12,
+    "mean_error": 2.223754543365497,
+    "sd_error": 3.0248872388085735,
+    "wall_clock_s_per_output": 2.0889856020609536,
+    "forward_passes_per_output": 16
+   },
+   {
+    "target": 20.0,
+    "K": 64,
+    "runs": 12,
+    "n_valid": 12,
+    "mean_error": 1.3465785654293567,
+    "sd_error": 1.3256269243668104,
+    "wall_clock_s_per_output": 2.95368625720342,
+    "forward_passes_per_output": 64
+   }
+  ],
+  "potential": "Gaussian on the prefix's expected final density against the target, sigma = 1.0 g/cm^3, evaluated at element positions",
+  "resampling": "multinomial, triggered when effective sample size falls below K/2",
+  "estimate_note": "the density estimate uses the trainer's own budget function, so the quantity SMC steers cannot disagree with the quantity the projection arm targets",
+  "lower_bound_note": "no proposal is learned and no threshold is tuned, so these numbers are a lower bound on what SMC can achieve rather than its ceiling; the purpose is to locate the crossover for a competent untuned implementation",
+  "cost_note": "K forward passes per accepted output at every target, indefinitely, against one training run and one forward pass for the projection",
+  "sigma_sweep": {
+   "K": 16,
+   "sigmas": [
+    0.3,
+    1.0
+   ],
+   "runs_per_cell": 8,
+   "rows": [
+    {
+     "target": 1.5,
+     "K": 16,
+     "sigma": 0.3,
+     "runs": 8,
+     "n_valid": 8,
+     "mean_error": 1.625246312253294,
+     "sd_error": 0.9046727591647603
+    },
+    {
+     "target": 1.5,
+     "K": 16,
+     "sigma": 1.0,
+     "runs": 8,
+     "n_valid": 8,
+     "mean_error": 0.8798611344930299,
+     "sd_error": 0.32719445749337916
+    },
+    {
+     "target": 2.0,
+     "K": 16,
+     "sigma": 0.3,
+     "runs": 8,
+     "n_valid": 8,
+     "mean_error": 0.6236839906270495,
+     "sd_error": 0.2952961453447046
+    },
+    {
+     "target": 2.0,
+     "K": 16,
+     "sigma": 1.0,
+     "runs": 8,
+     "n_valid": 8,
+     "mean_error": 0.9598729090935745,
+     "sd_error": 0.462593783642975
+    },
+    {
+     "target": 3.0,
+     "K": 16,
+     "sigma": 0.3,
+     "runs": 8,
+     "n_valid": 8,
+     "mean_error": 0.41730523767771815,
+     "sd_error": 0.5440756812050387
+    },
+    {
+     "target": 3.0,
+     "K": 16,
+     "sigma": 1.0,
+     "runs": 8,
+     "n_valid": 8,
+     "mean_error": 0.2936237412372723,
+     "sd_error": 0.24387422675515352
+    },
+    {
+     "target": 5.0,
+     "K": 16,
+     "sigma": 0.3,
+     "runs": 8,
+     "n_valid": 8,
+     "mean_error": 0.2525372707173914,
+     "sd_error": 0.1232854013239389
+    },
+    {
+     "target": 5.0,
+     "K": 16,
+     "sigma": 1.0,
+     "runs": 8,
+     "n_valid": 8,
+     "mean_error": 0.49119796413487604,
+     "sd_error": 0.36755222076393795
+    },
+    {
+     "target": 6.317,
+     "K": 16,
+     "sigma": 0.3,
+     "runs": 8,
+     "n_valid": 8,
+     "mean_error": 0.37958975999406663,
+     "sd_error": 0.3242593011972086
+    },
+    {
+     "target": 6.317,
+     "K": 16,
+     "sigma": 1.0,
+     "runs": 8,
+     "n_valid": 8,
+     "mean_error": 0.5004094362236057,
+     "sd_error": 0.3724455538010865
+    },
+    {
+     "target": 8.0,
+     "K": 16,
+     "sigma": 0.3,
+     "runs": 8,
+     "n_valid": 8,
+     "mean_error": 0.9396892837098332,
+     "sd_error": 0.86960538973399
+    },
+    {
+     "target": 8.0,
+     "K": 16,
+     "sigma": 1.0,
+     "runs": 8,
+     "n_valid": 8,
+     "mean_error": 1.1368914363483866,
+     "sd_error": 0.7723901751008229
+    },
+    {
+     "target": 10.0,
+     "K": 16,
+     "sigma": 0.3,
+     "runs": 8,
+     "n_valid": 8,
+     "mean_error": 1.331241251060505,
+     "sd_error": 0.808194324694462
+    },
+    {
+     "target": 10.0,
+     "K": 16,
+     "sigma": 1.0,
+     "runs": 8,
+     "n_valid": 8,
+     "mean_error": 0.9328327424156158,
+     "sd_error": 0.5638421587522546
+    },
+    {
+     "target": 13.0,
+     "K": 16,
+     "sigma": 0.3,
+     "runs": 8,
+     "n_valid": 8,
+     "mean_error": 1.2367256901888193,
+     "sd_error": 0.707775133244516
+    },
+    {
+     "target": 13.0,
+     "K": 16,
+     "sigma": 1.0,
+     "runs": 8,
+     "n_valid": 8,
+     "mean_error": 1.222109121123847,
+     "sd_error": 0.7389544492789755
+    },
+    {
+     "target": 16.0,
+     "K": 16,
+     "sigma": 0.3,
+     "runs": 8,
+     "n_valid": 8,
+     "mean_error": 9.222425567476098,
+     "sd_error": 20.32959755032684
+    },
+    {
+     "target": 16.0,
+     "K": 16,
+     "sigma": 1.0,
+     "runs": 8,
+     "n_valid": 8,
+     "mean_error": 1.2098753213886688,
+     "sd_error": 0.9874144400892938
+    },
+    {
+     "target": 20.0,
+     "K": 16,
+     "sigma": 0.3,
+     "runs": 8,
+     "n_valid": 8,
+     "mean_error": 1.9834099003979542,
+     "sd_error": 1.5695321682054248
+    },
+    {
+     "target": 20.0,
+     "K": 16,
+     "sigma": 1.0,
+     "runs": 8,
+     "n_valid": 8,
+     "mean_error": 1.8162158787332574,
+     "sd_error": 2.771244155457199
+    }
+   ],
+   "finding": "No single potential width is best: sigma=0.3 beats sigma=1.0 at 4 of 10 targets and loses at the rest, and its mean error over targets is worse (1.801 against 0.944) because one target degrades badly (9.222 at target 16.0). A single-target probe suggested sigma=0.3 was uniformly better; sweeping all ten targets refuted that.",
+   "why_no_tuned_headline": "Selecting the best sigma per target from the same runs that report the error is selection on the evaluation set, so the best-per-target mean (0.855) is optimistically biased and is not reported as SMC's performance. The fixed-sigma=1.0 rows are the honest comparison, and the sweep is reported to show tuning sensitivity rather than to produce a better number.",
+   "left_untuned": "proposal distribution, resampling threshold, number of resampling points, and per-target sigma selected on held-out draws -- any of which could improve these numbers, so they remain a lower bound"
+  }
+ }
+}

@@ -816,7 +816,7 @@ waits for five or six serializations budgeted together.
 Nothing quantitative in the reports is typed by hand: every number is read from an artifact in
 `results/`, each artifact carries its script, config hash, seeds, commit, environment and payload
 checksum, and narrative verdict fields inside artifacts are generated from the values they
-describe. The suite is 257 tests, all passing where `git init` is available (5 provenance tests skip
+describe. The suite is 262 tests, all passing where `git init` is available (5 provenance tests skip
 without it). Several of those tests exist because a claim in a
 report was found to be wrong — a stale test count that survived a green suite through a regex
 gap, a Regime-S exactness figure that verified because the field was absent, a per-file count that

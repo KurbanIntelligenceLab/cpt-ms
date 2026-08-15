@@ -271,6 +271,34 @@ data at both extremes. In one run it produced a mean density exceeding the maxim
 itself. The compensation hypothesis — that the backbone learns an offset calibrated to the
 projection's pull — was tested and rejected.
 
+## Sequential Monte Carlo is the principled version, and does not close the gap here
+
+`results/WS6_smc_steering.json`
+
+Best-of-n discards whole sequences; SMC carries K partial sequences and reallocates them as
+information arrives, spending compute where it changes the outcome. If the projection's advantage
+were only that naive selection is wasteful, SMC would remove it. The potential is a Gaussian on each
+particle's expected final density, evaluated at the same element positions where the projection is
+actionable, and the density estimate reuses the published decoder — verified bit-identical on
+complete sequences — so both methods are scored on the same quantity.
+
+This implementation reaches the projection at 6 of 10 targets within K = 64, all of them above the
+data mean where the projection saturates against its ceiling. Below the mean the projection is better
+at every K tested. Against best-of-n at equal compute SMC is worse at all ten targets, by a mean
+factor of 4.2 at K = 64. Structural validity is exact at every particle count, since the
+mask is active throughout.
+
+That comparison is a bound rather than a result, and the reason is worth stating. The potential's
+width is a free parameter; a probe at one target suggested a narrower width was much better, and
+sweeping both widths across all ten targets refuted the probe — the narrower width wins at 4 of
+10 targets, loses at the rest, and has a worse mean because one target degrades badly. There is no
+single good width, and the best width varies with the target. Selecting it per target from the same
+runs that report the error would be selection on the evaluation set, so the fixed-width rows are what
+is reported; the best-per-target mean is 0.855 and is declined. The proposal, the resampling
+threshold, and per-target width chosen on held-out draws remain untuned, so a stronger SMC is
+available and would not change the claim: the inference-time family buys accuracy with compute per
+output at every target indefinitely, while the projection buys it once at training.
+
 ## The constraint class and the serialization are coupled
 
 `results/CP9_serialization_expressibility.json`

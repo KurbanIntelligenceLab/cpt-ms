@@ -15,10 +15,15 @@ a soft terminal constraint. Resampling happens at element positions only, matchi
 positions where the projection is actionable, so the two methods are compared on the same
 decision points rather than on different ones.
 
-WHAT IS DELIBERATELY NOT DONE. No proposal is learned and no adaptive resampling threshold is
-tuned. A tuned SMC would be a stronger baseline still; the point here is to establish where
-the crossover sits for a competent untuned implementation, and to be explicit that the number
-reported is a lower bound on what SMC can do rather than its ceiling.
+TUNING MATTERS AND IS THEREFORE MEASURED. A first pass fixed sigma = 1.0 g/cm^3 and reported
+SMC as roughly four times worse than best-of-n at equal compute -- which would have been a
+claim about this implementation dressed up as a claim about SMC. A sweep at one target showed
+the potential's width is the dominant knob (mean error 0.259 at sigma = 0.3 against 0.640 at
+sigma = 1.0, a factor of 2.5 from one number), so sigma is swept here and the best value per
+target is reported alongside the fixed-sigma result. No proposal is learned and no adaptive
+resampling threshold is tuned, so these numbers remain a lower bound on what SMC can achieve
+rather than its ceiling; the purpose is to locate the crossover for a competently tuned
+implementation and to say plainly which knobs were left untouched.
 """
 from __future__ import annotations
 
@@ -127,8 +132,11 @@ def smc(model, V, gm, cfg, device, K: int, target: float, max_len: int,
     return [int(t) for t in ids[pick].cpu().numpy()], {"n_resample": n_resample}
 
 
+SIGMAS = [0.3, 1.0]
+
+
 def main(ckpt: str, targets=None, k_values=None, runs: int = 32,
-         seed: int = 0, smoke: bool = False) -> Path:
+         seed: int = 0, smoke: bool = False, sigmas=None) -> Path:
     from scripts.crystal.mp20 import ELEMENTS, CrystalVocab
     from scripts.train.train_crystal import CrystalTrainConfig, GrammarMask
 
@@ -143,34 +151,53 @@ def main(ckpt: str, targets=None, k_values=None, runs: int = 32,
     gm = GrammarMask(V, order=ck["vocab_order"])
     max_len = int(ck["max_len"]) + 2
 
+    sigs = sigmas or ([1.0] if smoke else SIGMAS)
     rows = []
     for t in tg:
         for K in ks:
-            rng = np.random.default_rng(seed)
-            torch.manual_seed(seed)
-            errs, valid, t0 = [], 0, time.time()
-            for _ in range(runs):
-                seq, _d = smc(model, V, gm, cfg, dev, K, float(t), max_len, rng)
-                d = V.decode_density(seq)
-                if d is not None and np.isfinite(d) and 0 < d < 100:
-                    valid += 1
-                    errs.append(abs(d - float(t)))
-            wall = time.time() - t0
-            rows.append({
-                "target": float(t), "K": int(K), "runs": runs,
-                "n_valid": valid,
-                "mean_error": float(np.mean(errs)) if errs else None,
-                "sd_error": float(np.std(errs, ddof=1)) if len(errs) > 1 else 0.0,
-                "wall_clock_s_per_output": wall / runs,
-                "forward_passes_per_output": int(K),
-            })
+            for sig in sigs:
+                rng = np.random.default_rng(seed)
+                torch.manual_seed(seed)
+                errs, valid, t0 = [], 0, time.time()
+                for _ in range(runs):
+                    seq, _d = smc(model, V, gm, cfg, dev, K, float(t), max_len, rng,
+                                  sigma=float(sig))
+                    d = V.decode_density(seq)
+                    if d is not None and np.isfinite(d) and 0 < d < 100:
+                        valid += 1
+                        errs.append(abs(d - float(t)))
+                wall = time.time() - t0
+                rows.append({
+                    "target": float(t), "K": int(K), "sigma": float(sig), "runs": runs,
+                    "n_valid": valid,
+                    "mean_error": float(np.mean(errs)) if errs else None,
+                    "sd_error": float(np.std(errs, ddof=1)) if len(errs) > 1 else 0.0,
+                    "wall_clock_s_per_output": wall / runs,
+                    "forward_passes_per_output": int(K),
+                })
+
+    # Best sigma per (target, K): the honest number for a tuned implementation.
+    best = {}
+    for r in rows:
+        key = (r["target"], r["K"])
+        cur = best.get(key)
+        if r["mean_error"] is not None and (cur is None or r["mean_error"] < cur["mean_error"]):
+            best[key] = r
+    best_rows = [{"target": k[0], "K": k[1], "sigma": v["sigma"],
+                  "mean_error": v["mean_error"], "sd_error": v["sd_error"]}
+                 for k, v in sorted(best.items())]
 
     payload = {
         "arm": "sequential Monte Carlo steering at inference, untuned",
         "checkpoint": Path(ckpt).name,
         "trained_density_target": float(ck["trained_density_target"]),
         "k_values": ks,
+        "sigmas": sigs,
         "rows": rows,
+        "best_by_sigma": best_rows,
+        "sigma_note": ("the potential's width is the dominant tuning knob; reporting only a "
+                       "fixed sigma would have made an implementation detail look like a "
+                       "property of SMC"),
         "potential": ("Gaussian on the prefix's expected final density against the target, "
                       "sigma = 1.0 g/cm^3, evaluated at element positions"),
         "resampling": "multinomial, triggered when effective sample size falls below K/2",
