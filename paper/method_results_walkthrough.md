@@ -407,6 +407,131 @@ assumed ceiling of 1.0 would be penalized for a property of the screen. An arm r
 be indistinguishable from the data, which is the outcome that matters and is invisible without the
 reference in hand.
 
+## Step 14 — One checkpoint, ten targets: the constraint target is an argument, not a label
+
+`results/WS4_zero_shot_retargeting.json`, `results/WS4_retargeting_seed_replication.json`
+
+Method. The target enters the dual solve as an argument, so a trained checkpoint should be
+deployable at targets it never saw. Three A3 checkpoints were trained at density 3.0, 5.0
+and 10.0, then each was deployed across all ten frontier targets with no retraining,
+changing only the deployment target. Both readings are recorded at every cell, so
+retargeting through the layer is distinguishable from a backbone that happens to sit near
+the new target. The comparison that holds training compute fixed is one checkpoint across
+the family against the frontier's separately trained models.
+
+Results. Thirty cells, structural validity exactly 1.0000 in every one, novel-formula
+fraction between 0.928 and 0.982 throughout. Per-checkpoint mean error across the seven
+sub-ceiling targets is 1.106, 0.790 and 0.441 for the checkpoints trained at 3.0, 5.0
+and 10.0.
+
+The amortization claim, replicated at three seeds: mean sub-ceiling error 0.650 ± 0.151
+against the frontier's 0.662, from 1 training run against 7. Better at 3 of 7
+targets, mean paired difference -0.012 g/cm^3, Wilcoxon signed-rank p = 1.0. One
+training run is statistically indistinguishable from seven, which is the claim worth
+making and it is a null result in the right direction.
+
+A claim that did not survive replication. The seed-0 checkpoint trained at 10.0 reached
+15.495, far past the published ceiling of 10.405, and its backbone sat at 22.769. Seeds 1
+and 2 gave backbones of 8.381 and 8.692 and reached 10.439 and 10.596. So the ceiling is
+exceeded at every seed, but the size of the excursion is a property of the checkpoint
+rather than of the method, and the backbone-to-reach relationship is carried by one
+extreme point rather than by a spread. The claim was narrowed from a hard ceiling to a
+soft one before publication rather than after.
+
+## Step 15 — Several constraints at once: exact, and conditional on vocabulary
+
+`results/CP6_multiconstraint.json`
+
+Method. The solver has always accepted a constraint matrix with several rows and returned
+one multiplier per constraint, but only the single-constraint case had been verified. The
+same two-oracle protocol as CP-2 was run at [1, 2, 3, 4] simultaneous constraints, with a Hessian
+conditioning report alongside, since a converged solve on a near-singular system is not
+trustworthy and reporting only the residual would hide that.
+
+Results. All converged at every constraint count. Worst residual 8.71e-13, worst Hessian
+condition number 1.739. A test constructs the pathological case of two identical
+constraint rows and asserts the ill-posedness is visible rather than masked by a small
+residual.
+
+Whether constraints compose is not a property of the solver. Joint attainability over
+pairs of targets rises with vocabulary size: 53.1% jointly attainable at vocabulary 8,
+91.4% at 64, and 100.0% at 256. At the smallest vocabulary 46.9% of grid points are
+attainable for each constraint separately but not for both together. A single grid at one
+vocabulary size would have reported that constraints always compose; the artifact also
+discloses that the absolute fractions depend on grid resolution, so only the
+cross-vocabulary comparison is claimed.
+
+## Step 16 — The limit of the expressible class
+
+`results/CP7_second_channel.json`
+
+Method. The plan's second constraint family is charge neutrality. The layer constrains a
+linear functional of the next token, so the question is whether charge balance is one.
+
+Results. It is not, and the reason is structural. Charge neutrality as SMACT defines it —
+and as the plausibility screen above measures it at 0.7150 — is an existential predicate: a
+composition is balanced if there exists an assignment of formal charges from each element's
+allowed oxidation states summing to zero. Of 87 elements in the training split, 85 have
+tabulated states and 71 are multivalent, so 81.5% of element-occurrences involve an element
+whose charge is not fixed by its identity. Collapsing the predicate to one charge per
+element makes it linear and destroys it: on 4,000 structures SMACT calls 71.08% balanced, the
+linear proxy calls 7.95%, they agree on 36.78%, and the proxy recovers 11.12% of the
+balanced set with 2,527 false negatives against 2 false positives.
+
+This is a scope result rather than a gap. The layer expresses additive functionals of the
+emitted symbols, not predicates requiring a search over latent assignments.
+
+The second family used instead is valence electron density: additive in element counts,
+defined for all 87 elements in the split, and not directly emitted, which answers the
+standing objection that density is close to something the model literally writes down. Its
+correlation with mass density is 0.725 across 26,910 structures. Both constraints solve
+jointly on 64 real crystal prefixes: all converged, worst residual 7.67e-13, zero mass
+on grammatically illegal tokens, Hessian condition median 124.2.
+
+Joint steering is possible only at element positions. Of the positions with channel
+variation, 260 carry two independent constraints and 196 carry only one: at a count
+position with pending element E the tokens are cnt:k, so mass contributes MASS[E]·k and
+valence contributes VALENCE[E]·k, both proportional to k, and the pair is exactly collinear
+there.
+
+## Step 17 — Two constraints do not compose when they share a token budget
+
+`results/WS5_two_constraint_grid.json`
+
+Method. An arm that trains through the joint projection of both constraints, on a grid of
+three density targets crossed with three valence targets at the data mean and plus or minus
+one standard deviation, with a single-constraint control at each density target so any
+difference is attributable to the second constraint rather than to training noise. The
+decisive quantity is pass-through — the range of achieved values over the range of
+requested values — and monotonicity, because a dial reporting plausible values at every
+target has not necessarily been steered.
+
+Results. The second dial does not respond. Requested valence range 0.404, achieved range
+0.0250, pass-through 6.2%. The response is not monotone: 0.2447, 0.2603, 0.2353 for
+increasing targets, so the largest target produced the smallest achieved value. Against the
+control, which carries no valence constraint at all, the largest deviation any cell reaches
+is 0.0179, or 8.9% of one data standard deviation.
+
+The mechanism is competition for one token budget. Fallback rate rises 0.102 → 0.518 → 0.826
+with the valence target at correlation 0.9963, while joint positions used fall 230 → 136 → 49,
+a 79% drop, at correlation -0.9998. Of exactly 518 actionable positions in every cell,
+236 to 262 were excluded because one running budget had reached zero while the other was
+still positive. Both quantities are additive in element identity and count and correlate at
+0.725, so the atoms that satisfy the density budget are the atoms the valence budget
+needs.
+
+Density steering is unaffected: 3.281, 3.041 and 3.071 against target 3.0, bracketing the
+control's 3.175, with structural validity exactly 1.0000 in every cell and control.
+
+Only the density-3.0 row is complete: each joint-constraint run costs about three times a
+single-constraint run and the job reached its time ceiling with the fourth cell in progress,
+whose partial output was discarded. The conclusion is stated for that row alone.
+
+The distinction this forces is worth stating precisely. The layer solves several
+expectation constraints simultaneously and exactly. It does not follow that several can be
+steered, because whether a joint solution exists at a given position is determined by the
+constraints and the prefix rather than by the solver.
+
 ## What the results support as claims
 
 Regime S is exact and holds by construction, on synthetic data and on real crystals, trained and
@@ -432,6 +557,28 @@ with the price rising as the slice thins — precisely where a generative model 
 steered model is less accurate and degrades past its ceiling, but produces novel compositions at
 every target, including the one where the conditional baseline has no training data at all.
 
+One training run amortizes across a family of targets. Because the target is an argument to the
+dual solve rather than a training-time label, a single checkpoint deployed at seven sub-ceiling
+targets is statistically indistinguishable from seven separately trained models — mean error
+0.650 ± 0.151 against 0.662, Wilcoxon p = 1.0 across three seeds. This is the claim that
+distinguishes the method from conditional training on the axis conditional training wins, since
+the baseline needs one model per target by construction.
+
+Several constraints are solved simultaneously and exactly, verified at up to four constraints
+against two independent oracles with the Hessian conditioning reported alongside the residual.
+
+Constraint COMPOSITION is bounded, and the bound is a property of the constrained quantities
+rather than of the solver. Joint attainability rises with vocabulary size; on real crystals two
+additive per-element quantities correlated at 0.725 do not compose, because they compete for the
+same token budget and one is exhausted before the other can be moved. Exact joint projection at
+the positions where a joint solution exists is compatible with no control over the second
+quantity.
+
+The expressible class has a stated boundary. The layer constrains additive functionals of the
+emitted symbols; charge neutrality is an existential predicate over oxidation-state assignments and
+is measurably not expressible as a linear functional, with a linear proxy recovering 11.1% of the
+balanced set.
+
 ## What is not claimed
 
 No claim is made that the layer improves in-distribution sample quality. No claim covers
@@ -449,6 +596,20 @@ across the frontier, against the five-seed matrix the plan sizes. The two extrem
 carry one seed each. The A6 comparator that fine-tunes toward the sequence-level tilt directly is
 specified and scoped in code but not trained, so the surrogate-versus-optimum comparison is exact
 on the synthetic task and absent on crystals.
+
+The two-constraint grid is one row of three. Density targets 5.0 and 8.0 were not reached before
+the job's time ceiling, and the 8.0 row is the one that could soften the composition result: a high
+density target and a high valence target pull in the same direction, so their budgets should
+compete less. If pass-through is higher there, the claim narrows from "these two quantities do not
+compose" to "they compose only when their targets are mutually compatible". The composition result
+also rests on one constraint pair chosen for availability rather than for independence; nothing here
+shows that expectation constraints in general fail to compose.
+
+The retargeting matrix carries three seeds at one training target and one seed at the other two.
+The predictive version of the serialization-range claim is deliberately descoped: with three
+serializations and one measured frontier, fitting on two points and testing on one is a residual
+rather than a held-out prediction, so that claim is stated correlationally and the predictive form
+waits for five or six serializations budgeted together.
 
 ## Verification posture
 
