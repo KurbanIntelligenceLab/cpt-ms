@@ -35,7 +35,8 @@ def _payload(name: str) -> dict:
 
 def test_referenced_figures_exist_on_disk():
     """Every figure the paper embeds must be a file in figures/."""
-    expected = ["frontier_mechanism.png", "composition_failure.png", "amortization.png"]
+    expected = ["frontier_mechanism.png", "composition_failure.png", "amortization.png",
+                "inference_compute.png"]
     missing = [f for f in expected if not (FIGS / f).exists()]
     assert not missing, f"referenced figures absent from figures/: {missing}"
 

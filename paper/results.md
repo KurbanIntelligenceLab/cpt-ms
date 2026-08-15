@@ -271,6 +271,17 @@ data at both extremes. In one run it produced a mean density exceeding the maxim
 itself. The compensation hypothesis — that the backbone learns an offset calibrated to the
 projection's pull — was tested and rejected.
 
+![Accuracy against inference compute]({{artifact:art_8cef8e99-a939-4381-bf2b-dffc9b18a250}})
+
+**Figure 3.** The comparison is a point against a curve. (a) Mean absolute density error over the
+seven sub-ceiling targets against forward passes per accepted output, both axes logarithmic. The
+projection is a single point at one forward pass (0.662); best-of-n and SMC are curves that reach it
+by spending compute, best-of-n crossing at n = 16. Above the ceiling the projection saturates, so those
+three targets are excluded as uninformative. (b) The axis the inference-time family pays on.
+Unique-formula fraction among accepted outputs falls from 0.830 at n = 1 to 0.220 at n = 64, while the
+projection's 0.782 does not depend on how hard the target is to hit. Accuracy bought by selection is
+diversity spent.
+
 ## Sequential Monte Carlo is the principled version, and does not close the gap here
 
 `results/WS6_smc_steering.json`
