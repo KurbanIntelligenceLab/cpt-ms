@@ -675,6 +675,37 @@ frontier targets — while the dual solve takes the target as a runtime argument
 amortize across constraints at a fixed model; this work amortizes across targets of one
 constraint at a fixed model. Neither subsumes the other.
 
+## Step 21 — The expressible class is coupled to the token ordering
+
+`results/CP9_serialization_expressibility.json`
+
+Method. The steering results rest on one serialization, so the natural check is to retrain under
+another. Before spending the runs, the prerequisite was measured: at what fraction of element
+positions is the density budget actually determined under each ordering? Determinability is what
+the projection needs — a constraint on an undetermined budget has nothing to project onto.
+
+Results.
+
+| ordering | density budget determined | valence budget determined |
+|---|---|---|
+| cell-first | 100.0% (1217/1217) | 100.0% |
+| comp-first | 0.0% (0/1217) | 0.0% |
+
+The split is total rather than gradual. Density is mass over volume, so a target density fixes a
+total mass budget only once the volume is known: cell-first ordering closes the volume before any
+element token, and composition-first does not. The second family inherits the same dependence
+because it is also a per-volume density.
+
+The requested experiment therefore cannot be run as posed — an arm trained under the second
+ordering would have no actionable positions and would measure the unconstrained model. Substituting
+a fixed mass per token is a different constraint, and it drives the composition toward the lightest
+available elements, which is what this project's first crystal run did before the ordering changed.
+
+What replaces the experiment is a sharper statement of the limitation: a quantity is constrainable
+by this layer only where the prefix determines its budget, so token ordering is a design variable
+of the method rather than an independent axis to vary. A serialization comparison needs two
+orderings that both close the budget before the constrained tokens.
+
 ## What the results support as claims
 
 Regime S is exact and holds by construction, on synthetic data and on real crystals, trained and
@@ -741,9 +772,13 @@ and rejected.
 
 ## What has not been run
 
-The steering results rest on one crystal serialization; the training entry point exposes an arm
-selector but no backbone selector, so the two-backbone comparison the plan describes would need
-both a flag and more runs. Crystal arms carry three seeds at the fixed target and two per target
+The steering results rest on one crystal serialization, and the second-serialization experiment is
+not merely unbudgeted — it is unavailable as posed. The density budget is determined at
+100% of element positions under cell-first ordering and 0% under composition-first, because
+density is a ratio whose budget closes only once the volume is known, so retraining under the
+second ordering would train with no actionable positions and measure the unconstrained model. The
+expressible class is coupled to the serialization; a comparison needs two orderings that both
+close the budget before the constrained tokens. Crystal arms carry three seeds at the fixed target and two per target
 across the frontier, against the five-seed matrix the plan sizes. The two extreme frontier targets
 carry one seed each. The A6 comparator that fine-tunes toward the sequence-level tilt directly is
 specified and scoped in code but not trained, so the surrogate-versus-optimum comparison is exact
@@ -782,7 +817,7 @@ waits for five or six serializations budgeted together.
 Nothing quantitative in the reports is typed by hand: every number is read from an artifact in
 `results/`, each artifact carries its script, config hash, seeds, commit, environment and payload
 checksum, and narrative verdict fields inside artifacts are generated from the values they
-describe. The suite is 251 tests, all passing where `git init` is available (5 provenance tests skip
+describe. The suite is 256 tests, all passing where `git init` is available (5 provenance tests skip
 without it). Several of those tests exist because a claim in a
 report was found to be wrong — a stale test count that survived a green suite through a regex
 gap, a Regime-S exactness figure that verified because the field was absent, a per-file count that

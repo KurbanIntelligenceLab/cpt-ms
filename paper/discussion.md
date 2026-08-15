@@ -67,11 +67,21 @@ constraints will and will not fit.
 
 ## Limitations that shape the claims
 
-The steering results rest on one crystal serialization. The two-backbone comparison would
-need a backbone selector the training entry point does not expose, and the determinability
-measurements show why the choice matters: the same constraint family is usable at very
-different rates depending on how the structure is written down. Nothing here separates
-properties of the method from properties of this serialization.
+The steering results rest on one crystal serialization, and the obvious remedy turns out to be
+unavailable rather than merely unbudgeted. Retraining under the alternative ordering would train
+with no actionable positions: the density budget is determined at 100% of element positions
+under cell-first ordering and 0% under composition-first, because density is a ratio and
+a target fixes a mass budget only once the volume is known. The second family inherits the same
+dependence.
+
+What that establishes is a coupling rather than a gap. A quantity is constrainable by this layer
+only where the prefix determines its budget, so token ordering is a design variable of the method
+and not an independent axis to vary — and the determinability measurements already showed the
+same constraint family being usable at very different rates depending on how a structure is
+written down. A serialization comparison for this method requires two orderings that both close
+the budget before the constrained tokens, which is a narrower and more specific experiment than
+the one it replaces. Until it is run, nothing here separates properties of the method from
+properties of this ordering, and the reason is now measured rather than conceded.
 
 Seed counts are uneven by design of what was worth replicating. The fixed-target arms carry
 three seeds, the frontier two per target, and the two extreme targets one each. When a

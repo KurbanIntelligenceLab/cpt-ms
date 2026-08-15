@@ -264,6 +264,34 @@ data at both extremes. In one run it produced a mean density exceeding the maxim
 itself. The compensation hypothesis — that the backbone learns an offset calibrated to the
 projection's pull — was tested and rejected.
 
+## The constraint class and the serialization are coupled
+
+`results/CP9_serialization_expressibility.json`
+
+The steering results rest on one token ordering, and the natural way to separate properties of
+the method from properties of that ordering is to retrain under a second one. That experiment
+cannot be run as posed, for a reason prior to engineering: under composition-first ordering the
+density constraint is not expressible as a per-step linear expectation at all.
+
+Density is a ratio, so a target density fixes a total mass budget only once the cell volume is
+known. Cell-first ordering closes the volume before any element token, making the running budget
+a determined real number at every element position; composition-first leaves the volume
+undetermined while the element tokens are emitted, so there is no budget to project onto.
+Measured on 393 real structures, the budget is determined at 100.0% of element positions
+under cell-first and 0.0% under comp-first. The second family inherits the same
+dependence, being also a per-volume density: 100.0% against 0.0%.
+
+Training the density arm under the second ordering would therefore train with no actionable
+positions and measure the unconstrained model rather than a serialization effect. Substituting a
+fixed mass per token instead is a different constraint, and it drives the composition toward the
+lightest available elements.
+
+The honest statement of the limitation is not that a serialization comparison was skipped. It is
+that the expressible constraint class depends on the serialization: a quantity is constrainable
+only where the prefix determines its budget, which makes token ordering a design variable of the
+method rather than an independent axis to vary. A serialization comparison for this method needs
+two orderings that both determine the budget before the constrained tokens.
+
 ## Against the strongest baseline the result is a trade
 
 `results/WS3_conditional_baseline.json`, `results/WS3_conditional_sparse.json`,
