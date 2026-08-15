@@ -426,9 +426,20 @@ and 10.0.
 
 The amortization claim, replicated at three seeds: mean sub-ceiling error 0.650 ± 0.151
 against the frontier's 0.662, from 1 training run against 7. Better at 3 of 7
-targets, mean paired difference -0.012 g/cm^3, Wilcoxon signed-rank p = 1.0. One
-training run is statistically indistinguishable from seven, which is the claim worth
-making and it is a null result in the right direction.
+targets, mean paired difference -0.012 g/cm^3, Wilcoxon signed-rank p = 1.0.
+
+That p-value alone would not support the claim. A large p is the absence of evidence of a
+difference, not evidence of equivalence, and with seven paired targets the first question is
+whether the design could detect anything. It could detect 0.135 g/cm^3 at 80% power,
+20% of the per-target arm's own mean error, and the 95% confidence interval on the
+paired difference is [-0.111, 0.086] g/cm^3. A two-one-sided-tests procedure establishes
+equivalence at p = 0.0023 against a margin of 0.189 g/cm^3 — the retargeted arm's own
+mean within-target seed standard deviation, chosen because a difference below the method's
+run-to-run reproducibility is not one a user could act on, and because a margin tied to the
+arm's own noise cannot be tuned to pass. Equivalence survives down to a margin of 0.10
+(p = 0.0362), so it is not an artifact of that choice. The claim is therefore a bounded
+equivalence rather than an unrejected null: any difference is smaller than the method's own
+seed noise.
 
 A claim that did not survive replication. The seed-0 checkpoint trained at 10.0 reached
 15.495, far past the published ceiling of 10.405, and its backbone sat at 22.769. Seeds 1
@@ -532,6 +543,45 @@ expectation constraints simultaneously and exactly. It does not follow that seve
 steered, because whether a joint solution exists at a given position is determined by the
 constraints and the prefix rather than by the solver.
 
+## Step 18 — Whether the equivalence claim is powered
+
+`results/WS4_equivalence.json`
+
+Method. Step 14's comparison returns a large p-value, which on its own is the absence of
+evidence of a difference rather than evidence of equivalence. Three quantities decide whether
+the stronger reading is available: the confidence interval on the paired difference, the
+smallest effect the design could have detected, and a two-one-sided-tests procedure against a
+margin fixed before the result is known.
+
+The margin is not chosen. It is the retargeted arm's own mean within-target seed standard
+deviation, on the reasoning that a difference smaller than the method's run-to-run
+reproducibility is not one anyone could act on, and that a margin defined by the arm's own
+noise cannot be tuned after seeing the outcome without changing the arm. Conventional margins
+are reported alongside so a reader can see whether the conclusion depends on the choice.
+
+Results. The pairing is over 7 deployment targets of the three-seed checkpoint, each cell
+being the mean across its seeds and the comparator being the frontier model trained at that same
+target. Over those 7 pairs the mean difference is -0.0122 g/cm^3 with a 95%
+confidence interval of [-0.111, 0.086]. The design could have detected 0.135 g/cm^3 at 80%
+power, which is 20% of the per-target arm's mean error of 0.662. Two one-sided
+tests against the derived margin of 0.189 give p = 0.0023.
+
+| margin (g/cm^3) | TOST p | equivalent |
+|---|---|---|
+| 0.10 | 0.0362 | yes |
+| 0.15 | 0.0071 | yes |
+| 0.20 | 0.0017 | yes |
+| 0.25 | 0.0005 | yes |
+
+Equivalence holds at every margin tested including the tightest, so the conclusion is not an
+artifact of the margin. The claim that reaches the paper is therefore bounded rather than
+null: any difference between one retargeted checkpoint and seven separately trained models is
+smaller than the method's own seed noise.
+
+The difference tests are kept alongside — Wilcoxon p = 1.0, paired t p = 0.7722 —
+because a reader looking for the conventional comparison should find it rather than infer
+that it was replaced.
+
 ## What the results support as claims
 
 Regime S is exact and holds by construction, on synthetic data and on real crystals, trained and
@@ -559,8 +609,9 @@ every target, including the one where the conditional baseline has no training d
 
 One training run amortizes across a family of targets. Because the target is an argument to the
 dual solve rather than a training-time label, a single checkpoint deployed at seven sub-ceiling
-targets is statistically indistinguishable from seven separately trained models — mean error
-0.650 ± 0.151 against 0.662, Wilcoxon p = 1.0 across three seeds. This is the claim that
+targets is equivalent to seven separately trained models — mean error
+0.650 ± 0.151 against 0.662, TOST p = 0.0023 against a margin set by the arm's own
+seed spread, 95% CI on the paired difference [-0.111, 0.086]. This is the claim that
 distinguishes the method from conditional training on the axis conditional training wins, since
 the baseline needs one model per target by construction.
 
@@ -606,6 +657,10 @@ also rests on one constraint pair chosen for availability rather than for indepe
 shows that expectation constraints in general fail to compose.
 
 The retargeting matrix carries three seeds at one training target and one seed at the other two.
+The equivalence test in Step 18 therefore pairs over the 7 deployment targets of the
+three-seed checkpoint, each cell averaged across its seeds, rather than over the full matrix:
+pooling checkpoints with different seed counts would give the single-seed ones the same weight
+as the replicated one.
 The predictive version of the serialization-range claim is deliberately descoped: with three
 serializations and one measured frontier, fitting on two points and testing on one is a residual
 rather than a held-out prediction, so that claim is stated correlationally and the predictive form
@@ -622,3 +677,13 @@ report was found to be wrong — a stale test count that survived a green suite 
 gap, a Regime-S exactness figure that verified because the field was absent, a per-file count that
 was corrected in the wrong direction — and each is now pinned by a check that fails against the
 reverted text.
+
+The manuscript is covered by the same mechanism. A figure quoted in the abstract, the results and
+this document is three chances to drift, so `tests/test_paper_consistency.py` recomputes the
+load-bearing numbers from their artifacts and asserts the prose still carries them, asserts every
+cited artifact exists, and asserts the negative results — the non-monotone second dial, the
+existential boundary, the exactness-is-not-steerability distinction — have not been quietly
+dropped. `tests/test_equivalence.py` goes further and ties a word to a test: the prose may say
+"equivalent" only while the two-one-sided-tests procedure supports it, so a change that breaks the
+statistical claim also fails the paper. Both files were verified load-bearing by deliberately
+drifting a figure and softening a claim, each of which the suite rejected.
