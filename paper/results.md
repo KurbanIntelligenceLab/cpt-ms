@@ -74,6 +74,17 @@ reduces infeasibility at all. Steering downward always has light elements availa
 steering upward eventually demands more mass per atom than the heaviest legal token
 supplies.
 
+![Steering frontier and its mechanism]({{artifact:art_5ede2afb-a542-4260-9833-f46b3c033c13}})
+
+**Figure 1.** Steering is asymmetric and the asymmetry has a measured cause. (a) Achieved against
+requested density; the dotted line is unity, the dashed line the achieved ceiling of 10.40 g cm^-3.
+Deployed points carry the projection, backbone points the mask only, and open markers denote the
+two targets measured at one seed rather than two. (b) The infeasible-step fraction at
+initialization and at convergence, with the repair factor (init / converged, log scale) on the
+right axis. Training reduces infeasibility by a factor of 29 at the lowest target and by
+0.97 at the highest — at the top of the range training no longer repairs infeasibility at all,
+which is why the achieved density saturates.
+
 ## One training run covers a family of targets
 
 `results/WS4_zero_shot_retargeting.json`, `results/WS4_retargeting_seed_replication.json`
@@ -189,6 +200,18 @@ transition structure, so each target is a separate automaton — about 884,000 s
 ten frontier targets — while the dual solve takes the target as a runtime argument. Automaton
 methods amortize across constraints at a fixed model; this work amortizes across targets of one
 constraint at a fixed model. Neither subsumes the other.
+
+![Composition failure and its mechanism]({{artifact:art_63f81e90-de87-4aef-9788-e9055f96c6dc}})
+
+**Figure 2.** Two additive constraints on a shared token budget do not compose. (a) Achieved
+against requested valence electron density. The complete density-3.0 row passes through
+6.2% of the request and is not monotone — the largest request gives the smallest achieved
+value — sitting essentially on the unconstrained control of 0.242. The partial density-8.0 row,
+where both targets pull the same way, reaches 11.5%: higher, and still far from controllable.
+(b) The mechanism. Fallback to the single-constraint solve rises with the second target while
+jointly solvable positions fall, of 518 actionable positions per cell. At density 8.0 the
+competition is weaker in both respects, which is what makes compatibility rather than
+composability the distinction the completed grid will test.
 
 ## The expressible class has a boundary
 
