@@ -1,0 +1,63 @@
+{
+  "schema_version": "1.0",
+  "artifact_name": "WS4_equivalence",
+  "script": "scripts/crystal/equivalence_test.py",
+  "git_commit": "e88d0deb4bf91b7ef521e843541189bb0a4054cd-dirty",
+  "config": {
+    "results_dir": "results",
+    "margin_rule": "mean retarget seed sd"
+  },
+  "config_hash": "ee2feb4e39212323",
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "created_utc": "2026-08-15T04:14:33.055839+00:00",
+  "python": "3.11.15",
+  "platform": "macOS-26.5.2-arm64-arm-64bit",
+  "payload_sha256": "4029a0f4fdea32a9059bdb89efebe2ef20e6531974c1f4b9f7b0a748d410c8f8",
+  "payload": {
+    "question": "Is one retargeted checkpoint equivalent to per-target training, or is the null result simply underpowered?",
+    "n_paired_targets": 7,
+    "paired_differences": [
+      -0.05560881651592453,
+      0.06356863109056404,
+      0.06033937179879062,
+      0.0566687090599336,
+      -0.14477596569004592,
+      -0.15989784602077783,
+      0.09419434648325464
+    ],
+    "mean_paired_difference": -0.012215938542029339,
+    "sd_paired_difference": 0.10672461910634051,
+    "ci95_on_mean_difference": [
+      -0.11091974876339111,
+      0.08648787167933245
+    ],
+    "difference_tests": {
+      "wilcoxon_stat": 14.0,
+      "wilcoxon_p": 1.0,
+      "paired_t": -0.3028386110355154,
+      "paired_t_p": 0.7722377025800835
+    },
+    "power": {
+      "min_detectable_effect_80pct": 0.13523817296740512,
+      "as_fraction_of_frontier_error": 0.20430001910076293,
+      "frontier_mean_error": 0.6619586897870245
+    },
+    "equivalence": {
+      "margin_definition": "mean within-target seed sd of the retargeted arm; a difference below the method's own reproducibility is not actionable",
+      "margin": 0.1891555248180438,
+      "tost_p": 0.0023179657135590274,
+      "equivalent_at_margin": true,
+      "sensitivity_to_margin": {
+        "0.10": 0.03621962676838089,
+        "0.15": 0.007109074974470599,
+        "0.20": 0.001742281117676387,
+        "0.25": 0.0005290760784268782
+      }
+    },
+    "verdict": "Equivalence established at a margin of 0.189 g/cm^3 (TOST p = 0.0023). The 95% CI on the paired difference is [-0.111, 0.086], so the claim is a bounded equivalence rather than an unrejected null. The design could have detected 0.135 g/cm^3 at 80% power, which is 20% of the per-target arm's own mean error."
+  }
+}

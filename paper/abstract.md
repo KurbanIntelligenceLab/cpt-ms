@@ -28,8 +28,9 @@ The layer is a training component rather than a decoder, and the evidence is tha
 it at inference inverts rather than degrades the result. Our central claim is amortization:
 because the constraint target enters the dual solve as an argument rather than as a
 training-time label, one checkpoint deployed at seven density targets it never trained on is
-statistically indistinguishable from seven separately trained models
-(0.650 ± 0.151 against 0.662 g cm$^{-3}$, Wilcoxon signed-rank $p$ = 1.0, three seeds).
+equivalent to seven separately trained models
+(0.650 ± 0.151 against 0.662 g cm$^{-3}$; two-one-sided-tests $p$ = 0.0023 against a margin set
+by the method's own seed spread, 95% CI on the paired difference [-0.111, 0.086]).
 Conditional training remains more accurate per target, so the contribution is a different
 cost structure rather than a better number — and it is strongest where that baseline is
 weakest, since the data slice a conditional model needs thins or vanishes at unusual targets.
@@ -65,8 +66,8 @@ individually violating sequences.
 The layer is a training component, not a decoder: removing it at inference inverts rather
 than degrades the result. Our central claim is amortization. Because the target enters the
 dual solve as an argument rather than a training-time label, one checkpoint deployed at
-seven density targets it never saw matches seven separately trained models
-(0.650 ± 0.151 against 0.662 g cm$^{-3}$, Wilcoxon $p$ = 1.0). Conditional training stays
+seven density targets it never saw is equivalent to seven separately trained models
+(0.650 ± 0.151 against 0.662 g cm$^{-3}$, TOST $p$ = 0.0023, 95% CI [-0.111, 0.086]). Conditional training stays
 more accurate per target, so this is a different cost structure rather than a better number.
 
 We report two boundaries as results. Exact multi-constraint solving is not multi-constraint

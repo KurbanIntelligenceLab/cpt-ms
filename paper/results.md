@@ -87,8 +87,16 @@ Held against the frontier's separately trained models at the seven sub-ceiling t
 the comparison that holds training compute fixed — one checkpoint reaches mean error
 0.650 ± 0.151 g/cm^3 against 0.662 from 7 runs. It is better at 3 of 7 targets,
 the mean paired difference is -0.012 g/cm^3, and a Wilcoxon signed-rank test over the
-paired targets gives p = 1.0 across three seeds. One training run is statistically
-indistinguishable from seven.
+paired targets gives p = 1.0 across three seeds.
+
+A large p-value is not evidence of equivalence, so the claim is made as a bounded one rather
+than as an unrejected null. The 95% confidence interval on the mean paired difference is
+[-0.111, 0.086] g/cm^3, and the design could have detected 0.135 g/cm^3 at 80% power —
+20% of the per-target arm's own mean error. A two-one-sided-tests procedure
+establishes equivalence at a margin of 0.189 g/cm^3 (p = 0.0023), that margin being the
+retargeted arm's own mean within-target seed standard deviation: a difference smaller than
+the method's run-to-run reproducibility is not one a user could act on. The conclusion is not
+margin-sensitive — equivalence holds down to a margin of 0.10 g/cm^3 (p = 0.0362).
 
 A stronger reading was available and did not survive replication. The first checkpoint
 trained at 10.0 reached 15.495, well past the 10.405 ceiling, with a backbone at
