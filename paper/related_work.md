@@ -119,6 +119,24 @@ projection layers it operates on a per-step distribution under a sequence-level 
 and relative to filtering baselines it trades a measured accuracy gap for coverage that
 filtering cannot supply.
 
+The sequence-level target this work's per-step surrogate approximates is not a construct of
+this paper. Khalifa, Elsahar and Dymetman (ICLR 2021) pose controlled generation as moment
+constraints, derive the same KL-minimal exponential-family optimum, and train an autoregressive
+model toward it by a distributional policy-gradient variant; their `disco` toolkit (Kruszewski,
+Rozen and Dymetman, ACL 2023) implements it. Step 2's measurement — that the per-step projection
+induces a distribution roughly one nat from that optimum — is therefore a measurement against a
+named method rather than against a hypothetical, and the comparator arm that trains directly
+toward the tilt is theirs. Their formulation bakes the moment target into the energy model before
+training begins, so like conditional training it needs one run per target; that is where the
+amortization claim bites rather than on accuracy.
+
+Ahmed, Chang and Van den Broeck (NeurIPS 2023) are the nearest training-time neighbour: they
+relax a logical constraint into a differentiable pseudo-semantic loss over a local
+approximation, which is the same shape of move as reducing a sequence-level expectation to a
+per-step one. The difference is the constraint class and where exactness lands — their relaxation
+is approximate in the constraint, while the projection here is exact in the support restriction
+and approximate only in the expectation.
+
 The sharpest distinction is amortization, and it is the one a reader should weigh. Every
 baseline that achieves a target by shaping its training distribution — conditional training,
 filtered retraining, classifier guidance trained per attribute — needs one model per target
@@ -131,12 +149,87 @@ accurate per target — so the claim is a different cost structure rather than a
 number, and it is strongest exactly where the baseline is weakest: at sparse targets, where
 the slice a conditional model needs either thins or does not exist.
 
+The inference-time alternative is measured rather than argued past. Best-of-n from the unsteered
+model amortizes perfectly and, given enough samples, is more accurate than the projection at most
+targets; what it cannot do is hold diversity while it does so. Sequential Monte Carlo steering
+(Loula et al., ICLR 2025) is the principled member of that family, reallocating particles as
+information arrives, and it occupies the same axis: accuracy bought with inference compute, per
+output, every time. The projection buys accuracy once at training and spends one forward pass
+thereafter, so the comparison is a point against a curve and the crossover is the result rather
+than a winner.
+
+In materials generation specifically, property-conditioned models set the bar for what
+conditioning already achieves. MatterGen (Zeni et al., Nature 2025) fine-tunes toward property
+constraints including joint ones, and CrystaLLM (Antunes et al., Nature Communications 2024) and
+Gruver et al. (ICLR 2024) establish that autoregressive language modelling of crystal text is a
+viable generator at scale. Two things follow. This work's backbone is far smaller than any of
+them, so nothing here is a claim about state-of-the-art crystal generation; and MatterGen's joint
+conditioning is the natural comparison a materials reader will raise against the composition
+result, with the distinction being that fine-tuning per property set is exactly the per-instance
+cost the projection avoids and the composition limit measured here is a property of shared token
+budgets rather than of conditioning in general.
+
 Two boundaries position the work as much as the capability does. The layer constrains
 additive functionals of the emitted symbols, so constraints defined by a search over latent
 assignments — charge neutrality being the canonical materials example — are outside its
-class rather than unimplemented. And solving several constraints exactly is not the same as
+class rather than unimplemented. The automaton-based methods — GeLaTo (Zhang et al., ICML 2023) and Ctrl-G (Zhang et al., NeurIPS
+2024) — amortize across constraints at a fixed model, with exactness guarantees for constraints
+expressible as deterministic finite automata over tokens. The measured distinction is not
+tractability: at the finest tolerance this serialization can express, an automaton tracking the
+running budget is a fraction of the controlled model's size. It is that the bound compiles into
+the transition structure, so each target is a separate automaton, while the dual solve takes the
+target as a runtime argument. Their amortization and this one are over different axes and
+compose rather than compete.
+
+And solving several constraints exactly is not the same as
 steering several: whether a joint solution exists at a position is set by the constraints
 and the prefix, and two constraints reading the same tokens through correlated weight tables
 compete for one budget rather than composing. Neither boundary is visible from the
 inference-time constrained-decoding literature, where the constraint is applied to a fixed
 model and the question of what training does with it does not arise.
+
+
+## References
+
+Verified against primary sources: publisher pages, proceedings records, or the venue's own
+programme listing. Venue and volume are as the publisher states them, not as secondary citations
+report them.
+
+Ahmed, K., Chang, K.-W., and Van den Broeck, G. A pseudo-semantic loss for autoregressive models
+with logical constraints. *Thirty-Seventh Conference on Neural Information Processing Systems
+(NeurIPS)*, 2023.
+
+Antunes, L. M., Butler, K. T., and Grau-Crespo, R. Crystal structure generation with
+autoregressive large language modeling. *Nature Communications* 15, 10570, 2024.
+doi:10.1038/s41467-024-54639-7.
+
+Gruver, N., Sriram, A., Madotto, A., Wilson, A. G., Zitnick, C. L., and Ulissi, Z. Fine-tuned
+language models generate stable inorganic materials as text. *Twelfth International Conference on
+Learning Representations (ICLR)*, 2024.
+
+Khalifa, M., Elsahar, H., and Dymetman, M. A distributional approach to controlled text
+generation. *Ninth International Conference on Learning Representations (ICLR)*, 2021.
+
+Kruszewski, G., Rozen, J., and Dymetman, M. disco: a toolkit for distributional control of
+generative models. *61st Annual Meeting of the Association for Computational Linguistics (ACL),
+System Demonstrations*, 2023. Outstanding demonstration paper.
+
+Loula, J., LeBrun, B., Du, L., Lipkin, B., Pasti, C., Grand, G., Liu, T., Emara, Y., Freedman, M.,
+Eisner, J., Cotterell, R., Mansinghka, V., Lew, A. K., Vieira, T., and O'Donnell, T. J. Syntactic
+and semantic control of large language models via sequential Monte Carlo. *Thirteenth
+International Conference on Learning Representations (ICLR)*, 2025. Selected for oral
+presentation.
+
+Zeni, C., Pinsler, R., Zügner, D., Fowler, A., Horton, M., Fu, X., Wang, Z., Shysheya, A.,
+Crabbé, J., Ueda, S., Sordillo, R., Sun, L., Smith, J., Nguyen, B., Schulz, H., Lewis, S., Huang,
+C.-W., Lu, Z., Zhou, Y., Yang, H., Hao, H., Li, J., Yang, C., Li, W., Tomioka, R., and Xie, T. A
+generative model for inorganic materials design. *Nature* 639(8055), 624-632, 2025.
+doi:10.1038/s41586-025-08628-5.
+
+Zhang, H., Dang, M., Peng, N., and Van den Broeck, G. Tractable control for autoregressive
+language generation (GeLaTo). *Fortieth International Conference on Machine Learning (ICML)*,
+PMLR 202, 40932-40945, 2023. Oral presentation.
+
+Zhang, H., Kung, P.-N., Yoshida, M., Van den Broeck, G., and Peng, N. Adaptable logical control
+for large language models (Ctrl-G). *Thirty-Eighth Conference on Neural Information Processing
+Systems (NeurIPS)*, 2024.
