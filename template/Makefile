@@ -24,10 +24,18 @@ $(MAIN).pdf: $(MAIN).tex kurbanlab.sty affiliations.tex references.bib
 
 # arXiv wants the .bbl, not the .bib, and no build cruft.
 arxiv: $(MAIN).pdf
-	@rm -rf arxiv && mkdir -p arxiv/figures arxiv/logo
+	@rm -rf arxiv && mkdir -p arxiv/figures/logo
 	@cp $(MAIN).tex kurbanlab.sty affiliations.tex references.bib .latexmkrc $(MAIN).bbl arxiv/
-	@cp figures/*.pdf arxiv/figures/ 2>/dev/null || true
-	@cp logo/kil-lockup.pdf arxiv/logo/ 2>/dev/null || true
+# Ship only the figures this manuscript actually \includegraphics, so the template's
+# example-*.pdf placeholders do not travel to arXiv as unreferenced files.
+	@for f in $$(grep -oE 'kilgraphics(\[[^]]*\])?\{figures/[^}]+\}' $(MAIN).tex \
+	            | sed -E 's/.*\{figures\/([^}]+)\}/\1/'); do \
+	    cp "figures/$$f" arxiv/figures/ 2>/dev/null || true; \
+	done
+# The lockup lives under figures/logo/ -- kurbanlab.sty says an earlier logo/ path
+# failed \IfFileExists silently, so copying from logo/ shipped a tarball with the
+# wordmark missing and no error anywhere.
+	@cp figures/logo/kil-lockup.png figures/logo/kil-lockup.pdf arxiv/figures/logo/ 2>/dev/null || true
 	@cd arxiv && tar czf ../arxiv-submission.tar.gz .
 	@rm -rf arxiv
 	@echo "==> arxiv-submission.tar.gz  (upload this)"

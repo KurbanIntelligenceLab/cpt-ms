@@ -1,0 +1,7 @@
+label,caption_words_before,caption_words_after,dup_pct_before,dup_pct_after,shared_after,caption_only_after
+fig:charge,59,59,0.0,0.0,,
+fig:frontier,36,36,0.0,0.0,,
+fig:pareto,44,44,0.0,0.0,,
+tab:concentration,56,56,1.9,1.9,,
+si:tab:perseed,38,40,0.0,0.0,,0;1.0;10.405
+si:tab:grid,44,44,0.0,0.0,,
