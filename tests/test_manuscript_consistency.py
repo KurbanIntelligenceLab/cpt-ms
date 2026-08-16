@@ -27,12 +27,38 @@ def _p(name: str) -> dict:
     return json.loads((RESULTS / name).read_text())["payload"]
 
 
+def _assembled() -> str:
+    """main.tex with every \\input inlined.
+
+    The manuscript is split across sections/*.tex, so main.tex on its own is a preamble
+    and a list of includes -- reading it directly makes every prose assertion below pass
+    vacuously or fail spuriously depending on which way the check runs. Resolve the
+    includes so the tests see the document a reader sees.
+    """
+    text = TEX.read_text()
+
+    def inline(match: "re.Match[str]") -> str:
+        rel = match.group(1).strip()
+        for candidate in (rel, rel + ".tex"):
+            path = TEX.parent / candidate
+            if path.exists():
+                return path.read_text()
+        raise AssertionError(f"\\input{{{rel}}} does not resolve from {TEX.parent}")
+
+    for _ in range(3):  # inputs may nest
+        text, n = re.subn(r"\\input\{([^}]+)\}", inline, text)
+        if not n:
+            break
+    assert r"\input{" not in text, "unresolved \\input remains after inlining"
+    return text
+
+
 def _src() -> str:
-    return re.sub(r"\s+", " ", TEX.read_text())
+    return re.sub(r"\s+", " ", _assembled())
 
 
 def _main_text() -> str:
-    return re.sub(r"\s+", " ", TEX.read_text().split(r"\appendix")[0])
+    return re.sub(r"\s+", " ", _assembled().split(r"\appendix")[0])
 
 
 def test_concentration_numbers_match_their_artifacts():
@@ -104,7 +130,7 @@ def test_direction_asymmetry_counts_match_the_grid():
 
 def test_every_si_section_is_called_out_from_the_main_text():
     """An SI section a reader cannot reach from the main text is unreachable, not optional."""
-    tex = TEX.read_text()
+    tex = _assembled()
     cite = r"\\(?:ref|cref|Cref|autoref)\{([^}]*)\}"
     main = tex.split(r"\appendix")[0]
     cited = {k.strip() for m in re.finditer(cite, main) for k in m.group(1).split(",")}
@@ -117,7 +143,7 @@ def test_every_si_section_is_called_out_from_the_main_text():
 
 
 def test_si_callouts_are_in_order_of_first_appearance():
-    tex = TEX.read_text()
+    tex = _assembled()
     cite = r"\\(?:ref|cref|Cref|autoref)\{([^}]*)\}"
     main = tex.split(r"\appendix")[0]
     first = {}
@@ -135,7 +161,7 @@ def test_si_callouts_are_in_order_of_first_appearance():
 
 def test_no_bibliographic_key_is_cited_twice():
     """One citation per reference, at its first named appearance."""
-    src = TEX.read_text()
+    src = _assembled()
     keys = [k.strip() for m in re.finditer(r"\\citep?\{([^}]*)\}", src)
             for k in m.group(1).split(",")]
     dupes = {k for k in keys if keys.count(k) > 1}
@@ -143,7 +169,7 @@ def test_no_bibliographic_key_is_cited_twice():
 
 
 def test_every_bib_entry_is_cited_and_every_citation_resolves():
-    src = TEX.read_text()
+    src = _assembled()
     entries = set(re.findall(r"@\w+\{([^,]+),", BIB.read_text()))
     cited = {k.strip() for m in re.finditer(r"\\citep?\{([^}]*)\}", src)
              for k in m.group(1).split(",")}
@@ -151,13 +177,28 @@ def test_every_bib_entry_is_cited_and_every_citation_resolves():
     assert not (entries - cited), f"in the bibliography but never cited: {sorted(entries - cited)}"
 
 
+def _no_comments(text: str) -> str:
+    """Blank LaTeX comment bodies, preserving line structure.
+
+    Comments matter here because affiliations.tex rules its sections off with `% ---
+    home ---...`, and those dashes are invisible to a reader. A check that counts them
+    reports 49 em dashes on a manuscript that has none in prose.
+    """
+    return re.sub(r"(?<!\\)%[^\n]*", "%", text)
+
+
 def test_no_em_dashes():
     """House style: an em dash is a parenthetical the author did not resolve."""
-    assert "---" not in TEX.read_text(), "em dashes must be rewritten, not inserted"
+    prose = _no_comments(_assembled())
+    found = [
+        " ".join(prose[max(0, m.start() - 60) : m.start() + 40].split())
+        for m in re.finditer(r"---", prose)
+    ]
+    assert not found, f"em dashes must be rewritten, not inserted: {found[:3]}"
 
 
 def test_no_forward_reference_to_an_equation():
-    src = TEX.read_text()
+    src = _assembled()
     for lab in re.findall(r"\\label\{(eq:[^}]+)\}", src):
         decl = src.find(r"\label{" + lab + "}")
         refs = [m.start() for m in re.finditer(re.escape(lab), src) if m.start() != decl + 7]
@@ -165,7 +206,7 @@ def test_no_forward_reference_to_an_equation():
 
 
 def test_figures_referenced_by_the_manuscript_exist_as_vector_pdfs():
-    src = TEX.read_text()
+    src = _assembled()
     for rel in re.findall(r"\\kilgraphics(?:\[[^\]]*\])?\{([^}]+)\}", src):
         path = TEX.parent / rel
         assert path.exists(), f"{rel} is referenced but absent"

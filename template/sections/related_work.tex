@@ -1,0 +1,66 @@
+\section{Related work}
+\label{sec:related}
+
+\paragraph{Sequence-level distributional control}
+Posing controlled generation as a moment constraint and solving for the KL-minimal
+distribution yields an exponential-family optimum, and distributional policy gradient
+trains a model toward it by importance-weighted sampling against that unnormalized
+target~\citep{khalifa2021distributional}. The formulation is attractive because the optimum
+is characterized in closed form up to a normalizer and the multiplier has a direct reading
+as the price of the constraint. Its practical difficulty is that the target is defined over
+complete sequences, so the training signal arrives only once a sequence terminates and the
+estimator's variance grows with the tilt strength. Where the resulting distribution is
+evaluated, it is evaluated on whether the constrained expectation is met, which is the
+quantity the formulation optimizes and not the quantity a user inspecting samples
+experiences.
+
+\paragraph{Expectation versus per-instance constraints}
+The distinction our concentration result turns on is the one constrained Markov
+decision processes make between constraining an expectation and constraining every
+trajectory~\citep{altman1999cmdp}, refined by state-wise
+formulations~\citep{zhao2023scpo} and by chance-constrained
+programming~\citep{charnes1959chance}. The precedent closest in mechanism is the safety
+layer, which projects a proposed action onto a feasible set at every
+step~\citep{pham2018optlayer}. We adopt that vocabulary: the sequence-level tilt is an
+expectation constraint, and what our projection delivers is closer to a per-step
+feasibility guarantee whose aggregate happens to meet the expectation.
+
+\paragraph{Per-step constrained decoding}
+Lexically constrained decoding enforces predicate-logic constraints during search
+without retraining~\citep{lu2021neurologic}, with lookahead heuristics added to reduce
+myopia~\citep{lu2022neurologic}. GeLaTo instead distills a tractable generative model to
+supply exact conditional guidance~\citep{zhang2023gelato}, and sequential Monte Carlo
+methods reweight partial sequences against a target
+potential~\citep{zhao2024twisted, loula2025syntactic}. All three act at the per-step locus but treat the
+constraint as a filter over candidates or a reweighting of them, so none yields a
+distribution that is itself the solution of a constrained problem, and none is
+differentiable with respect to the constraint. Ahmed
+\etal~\citep{ahmed2023pseudosemantic} are the nearest training-time neighbour, relaxing
+a logical constraint into a pseudo-semantic loss over a local approximation, the
+same shape of move as reducing a sequence-level expectation to a per-step one, though
+approximate in the constraint rather than exact in the support.
+
+\paragraph{Differentiable optimization layers}
+Embedding an argmin in a network and backpropagating through its solution is established
+for quadratic programs, where differentiating the Karush--Kuhn--Tucker conditions gives the
+gradient in closed form~\citep{amos2017optnet}; for general convex programs, where the same
+idea is automated by rewriting the problem in a canonical cone
+form~\citep{agrawal2019cvxpylayers}; and for hard constraints, where a completion-plus-
+correction scheme restores feasibility that a learned map would otherwise
+violate~\citep{donti2021dc3}. What these share is a cost profile: a generic solver is
+called in the forward pass and its implicit derivative in the backward pass, so the layer
+is affordable per example but not per token. None of them has been instantiated as a
+divergence projection over a next-token distribution, where the problem is small and
+structured enough that a generic solver is the wrong tool.
+
+\paragraph{Crystal structure generation}
+Generative models for inorganic crystals include diffusion over invariant
+representations~\citep{xie2022cdvae, jiao2023diffcsp}, autoregressive language
+models over text serializations~\citep{antunes2024crystallm, gruver2024finetuned}, and
+large-scale diffusion trained for property targeting~\citep{zeni2025mattergen}. We use
+the same MP-20 subset of the Materials Project~\citep{jain2013materialsproject} and a
+text serialization in the spirit of the autoregressive line, because a serialization is
+what makes a per-step budget definable at all. That the class is bounded this way is a real
+constraint on the method rather than an implementation detail.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

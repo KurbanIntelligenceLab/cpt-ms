@@ -1,0 +1,73 @@
+\section{Introduction}
+\label{sec:intro}
+
+Materials discovery, molecular design and program synthesis increasingly depend on
+generative models, and in each the useful output is not merely a plausible one but one that meets a
+number: a lattice at a specified density, a composition inside a charge budget, a schedule
+within a cost. Learning the distribution of examples does not deliver this, because a model
+fit to a corpus reproduces the corpus's spread of the quantity rather than any value a user
+picks. Control of a generative model's quantitative behaviour is therefore a prerequisite
+for using one as a design tool at all.
+
+The field's standard answer works at the level of whole sequences. Among all distributions
+whose expectation of a statistic meets the target, take the one closest in
+Kullback--Leibler divergence to the model; the solution is an exponential tilt of the base,
+and it is the fixed point that distributional policy gradient and its
+descendants pursue. Two properties of that answer are
+usually left implicit. It is defined over complete sequences, while an autoregressive model
+emits one token at a time, so reaching it requires either sampling from an unnormalized
+target or training against an estimator of it.
+
+The second property is the one this paper turns on. An expectation constrains an average,
+which says nothing about any individual draw. Constrained optimization has distinguished these
+since chance-constrained programming separated expected from per-instance feasibility, and
+constrained reinforcement learning inherited the expectation form wholesale. For a generative model the distinction
+is not academic, because the samples a user inspects are individual draws rather than
+averages, yet the size of the gap between the two notions of feasibility is left
+unquantified in this setting.
+
+Working per step is the obvious alternative and has been explored as decoding-time
+machinery: grammar and lexical constraints applied as masks, tractable surrogates
+consulted during search, and sequential Monte Carlo reweighting partial
+sequences. These act on a trained model's output rather than
+shaping what the model learns, so a model steered this way was never trained to expect the
+steering, and the mismatch between the distribution it learned and the one it is asked to
+emit is left for the sampler to absorb.
+
+A separate literature supplies the missing ingredient. Convex programs with implicit
+derivatives can sit inside a network as layers, which is what a per-step constraint would
+need in order to be trained through rather than bolted on. That
+line and the decoding line have not been joined for expectation constraints, so how a
+per-step surrogate compares against the sequence-level optimum it approximates has never
+been measured against a model actually trained toward that optimum.
+
+Our setting is crystal structure generation, where the target quantity is mass density and
+the serialization is text, alongside a synthetic task small enough that every distribution
+is computed exactly rather than sampled. Generative models for this domain are established enough that steering one is a fair test
+rather than a demonstration; \cref{sec:related} surveys them.
+
+\paragraph{Contributions}
+
+\begin{enumerate}
+  \item A differentiable per-step constraint projection with an analytic Jacobian,
+        trained through rather than applied at decoding time (\cref{sec:method}).
+  \item The concentration result: the surrogate targets a distribution whose
+        constrained quantity is concentrated, while the sequence-level optimum
+        anti-concentrates it (\cref{sec:concentration}).
+  \item Zero-shot retargeting: one checkpoint covers a constraint family with
+        statistically bounded equivalence to per-target training
+        (\cref{sec:retargeting}).
+  \item Four scope boundaries, each measured rather than asserted: a steering
+        ceiling, partial and asymmetric two-constraint composition, a serialization
+        determinability limit, and inference-time baselines that beat the projection on
+        accuracy at a diversity cost (\cref{sec:scope,sec:baselines}).
+\end{enumerate}
+
+\begin{kilkey}
+The per-step surrogate is not a cheaper approximation of the sequence-level optimum. It
+targets a different distribution, one whose constrained quantity is concentrated rather than
+spread, and on the tasks measured here that distribution is closer to what a request for a
+constraint usually means.
+\end{kilkey}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

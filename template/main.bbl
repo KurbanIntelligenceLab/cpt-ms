@@ -12,6 +12,30 @@ Muhammad Khalifa, Hady Elsahar, and Marc Dymetman.
 \newblock In \emph{International Conference on Learning Representations
   (ICLR)}, 2021.
 
+\bibitem[Altman(1999)]{altman1999cmdp}
+Eitan Altman.
+\newblock \emph{Constrained {M}arkov Decision Processes}.
+\newblock 1999.
+
+\bibitem[Zhao et~al.(2023)Zhao, Chen, Sun, Liu, Wei, and Liu]{zhao2023scpo}
+Weiye Zhao, Rui Chen, Yifan Sun, Ruixuan Liu, Tianhao Wei, and Changliu Liu.
+\newblock State-wise constrained policy optimization, 2023.
+\newblock Preprint; withdrawn ICLR 2024 submission.
+
+\bibitem[Charnes and Cooper(1959)]{charnes1959chance}
+A.~Charnes and W.~W. Cooper.
+\newblock Chance-constrained programming.
+\newblock \emph{Management Science}, \penalty0 (1), 1959.
+\newblock \doi{10.1287/mnsc.6.1.73}.
+
+\bibitem[Pham et~al.(2018)Pham, De~Magistris, and Tachibana]{pham2018optlayer}
+Tu-Hoa Pham, Giovanni De~Magistris, and Ryuki Tachibana.
+\newblock {O}pt{L}ayer -- practical constrained optimization for deep
+  reinforcement learning in the real world.
+\newblock In \emph{2018 IEEE International Conference on Robotics and
+  Automation (ICRA)}, 2018.
+\newblock \doi{10.1109/ICRA.2018.8460547}.
+
 \bibitem[Lu et~al.(2021)Lu, West, Zellers, Le~Bras, Bhagavatula, and
   Choi]{lu2021neurologic}
 Ximing Lu, Peter West, Rowan Zellers, Ronan Le~Bras, Chandra Bhagavatula, and
@@ -83,30 +107,6 @@ Priya~L. Donti, David Rolnick, and J.~Zico Kolter.
 \newblock {DC3}: A learning method for optimization with hard constraints.
 \newblock In \emph{International Conference on Learning Representations
   (ICLR)}, 2021.
-
-\bibitem[Altman(1999)]{altman1999cmdp}
-Eitan Altman.
-\newblock \emph{Constrained {M}arkov Decision Processes}.
-\newblock 1999.
-
-\bibitem[Zhao et~al.(2023)Zhao, Chen, Sun, Liu, Wei, and Liu]{zhao2023scpo}
-Weiye Zhao, Rui Chen, Yifan Sun, Ruixuan Liu, Tianhao Wei, and Changliu Liu.
-\newblock State-wise constrained policy optimization, 2023.
-\newblock Preprint; withdrawn ICLR 2024 submission.
-
-\bibitem[Charnes and Cooper(1959)]{charnes1959chance}
-A.~Charnes and W.~W. Cooper.
-\newblock Chance-constrained programming.
-\newblock \emph{Management Science}, \penalty0 (1), 1959.
-\newblock \doi{10.1287/mnsc.6.1.73}.
-
-\bibitem[Pham et~al.(2018)Pham, De~Magistris, and Tachibana]{pham2018optlayer}
-Tu-Hoa Pham, Giovanni De~Magistris, and Ryuki Tachibana.
-\newblock {O}pt{L}ayer -- practical constrained optimization for deep
-  reinforcement learning in the real world.
-\newblock In \emph{2018 IEEE International Conference on Robotics and
-  Automation (ICRA)}, 2018.
-\newblock \doi{10.1109/ICRA.2018.8460547}.
 
 \bibitem[Xie et~al.(2022)Xie, Fu, Ganea, Barzilay, and Jaakkola]{xie2022cdvae}
 Tian Xie, Xiang Fu, Octavian-Eugen Ganea, Regina Barzilay, and Tommi~S.
