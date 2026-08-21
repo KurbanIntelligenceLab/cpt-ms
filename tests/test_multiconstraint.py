@@ -144,7 +144,7 @@ def test_attainability_fraction_is_grid_dependent_and_says_so():
         f"expected the joint fraction to rise with grid resolution, got {fc:.3f} at "
         f"n_grid=5 and {ff:.3f} at 15"
     )
-    art = RESULTS / "CP6_multiconstraint.json"
+    art = RESULTS / "multiconstraint.json"
     if art.exists():
         payload = json.loads(art.read_text())["payload"]
         assert payload["summary"]["fractions_are_grid_dependent"] is True
@@ -158,7 +158,7 @@ def test_composition_gets_easier_with_vocabulary_size():
     compose". The monotone rise from a small vocabulary is the actual finding, and the
     artifact has to carry the sweep for it to be checkable.
     """
-    art = RESULTS / "CP6_multiconstraint.json"
+    art = RESULTS / "multiconstraint.json"
     if not art.exists():
         pytest.skip("multiconstraint artifact absent; run scripts.layer.verify_multiconstraint")
     payload = json.loads(art.read_text())["payload"]

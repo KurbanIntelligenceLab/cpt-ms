@@ -21,8 +21,13 @@ import numpy as np
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
+DEV = ROOT / "development"
+pytestmark = pytest.mark.skipif(
+    not DEV.exists(),
+    reason="development/ is untracked; run-notes and preregistration checks need the dev tree")
+
 RES = ROOT / "results"
-NOTES = ROOT / "reports" / "WS7_a6_comparator_notes.md"
+NOTES = ROOT / "development" / "reports" / "a6_comparator_notes.md"
 
 
 def _p(name: str) -> dict:
@@ -34,7 +39,7 @@ def _p(name: str) -> dict:
 
 def test_a6_reached_its_target_so_the_comparison_is_fair():
     """A6 must satisfy the expectation constraint within its own seed spread."""
-    p = _p("WS7_a6_tilt_comparator.json")
+    p = _p("a6_tilt_comparator.json")
     s = p["summary"]
     mean, sd = s["mean_charge"]["mean"], s["mean_charge"]["sd"]
     assert abs(mean) <= 3 * max(sd, 1e-6), (
@@ -51,7 +56,7 @@ def test_a6_reached_its_target_so_the_comparison_is_fair():
 def test_a6_inherits_the_tilts_violation_rate():
     """A6 approximating the tilt must inherit its per-sequence violation, or it is not
     approximating the tilt in the way the argument assumes."""
-    p = _p("WS7_a6_tilt_comparator.json")
+    p = _p("a6_tilt_comparator.json")
     a6 = p["summary"]["hard_violation_rate"]["mean"]
     tilt = p["reference"]["tilt"]["hard_violation_rate"]
     assert abs(a6 - tilt) < 0.05, (
@@ -67,7 +72,7 @@ def test_mean_sd_pairs_are_indexed_not_averaged():
     This is pinned because it happened: mean([0.6155, 0.0080]) = 0.3117 was reported as a
     violation rate before the pair structure was noticed.
     """
-    p = _p("A2_training_summary.json")
+    p = _p("training_summary.json")
     for arm, d in p["arms"].items():
         for field, v in d.items():
             if not isinstance(v, list) or len(v) != 2:
@@ -101,10 +106,10 @@ def test_concentration_is_measured_against_the_optimum_not_the_unconstrained_arm
     does not, so the comparison must name the optimum. A reviewer caught this; the test keeps
     it caught.
     """
-    a2p = _p("A2_training_summary.json")
-    a6p = _p("WS7_a6_tilt_comparator.json")
+    a2p = _p("training_summary.json")
+    a6p = _p("a6_tilt_comparator.json")
     a3 = a2p["arms"]["A3_deployed"]["charge_variance"][0]
-    a2 = a2p["arms"]["A2_masked"]["charge_variance"][0]
+    a2 = a2p["arms"]["masked"]["charge_variance"][0]
     tilt = a6p["reference"]["tilt"]["charge_variance"]
     a6 = a6p["summary"]["charge_variance"]["mean"]
     a6_sd = a6p["summary"]["charge_variance"]["sd"]
@@ -135,7 +140,7 @@ def test_the_optimum_anti_concentrates_relative_to_the_data():
     This is the mechanism, and it is stronger than 'the optimum does not concentrate'. If a
     later run reversed it, the prose would be wrong in a way no other test would catch.
     """
-    a6p = _p("WS7_a6_tilt_comparator.json")
+    a6p = _p("a6_tilt_comparator.json")
     tilt = a6p["reference"]["tilt"]["charge_variance"]
     base = a6p["reference"]["base_S_conditioned"]["charge_variance"]
     assert tilt > base, (
@@ -162,8 +167,8 @@ def test_the_claim_is_not_stated_as_beating_the_baseline_on_its_own_terms():
         "the notes must frame the result as approximating a different target, not as a "
         "better approximation of the same one"
     )
-    a6_kl = _p("WS7_a6_tilt_comparator.json")["summary"]["kl_from_tilt"]["mean"]
-    induced_kl = _p("WS1_induced_vs_tilt.json")["comparison"]["kl_induced_from_tilt_nats"]
+    a6_kl = _p("a6_tilt_comparator.json")["summary"]["kl_from_tilt"]["mean"]
+    induced_kl = _p("induced_vs_tilt.json")["comparison"]["kl_induced_from_tilt_nats"]
     assert a6_kl < induced_kl, (
         f"A6 ({a6_kl:.4f} nats) should be closer to the tilt than the per-step induced "
         f"distribution ({induced_kl:.4f}); if not, the framing above is wrong"

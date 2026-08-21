@@ -325,7 +325,7 @@ def main(smoke: bool = False) -> Path:
             "directly_emitted": False,
         },
     }
-    return emit("CP7_second_channel" + ("_smoke" if smoke else ""), payload,
+    return emit("second_channel" + ("_smoke" if smoke else ""), payload,
                 config={"smoke": smoke, "second_family": "valence_electron_density"},
                 seeds=[0], script=SCRIPT)
 

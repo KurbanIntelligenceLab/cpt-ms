@@ -121,7 +121,7 @@ def test_regime_S_exactness_is_measured_not_hardcoded():
     """
     import json
     from pathlib import Path
-    art = Path("results/WS1_induced_vs_tilt.json")
+    art = Path("results/induced_vs_tilt.json")
     if not art.exists():
         pytest.skip("artifact absent; run scripts.synthetic.induced_distribution")
     dists = json.load(open(art))["payload"]["distributions"]

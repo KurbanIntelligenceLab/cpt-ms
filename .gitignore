@@ -5,6 +5,12 @@ __pycache__/
 .venv/
 *.egg-info/
 
+# Development-only material: run notes, preregistration records, the manuscript
+# sources (docs/), figure-inspection renders and training logs. None of it is
+# needed to install, verify, or reproduce a result; the scripts and the artifacts
+# they emit stay tracked. See development/README.md.
+development/
+.claude
 # macOS
 .DS_Store
 
@@ -27,3 +33,9 @@ results/_*.json
 
 # MP-20 CSVs are ~58MB and re-downloadable from the CDVAE repo
 data/
+
+# Trained checkpoints are build products of a documented training command, not
+# evidence. They are large, they are not needed to verify any claim in the
+# manuscript, and a stale one is worse than none. Reproduce with scripts/train/.
+/ckpt/
+development/ckpt/

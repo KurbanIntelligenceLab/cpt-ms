@@ -138,7 +138,7 @@ def main(smoke: bool = False) -> Path:
         "the other and the two are compatible."
     )
 
-    return emit("CP8_automaton_size" + ("_smoke" if smoke else ""), payload,
+    return emit("automaton_size" + ("_smoke" if smoke else ""), payload,
                 config={"tolerances": [r["relative_tolerance"] for r in rows],
                         "model_params": model_params},
                 seeds=[0], script=SCRIPT)

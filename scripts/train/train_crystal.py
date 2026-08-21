@@ -20,7 +20,7 @@ computed exactly. Sample sizes are stated with each figure and the same draw cou
 is used for every arm.
 
 The steered quantity is DENSITY, primary on all backbones per
-`preregistration/WS2_dial_assignment.md`.
+`preregistration/dial_assignment.md`.
 """
 
 from __future__ import annotations
@@ -390,8 +390,9 @@ def pad_batch(seqs: list[list[int]], pad: int) -> np.ndarray:
 @torch.no_grad()
 def sample(model, V, gm, cfg, device, n, *, use_mask: bool, project_at_inference: bool,
            max_len: int, rng) -> tuple[list[list[int]], dict]:
-    """Autoregressive generation. Returns token sequences and diagnostics."""
     model.eval()
+    gen_seed = int(rng.integers(0, 2 ** 63 - 1))
+    torch.manual_seed(gen_seed)
     ids = torch.full((n, 1), V.index["<BOS>"], dtype=torch.long, device=device)
     done = torch.zeros(n, dtype=torch.bool, device=device)
     n_infeasible = torch.zeros(n, device=device)
@@ -434,7 +435,7 @@ def sample(model, V, gm, cfg, device, n, *, use_mask: bool, project_at_inference
             budget, slots = _mass_budget(ids.cpu().numpy(), V, cfg)
             budget = torch.from_numpy(budget).to(device).float()
             slots = torch.from_numpy(slots).to(device).float()
-            # ACTIONABLE POSITIONS ONLY, per preregistration/CP0_actionable_window.md.
+            # ACTIONABLE POSITIONS ONLY, per preregistration/actionable_window.md.
             # With the static channel, only element positions carry nonzero mass: at
             # a count or structural position every legal token has channel value 0,
             # so the attainable range is {0} and any nonzero budget is infeasible by
@@ -919,7 +920,7 @@ def main(smoke: bool = False, arm: str = "A2", steps: int | None = None,
             "bytes": ckpt.stat().st_size,
         }
     return emit(
-        f"WS3_crystal_{cfg.arm}" + ("_smoke" if smoke else ""),
+        f"crystal_{cfg.arm}" + ("_smoke" if smoke else ""),
         payload,
         config={"arm": cfg.arm, "steps": cfg.steps, "smoke": smoke},
         seeds=[cfg.seed], script=SCRIPT,

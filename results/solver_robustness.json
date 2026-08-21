@@ -1,0 +1,2618 @@
+{
+  "schema_version": "1.0",
+  "artifact_name": "CPR5_solver_robustness",
+  "script": "scripts/layer/robustness_sweep.py",
+  "git_commit": "5e963cc6b84d7045ace5e3139800ffd7cb12c972-dirty",
+  "config": {
+    "vocab": 884,
+    "batch": 128,
+    "tols": [
+      0.0001,
+      1e-05,
+      1e-06,
+      1e-07,
+      1e-08,
+      1e-09,
+      1e-10,
+      1e-11,
+      1e-12,
+      1e-13,
+      1e-14
+    ],
+    "max_iters": [
+      3,
+      5,
+      8,
+      12,
+      20,
+      30,
+      50,
+      100
+    ],
+    "smoke": false
+  },
+  "config_hash": "8eb6db6829bc882b",
+  "seeds": [
+    10,
+    11,
+    20,
+    21,
+    30,
+    31,
+    32
+  ],
+  "created_utc": "2026-08-21T02:51:21.658816+00:00",
+  "python": "3.11.15",
+  "platform": "macOS-26.5.2-arm64-arm-64bit",
+  "payload_sha256": "cc469a595162f5945ba442bfd5688a57a10d75d648c55ae26b7fcc64937bbaa5",
+  "payload": {
+    "tolerance_sweep": {
+      "m1": {
+        "m": 1,
+        "B": 128,
+        "vocab": 884,
+        "reference_tol": 1e-14,
+        "reference_max_iter": 500,
+        "rows": [
+          {
+            "tol": 0.0001,
+            "max_iter": 100,
+            "achieved_residual_max": 9.663329771569806e-05,
+            "achieved_residual_mean": 8.974916114123932e-06,
+            "iterations": 5,
+            "converged_fraction": 1.0,
+            "nonconvergence_rate": 0.0,
+            "grad_max_abs_error_vs_tight_reference": 2.6757982901637334e-07,
+            "grad_max_rel_error_vs_tight_reference": 1.1352949398803757e-06,
+            "wall_clock_forward_s": 0.014326208001875784,
+            "wall_clock_fwd_bwd_s": 0.016121374996146187,
+            "q_max_abs_diff_vs_reference": 1.902776357587399e-07
+          },
+          {
+            "tol": 1e-05,
+            "max_iter": 100,
+            "achieved_residual_max": 8.188770948436286e-06,
+            "achieved_residual_mean": 6.304030067405542e-07,
+            "iterations": 6,
+            "converged_fraction": 1.0,
+            "nonconvergence_rate": 0.0,
+            "grad_max_abs_error_vs_tight_reference": 7.453739583884733e-09,
+            "grad_max_rel_error_vs_tight_reference": 3.1624928021957096e-08,
+            "wall_clock_forward_s": 0.01712729100108845,
+            "wall_clock_fwd_bwd_s": 0.0189440409958479,
+            "q_max_abs_diff_vs_reference": 1.870261290282116e-08
+          },
+          {
+            "tol": 1e-06,
+            "max_iter": 100,
+            "achieved_residual_max": 8.108637103987348e-07,
+            "achieved_residual_mean": 7.090054343628083e-08,
+            "iterations": 6,
+            "converged_fraction": 1.0,
+            "nonconvergence_rate": 0.0,
+            "grad_max_abs_error_vs_tight_reference": 1.0747002732180988e-09,
+            "grad_max_rel_error_vs_tight_reference": 4.559767403087421e-09,
+            "wall_clock_forward_s": 0.01850808299786877,
+            "wall_clock_fwd_bwd_s": 0.019804374998784624,
+            "q_max_abs_diff_vs_reference": 1.088955745021103e-09
+          },
+          {
+            "tol": 1e-07,
+            "max_iter": 100,
+            "achieved_residual_max": 9.357405872378877e-08,
+            "achieved_residual_mean": 6.566506005611927e-09,
+            "iterations": 6,
+            "converged_fraction": 1.0,
+            "nonconvergence_rate": 0.0,
+            "grad_max_abs_error_vs_tight_reference": 1.335764554522001e-10,
+            "grad_max_rel_error_vs_tight_reference": 5.667418000807518e-10,
+            "wall_clock_forward_s": 0.01853954100079136,
+            "wall_clock_fwd_bwd_s": 0.02064999999856809,
+            "q_max_abs_diff_vs_reference": 1.1454356907414365e-10
+          },
+          {
+            "tol": 1e-08,
+            "max_iter": 100,
+            "achieved_residual_max": 8.003212315088604e-09,
+            "achieved_residual_mean": 4.6440712386797145e-10,
+            "iterations": 6,
+            "converged_fraction": 1.0,
+            "nonconvergence_rate": 0.0,
+            "grad_max_abs_error_vs_tight_reference": 1.2716633301934621e-11,
+            "grad_max_rel_error_vs_tight_reference": 5.3954475914988475e-11,
+            "wall_clock_forward_s": 0.018556750001152977,
+            "wall_clock_fwd_bwd_s": 0.02167037500475999,
+            "q_max_abs_diff_vs_reference": 2.13533912774011e-11
+          },
+          {
+            "tol": 1e-09,
+            "max_iter": 100,
+            "achieved_residual_max": 9.787868293642532e-10,
+            "achieved_residual_mean": 7.220474218527784e-11,
+            "iterations": 6,
+            "converged_fraction": 1.0,
+            "nonconvergence_rate": 0.0,
+            "grad_max_abs_error_vs_tight_reference": 1.6382034617734575e-12,
+            "grad_max_rel_error_vs_tight_reference": 6.950613981191071e-12,
+            "wall_clock_forward_s": 0.01806058299553115,
+            "wall_clock_fwd_bwd_s": 0.021088875000714324,
+            "q_max_abs_diff_vs_reference": 1.494332435569845e-12
+          },
+          {
+            "tol": 1e-10,
+            "max_iter": 100,
+            "achieved_residual_max": 9.001155376608949e-11,
+            "achieved_residual_mean": 4.190037206086572e-12,
+            "iterations": 6,
+            "converged_fraction": 1.0,
+            "nonconvergence_rate": 0.0,
+            "grad_max_abs_error_vs_tight_reference": 1.5500101202547967e-13,
+            "grad_max_rel_error_vs_tight_reference": 6.57642488507968e-13,
+            "wall_clock_forward_s": 0.01947900000232039,
+            "wall_clock_fwd_bwd_s": 0.020354374995804392,
+            "q_max_abs_diff_vs_reference": 1.0354217483410366e-13
+          },
+          {
+            "tol": 1e-11,
+            "max_iter": 100,
+            "achieved_residual_max": 7.574385563202668e-12,
+            "achieved_residual_mean": 5.154210391822289e-13,
+            "iterations": 6,
+            "converged_fraction": 1.0,
+            "nonconvergence_rate": 0.0,
+            "grad_max_abs_error_vs_tight_reference": 2.270406085358445e-14,
+            "grad_max_rel_error_vs_tight_reference": 9.632940381404204e-14,
+            "wall_clock_forward_s": 0.019665125000756234,
+            "wall_clock_fwd_bwd_s": 0.021108833003381733,
+            "q_max_abs_diff_vs_reference": 1.6459056340067946e-14
+          },
+          {
+            "tol": 1e-12,
+            "max_iter": 100,
+            "achieved_residual_max": 7.105427357601002e-13,
+            "achieved_residual_mean": 6.766809335090329e-14,
+            "iterations": 7,
+            "converged_fraction": 1.0,
+            "nonconvergence_rate": 0.0,
+            "grad_max_abs_error_vs_tight_reference": 1.2628786905111156e-15,
+            "grad_max_rel_error_vs_tight_reference": 5.358175884521898e-15,
+            "wall_clock_forward_s": 0.02107291699940106,
+            "wall_clock_fwd_bwd_s": 0.021774083004856948,
+            "q_max_abs_diff_vs_reference": 9.159339953157541e-16
+          },
+          {
+            "tol": 1e-13,
+            "max_iter": 100,
+            "achieved_residual_max": 8.526512829121202e-14,
+            "achieved_residual_mean": 2.5091040356528538e-14,
+            "iterations": 7,
+            "converged_fraction": 1.0,
+            "nonconvergence_rate": 0.0,
+            "grad_max_abs_error_vs_tight_reference": 2.498001805406602e-16,
+            "grad_max_rel_error_vs_tight_reference": 1.0598589661691666e-15,
+            "wall_clock_forward_s": 0.020670249999966472,
+            "wall_clock_fwd_bwd_s": 0.023254500003531575,
+            "q_max_abs_diff_vs_reference": 2.220446049250313e-16
+          },
+          {
+            "tol": 1e-14,
+            "max_iter": 100,
+            "achieved_residual_max": 8.526512829121202e-14,
+            "achieved_residual_mean": 1.226796442210798e-14,
+            "iterations": 100,
+            "converged_fraction": 1.0,
+            "nonconvergence_rate": 0.0,
+            "grad_max_abs_error_vs_tight_reference": 1.3877787807814457e-16,
+            "grad_max_rel_error_vs_tight_reference": 5.888105367606482e-16,
+            "wall_clock_forward_s": 0.31693087500025285,
+            "wall_clock_fwd_bwd_s": 0.3198785830027191,
+            "q_max_abs_diff_vs_reference": 1.6653345369377348e-16
+          }
+        ]
+      },
+      "m2": {
+        "m": 2,
+        "B": 128,
+        "vocab": 884,
+        "reference_tol": 1e-14,
+        "reference_max_iter": 500,
+        "rows": [
+          {
+            "tol": 0.0001,
+            "max_iter": 100,
+            "achieved_residual_max": 0.052365941563586205,
+            "achieved_residual_mean": 0.0004209118702577022,
+            "iterations": 100,
+            "converged_fraction": 0.9921875,
+            "nonconvergence_rate": 0.0078125,
+            "grad_max_abs_error_vs_tight_reference": 6.60603329040721e-05,
+            "grad_max_rel_error_vs_tight_reference": 0.0003002232828258529,
+            "wall_clock_forward_s": 1.2324710419998155,
+            "wall_clock_fwd_bwd_s": 1.3815680840052664,
+            "q_max_abs_diff_vs_reference": 2.408977952367275e-06
+          },
+          {
+            "tol": 1e-05,
+            "max_iter": 100,
+            "achieved_residual_max": 0.052365941563586205,
+            "achieved_residual_mean": 0.0004101528871655255,
+            "iterations": 100,
+            "converged_fraction": 0.9921875,
+            "nonconvergence_rate": 0.0078125,
+            "grad_max_abs_error_vs_tight_reference": 6.60603329040721e-05,
+            "grad_max_rel_error_vs_tight_reference": 0.0003002232828258529,
+            "wall_clock_forward_s": 1.2460527919974993,
+            "wall_clock_fwd_bwd_s": 1.2421788330029813,
+            "q_max_abs_diff_vs_reference": 2.711177697900524e-07
+          },
+          {
+            "tol": 1e-06,
+            "max_iter": 100,
+            "achieved_residual_max": 0.052365941563586205,
+            "achieved_residual_mean": 0.00040917609070880573,
+            "iterations": 100,
+            "converged_fraction": 0.9921875,
+            "nonconvergence_rate": 0.0078125,
+            "grad_max_abs_error_vs_tight_reference": 6.60603329040721e-05,
+            "grad_max_rel_error_vs_tight_reference": 0.0003002232828258529,
+            "wall_clock_forward_s": 1.2403432080027414,
+            "wall_clock_fwd_bwd_s": 1.2396292080011335,
+            "q_max_abs_diff_vs_reference": 2.711177697900524e-07
+          },
+          {
+            "tol": 1e-07,
+            "max_iter": 100,
+            "achieved_residual_max": 0.052365941563586205,
+            "achieved_residual_mean": 0.00040911379924622737,
+            "iterations": 100,
+            "converged_fraction": 0.9921875,
+            "nonconvergence_rate": 0.0078125,
+            "grad_max_abs_error_vs_tight_reference": 6.60603329040721e-05,
+            "grad_max_rel_error_vs_tight_reference": 0.0003002232828258529,
+            "wall_clock_forward_s": 1.3638592089992017,
+            "wall_clock_fwd_bwd_s": 1.240913541005284,
+            "q_max_abs_diff_vs_reference": 2.711177697900524e-07
+          },
+          {
+            "tol": 1e-08,
+            "max_iter": 100,
+            "achieved_residual_max": 0.052365941563586205,
+            "achieved_residual_mean": 0.0004091090989542037,
+            "iterations": 100,
+            "converged_fraction": 0.9921875,
+            "nonconvergence_rate": 0.0078125,
+            "grad_max_abs_error_vs_tight_reference": 6.60603329040721e-05,
+            "grad_max_rel_error_vs_tight_reference": 0.0003002232828258529,
+            "wall_clock_forward_s": 1.244094417001179,
+            "wall_clock_fwd_bwd_s": 1.258494416004396,
+            "q_max_abs_diff_vs_reference": 2.711177697900524e-07
+          },
+          {
+            "tol": 1e-09,
+            "max_iter": 100,
+            "achieved_residual_max": 0.052365941563586205,
+            "achieved_residual_mean": 0.00040910897987076617,
+            "iterations": 100,
+            "converged_fraction": 0.9921875,
+            "nonconvergence_rate": 0.0078125,
+            "grad_max_abs_error_vs_tight_reference": 6.60603329040721e-05,
+            "grad_max_rel_error_vs_tight_reference": 0.0003002232828258529,
+            "wall_clock_forward_s": 1.2466279159998521,
+            "wall_clock_fwd_bwd_s": 1.312643624994962,
+            "q_max_abs_diff_vs_reference": 2.711177697900524e-07
+          },
+          {
+            "tol": 1e-10,
+            "max_iter": 100,
+            "achieved_residual_max": 0.052365941563586205,
+            "achieved_residual_mean": 0.00040910892235748036,
+            "iterations": 100,
+            "converged_fraction": 0.9921875,
+            "nonconvergence_rate": 0.0078125,
+            "grad_max_abs_error_vs_tight_reference": 6.60603329040721e-05,
+            "grad_max_rel_error_vs_tight_reference": 0.0003002232828258529,
+            "wall_clock_forward_s": 1.2767486669981736,
+            "wall_clock_fwd_bwd_s": 1.301870041002985,
+            "q_max_abs_diff_vs_reference": 2.711177697900524e-07
+          },
+          {
+            "tol": 1e-11,
+            "max_iter": 100,
+            "achieved_residual_max": 0.052365941563586205,
+            "achieved_residual_mean": 0.00040910891913522457,
+            "iterations": 100,
+            "converged_fraction": 0.9921875,
+            "nonconvergence_rate": 0.0078125,
+            "grad_max_abs_error_vs_tight_reference": 6.60603329040721e-05,
+            "grad_max_rel_error_vs_tight_reference": 0.0003002232828258529,
+            "wall_clock_forward_s": 1.340696334002132,
+            "wall_clock_fwd_bwd_s": 1.349694125005044,
+            "q_max_abs_diff_vs_reference": 2.711177697900524e-07
+          },
+          {
+            "tol": 1e-12,
+            "max_iter": 100,
+            "achieved_residual_max": 0.052365941563586205,
+            "achieved_residual_mean": 0.00040910891851365233,
+            "iterations": 100,
+            "converged_fraction": 0.9921875,
+            "nonconvergence_rate": 0.0078125,
+            "grad_max_abs_error_vs_tight_reference": 6.60603329040721e-05,
+            "grad_max_rel_error_vs_tight_reference": 0.0003002232828258529,
+            "wall_clock_forward_s": 1.1860775829991326,
+            "wall_clock_fwd_bwd_s": 1.236185583002225,
+            "q_max_abs_diff_vs_reference": 2.711177697900524e-07
+          },
+          {
+            "tol": 1e-13,
+            "max_iter": 100,
+            "achieved_residual_max": 0.052365941563586205,
+            "achieved_residual_mean": 0.0004091089184879229,
+            "iterations": 100,
+            "converged_fraction": 0.9921875,
+            "nonconvergence_rate": 0.0078125,
+            "grad_max_abs_error_vs_tight_reference": 6.60603329040721e-05,
+            "grad_max_rel_error_vs_tight_reference": 0.0003002232828258529,
+            "wall_clock_forward_s": 1.251506957996753,
+            "wall_clock_fwd_bwd_s": 1.228522500001418,
+            "q_max_abs_diff_vs_reference": 2.711177697900524e-07
+          },
+          {
+            "tol": 1e-14,
+            "max_iter": 100,
+            "achieved_residual_max": 0.052365941563586205,
+            "achieved_residual_mean": 0.0004091089184734137,
+            "iterations": 100,
+            "converged_fraction": 0.9921875,
+            "nonconvergence_rate": 0.0078125,
+            "grad_max_abs_error_vs_tight_reference": 6.60603329040721e-05,
+            "grad_max_rel_error_vs_tight_reference": 0.0003002232828258529,
+            "wall_clock_forward_s": 1.243458583005122,
+            "wall_clock_fwd_bwd_s": 1.239657875004923,
+            "q_max_abs_diff_vs_reference": 2.711177697900524e-07
+          }
+        ]
+      }
+    },
+    "iteration_cap_sweep": {
+      "m1": {
+        "m": 1,
+        "B": 128,
+        "vocab": 884,
+        "tol": 1e-10,
+        "rows": [
+          {
+            "max_iter": 3,
+            "tol": 1e-10,
+            "achieved_residual_max": 0.04098346006002629,
+            "converged_fraction": 0.7265625,
+            "nonconvergence_rate": 0.2734375,
+            "iterations_used": 3,
+            "wall_clock_forward_s": 0.010010624995629769
+          },
+          {
+            "max_iter": 5,
+            "tol": 1e-10,
+            "achieved_residual_max": 8.176925803127233e-11,
+            "converged_fraction": 1.0,
+            "nonconvergence_rate": 0.0,
+            "iterations_used": 5,
+            "wall_clock_forward_s": 0.01591470799758099
+          },
+          {
+            "max_iter": 8,
+            "tol": 1e-10,
+            "achieved_residual_max": 8.176925803127233e-11,
+            "converged_fraction": 1.0,
+            "nonconvergence_rate": 0.0,
+            "iterations_used": 6,
+            "wall_clock_forward_s": 0.0154598330045701
+          },
+          {
+            "max_iter": 12,
+            "tol": 1e-10,
+            "achieved_residual_max": 8.176925803127233e-11,
+            "converged_fraction": 1.0,
+            "nonconvergence_rate": 0.0,
+            "iterations_used": 6,
+            "wall_clock_forward_s": 0.015503791997616645
+          },
+          {
+            "max_iter": 20,
+            "tol": 1e-10,
+            "achieved_residual_max": 8.176925803127233e-11,
+            "converged_fraction": 1.0,
+            "nonconvergence_rate": 0.0,
+            "iterations_used": 6,
+            "wall_clock_forward_s": 0.015687416998844128
+          },
+          {
+            "max_iter": 30,
+            "tol": 1e-10,
+            "achieved_residual_max": 8.176925803127233e-11,
+            "converged_fraction": 1.0,
+            "nonconvergence_rate": 0.0,
+            "iterations_used": 6,
+            "wall_clock_forward_s": 0.016225416999077424
+          },
+          {
+            "max_iter": 50,
+            "tol": 1e-10,
+            "achieved_residual_max": 8.176925803127233e-11,
+            "converged_fraction": 1.0,
+            "nonconvergence_rate": 0.0,
+            "iterations_used": 6,
+            "wall_clock_forward_s": 0.01687816699995892
+          },
+          {
+            "max_iter": 100,
+            "tol": 1e-10,
+            "achieved_residual_max": 8.176925803127233e-11,
+            "converged_fraction": 1.0,
+            "nonconvergence_rate": 0.0,
+            "iterations_used": 6,
+            "wall_clock_forward_s": 0.015502207999816164
+          }
+        ]
+      },
+      "m2": {
+        "m": 2,
+        "B": 128,
+        "vocab": 884,
+        "tol": 1e-10,
+        "rows": [
+          {
+            "max_iter": 3,
+            "tol": 1e-10,
+            "achieved_residual_max": 1.3762737441372082,
+            "converged_fraction": 0.125,
+            "nonconvergence_rate": 0.875,
+            "iterations_used": 3,
+            "wall_clock_forward_s": 0.013572333002230152
+          },
+          {
+            "max_iter": 5,
+            "tol": 1e-10,
+            "achieved_residual_max": 3.1469428932950905e-05,
+            "converged_fraction": 0.9296875,
+            "nonconvergence_rate": 0.0703125,
+            "iterations_used": 5,
+            "wall_clock_forward_s": 0.021711458000936545
+          },
+          {
+            "max_iter": 8,
+            "tol": 1e-10,
+            "achieved_residual_max": 8.423484132435988e-11,
+            "converged_fraction": 1.0,
+            "nonconvergence_rate": 0.0,
+            "iterations_used": 7,
+            "wall_clock_forward_s": 0.02518904199678218
+          },
+          {
+            "max_iter": 12,
+            "tol": 1e-10,
+            "achieved_residual_max": 8.423484132435988e-11,
+            "converged_fraction": 1.0,
+            "nonconvergence_rate": 0.0,
+            "iterations_used": 7,
+            "wall_clock_forward_s": 0.026132917002541944
+          },
+          {
+            "max_iter": 20,
+            "tol": 1e-10,
+            "achieved_residual_max": 8.423484132435988e-11,
+            "converged_fraction": 1.0,
+            "nonconvergence_rate": 0.0,
+            "iterations_used": 7,
+            "wall_clock_forward_s": 0.025674333999631926
+          },
+          {
+            "max_iter": 30,
+            "tol": 1e-10,
+            "achieved_residual_max": 8.423484132435988e-11,
+            "converged_fraction": 1.0,
+            "nonconvergence_rate": 0.0,
+            "iterations_used": 7,
+            "wall_clock_forward_s": 0.027659999999741558
+          },
+          {
+            "max_iter": 50,
+            "tol": 1e-10,
+            "achieved_residual_max": 8.423484132435988e-11,
+            "converged_fraction": 1.0,
+            "nonconvergence_rate": 0.0,
+            "iterations_used": 7,
+            "wall_clock_forward_s": 0.028601666999747977
+          },
+          {
+            "max_iter": 100,
+            "tol": 1e-10,
+            "achieved_residual_max": 8.423484132435988e-11,
+            "converged_fraction": 1.0,
+            "nonconvergence_rate": 0.0,
+            "iterations_used": 7,
+            "wall_clock_forward_s": 0.0292804580021766
+          }
+        ]
+      }
+    },
+    "boundary_conditioning": {
+      "m1": {
+        "m": 1,
+        "B": 128,
+        "vocab": 884,
+        "collinear": false,
+        "attainable_ranges": [
+          [
+            1.008,
+            244.0
+          ]
+        ],
+        "results": [
+          {
+            "side": "lo",
+            "frac_from_boundary": 0.5,
+            "targets": [
+              122.50399999999999
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 6.0772435972467065e-09,
+            "residual_mean": 3.042345264603341e-10,
+            "multiplier_absmax_over_batch": 0.006400283288361948,
+            "multiplier_absmax_median_over_batch": 0.0016087046697444332,
+            "hessian_metric_max_over_batch": 6204.127969328472,
+            "hessian_metric_median_over_batch": 5058.544250001787,
+            "hessian_metric_is_condition_number": false,
+            "iterations": 5,
+            "each_constraint_solo_feasible_fraction": null,
+            "fraction_joint_infeasible_but_each_solo_feasible": null,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "lo",
+            "frac_from_boundary": 0.2,
+            "targets": [
+              49.6064
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 7.39388639203753e-09,
+            "residual_mean": 1.0158546226435305e-10,
+            "multiplier_absmax_over_batch": 0.026057905799544246,
+            "multiplier_absmax_median_over_batch": 0.01740570050825369,
+            "hessian_metric_max_over_batch": 3132.273783762381,
+            "hessian_metric_median_over_batch": 2198.906497894112,
+            "hessian_metric_is_condition_number": false,
+            "iterations": 6,
+            "each_constraint_solo_feasible_fraction": null,
+            "fraction_joint_infeasible_but_each_solo_feasible": null,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "lo",
+            "frac_from_boundary": 0.1,
+            "targets": [
+              25.307199999999998
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.84509895829433e-09,
+            "residual_mean": 9.30780674757159e-10,
+            "multiplier_absmax_over_batch": 0.05681982730293503,
+            "multiplier_absmax_median_over_batch": 0.038330365683900136,
+            "hessian_metric_max_over_batch": 1205.6195882491907,
+            "hessian_metric_median_over_batch": 607.0171401994139,
+            "hessian_metric_is_condition_number": false,
+            "iterations": 8,
+            "each_constraint_solo_feasible_fraction": null,
+            "fraction_joint_infeasible_but_each_solo_feasible": null,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "lo",
+            "frac_from_boundary": 0.05,
+            "targets": [
+              13.157599999999999
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 8.773143989060372e-09,
+            "residual_mean": 8.72177774446925e-10,
+            "multiplier_absmax_over_batch": 0.1724017249663304,
+            "multiplier_absmax_median_over_batch": 0.08128379889190396,
+            "hessian_metric_max_over_batch": 381.1384974535253,
+            "hessian_metric_median_over_batch": 141.6376481455887,
+            "hessian_metric_is_condition_number": false,
+            "iterations": 9,
+            "each_constraint_solo_feasible_fraction": null,
+            "fraction_joint_infeasible_but_each_solo_feasible": null,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "lo",
+            "frac_from_boundary": 0.02,
+            "targets": [
+              5.86784
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.043403359498825e-09,
+            "residual_mean": 6.765041651868309e-10,
+            "multiplier_absmax_over_batch": 0.4907836396051973,
+            "multiplier_absmax_median_over_batch": 0.20255663736891025,
+            "hessian_metric_max_over_batch": 92.38850132000026,
+            "hessian_metric_median_over_batch": 30.648057795052075,
+            "hessian_metric_is_condition_number": false,
+            "iterations": 10,
+            "each_constraint_solo_feasible_fraction": null,
+            "fraction_joint_infeasible_but_each_solo_feasible": null,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "lo",
+            "frac_from_boundary": 0.01,
+            "targets": [
+              3.43792
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.46130462864403e-09,
+            "residual_mean": 4.374809750573583e-10,
+            "multiplier_absmax_over_batch": 0.6881563449439867,
+            "multiplier_absmax_median_over_batch": 0.3410441665206119,
+            "hessian_metric_max_over_batch": 32.56740746311385,
+            "hessian_metric_median_over_batch": 13.685002328759774,
+            "hessian_metric_is_condition_number": false,
+            "iterations": 11,
+            "each_constraint_solo_feasible_fraction": null,
+            "fraction_joint_infeasible_but_each_solo_feasible": null,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "lo",
+            "frac_from_boundary": 0.005,
+            "targets": [
+              2.22296
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 8.65550786599556e-09,
+            "residual_mean": 4.885870978632578e-10,
+            "multiplier_absmax_over_batch": 1.121302654079415,
+            "multiplier_absmax_median_over_batch": 0.4719926208674028,
+            "hessian_metric_max_over_batch": 14.776950161832415,
+            "hessian_metric_median_over_batch": 6.3358073004639195,
+            "hessian_metric_is_condition_number": false,
+            "iterations": 11,
+            "each_constraint_solo_feasible_fraction": null,
+            "fraction_joint_infeasible_but_each_solo_feasible": null,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "lo",
+            "frac_from_boundary": 0.002,
+            "targets": [
+              1.493984
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.48755718432892e-09,
+            "residual_mean": 1.0676697078521036e-09,
+            "multiplier_absmax_over_batch": 1.5246364425441477,
+            "multiplier_absmax_median_over_batch": 0.6790722663567657,
+            "hessian_metric_max_over_batch": 5.399186305760614,
+            "hessian_metric_median_over_batch": 2.1699291873060895,
+            "hessian_metric_is_condition_number": false,
+            "iterations": 12,
+            "each_constraint_solo_feasible_fraction": null,
+            "fraction_joint_infeasible_but_each_solo_feasible": null,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "lo",
+            "frac_from_boundary": 0.001,
+            "targets": [
+              1.250992
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.93725257636413e-09,
+            "residual_mean": 1.1898418361688812e-09,
+            "multiplier_absmax_over_batch": 1.7840197966888522,
+            "multiplier_absmax_median_over_batch": 0.8351283955250897,
+            "hessian_metric_max_over_batch": 2.4487380375855228,
+            "hessian_metric_median_over_batch": 0.9761001883283776,
+            "hessian_metric_is_condition_number": false,
+            "iterations": 13,
+            "each_constraint_solo_feasible_fraction": null,
+            "fraction_joint_infeasible_but_each_solo_feasible": null,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "lo",
+            "frac_from_boundary": 0.0003,
+            "targets": [
+              1.0808976
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.848570625692332e-09,
+            "residual_mean": 3.0024836054909354e-09,
+            "multiplier_absmax_over_batch": 2.2044242148103486,
+            "multiplier_absmax_median_over_batch": 1.1670816807710351,
+            "hessian_metric_max_over_batch": 0.6015780473583503,
+            "hessian_metric_median_over_batch": 0.23899865831970923,
+            "hessian_metric_is_condition_number": false,
+            "iterations": 14,
+            "each_constraint_solo_feasible_fraction": null,
+            "fraction_joint_infeasible_but_each_solo_feasible": null,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "lo",
+            "frac_from_boundary": 0.0001,
+            "targets": [
+              1.0322992
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.929340683001442e-09,
+            "residual_mean": 3.5163737859000843e-09,
+            "multiplier_absmax_over_batch": 2.576333528850707,
+            "multiplier_absmax_median_over_batch": 1.4972186018261433,
+            "hessian_metric_max_over_batch": 0.16802754378257245,
+            "hessian_metric_median_over_batch": 0.07481138149397704,
+            "hessian_metric_is_condition_number": false,
+            "iterations": 15,
+            "each_constraint_solo_feasible_fraction": null,
+            "fraction_joint_infeasible_but_each_solo_feasible": null,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "lo",
+            "frac_from_boundary": 3e-05,
+            "targets": [
+              1.01528976
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.921403476553792e-09,
+            "residual_mean": 1.9455403156565243e-09,
+            "multiplier_absmax_over_batch": 2.980092063750305,
+            "multiplier_absmax_median_over_batch": 1.874891905642401,
+            "hessian_metric_max_over_batch": 0.0373744148866042,
+            "hessian_metric_median_over_batch": 0.021990692439756043,
+            "hessian_metric_is_condition_number": false,
+            "iterations": 16,
+            "each_constraint_solo_feasible_fraction": null,
+            "fraction_joint_infeasible_but_each_solo_feasible": null,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "lo",
+            "frac_from_boundary": 1e-05,
+            "targets": [
+              1.01042992
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.927977773216412e-09,
+            "residual_mean": 2.6670299736047953e-09,
+            "multiplier_absmax_over_batch": 3.3474092191590956,
+            "multiplier_absmax_median_over_batch": 2.235309113763053,
+            "hessian_metric_max_over_batch": 0.009321504303786643,
+            "hessian_metric_median_over_batch": 0.007294117325249427,
+            "hessian_metric_is_condition_number": false,
+            "iterations": 17,
+            "each_constraint_solo_feasible_fraction": null,
+            "fraction_joint_infeasible_but_each_solo_feasible": null,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "lo",
+            "frac_from_boundary": 1e-06,
+            "targets": [
+              1.008242992
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.927034305690086e-09,
+            "residual_mean": 1.7413769558272119e-09,
+            "multiplier_absmax_over_batch": 4.116442050368166,
+            "multiplier_absmax_median_over_batch": 3.0011342963912284,
+            "hessian_metric_max_over_batch": 0.0007538400063129558,
+            "hessian_metric_median_over_batch": 0.0007279289438605341,
+            "hessian_metric_is_condition_number": false,
+            "iterations": 19,
+            "each_constraint_solo_feasible_fraction": null,
+            "fraction_joint_infeasible_but_each_solo_feasible": null,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "lo",
+            "frac_from_boundary": 0.0,
+            "targets": [
+              1.008
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.92803039778778e-09,
+            "residual_mean": 4.895315472430717e-09,
+            "multiplier_absmax_over_batch": 7.722933884944931,
+            "multiplier_absmax_median_over_batch": 6.613315157678935,
+            "hessian_metric_max_over_batch": 2.9734451345575508e-08,
+            "hessian_metric_median_over_batch": 1.4400601933139967e-08,
+            "hessian_metric_is_condition_number": false,
+            "iterations": 26,
+            "each_constraint_solo_feasible_fraction": null,
+            "fraction_joint_infeasible_but_each_solo_feasible": null,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "lo",
+            "frac_from_boundary": -0.0001,
+            "targets": [
+              0.9837008
+            ],
+            "converged_fraction": 0.0,
+            "residual_max": 0.024299199999999965,
+            "residual_mean": 0.024299199999999965,
+            "multiplier_absmax_over_batch": 45925488808.93956,
+            "multiplier_absmax_median_over_batch": 45682497287.05561,
+            "hessian_metric_max_over_batch": 0.0,
+            "hessian_metric_median_over_batch": 0.0,
+            "hessian_metric_is_condition_number": false,
+            "iterations": 200,
+            "each_constraint_solo_feasible_fraction": null,
+            "fraction_joint_infeasible_but_each_solo_feasible": null,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "lo",
+            "frac_from_boundary": -0.01,
+            "targets": [
+              -1.42192
+            ],
+            "converged_fraction": 0.0,
+            "residual_max": 2.42992,
+            "residual_mean": 2.42992,
+            "multiplier_absmax_over_batch": 4689745600502.406,
+            "multiplier_absmax_median_over_batch": 4689745600049.771,
+            "hessian_metric_max_over_batch": 0.0,
+            "hessian_metric_median_over_batch": 0.0,
+            "hessian_metric_is_condition_number": false,
+            "iterations": 200,
+            "each_constraint_solo_feasible_fraction": null,
+            "fraction_joint_infeasible_but_each_solo_feasible": null,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "hi",
+            "frac_from_boundary": 0.5,
+            "targets": [
+              122.504
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 6.077257808101422e-09,
+            "residual_mean": 3.042350815718464e-10,
+            "multiplier_absmax_over_batch": 0.00640028328836195,
+            "multiplier_absmax_median_over_batch": 0.0016087046697444317,
+            "hessian_metric_max_over_batch": 6204.127969328472,
+            "hessian_metric_median_over_batch": 5058.544250001789,
+            "hessian_metric_is_condition_number": false,
+            "iterations": 5,
+            "each_constraint_solo_feasible_fraction": null,
+            "fraction_joint_infeasible_but_each_solo_feasible": null,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "hi",
+            "frac_from_boundary": 0.2,
+            "targets": [
+              195.4016
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 8.103910431600525e-09,
+            "residual_mean": 4.282085797058244e-10,
+            "multiplier_absmax_over_batch": 0.03038940633483359,
+            "multiplier_absmax_median_over_batch": 0.021267786904083326,
+            "hessian_metric_max_over_batch": 3055.756671100513,
+            "hessian_metric_median_over_batch": 2065.6914823302686,
+            "hessian_metric_is_condition_number": false,
+            "iterations": 7,
+            "each_constraint_solo_feasible_fraction": null,
+            "fraction_joint_infeasible_but_each_solo_feasible": null,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "hi",
+            "frac_from_boundary": 0.1,
+            "targets": [
+              219.70080000000002
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.189875527226832e-09,
+            "residual_mean": 1.2168790419764264e-09,
+            "multiplier_absmax_over_batch": 0.07657670134023496,
+            "multiplier_absmax_median_over_batch": 0.04294601555596413,
+            "hessian_metric_max_over_batch": 1326.7356801102069,
+            "hessian_metric_median_over_batch": 590.721929142841,
+            "hessian_metric_is_condition_number": false,
+            "iterations": 8,
+            "each_constraint_solo_feasible_fraction": null,
+            "fraction_joint_infeasible_but_each_solo_feasible": null,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "hi",
+            "frac_from_boundary": 0.05,
+            "targets": [
+              231.8504
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 8.706109611011925e-09,
+            "residual_mean": 8.82134143509461e-10,
+            "multiplier_absmax_over_batch": 0.1800252658182297,
+            "multiplier_absmax_median_over_batch": 0.08530941415971596,
+            "hessian_metric_max_over_batch": 569.0580127790381,
+            "hessian_metric_median_over_batch": 145.66218471316824,
+            "hessian_metric_is_condition_number": false,
+            "iterations": 10,
+            "each_constraint_solo_feasible_fraction": null,
+            "fraction_joint_infeasible_but_each_solo_feasible": null,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "hi",
+            "frac_from_boundary": 0.02,
+            "targets": [
+              239.14016
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 7.273996516232728e-09,
+            "residual_mean": 4.0666137124389934e-10,
+            "multiplier_absmax_over_batch": 0.41708236318440495,
+            "multiplier_absmax_median_over_batch": 0.2011613528678197,
+            "hessian_metric_max_over_batch": 171.81168594522023,
+            "hessian_metric_median_over_batch": 35.33126226026798,
+            "hessian_metric_is_condition_number": false,
+            "iterations": 10,
+            "each_constraint_solo_feasible_fraction": null,
+            "fraction_joint_infeasible_but_each_solo_feasible": null,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "hi",
+            "frac_from_boundary": 0.01,
+            "targets": [
+              241.57008
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.846729653872899e-09,
+            "residual_mean": 2.610780480694075e-10,
+            "multiplier_absmax_over_batch": 0.6594742186464475,
+            "multiplier_absmax_median_over_batch": 0.3119402171341653,
+            "hessian_metric_max_over_batch": 65.10667067416216,
+            "hessian_metric_median_over_batch": 17.49906777848082,
+            "hessian_metric_is_condition_number": false,
+            "iterations": 10,
+            "each_constraint_solo_feasible_fraction": null,
+            "fraction_joint_infeasible_but_each_solo_feasible": null,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "hi",
+            "frac_from_boundary": 0.005,
+            "targets": [
+              242.78504
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.797247457754565e-09,
+            "residual_mean": 1.7824279829881107e-09,
+            "multiplier_absmax_over_batch": 0.8132054397980648,
+            "multiplier_absmax_median_over_batch": 0.4118204328073058,
+            "hessian_metric_max_over_batch": 26.450128973971005,
+            "hessian_metric_median_over_batch": 8.19024342882767,
+            "hessian_metric_is_condition_number": false,
+            "iterations": 11,
+            "each_constraint_solo_feasible_fraction": null,
+            "fraction_joint_infeasible_but_each_solo_feasible": null,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "hi",
+            "frac_from_boundary": 0.002,
+            "targets": [
+              243.514016
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.683390089776367e-09,
+            "residual_mean": 1.7305807897827208e-09,
+            "multiplier_absmax_over_batch": 0.9822289611995627,
+            "multiplier_absmax_median_over_batch": 0.5498819092123801,
+            "hessian_metric_max_over_batch": 8.320116489689099,
+            "hessian_metric_median_over_batch": 3.1802130000396573,
+            "hessian_metric_is_condition_number": false,
+            "iterations": 12,
+            "each_constraint_solo_feasible_fraction": null,
+            "fraction_joint_infeasible_but_each_solo_feasible": null,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "hi",
+            "frac_from_boundary": 0.001,
+            "targets": [
+              243.757008
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 1.963655904546613e-10,
+            "residual_mean": 1.7428947174380482e-11,
+            "multiplier_absmax_over_batch": 1.1009827002538646,
+            "multiplier_absmax_median_over_batch": 0.6533500990099347,
+            "hessian_metric_max_over_batch": 3.3810789858398493,
+            "hessian_metric_median_over_batch": 1.586062743292132,
+            "hessian_metric_is_condition_number": false,
+            "iterations": 12,
+            "each_constraint_solo_feasible_fraction": null,
+            "fraction_joint_infeasible_but_each_solo_feasible": null,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "hi",
+            "frac_from_boundary": 0.0003,
+            "targets": [
+              243.9271024
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 8.335803158843191e-10,
+            "residual_mean": 1.1318390669146083e-10,
+            "multiplier_absmax_over_batch": 1.3010949170122257,
+            "multiplier_absmax_median_over_batch": 0.8351379916405943,
+            "hessian_metric_max_over_batch": 0.7464765864278888,
+            "hessian_metric_median_over_batch": 0.47058515225580777,
+            "hessian_metric_is_condition_number": false,
+            "iterations": 13,
+            "each_constraint_solo_feasible_fraction": null,
+            "fraction_joint_infeasible_but_each_solo_feasible": null,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "hi",
+            "frac_from_boundary": 0.0001,
+            "targets": [
+              243.9757008
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 8.969891496235505e-10,
+            "residual_mean": 1.500635171680642e-10,
+            "multiplier_absmax_over_batch": 1.4816633441902858,
+            "multiplier_absmax_median_over_batch": 1.0082579024043703,
+            "hessian_metric_max_over_batch": 0.20698131788958563,
+            "hessian_metric_median_over_batch": 0.15491272055442096,
+            "hessian_metric_is_condition_number": false,
+            "iterations": 14,
+            "each_constraint_solo_feasible_fraction": null,
+            "fraction_joint_infeasible_but_each_solo_feasible": null,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "hi",
+            "frac_from_boundary": 3e-05,
+            "targets": [
+              243.99271024
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 2.7694113668985665e-09,
+            "residual_mean": 5.708866712694771e-10,
+            "multiplier_absmax_over_batch": 1.6793712943886763,
+            "multiplier_absmax_median_over_batch": 1.1977140562999815,
+            "hessian_metric_max_over_batch": 0.05311893757607322,
+            "hessian_metric_median_over_batch": 0.04577742136098095,
+            "hessian_metric_is_condition_number": false,
+            "iterations": 15,
+            "each_constraint_solo_feasible_fraction": null,
+            "fraction_joint_infeasible_but_each_solo_feasible": null,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "hi",
+            "frac_from_boundary": 1e-05,
+            "targets": [
+              243.99757008
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 2.600671678010258e-09,
+            "residual_mean": 5.808946657026581e-10,
+            "multiplier_absmax_over_batch": 1.8601159862401888,
+            "multiplier_absmax_median_over_batch": 1.363917783621389,
+            "hessian_metric_max_over_batch": 0.01676316470548045,
+            "hessian_metric_median_over_batch": 0.015123341949220048,
+            "hessian_metric_is_condition_number": false,
+            "iterations": 16,
+            "each_constraint_solo_feasible_fraction": null,
+            "fraction_joint_infeasible_but_each_solo_feasible": null,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "hi",
+            "frac_from_boundary": 1e-06,
+            "targets": [
+              243.999757008
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 4.056147417941247e-09,
+            "residual_mean": 1.154915940659862e-09,
+            "multiplier_absmax_over_batch": 2.2403092916364606,
+            "multiplier_absmax_median_over_batch": 1.728327470867141,
+            "hessian_metric_max_over_batch": 0.0016619502275716513,
+            "hessian_metric_median_over_batch": 0.0014948321513656992,
+            "hessian_metric_is_condition_number": false,
+            "iterations": 18,
+            "each_constraint_solo_feasible_fraction": null,
+            "fraction_joint_infeasible_but_each_solo_feasible": null,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "hi",
+            "frac_from_boundary": 0.0,
+            "targets": [
+              244.0
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.999041594710434e-09,
+            "residual_mean": 7.865047280120052e-09,
+            "multiplier_absmax_over_batch": 3.962969682437219,
+            "multiplier_absmax_median_over_batch": 3.435928888382562,
+            "hessian_metric_max_over_batch": 6.236950866878033e-08,
+            "hessian_metric_median_over_batch": 5.3976691560819745e-08,
+            "hessian_metric_is_condition_number": false,
+            "iterations": 26,
+            "each_constraint_solo_feasible_fraction": null,
+            "fraction_joint_infeasible_but_each_solo_feasible": null,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "hi",
+            "frac_from_boundary": -0.0001,
+            "targets": [
+              244.0242992
+            ],
+            "converged_fraction": 0.0,
+            "residual_max": 0.02429920000000152,
+            "residual_mean": 0.02429920000000152,
+            "multiplier_absmax_over_batch": 46899618452.12915,
+            "multiplier_absmax_median_over_batch": 45683230561.60158,
+            "hessian_metric_max_over_batch": 0.0,
+            "hessian_metric_median_over_batch": 0.0,
+            "hessian_metric_is_condition_number": false,
+            "iterations": 200,
+            "each_constraint_solo_feasible_fraction": null,
+            "fraction_joint_infeasible_but_each_solo_feasible": null,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "hi",
+            "frac_from_boundary": -0.01,
+            "targets": [
+              246.42992
+            ],
+            "converged_fraction": 0.0,
+            "residual_max": 2.42992000000001,
+            "residual_mean": 2.42992000000001,
+            "multiplier_absmax_over_batch": 4689752888052.174,
+            "multiplier_absmax_median_over_batch": 4689745600420.375,
+            "hessian_metric_max_over_batch": 0.0,
+            "hessian_metric_median_over_batch": 0.0,
+            "hessian_metric_is_condition_number": false,
+            "iterations": 200,
+            "each_constraint_solo_feasible_fraction": null,
+            "fraction_joint_infeasible_but_each_solo_feasible": null,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          }
+        ]
+      },
+      "m2_realistic_pair": {
+        "m": 2,
+        "B": 128,
+        "vocab": 884,
+        "collinear": false,
+        "attainable_ranges": [
+          [
+            1.008,
+            244.0
+          ],
+          [
+            1.0,
+            32.0
+          ]
+        ],
+        "results": [
+          {
+            "side": "lo",
+            "frac_from_boundary": 0.5,
+            "targets": [
+              122.50399999999999,
+              16.5
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 8.201226364690228e-09,
+            "residual_mean": 5.053455431891507e-10,
+            "multiplier_absmax_over_batch": 0.2649085119595967,
+            "multiplier_absmax_median_over_batch": 0.16745401603340768,
+            "hessian_metric_max_over_batch": 536.4960819169731,
+            "hessian_metric_median_over_batch": 281.81139831897764,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 7,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "lo",
+            "frac_from_boundary": 0.2,
+            "targets": [
+              49.6064,
+              7.2
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.6643972824495e-09,
+            "residual_mean": 1.1121926088430989e-09,
+            "multiplier_absmax_over_batch": 0.1702648386363786,
+            "multiplier_absmax_median_over_batch": 0.07349821036187851,
+            "hessian_metric_max_over_batch": 308.03944717092935,
+            "hessian_metric_median_over_batch": 158.91479956626551,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 7,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "lo",
+            "frac_from_boundary": 0.1,
+            "targets": [
+              25.307199999999998,
+              4.1
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.920647414674022e-09,
+            "residual_mean": 1.4604974452048225e-09,
+            "multiplier_absmax_over_batch": 0.27458174429013404,
+            "multiplier_absmax_median_over_batch": 0.04615309257587404,
+            "hessian_metric_max_over_batch": 162.4629134220405,
+            "hessian_metric_median_over_batch": 101.97880995554698,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 8,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "lo",
+            "frac_from_boundary": 0.05,
+            "targets": [
+              13.157599999999999,
+              2.55
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 8.821629648991802e-09,
+            "residual_mean": 1.2025042073204872e-09,
+            "multiplier_absmax_over_batch": 0.6459504636818771,
+            "multiplier_absmax_median_over_batch": 0.17436834931557038,
+            "hessian_metric_max_over_batch": 142.0807997648702,
+            "hessian_metric_median_over_batch": 68.62192726530121,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 9,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "lo",
+            "frac_from_boundary": 0.02,
+            "targets": [
+              5.86784,
+              1.62
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.765115827065074e-09,
+            "residual_mean": 5.276364085232688e-10,
+            "multiplier_absmax_over_batch": 1.5124403694887478,
+            "multiplier_absmax_median_over_batch": 0.4179545809914704,
+            "hessian_metric_max_over_batch": 239.16806197096398,
+            "hessian_metric_median_over_batch": 59.116383623048016,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 11,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "lo",
+            "frac_from_boundary": 0.01,
+            "targets": [
+              3.43792,
+              1.31
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.207897555540967e-09,
+            "residual_mean": 9.92705926142201e-10,
+            "multiplier_absmax_over_batch": 2.650258417198082,
+            "multiplier_absmax_median_over_batch": 0.6474776527502275,
+            "hessian_metric_max_over_batch": 132.79233981111582,
+            "hessian_metric_median_over_batch": 52.466777750735204,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 11,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "lo",
+            "frac_from_boundary": 0.005,
+            "targets": [
+              2.22296,
+              1.155
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 8.37842994982907e-09,
+            "residual_mean": 3.2742755382009214e-10,
+            "multiplier_absmax_over_batch": 3.3901319831950905,
+            "multiplier_absmax_median_over_batch": 0.8607500482005435,
+            "hessian_metric_max_over_batch": 120.61067939468312,
+            "hessian_metric_median_over_batch": 50.66736848193639,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 12,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "lo",
+            "frac_from_boundary": 0.002,
+            "targets": [
+              1.493984,
+              1.062
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.998436745206618e-09,
+            "residual_mean": 5.943372096556265e-10,
+            "multiplier_absmax_over_batch": 4.005476369756763,
+            "multiplier_absmax_median_over_batch": 1.2913445626193023,
+            "hessian_metric_max_over_batch": 116.81489023252465,
+            "hessian_metric_median_over_batch": 50.50968220312018,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 12,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "lo",
+            "frac_from_boundary": 0.001,
+            "targets": [
+              1.250992,
+              1.031
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 7.69896923991098e-09,
+            "residual_mean": 9.555438870711974e-10,
+            "multiplier_absmax_over_batch": 4.377316751009202,
+            "multiplier_absmax_median_over_batch": 1.628569724846035,
+            "hessian_metric_max_over_batch": 109.21370547754057,
+            "hessian_metric_median_over_batch": 50.204634972320555,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 13,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "lo",
+            "frac_from_boundary": 0.0003,
+            "targets": [
+              1.0808976,
+              1.0093
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.855272153913575e-09,
+            "residual_mean": 2.2395248416157143e-09,
+            "multiplier_absmax_over_batch": 4.990588152844924,
+            "multiplier_absmax_median_over_batch": 2.2042267061493352,
+            "hessian_metric_max_over_batch": 85.19195001440863,
+            "hessian_metric_median_over_batch": 50.289383572838105,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 14,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "lo",
+            "frac_from_boundary": 0.0001,
+            "targets": [
+              1.0322992,
+              1.0031
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.26467946804621e-09,
+            "residual_mean": 2.3218527621382545e-09,
+            "multiplier_absmax_over_batch": 5.539055662051252,
+            "multiplier_absmax_median_over_batch": 2.741129038110282,
+            "hessian_metric_max_over_batch": 67.00590300769528,
+            "hessian_metric_median_over_batch": 50.1986982551995,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 15,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "lo",
+            "frac_from_boundary": 3e-05,
+            "targets": [
+              1.01528976,
+              1.00093
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.873113215874696e-09,
+            "residual_mean": 3.1618282905071515e-09,
+            "multiplier_absmax_over_batch": 6.136656606396375,
+            "multiplier_absmax_median_over_batch": 3.3349699208094465,
+            "hessian_metric_max_over_batch": 56.841015500954065,
+            "hessian_metric_median_over_batch": 50.16453737633677,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 16,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "lo",
+            "frac_from_boundary": 1e-05,
+            "targets": [
+              1.01042992,
+              1.00031
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.855918969847721e-09,
+            "residual_mean": 3.34229442386369e-09,
+            "multiplier_absmax_over_batch": 6.680996890459087,
+            "multiplier_absmax_median_over_batch": 3.8781736363227903,
+            "hessian_metric_max_over_batch": 52.87475051614893,
+            "hessian_metric_median_over_batch": 50.13577723442485,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 17,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "lo",
+            "frac_from_boundary": 1e-06,
+            "targets": [
+              1.008242992,
+              1.000031
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.808349688000817e-09,
+            "residual_mean": 3.716032400194469e-09,
+            "multiplier_absmax_over_batch": 7.821226298865982,
+            "multiplier_absmax_median_over_batch": 5.017784746079967,
+            "hessian_metric_max_over_batch": 50.517556174775955,
+            "hessian_metric_median_over_batch": 50.116465912942324,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 19,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "lo",
+            "frac_from_boundary": 0.0,
+            "targets": [
+              1.008,
+              1.0
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.993139649111527e-09,
+            "residual_mean": 6.5689296970677935e-09,
+            "multiplier_absmax_over_batch": 13.954385444480895,
+            "multiplier_absmax_median_over_batch": 10.69695575679962,
+            "hessian_metric_max_over_batch": 110.67124924343368,
+            "hessian_metric_median_over_batch": 69.25840653239054,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 26,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "lo",
+            "frac_from_boundary": -0.0001,
+            "targets": [
+              0.9837008,
+              0.9969
+            ],
+            "converged_fraction": 0.0,
+            "residual_max": 0.024299199999999965,
+            "residual_mean": 0.024299199999999965,
+            "multiplier_absmax_over_batch": 45925486928.0787,
+            "multiplier_absmax_median_over_batch": 45682497555.934105,
+            "hessian_metric_max_over_batch": NaN,
+            "hessian_metric_median_over_batch": NaN,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 200,
+            "each_constraint_solo_feasible_fraction": 0.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "lo",
+            "frac_from_boundary": -0.01,
+            "targets": [
+              -1.42192,
+              0.69
+            ],
+            "converged_fraction": 0.0,
+            "residual_max": 2.42992,
+            "residual_mean": 2.42992,
+            "multiplier_absmax_over_batch": 4714044800019.148,
+            "multiplier_absmax_median_over_batch": 4689745600019.535,
+            "hessian_metric_max_over_batch": NaN,
+            "hessian_metric_median_over_batch": NaN,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 200,
+            "each_constraint_solo_feasible_fraction": 0.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "hi",
+            "frac_from_boundary": 0.5,
+            "targets": [
+              122.504,
+              16.5
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 8.201183732126083e-09,
+            "residual_mean": 5.053432672319502e-10,
+            "multiplier_absmax_over_batch": 0.2649085119595963,
+            "multiplier_absmax_median_over_batch": 0.16745401603340765,
+            "hessian_metric_max_over_batch": 536.49608191697,
+            "hessian_metric_median_over_batch": 281.8113983189778,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 7,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "hi",
+            "frac_from_boundary": 0.2,
+            "targets": [
+              195.4016,
+              25.8
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.652382004787796e-09,
+            "residual_mean": 6.372158356526825e-10,
+            "multiplier_absmax_over_batch": 0.30959153550067764,
+            "multiplier_absmax_median_over_batch": 0.17600433028400816,
+            "hessian_metric_max_over_batch": 141.63284699466035,
+            "hessian_metric_median_over_batch": 69.73187664964831,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 8,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "hi",
+            "frac_from_boundary": 0.1,
+            "targets": [
+              219.70080000000002,
+              28.9
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.381892596138641e-09,
+            "residual_mean": 1.057918863622831e-09,
+            "multiplier_absmax_over_batch": 0.4962765215242674,
+            "multiplier_absmax_median_over_batch": 0.25388093498521813,
+            "hessian_metric_max_over_batch": 8.767660055841208,
+            "hessian_metric_median_over_batch": 3.9583509734176703,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 9,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "hi",
+            "frac_from_boundary": 0.05,
+            "targets": [
+              231.8504,
+              30.45
+            ],
+            "converged_fraction": 0.0,
+            "residual_max": 22.45,
+            "residual_mean": 9.609943727698695,
+            "multiplier_absmax_over_batch": 18506610884.49981,
+            "multiplier_absmax_median_over_batch": 643935019.7766318,
+            "hessian_metric_max_over_batch": 1471231.101515934,
+            "hessian_metric_median_over_batch": NaN,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 200,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 1.0,
+            "joint_infeasible_but_each_solo_feasible_observed": true
+          },
+          {
+            "side": "hi",
+            "frac_from_boundary": 0.02,
+            "targets": [
+              239.14016,
+              31.38
+            ],
+            "converged_fraction": 0.0,
+            "residual_max": 23.38,
+            "residual_mean": 18.79146361035717,
+            "multiplier_absmax_over_batch": 13674370266631.756,
+            "multiplier_absmax_median_over_batch": 12416197096869.799,
+            "hessian_metric_max_over_batch": 935979.8223325413,
+            "hessian_metric_median_over_batch": NaN,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 200,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 1.0,
+            "joint_infeasible_but_each_solo_feasible_observed": true
+          },
+          {
+            "side": "hi",
+            "frac_from_boundary": 0.01,
+            "targets": [
+              241.57008,
+              31.69
+            ],
+            "converged_fraction": 0.0,
+            "residual_max": 23.69,
+            "residual_mean": 20.337514925832387,
+            "multiplier_absmax_over_batch": 18075909087489.613,
+            "multiplier_absmax_median_over_batch": 15518757572248.195,
+            "hessian_metric_max_over_batch": 1114469.6415135756,
+            "hessian_metric_median_over_batch": NaN,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 200,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 1.0,
+            "joint_infeasible_but_each_solo_feasible_observed": true
+          },
+          {
+            "side": "hi",
+            "frac_from_boundary": 0.005,
+            "targets": [
+              242.78504,
+              31.845
+            ],
+            "converged_fraction": 0.0,
+            "residual_max": 23.845,
+            "residual_mean": 21.394117597161095,
+            "multiplier_absmax_over_batch": 22276867162489.453,
+            "multiplier_absmax_median_over_batch": 19784538184139.18,
+            "hessian_metric_max_over_batch": 238099.14633288144,
+            "hessian_metric_median_over_batch": NaN,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 200,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 1.0,
+            "joint_infeasible_but_each_solo_feasible_observed": true
+          },
+          {
+            "side": "hi",
+            "frac_from_boundary": 0.002,
+            "targets": [
+              243.514016,
+              31.938
+            ],
+            "converged_fraction": 0.0,
+            "residual_max": 23.938,
+            "residual_mean": 22.0944044756644,
+            "multiplier_absmax_over_batch": 23144897842666.277,
+            "multiplier_absmax_median_over_batch": 21016790171408.06,
+            "hessian_metric_max_over_batch": 2413189.153907901,
+            "hessian_metric_median_over_batch": NaN,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 200,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 1.0,
+            "joint_infeasible_but_each_solo_feasible_observed": true
+          },
+          {
+            "side": "hi",
+            "frac_from_boundary": 0.001,
+            "targets": [
+              243.757008,
+              31.969
+            ],
+            "converged_fraction": 0.0,
+            "residual_max": 23.969,
+            "residual_mean": 22.313530654313293,
+            "multiplier_absmax_over_batch": 23965425604897.95,
+            "multiplier_absmax_median_over_batch": 22204146788036.625,
+            "hessian_metric_max_over_batch": NaN,
+            "hessian_metric_median_over_batch": NaN,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 200,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 1.0,
+            "joint_infeasible_but_each_solo_feasible_observed": true
+          },
+          {
+            "side": "hi",
+            "frac_from_boundary": 0.0003,
+            "targets": [
+              243.9271024,
+              31.9907
+            ],
+            "converged_fraction": 0.0,
+            "residual_max": 23.9907,
+            "residual_mean": 22.27579612198778,
+            "multiplier_absmax_over_batch": 24235093290989.156,
+            "multiplier_absmax_median_over_batch": 22555772926498.742,
+            "hessian_metric_max_over_batch": NaN,
+            "hessian_metric_median_over_batch": NaN,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 200,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 1.0,
+            "joint_infeasible_but_each_solo_feasible_observed": true
+          },
+          {
+            "side": "hi",
+            "frac_from_boundary": 0.0001,
+            "targets": [
+              243.9757008,
+              31.9969
+            ],
+            "converged_fraction": 0.0,
+            "residual_max": 23.9969,
+            "residual_mean": 22.24826639083201,
+            "multiplier_absmax_over_batch": 24602779551983.508,
+            "multiplier_absmax_median_over_batch": 22834431596928.695,
+            "hessian_metric_max_over_batch": NaN,
+            "hessian_metric_median_over_batch": NaN,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 200,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 1.0,
+            "joint_infeasible_but_each_solo_feasible_observed": true
+          },
+          {
+            "side": "hi",
+            "frac_from_boundary": 3e-05,
+            "targets": [
+              243.99271024,
+              31.99907
+            ],
+            "converged_fraction": 0.0,
+            "residual_max": 23.99907,
+            "residual_mean": 22.414215364453437,
+            "multiplier_absmax_over_batch": 24635777865589.32,
+            "multiplier_absmax_median_over_batch": 22896419949173.297,
+            "hessian_metric_max_over_batch": NaN,
+            "hessian_metric_median_over_batch": NaN,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 200,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 1.0,
+            "joint_infeasible_but_each_solo_feasible_observed": true
+          },
+          {
+            "side": "hi",
+            "frac_from_boundary": 1e-05,
+            "targets": [
+              243.99757008,
+              31.99969
+            ],
+            "converged_fraction": 0.0,
+            "residual_max": 23.99969,
+            "residual_mean": 22.243422203617232,
+            "multiplier_absmax_over_batch": 24645181655986.438,
+            "multiplier_absmax_median_over_batch": 23095312810479.984,
+            "hessian_metric_max_over_batch": NaN,
+            "hessian_metric_median_over_batch": NaN,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 200,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 1.0,
+            "joint_infeasible_but_each_solo_feasible_observed": true
+          },
+          {
+            "side": "hi",
+            "frac_from_boundary": 1e-06,
+            "targets": [
+              243.999757008,
+              31.999969
+            ],
+            "converged_fraction": 0.0,
+            "residual_max": 23.999969,
+            "residual_mean": 22.19215525946594,
+            "multiplier_absmax_over_batch": 24649446165588.8,
+            "multiplier_absmax_median_over_batch": 23100365057681.46,
+            "hessian_metric_max_over_batch": NaN,
+            "hessian_metric_median_over_batch": NaN,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 200,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 1.0,
+            "joint_infeasible_but_each_solo_feasible_observed": true
+          },
+          {
+            "side": "hi",
+            "frac_from_boundary": 0.0,
+            "targets": [
+              244.0,
+              32.0
+            ],
+            "converged_fraction": 0.0,
+            "residual_max": 24.0,
+            "residual_mean": 22.238307831456474,
+            "multiplier_absmax_over_batch": 24649919999988.42,
+            "multiplier_absmax_median_over_batch": 23320000000021.414,
+            "hessian_metric_max_over_batch": NaN,
+            "hessian_metric_median_over_batch": NaN,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 200,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 1.0,
+            "joint_infeasible_but_each_solo_feasible_observed": true
+          },
+          {
+            "side": "hi",
+            "frac_from_boundary": -0.0001,
+            "targets": [
+              244.0242992,
+              32.0031
+            ],
+            "converged_fraction": 0.0,
+            "residual_max": 24.003100000000003,
+            "residual_mean": 22.465246315319774,
+            "multiplier_absmax_over_batch": 24697303439988.9,
+            "multiplier_absmax_median_over_batch": 23362261944039.727,
+            "hessian_metric_max_over_batch": NaN,
+            "hessian_metric_median_over_batch": NaN,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 200,
+            "each_constraint_solo_feasible_fraction": 0.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "hi",
+            "frac_from_boundary": -0.01,
+            "targets": [
+              246.42992,
+              32.31
+            ],
+            "converged_fraction": 0.0,
+            "residual_max": 24.42992000000001,
+            "residual_mean": 24.016576090431645,
+            "multiplier_absmax_over_batch": 27628263999989.57,
+            "multiplier_absmax_median_over_batch": 26078665312502.96,
+            "hessian_metric_max_over_batch": NaN,
+            "hessian_metric_median_over_batch": NaN,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 200,
+            "each_constraint_solo_feasible_fraction": 0.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          }
+        ]
+      },
+      "m2_near_collinear_pair": {
+        "m": 2,
+        "B": 128,
+        "vocab": 884,
+        "collinear": true,
+        "attainable_ranges": [
+          [
+            1.008,
+            244.0
+          ],
+          [
+            1.0082879252018202,
+            244.0732212976124
+          ]
+        ],
+        "results": [
+          {
+            "side": "lo",
+            "frac_from_boundary": 0.5,
+            "targets": [
+              122.50399999999999,
+              122.54075461140712
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.884175256047456e-09,
+            "residual_mean": 1.8401714596549823e-09,
+            "multiplier_absmax_over_batch": 3432.56122988515,
+            "multiplier_absmax_median_over_batch": 1072.5771290227626,
+            "hessian_metric_max_over_batch": 4760131094360.584,
+            "hessian_metric_median_over_batch": 2598963980537.754,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 23,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "lo",
+            "frac_from_boundary": 0.2,
+            "targets": [
+              49.6064,
+              49.62127459968394
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.907722642310546e-09,
+            "residual_mean": 2.1132178229521514e-09,
+            "multiplier_absmax_over_batch": 7498.360171377125,
+            "multiplier_absmax_median_over_batch": 4005.5100522549237,
+            "hessian_metric_max_over_batch": 1866668065483.8918,
+            "hessian_metric_median_over_batch": 996453324505.6998,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 17,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "lo",
+            "frac_from_boundary": 0.1,
+            "targets": [
+              25.307199999999998,
+              25.31478126244288
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.90803528111428e-09,
+            "residual_mean": 1.760894902114174e-09,
+            "multiplier_absmax_over_batch": 13189.419491499577,
+            "multiplier_absmax_median_over_batch": 7065.257477993799,
+            "hessian_metric_max_over_batch": 617368883012.4929,
+            "hessian_metric_median_over_batch": 298330057584.93207,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 27,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "lo",
+            "frac_from_boundary": 0.05,
+            "targets": [
+              13.157599999999999,
+              13.161534593822351
+            ],
+            "converged_fraction": 0.984375,
+            "residual_max": 6.379467620831747e-08,
+            "residual_mean": 2.1011089257338966e-09,
+            "multiplier_absmax_over_batch": 19863.508229360275,
+            "multiplier_absmax_median_over_batch": 10221.701044042431,
+            "hessian_metric_max_over_batch": 318151754851.33,
+            "hessian_metric_median_over_batch": 94921479181.15015,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 200,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.015625,
+            "joint_infeasible_but_each_solo_feasible_observed": true
+          },
+          {
+            "side": "lo",
+            "frac_from_boundary": 0.02,
+            "targets": [
+              5.86784,
+              5.869586592650032
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.979765458467682e-09,
+            "residual_mean": 1.87236186277584e-09,
+            "multiplier_absmax_over_batch": 26079.064023539733,
+            "multiplier_absmax_median_over_batch": 12381.534109983204,
+            "hessian_metric_max_over_batch": 186986183461.64706,
+            "hessian_metric_median_over_batch": 28530866732.661716,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 11,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "lo",
+            "frac_from_boundary": 0.01,
+            "targets": [
+              3.43792,
+              3.438937258925926
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.539156575755214e-09,
+            "residual_mean": 1.3735514531321158e-09,
+            "multiplier_absmax_over_batch": 33834.569912831204,
+            "multiplier_absmax_median_over_batch": 15602.36617220543,
+            "hessian_metric_max_over_batch": 111594886010.83644,
+            "hessian_metric_median_over_batch": 28385251722.951443,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 13,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "lo",
+            "frac_from_boundary": 0.005,
+            "targets": [
+              2.22296,
+              2.223612592063873
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.483381191444096e-09,
+            "residual_mean": 2.2817083673853933e-09,
+            "multiplier_absmax_over_batch": 39230.34977174044,
+            "multiplier_absmax_median_over_batch": 18959.35268145288,
+            "hessian_metric_max_over_batch": 65076961047.21193,
+            "hessian_metric_median_over_batch": 29703984520.505054,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 12,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "lo",
+            "frac_from_boundary": 0.002,
+            "targets": [
+              1.493984,
+              1.4944177919466415
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.921534260826093e-09,
+            "residual_mean": 3.986188960511394e-09,
+            "multiplier_absmax_over_batch": 45164.14108641334,
+            "multiplier_absmax_median_over_batch": 23284.697289538435,
+            "hessian_metric_max_over_batch": 44712772876.86135,
+            "hessian_metric_median_over_batch": 29555615195.504173,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 15,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "lo",
+            "frac_from_boundary": 0.001,
+            "targets": [
+              1.250992,
+              1.2513528585742308
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.770381392826266e-09,
+            "residual_mean": 4.206880215712472e-09,
+            "multiplier_absmax_over_batch": 49331.54970237923,
+            "multiplier_absmax_median_over_batch": 26614.481391908776,
+            "hessian_metric_max_over_batch": 40907293548.715,
+            "hessian_metric_median_over_batch": 29212186326.545486,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 18,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "lo",
+            "frac_from_boundary": 0.0003,
+            "targets": [
+              1.0808976,
+              1.0812074052135434
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.996964145386755e-09,
+            "residual_mean": 7.286570451181529e-09,
+            "multiplier_absmax_over_batch": 56336.27077940392,
+            "multiplier_absmax_median_over_batch": 32745.83066367999,
+            "hessian_metric_max_over_batch": 37577160397.084,
+            "hessian_metric_median_over_batch": 28581193000.32962,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 30,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "lo",
+            "frac_from_boundary": 0.0001,
+            "targets": [
+              1.0322992,
+              1.0325944185390612
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.997199956757186e-09,
+            "residual_mean": 8.90044237443488e-09,
+            "multiplier_absmax_over_batch": 62590.26018453648,
+            "multiplier_absmax_median_over_batch": 38113.82714050186,
+            "hessian_metric_max_over_batch": 37018724415.181,
+            "hessian_metric_median_over_batch": 28003629257.43534,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 53,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "lo",
+            "frac_from_boundary": 3e-05,
+            "targets": [
+              1.01528976,
+              1.0155798732029926
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.975309245291442e-09,
+            "residual_mean": 9.595884158455914e-09,
+            "multiplier_absmax_over_batch": 69157.26893337474,
+            "multiplier_absmax_median_over_batch": 43875.56029429994,
+            "hessian_metric_max_over_batch": 35523681188.1742,
+            "hessian_metric_median_over_batch": 26623243329.861458,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 107,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "lo",
+            "frac_from_boundary": 1e-05,
+            "targets": [
+              1.01042992,
+              1.0107185745355443
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.999219008349769e-09,
+            "residual_mean": 9.846795311421741e-09,
+            "multiplier_absmax_over_batch": 74093.62586965156,
+            "multiplier_absmax_median_over_batch": 48234.10843111113,
+            "hessian_metric_max_over_batch": 31945702436.216377,
+            "hessian_metric_median_over_batch": 22435926275.403885,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 188,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "lo",
+            "frac_from_boundary": 1e-06,
+            "targets": [
+              1.008242992,
+              1.0085309901351927
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.51815626315522e-09,
+            "residual_mean": 3.984966074135898e-09,
+            "multiplier_absmax_over_batch": 54560.320187151934,
+            "multiplier_absmax_median_over_batch": 31865.103402148445,
+            "hessian_metric_max_over_batch": 27184272443838.99,
+            "hessian_metric_median_over_batch": 459066904181.3552,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 19,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "lo",
+            "frac_from_boundary": 0.0,
+            "targets": [
+              1.008,
+              1.0082879252018202
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.946250489889508e-09,
+            "residual_mean": 5.458396143062649e-09,
+            "multiplier_absmax_over_batch": 54276.889021764066,
+            "multiplier_absmax_median_over_batch": 31605.6735803586,
+            "hessian_metric_max_over_batch": 47808501355.97151,
+            "hessian_metric_median_over_batch": 404296602.1074969,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 26,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "lo",
+            "frac_from_boundary": -0.0001,
+            "targets": [
+              0.9837008,
+              0.9839814318645791
+            ],
+            "converged_fraction": 0.0,
+            "residual_max": 0.02430649333724111,
+            "residual_mean": 0.02430649333724111,
+            "multiplier_absmax_over_batch": 46182383489.37223,
+            "multiplier_absmax_median_over_batch": 45696235390.840004,
+            "hessian_metric_max_over_batch": NaN,
+            "hessian_metric_median_over_batch": NaN,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 200,
+            "each_constraint_solo_feasible_fraction": 0.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "lo",
+            "frac_from_boundary": -0.01,
+            "targets": [
+              -1.42192,
+              -1.4223614085222858
+            ],
+            "converged_fraction": 0.0,
+            "residual_max": 2.430649333724106,
+            "residual_mean": 2.4306493337241055,
+            "multiplier_absmax_over_batch": 4715459819932.575,
+            "multiplier_absmax_median_over_batch": 4691153138653.479,
+            "hessian_metric_max_over_batch": NaN,
+            "hessian_metric_median_over_batch": NaN,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 200,
+            "each_constraint_solo_feasible_fraction": 0.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "hi",
+            "frac_from_boundary": 0.5,
+            "targets": [
+              122.504,
+              122.54075461140711
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.609905760044057e-09,
+            "residual_mean": 1.9754916591452343e-09,
+            "multiplier_absmax_over_batch": 3432.5611007401085,
+            "multiplier_absmax_median_over_batch": 1072.572396385709,
+            "hessian_metric_max_over_batch": 4748523604252.9375,
+            "hessian_metric_median_over_batch": 2597285944067.1865,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 16,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "hi",
+            "frac_from_boundary": 0.2,
+            "targets": [
+              195.4016,
+              195.46023462313028
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.948678325599758e-09,
+            "residual_mean": 1.334633958904874e-09,
+            "multiplier_absmax_over_batch": 8667.105844685693,
+            "multiplier_absmax_median_over_batch": 1960.898061860571,
+            "hessian_metric_max_over_batch": 2656346232916.433,
+            "hessian_metric_median_over_batch": 1317113963475.0542,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 26,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "hi",
+            "frac_from_boundary": 0.1,
+            "targets": [
+              219.70080000000002,
+              219.76672796037136
+            ],
+            "converged_fraction": 0.9921875,
+            "residual_max": 6.202245117492566e-08,
+            "residual_mean": 2.906026752569346e-09,
+            "multiplier_absmax_over_batch": 11489.453574352447,
+            "multiplier_absmax_median_over_batch": 2524.6260554216424,
+            "hessian_metric_max_over_batch": 1273387779186.0784,
+            "hessian_metric_median_over_batch": 482586827162.94604,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 200,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0078125,
+            "joint_infeasible_but_each_solo_feasible_observed": true
+          },
+          {
+            "side": "hi",
+            "frac_from_boundary": 0.05,
+            "targets": [
+              231.8504,
+              231.91997462899187
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.666479172665277e-09,
+            "residual_mean": 1.028771512423532e-09,
+            "multiplier_absmax_over_batch": 15876.011526211763,
+            "multiplier_absmax_median_over_batch": 3444.165048972657,
+            "hessian_metric_max_over_batch": 636251148602.8297,
+            "hessian_metric_median_over_batch": 138433720399.4052,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 21,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "hi",
+            "frac_from_boundary": 0.02,
+            "targets": [
+              239.14016,
+              239.2119226301642
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.890271712720278e-09,
+            "residual_mean": 2.0557848756652675e-09,
+            "multiplier_absmax_over_batch": 22295.947604216235,
+            "multiplier_absmax_median_over_batch": 4448.858761044916,
+            "hessian_metric_max_over_batch": 329272475074.41943,
+            "hessian_metric_median_over_batch": 56305969689.95925,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 21,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "hi",
+            "frac_from_boundary": 0.01,
+            "targets": [
+              241.57008,
+              241.6425719638883
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.93051685327373e-09,
+            "residual_mean": 2.261932641189901e-09,
+            "multiplier_absmax_over_batch": 25537.571710306216,
+            "multiplier_absmax_median_over_batch": 5414.758145848089,
+            "hessian_metric_max_over_batch": 257556487870.65326,
+            "hessian_metric_median_over_batch": 51108730504.60381,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 17,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "hi",
+            "frac_from_boundary": 0.005,
+            "targets": [
+              242.78504,
+              242.85789663075036
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.755552810020163e-09,
+            "residual_mean": 3.256901193182671e-09,
+            "multiplier_absmax_over_batch": 28151.750893022425,
+            "multiplier_absmax_median_over_batch": 5683.877136858048,
+            "hessian_metric_max_over_batch": 229084533871.3552,
+            "hessian_metric_median_over_batch": 41846121909.26721,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 16,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "hi",
+            "frac_from_boundary": 0.002,
+            "targets": [
+              243.514016,
+              243.5870914308676
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.997535244110622e-09,
+            "residual_mean": 4.081669446875935e-09,
+            "multiplier_absmax_over_batch": 30885.398233468582,
+            "multiplier_absmax_median_over_batch": 5774.7910432994395,
+            "hessian_metric_max_over_batch": 170953448584.3668,
+            "hessian_metric_median_over_batch": 35856978743.934326,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 20,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "hi",
+            "frac_from_boundary": 0.001,
+            "targets": [
+              243.757008,
+              243.83015636424
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.605201967133326e-09,
+            "residual_mean": 5.272690062341212e-09,
+            "multiplier_absmax_over_batch": 32473.579383313798,
+            "multiplier_absmax_median_over_batch": 6581.4590385569645,
+            "hessian_metric_max_over_batch": 143263927907.07404,
+            "hessian_metric_median_over_batch": 32447217277.68798,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 25,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "hi",
+            "frac_from_boundary": 0.0003,
+            "targets": [
+              243.9271024,
+              244.00030181760067
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.991595106839668e-09,
+            "residual_mean": 7.647299904434135e-09,
+            "multiplier_absmax_over_batch": 34457.588680414556,
+            "multiplier_absmax_median_over_batch": 7315.72437256298,
+            "hessian_metric_max_over_batch": 92748219856.16168,
+            "hessian_metric_median_over_batch": 30384683240.350136,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 36,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "hi",
+            "frac_from_boundary": 0.0001,
+            "targets": [
+              243.9757008,
+              244.04891480427517
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.999268968385877e-09,
+            "residual_mean": 8.889944558276852e-09,
+            "multiplier_absmax_over_batch": 35953.3839820015,
+            "multiplier_absmax_median_over_batch": 8506.10508389775,
+            "hessian_metric_max_over_batch": 947032808071.6254,
+            "hessian_metric_median_over_batch": 29585278705.38591,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 57,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "hi",
+            "frac_from_boundary": 3e-05,
+            "targets": [
+              243.99271024,
+              244.06592934961122
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.993755156756379e-09,
+            "residual_mean": 9.138445999923306e-09,
+            "multiplier_absmax_over_batch": 36946.57523207883,
+            "multiplier_absmax_median_over_batch": 9050.446159028728,
+            "hessian_metric_max_over_batch": 12292659815358.486,
+            "hessian_metric_median_over_batch": 29519789460.58104,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 100,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "hi",
+            "frac_from_boundary": 1e-05,
+            "targets": [
+              243.99757008,
+              244.0707906482787
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.996227845476824e-09,
+            "residual_mean": 9.188829697137635e-09,
+            "multiplier_absmax_over_batch": 36296.4517888882,
+            "multiplier_absmax_median_over_batch": 8756.714296160886,
+            "hessian_metric_max_over_batch": 933089115575.1154,
+            "hessian_metric_median_over_batch": 12712478799.732431,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 140,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "hi",
+            "frac_from_boundary": 1e-06,
+            "targets": [
+              243.999757008,
+              244.07297823267902
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 8.571618081987253e-09,
+            "residual_mean": 2.067562121510491e-09,
+            "multiplier_absmax_over_batch": 35084.5085763697,
+            "multiplier_absmax_median_over_batch": 7284.902535446992,
+            "hessian_metric_max_over_batch": 27468786052.954227,
+            "hessian_metric_median_over_batch": 1359459214.337317,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 18,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "hi",
+            "frac_from_boundary": 0.0,
+            "targets": [
+              244.0,
+              244.0732212976124
+            ],
+            "converged_fraction": 1.0,
+            "residual_max": 9.92284299172752e-09,
+            "residual_mean": 7.136894408787953e-09,
+            "multiplier_absmax_over_batch": 35034.2493601579,
+            "multiplier_absmax_median_over_batch": 7299.256991717396,
+            "hessian_metric_max_over_batch": 9.207288551590875e+16,
+            "hessian_metric_median_over_batch": 31266.0057025083,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 26,
+            "each_constraint_solo_feasible_fraction": 1.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "hi",
+            "frac_from_boundary": -0.0001,
+            "targets": [
+              244.0242992,
+              244.09752779094964
+            ],
+            "converged_fraction": 0.0,
+            "residual_max": 0.024306493337235224,
+            "residual_mean": 0.024306493337235224,
+            "multiplier_absmax_over_batch": 46277753475.322815,
+            "multiplier_absmax_median_over_batch": 45697261707.569214,
+            "hessian_metric_max_over_batch": NaN,
+            "hessian_metric_median_over_batch": NaN,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 200,
+            "each_constraint_solo_feasible_fraction": 0.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          },
+          {
+            "side": "hi",
+            "frac_from_boundary": -0.01,
+            "targets": [
+              246.42992,
+              246.50387063133653
+            ],
+            "converged_fraction": 0.0,
+            "residual_max": 2.4306493337241193,
+            "residual_mean": 2.4306493337241193,
+            "multiplier_absmax_over_batch": 4719598526936.662,
+            "multiplier_absmax_median_over_batch": 4691153216001.406,
+            "hessian_metric_max_over_batch": NaN,
+            "hessian_metric_median_over_batch": NaN,
+            "hessian_metric_is_condition_number": true,
+            "iterations": 200,
+            "each_constraint_solo_feasible_fraction": 0.0,
+            "fraction_joint_infeasible_but_each_solo_feasible": 0.0,
+            "joint_infeasible_but_each_solo_feasible_observed": false
+          }
+        ]
+      }
+    },
+    "summary": {
+      "worst_grad_rel_err_by_tol": {
+        "1e-04": 0.0003002232828258529,
+        "1e-05": 0.0003002232828258529,
+        "1e-06": 0.0003002232828258529,
+        "1e-07": 0.0003002232828258529,
+        "1e-08": 0.0003002232828258529,
+        "1e-09": 0.0003002232828258529,
+        "1e-10": 0.0003002232828258529,
+        "1e-11": 0.0003002232828258529,
+        "1e-12": 0.0003002232828258529,
+        "1e-13": 0.0003002232828258529,
+        "1e-14": 0.0003002232828258529
+      },
+      "m1_multiplier_absmax_at_lo_boundary": 4689745600502.406,
+      "m1_multiplier_absmax_at_hi_boundary": 4689752888052.174,
+      "m2_realistic_pair_worst_condition_number": 2413189.153907901,
+      "m2_near_collinear_pair_worst_condition_number": 9.207288551590875e+16,
+      "m2_realistic_pair_correlation_note": "mass and valence rows are the same pair characterized in second_channel.py (correlation 0.725 across MP-20 training structures); this artifact does not recompute that correlation, only the conditioning of the resulting dual Hessian"
+    }
+  }
+}

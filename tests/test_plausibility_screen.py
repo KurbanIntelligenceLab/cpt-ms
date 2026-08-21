@@ -15,7 +15,7 @@ import pytest
 
 from scripts.crystal.plausibility_screen import _smact_screens, screen_compositions
 
-ART = Path("results/WS3_plausibility_reference.json")
+ART = Path("results/plausibility_reference.json")
 
 
 @pytest.fixture(scope="module")

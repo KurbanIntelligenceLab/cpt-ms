@@ -15,12 +15,18 @@ from pathlib import Path
 
 import pytest
 
-ROOT = Path(__file__).resolve().parents[1]
-TEX = ROOT / "template" / "main.tex"
-BIB = ROOT / "template" / "references.bib"
+from _devtree import ROOT, requires_dev_tree
+
+TEX = ROOT / "development" / "docs" / "template" / "main.tex"
+BIB = ROOT / "development" / "docs" / "template" / "references.bib"
 RESULTS = ROOT / "results"
 
-pytestmark = pytest.mark.skipif(not TEX.exists(), reason="manuscript source not present")
+# Two guards, in one list. A previous version assigned pytestmark twice and the
+# second assignment silently discarded the first.
+pytestmark = [
+    requires_dev_tree,
+    pytest.mark.skipif(not TEX.exists(), reason="manuscript source not present"),
+]
 
 
 def _p(name: str) -> dict:
@@ -63,8 +69,8 @@ def _main_text() -> str:
 
 def test_concentration_numbers_match_their_artifacts():
     """The paper's central claim, recomputed from the two artifacts that hold it."""
-    a2 = _p("A2_training_summary.json")["arms"]
-    a6 = _p("WS7_a6_tilt_comparator.json")
+    a2 = _p("training_summary.json")["arms"]
+    a6 = _p("a6_tilt_comparator.json")
     src = _src()
 
     # These arrays are [mean, sd] pairs, NOT per-seed lists. Averaging them yields a
@@ -94,17 +100,17 @@ def test_concentration_numbers_match_their_artifacts():
 
 
 def test_equivalence_numbers_come_from_the_preregistration():
-    eq = _p("WS4_equivalence.json")["equivalence"]
+    eq = _p("equivalence.json")["equivalence"]
     src = _src()
     assert f"{eq['tost_p']:.4f}" in src
     assert f"{eq['margin']:.3f}" in src
-    prereg = ROOT / "preregistration" / "WS4_equivalence_margin.md"
+    prereg = ROOT / "development" / "preregistration" / "equivalence_margin.md"
     assert prereg.exists(), "the margin must live in a pre-registration file"
 
 
 def test_per_seed_table_carries_per_seed_values():
     """A table captioned 'per-seed' must hold seeds, not just their aggregate."""
-    ps = _p("WS4_retargeting_seed_replication.json")["per_seed"]
+    ps = _p("retargeting_seed_replication.json")["per_seed"]
     src = _src()
     for seed, row in ps.items():
         assert f"{row['sub_ceiling_mae']:.4f}" in src, (
@@ -115,7 +121,7 @@ def test_per_seed_table_carries_per_seed_values():
 
 def test_direction_asymmetry_counts_match_the_grid():
     """The failing cells must be counted from the artifact, not described from memory."""
-    cols = _p("WS5_two_constraint_grid.json")["summary"]["fixed_valence_columns"]
+    cols = _p("two_constraint_grid.json")["summary"]["fixed_valence_columns"]
     rows = [r for c in cols for r in c["rows"]]
     up = [r for r in rows if r["asked_direction"] == "up"]
     down = [r for r in rows if r["asked_direction"] == "down"]
@@ -211,3 +217,110 @@ def test_figures_referenced_by_the_manuscript_exist_as_vector_pdfs():
         path = TEX.parent / rel
         assert path.exists(), f"{rel} is referenced but absent"
         assert path.suffix == ".pdf", f"{rel} must be vector PDF for arXiv, not {path.suffix}"
+
+
+def test_generated_plausibility_funnel_matches_its_artifact():
+    """CPR4 was regenerated after the sampling-seed fix; the funnel table must track it."""
+    f = _p("generated_plausibility.json")["funnel"]
+    rc = _p("generated_plausibility.json")["reference_ceiling"]
+    src = _src()
+
+    assert f"{f['built_rate_of_sampled']:.4f}" in src
+    scr = f["screens_on_built"]
+    assert f"{scr['charge_balanced_rate']:.4f}" in src
+    assert f"{scr['electronegativity_ordered_rate']:.4f}" in src
+    assert f"{scr['packing_plausible_rate']:.4f}" in src
+    assert f"{rc['charge_balanced_rate']:.4f}" in src
+    assert f"{rc['electronegativity_ordered_rate']:.4f}" in src
+    assert f"{rc['packing_plausible_rate']:.4f}" in src
+
+    # The gaps quoted in prose must be the artifact's own ceiling minus its own rate,
+    # not a stale value carried over from a pre-regeneration draft.
+    gap_charge = rc["charge_balanced_rate"] - scr["charge_balanced_rate"]
+    gap_eneg = rc["electronegativity_ordered_rate"] - scr["electronegativity_ordered_rate"]
+    gap_pack = rc["packing_plausible_rate"] - scr["packing_plausible_rate"]
+    assert f"{gap_charge:.4f}" in src, "charge-balance gap does not match the regenerated artifact"
+    assert f"{gap_eneg:.4f}" in src, "electronegativity gap does not match the regenerated artifact"
+    assert f"{gap_pack:.4f}" in src, "packing gap does not match the regenerated artifact"
+
+
+def test_hybrid_selection_table_matches_the_regenerated_fig3_curve():
+    """FIG3's hybrid_curve was regenerated (seed fix); si:tab:hybrid must not carry stale values."""
+    hc = _p("fig_accuracy_diversity_pareto.json")["hybrid_curve"]
+    bo = _p("fig_accuracy_diversity_pareto.json")["best_of_n_curve"]
+    smc = _p("fig_accuracy_diversity_pareto.json")["smc_tuned_point"]
+    src = _src()
+
+    for row in hc:
+        assert f"{row['mean_error']:.3f}" in src, f"hybrid n={row['n']} error missing or stale"
+        assert f"{row['mean_unique_fraction']:.3f}" in src, f"hybrid n={row['n']} diversity missing or stale"
+    for row in bo:
+        if row["n"] in (1, 4, 16):
+            assert f"{row['mean_error']:.3f}" in src, f"best-of-{row['n']} error missing or stale"
+
+    assert f"{smc['mean_error']:.3f}" in src
+    assert f"{smc['mean_unique_fraction']:.3f}" in src
+
+    # The removed projection-alone diamond must not resurface as a separately plotted
+    # point in the figure caption text (a %% provenance comment naming the artifact
+    # field is fine; a caption claiming a standalone "projection" marker is not).
+    caption_text = re.search(r"\\caption\{.*?fig:pareto", _assembled(), re.S)
+    main_caption = re.search(
+        r"\\caption\{\\textbf\{Accuracy bought.*?\\label\{fig:pareto\}", _assembled(), re.S
+    )
+    assert main_caption is not None
+    assert "diamond" not in main_caption.group(0)
+
+
+def test_smc_tuning_numbers_match_their_artifacts():
+    tuned = _p("smc_tuned.json")
+    div = _p("smc_diversity.json")
+    src = _src()
+
+    best = tuned["global_best_fixed_sigma"]
+    assert f"{best['mean_error_over_targets']:.3f}" in src
+    per_target_best_mean = sum(
+        r["mean_error"] for r in tuned["best_per_target_selected_on_eval"]
+    ) / len(tuned["best_per_target_selected_on_eval"])
+    assert f"{per_target_best_mean:.3f}" in src
+
+    assert f"{div['mean_error_over_targets']:.3f}" in src
+    assert f"{div['mean_unique_formula_fraction_over_targets']:.3f}" in src
+
+
+def test_solver_robustness_conditioning_gap_is_internally_consistent():
+    """The realistic-vs-near-collinear m=2 condition-number gap must be stated once, correctly."""
+    payload = _p("solver_robustness.json")["summary"]
+    realistic = payload["m2_realistic_pair_worst_condition_number"]
+    collinear = payload["m2_near_collinear_pair_worst_condition_number"]
+    import math
+
+    gap_orders = math.log10(collinear / realistic)
+    src = _src()
+
+    # The manuscript must not claim a "three orders of magnitude" gap when the
+    # artifact's own two condition numbers are roughly ten orders of magnitude apart.
+    assert gap_orders > 9, "test fixture assumption changed; re-check the artifact"
+    assert "three orders of magnitude below the near-collinear" not in src
+    assert "ten orders of magnitude below the near-collinear" in src
+
+
+def test_fallback_gradient_discrepancies_match_their_artifact():
+    d = _p("fallback_gradients.json")
+    disc = d["unrolled_vs_implicit_gradient_discrepancy"]
+    src = _src()
+
+    crystal = disc["crystal_arm_vocab500_float64"]["realistic_perturbed_target"]
+    synth = disc["synthetic_arm_vocab4_float64"]["realistic_perturbed_target"]
+    edge = disc["crystal_arm_vocab500_float64"]["zero_iteration_edge_case_target_equals_current_expectation"]
+
+    assert f"{crystal['unrolled_vs_implicit_relative_l2_diff']:.1e}".replace("e-10", "\\times10^{-10}") in src \
+        or "1.4\\times10^{-10}" in src
+    assert "3.2\\times10^{-9}" in src
+    assert "6.7\\times10^{-2}" in src
+
+    stability = d["training_stability_relation"]["deployed_outcome_vs_infeasibility"]
+    r_err = stability["pearson_r_infeas_deployed_vs_abs_density_error"]
+    r_sd = stability["pearson_r_infeas_deployed_vs_deployed_sd"]
+    assert f"{r_err:.3f}" in src
+    assert f"{r_sd:.3f}" in src

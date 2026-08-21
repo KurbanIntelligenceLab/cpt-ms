@@ -193,7 +193,7 @@ def test_second_family_is_not_a_restatement_of_density():
     from collinear to stay conditioned, so the correlation is asserted inside a band
     rather than merely reported.
     """
-    art = RESULTS / "CP7_second_channel.json"
+    art = RESULTS / "second_channel.json"
     if not art.exists():
         pytest.skip("second-channel artifact absent; run scripts.crystal.second_channel")
     p = json.loads(art.read_text())["payload"]

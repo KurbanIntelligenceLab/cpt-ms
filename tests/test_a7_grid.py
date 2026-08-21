@@ -18,8 +18,8 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 RESULTS = Path(__file__).resolve().parents[1] / "results"
-ART = RESULTS / "WS5_two_constraint_grid.json"
-NOTES = Path(__file__).resolve().parents[1] / "reports" / "WS5_two_constraint_grid_notes.md"
+ART = RESULTS / "two_constraint_grid.json"
+NOTES = Path(__file__).resolve().parents[1] / "reports" / "two_constraint_grid_notes.md"
 
 
 def _payload():
@@ -198,7 +198,7 @@ def test_notes_do_not_overclaim_the_incomplete_grid():
 def test_valence_reference_matches_cp7():
     """The data mean and sd quoted here must be CP-7's measured values."""
     p = _payload()
-    cp7 = RESULTS / "CP7_second_channel.json"
+    cp7 = RESULTS / "second_channel.json"
     if not cp7.exists():
         pytest.skip("CP-7 artifact absent")
     st = json.loads(cp7.read_text())["payload"]["channel_statistics"]

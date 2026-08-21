@@ -16,12 +16,12 @@ R = Path('results')
 SUB = [1.5, 2.0, 3.0, 5.0, 6.317, 8.0, 10.0]
 CEIL = 10.405
 
-s0 = json.loads((R / 'WS4_zero_shot_retargeting.json').read_text())['payload']
+s0 = json.loads((R / 'zero_shot_retargeting.json').read_text())['payload']
 blocks = {0: [b for b in s0['matrix'] if b['trained_density_target'] == 10.0][0]}
 for s, p in [(1, 'retarget_t10_s1.json'), (2, 'retarget_t10_s2.json')]:
     blocks[s] = json.loads((R / p).read_text())['matrix'][0]
 
-fr = json.loads((R / 'WS3_steering_frontier_rows.json').read_text())['payload']['rows']
+fr = json.loads((R / 'steering_frontier_rows.json').read_text())['payload']['rows']
 by = {}
 for v in fr.values():
     by.setdefault(v['target'], []).append(v)
@@ -93,6 +93,6 @@ payload = {
         'not reproduce, so the ceiling is soft rather than absent.'
     ),
 }
-print(emit('WS4_retargeting_seed_replication', payload,
+print(emit('retargeting_seed_replication', payload,
            config={'seeds': [0, 1, 2], 'targets': SUB, 'arm': 'A3', 'trained_at': 10.0},
            seeds=[0, 1, 2], script='scripts/crystal/consolidate_retargeting.py'))

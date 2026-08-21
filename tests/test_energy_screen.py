@@ -15,7 +15,7 @@ import pytest
 
 from scripts.crystal.energy_screen import MIN_OCCURRENCES, fit_references, formation_energy
 
-ART = Path("results/WS3_energy_calibration.json")
+ART = Path("results/energy_calibration.json")
 
 
 @pytest.fixture(scope="module")

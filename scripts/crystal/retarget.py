@@ -175,7 +175,7 @@ if __name__ == "__main__":
         Path(a.out).write_text(json.dumps(payload, indent=1))
         print(a.out)
     else:
-        print(emit("WS4_zero_shot_retargeting" + ("_smoke" if a.smoke else ""),
+        print(emit("zero_shot_retargeting" + ("_smoke" if a.smoke else ""),
                    payload,
                    config={"n_checkpoints": len(a.ckpt), "smoke": a.smoke,
                            "targets": tg or FRONTIER_TARGETS},

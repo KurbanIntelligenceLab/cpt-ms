@@ -211,7 +211,7 @@ def main(ckpt: str, targets=None, k_values=None, runs: int = 32,
         "cost_note": ("K forward passes per accepted output at every target, indefinitely, "
                       "against one training run and one forward pass for the projection"),
     }
-    return emit("WS6_smc_steering" + ("_smoke" if smoke else ""), payload,
+    return emit("smc_steering" + ("_smoke" if smoke else ""), payload,
                 config={"k_values": ks, "targets": tg, "runs": runs,
                         "checkpoint": Path(ckpt).name},
                 seeds=[seed], script=SCRIPT)

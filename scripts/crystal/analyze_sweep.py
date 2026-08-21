@@ -198,7 +198,7 @@ def main(pattern: str, smoke: bool = False) -> Path:
         },
     }
     return emit(
-        "WS3_steering_sweep" + ("_smoke" if smoke else ""),
+        "steering_sweep" + ("_smoke" if smoke else ""),
         payload,
         config={"pattern": pattern, "smoke": smoke},
         seeds=sorted({r["seed"] for r in rows}),

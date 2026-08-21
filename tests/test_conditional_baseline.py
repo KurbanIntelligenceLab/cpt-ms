@@ -141,7 +141,7 @@ def test_sparse_regime_claim_is_coverage_not_accuracy():
     """
     import json
     from pathlib import Path
-    art = Path("results/WS3_conditional_sparse.json")
+    art = Path("results/conditional_sparse.json")
     if not art.exists():
         pytest.skip("sparse artifact absent; run the sparse-target job")
     p = json.load(open(art))["payload"]
@@ -165,7 +165,7 @@ def test_only_one_swept_target_actually_starves():
     """The refusal is a single case, and overstating it was the original error."""
     import json
     from pathlib import Path
-    art = Path("results/WS3_conditional_sparse.json")
+    art = Path("results/conditional_sparse.json")
     if not art.exists():
         pytest.skip("sparse artifact absent")
     ref = json.load(open(art))["payload"]["refusal"]

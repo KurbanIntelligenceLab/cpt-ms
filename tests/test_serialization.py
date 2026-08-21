@@ -18,7 +18,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-ART = ROOT / "results" / "CP9_serialization_expressibility.json"
+ART = ROOT / "results" / "serialization_expressibility.json"
 
 
 def _p() -> dict:

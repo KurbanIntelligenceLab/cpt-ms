@@ -164,7 +164,7 @@ def main(ckpt: str, targets: list[float] | None = None, pool: int = 512,
         f"merely expensive." if unreachable else
         f"Every target lies inside the pool's span of {dens.min():.2f} to {dens.max():.2f}.")
 
-    return emit("WS6_best_of_n" + ("_smoke" if smoke else ""), payload,
+    return emit("best_of_n" + ("_smoke" if smoke else ""), payload,
                 config={"pool": pool, "targets": tg, "n_values": n_vals,
                         "checkpoint": Path(ckpt).name},
                 seeds=[seed], script=SCRIPT)

@@ -142,7 +142,7 @@ def main(steps: int | None = None, seeds=None, smoke: bool = False) -> Path:
                            f"{len(task.sequences)} sequences, so every divergence is exact "
                            "rather than estimated"),
     }
-    return emit("WS7_a6_tilt_comparator" + ("_smoke" if smoke else ""), payload,
+    return emit("a6_tilt_comparator" + ("_smoke" if smoke else ""), payload,
                 config={"steps": payload["steps"], "seeds": list(seeds),
                         "arm": "A6", "training_rule": "MLE on exact tilt samples"},
                 seeds=list(seeds), script=SCRIPT)

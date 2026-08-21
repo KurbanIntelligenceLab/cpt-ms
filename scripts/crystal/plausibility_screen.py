@@ -133,7 +133,7 @@ def main(limit: int = 500, smoke: bool = False) -> Path:
         ),
     }
     return emit(
-        "WS3_plausibility_reference" + ("_smoke" if smoke else ""),
+        "plausibility_reference" + ("_smoke" if smoke else ""),
         payload,
         config={"limit": limit, "smoke": smoke}, seeds=[0], script=SCRIPT,
     )

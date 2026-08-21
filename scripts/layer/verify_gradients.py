@@ -1,6 +1,6 @@
 """CP2 gradient verification: implicit-function gradients vs two oracles.
 
-Emits `results/CP2_gradient_verification.json` with measured tolerances, which is
+Emits `results/gradient_verification.json` with measured tolerances, which is
 the artifact CP2 reads. Nothing here is asserted: every tolerance in the report
 is a number this script computed.
 
@@ -218,7 +218,7 @@ def main(smoke: bool = False) -> Path:
     }
 
     return emit(
-        "CP2_gradient_verification" + ("_smoke" if smoke else ""),
+        "gradient_verification" + ("_smoke" if smoke else ""),
         payload,
         config={"configs": configs, "dtype": "float64", "smoke": smoke},
         seeds=[0],

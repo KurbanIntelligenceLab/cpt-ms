@@ -1,6 +1,6 @@
 """Measure per-step determinability of both Regime-E families on both backbones.
 
-Emits `results/WS2_family_determinability.json`, the artifact that decides whether
+Emits `results/family_determinability.json`, the artifact that decides whether
 the plan's family (ii) hedge against ionic-scoping risk is instantiable per step
 or only at the sequence level.
 
@@ -244,7 +244,7 @@ def main(smoke: bool = False) -> Path:
     }
 
     return emit(
-        "WS2_family_determinability" + ("_smoke" if smoke else ""),
+        "family_determinability" + ("_smoke" if smoke else ""),
         payload,
         config={"cases": [c for c, _ in seqs["B2"]], "smoke": smoke},
         seeds=[],

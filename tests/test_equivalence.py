@@ -17,8 +17,13 @@ import pytest
 from scipy import stats
 
 ROOT = Path(__file__).resolve().parents[1]
-ART = ROOT / "results" / "WS4_equivalence.json"
-REP = ROOT / "results" / "WS4_retargeting_seed_replication.json"
+DEV = ROOT / "development"
+pytestmark = pytest.mark.skipif(
+    not DEV.exists(),
+    reason="development/ is untracked; run-notes and preregistration checks need the dev tree")
+
+ART = ROOT / "results" / "equivalence.json"
+REP = ROOT / "results" / "retargeting_seed_replication.json"
 
 
 def _p():
@@ -66,7 +71,7 @@ def test_margin_is_the_arms_own_seed_spread_not_a_chosen_number():
     )
     # And it must be the value the pre-registration actually states, not a recomputation
     # that happens to agree: the point of pre-registering is that the file binds.
-    prereg = ROOT / "preregistration" / "WS4_equivalence_margin.md"
+    prereg = ROOT / "development" / "preregistration" / "equivalence_margin.md"
     m = re.search(r"EQUIVALENCE_MARGIN_G_PER_CM3\s*=\s*([0-9.]+)", prereg.read_text())
     assert m and float(m.group(1)) == got, (
         "the artifact margin disagrees with the pre-registered file"
@@ -97,7 +102,7 @@ def test_prose_claims_equivalence_only_while_the_test_supports_it():
     """If the test ever stops passing, the paper must stop saying 'equivalent'."""
     p = _p()
     for name in ("results.md", "abstract.md"):
-        f = ROOT / "paper" / name
+        f = ROOT / "development" / "docs" / "paper" / name
         if not f.exists():
             continue
         txt = re.sub(r"\s+", " ", f.read_text())
@@ -114,7 +119,7 @@ def test_prose_claims_equivalence_only_while_the_test_supports_it():
 def test_power_is_reported_not_just_the_null():
     """A null result without its detectable effect size is not interpretable."""
     p = _p()
-    txt = re.sub(r"\s+", " ", (ROOT / "paper" / "results.md").read_text())
+    txt = re.sub(r"\s+", " ", (ROOT / "development" / "docs" / "paper" / "results.md").read_text())
     assert f"{p['power']['min_detectable_effect_80pct']:.3f}" in txt, (
         "the minimum detectable effect is missing from the results prose"
     )

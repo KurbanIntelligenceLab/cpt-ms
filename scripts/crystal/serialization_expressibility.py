@@ -122,7 +122,7 @@ def main(n_structures: int = 400, smoke: bool = False) -> Path:
             "Both orderings determine the budget at similar rates, so a serialization "
             "comparison is a straightforward training run after all.")
 
-    return emit("CP9_serialization_expressibility" + ("_smoke" if smoke else ""), payload,
+    return emit("serialization_expressibility" + ("_smoke" if smoke else ""), payload,
                 config={"orders": list(ORDERS), "n_structures": len(train),
                         "density_target": cfg.density_target},
                 seeds=[0], script=SCRIPT)

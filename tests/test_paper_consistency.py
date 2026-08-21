@@ -15,7 +15,11 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
-PAPER = ROOT / "paper"
+PAPER = ROOT / "development" / "docs" / "paper"
+
+from _devtree import requires_dev_tree
+
+pytestmark = requires_dev_tree
 RESULTS = ROOT / "results"
 SECTIONS = ["introduction.md", "results.md", "discussion.md", "scope.md",
             "method_results_walkthrough.md"]
@@ -53,7 +57,7 @@ def test_every_cited_artifact_exists():
 
 
 def test_amortization_figures_match_the_artifact():
-    s = _payload("WS4_retargeting_seed_replication.json")["summary"]
+    s = _payload("retargeting_seed_replication.json")["summary"]
     txt = _text("introduction.md") + " " + _text("results.md")
     for want in (f"{s['sub_ceiling_mae_mean']:.3f}",
                  f"{s['sub_ceiling_mae_sd']:.3f}",
@@ -71,7 +75,7 @@ def test_composition_figures_match_the_artifact():
     version of this test read rows[0] only, which would have passed while a second row's
     numbers were absent or wrong.
     """
-    p = _payload("WS5_two_constraint_grid.json")
+    p = _payload("two_constraint_grid.json")
     rows = [r for r in p["rows"] if r.get("complete")]
     if not rows:
         pytest.skip("no complete grid row")
@@ -99,8 +103,8 @@ def test_composition_figures_match_the_artifact():
 
 
 def test_expressibility_figures_match_the_artifact():
-    e = _payload("CP7_second_channel.json")["charge_is_not_linear"]
-    ch = _payload("CP7_second_channel.json")["channel_statistics"]
+    e = _payload("second_channel.json")["charge_is_not_linear"]
+    ch = _payload("second_channel.json")["channel_statistics"]
     txt = _text("results.md") + " " + _text("discussion.md")
     assert f"{e['recall_of_smact_balanced'] * 100:.1f}%" in txt or \
            f"{e['recall_of_smact_balanced'] * 100:.2f}%" in txt
@@ -136,7 +140,7 @@ def test_negative_results_are_stated_not_buried():
 
 def test_ceiling_claim_is_soft_not_hard():
     """Replication narrowed this; the prose must not carry the pre-replication reading."""
-    s = _payload("WS4_retargeting_seed_replication.json")["summary"]
+    s = _payload("retargeting_seed_replication.json")["summary"]
     txt = _text("results.md")
     assert s["seed0_is_an_excursion"] is True
     for x in s["backbone_across_seeds"][1:]:

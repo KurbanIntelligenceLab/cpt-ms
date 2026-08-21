@@ -168,7 +168,7 @@ def main(n_calib: int = 3000, seed: int = 0, smoke: bool = False) -> Path:
         "element_references_ev": refs,
     }
     return emit(
-        "WS3_energy_calibration" + ("_smoke" if smoke else ""),
+        "energy_calibration" + ("_smoke" if smoke else ""),
         payload,
         config={"n_calib": n_calib, "seed": seed, "min_occ": MIN_OCCURRENCES,
                 "smoke": smoke},

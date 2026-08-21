@@ -1,13 +1,13 @@
 """Seed-averaged crystal steering frontier for the manuscript's Figure 2.
 
 Aggregation convention: SEED-AVERAGED per target, computed directly from the
-18 per-run rows in results/WS3_steering_frontier_rows.json. This is the
-convention reports/WS3_steering_frontier_notes.md uses for its headline
+18 per-run rows in results/steering_frontier_rows.json. This is the
+convention reports/steering_frontier_crystal_notes.md uses for its headline
 frontier table (as opposed to the per-run, 18-row convention used only for
 the compensation regression in that note) -- see the note's "The frontier"
 table, which this script reproduces exactly.
 
-results/WS1_steering_frontier.json is the synthetic-task (charge) steering
+results/steering_frontier.json is the synthetic-task (charge) steering
 sweep, not a density measurement -- its rows carry `charge_target` /
 `induced_mean_charge` on the enumerable 4-symbol task, not crystal density.
 It is not merged into this figure's x/y axis because the two are different
@@ -32,7 +32,7 @@ REPO = Path(__file__).resolve().parents[2]
 def main() -> Path:
     import json
 
-    with open(REPO / "results" / "WS3_steering_frontier_rows.json") as fh:
+    with open(REPO / "results" / "steering_frontier_rows.json") as fh:
         src = json.load(fh)
     rows = list(src["payload"]["rows"].values())
     targets = sorted(set(r["target"] for r in rows))
@@ -51,8 +51,8 @@ def main() -> Path:
     ceiling_row = max(agg, key=lambda r: r["target"])
 
     payload = {
-        "aggregation": "seed-averaged per target (matches reports/WS3_steering_frontier_notes.md 'The frontier' table)",
-        "source_artifact": "results/WS3_steering_frontier_rows.json",
+        "aggregation": "seed-averaged per target (matches reports/steering_frontier_crystal_notes.md 'The frontier' table)",
+        "source_artifact": "results/steering_frontier_rows.json",
         "n_source_runs": len(rows),
         "frontier": agg,
         "steering_ceiling": {
@@ -65,9 +65,9 @@ def main() -> Path:
     }
 
     return emit(
-        "FIG2_steering_frontier",
+        "fig_steering_frontier",
         payload,
-        config={"source": "WS3_steering_frontier_rows"},
+        config={"source": "steering_frontier_rows"},
         seeds=[0, 1],
         script=SCRIPT,
     )

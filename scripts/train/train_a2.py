@@ -367,7 +367,7 @@ def main(smoke: bool = False, arm: str = "A2", steps: int | None = None) -> Path
         "wall_clock_s": round(time.time() - t0, 1),
     }
     return emit(
-        f"A2_train_{tcfg.arm}" + ("_smoke" if smoke else ""),
+        f"train_{tcfg.arm}" + ("_smoke" if smoke else ""),
         payload,
         config={"arm": tcfg.arm, "steps": tcfg.steps, "smoke": smoke},
         seeds=[tcfg.seed],

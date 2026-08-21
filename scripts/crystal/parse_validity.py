@@ -249,7 +249,7 @@ def main(smoke: bool = False) -> Path:
     }
 
     return emit(
-        "WS2_parse_validity" + ("_smoke" if smoke else ""),
+        "parse_validity" + ("_smoke" if smoke else ""),
         payload,
         config={"n_samples": n, "max_chars": MAX_CHARS, "smoke": smoke},
         seeds=[11, 5],

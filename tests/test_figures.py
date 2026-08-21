@@ -16,8 +16,12 @@ import numpy as np
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
-FIGS = ROOT / "figures"
-RESULTS = ROOT / "paper" / "results.md"
+FIGS = ROOT / "development" / "figures"
+RESULTS = ROOT / "development" / "docs" / "paper" / "results.md"
+
+from _devtree import requires_dev_tree
+
+pytestmark = requires_dev_tree
 
 
 def _text() -> str:
@@ -69,7 +73,7 @@ def test_every_embedded_figure_has_a_caption():
 
 
 def test_frontier_caption_numbers_match_the_artifact():
-    rows = _payload("WS3_steering_frontier_rows.json")["rows"]
+    rows = _payload("steering_frontier_rows.json")["rows"]
     by: dict[float, list[dict]] = {}
     for v in rows.values():
         by.setdefault(v["target"], []).append(v)
@@ -88,7 +92,7 @@ def test_frontier_caption_numbers_match_the_artifact():
 
 
 def test_composition_caption_numbers_match_the_artifact():
-    p = _payload("WS5_two_constraint_grid.json")
+    p = _payload("two_constraint_grid.json")
     rows = [r for r in p["rows"] if r.get("complete")]
     if not rows:
         pytest.skip("no complete grid row")
@@ -106,7 +110,7 @@ def test_partial_rows_are_labelled_as_partial():
     Driven by the artifact rather than by a hardcoded row: whichever rows are incomplete must
     be disclosed, and a row that has since COMPLETED must no longer be described as partial.
     """
-    art = ROOT / "results" / "WS5_two_constraint_grid.json"
+    art = ROOT / "results" / "two_constraint_grid.json"
     if not art.exists():
         pytest.skip("grid artifact absent")
     rows = json.loads(art.read_text())["payload"]["rows"]

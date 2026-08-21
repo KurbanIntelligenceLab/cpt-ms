@@ -1,8 +1,8 @@
 """Figure 2 -- requested vs achieved density, seeds as error bars, ceiling marked.
 
-Reads results/FIG2_steering_frontier.json exclusively. No number in this
+Reads results/fig_steering_frontier.json exclusively. No number in this
 script is typed by hand. Aggregation is seed-averaged per target (see the
-artifact's own `aggregation` field and reports/WS3_steering_frontier_notes.md).
+artifact's own `aggregation` field and reports/steering_frontier_crystal_notes.md).
 """
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ import numpy as np
 from matplotlib import font_manager as fm
 import glob
 
-REPO = Path("/Users/jp/cpt-ms")
+REPO = Path(__file__).resolve().parents[2]
 
 for f in glob.glob('/usr/local/texlive/2026/texmf-dist/fonts/opentype/public/montserrat/Montserrat-*.otf'):
     fm.fontManager.addfont(f)
@@ -24,7 +24,7 @@ apply_figure_style(font='Montserrat')
 
 INK, VIOLET, LILAC, SLATE, LINE = '#0D1526', '#6C5CF6', '#B49BFB', '#5C6C87', '#E3DFF8'
 
-with open(REPO / "results" / "FIG2_steering_frontier.json") as fh:
+with open(REPO / "results" / "fig_steering_frontier.json") as fh:
     artifact = json.load(fh)
 payload = artifact["payload"]
 frontier = payload["frontier"]
@@ -62,8 +62,8 @@ ax.set_ylabel("achieved density (g/cm\u00b3)")
 ax.legend(loc='upper left', fontsize=6.0, handlelength=1.6, frameon=False)
 
 fig.tight_layout()
-fig.savefig(REPO / "figures" / "fig2_steering_frontier.png", dpi=300)
-fig.savefig(REPO / "template" / "figures" / "fig2_steering_frontier.pdf")
+fig.savefig(REPO / "development" / "figures" / "fig2_steering_frontier.png", dpi=300)
+fig.savefig(REPO / "development" / "docs" / "template" / "figures" / "fig2_steering_frontier.pdf")
 
 # --- Verification
 errbar_line = None
@@ -94,4 +94,4 @@ for t, m, s in zip(targets, means, sds):
         assert np.allclose([y_lo, y_hi], [m - s, m + s], atol=1e-8), f"errbar mismatch at target {t}"
         n_err_verified += 1
 
-print(f"fig2: {len(order)}/{len(targets)} point series verified, {n_err_verified}/{len(targets)} error bars verified against results/FIG2_steering_frontier.json")
+print(f"fig2: {len(order)}/{len(targets)} point series verified, {n_err_verified}/{len(targets)} error bars verified against results/fig_steering_frontier.json")

@@ -1,7 +1,7 @@
 """Figure 1 -- charge distributions: mask only, deployed projection, tilt-trained,
 exact tilt, data.
 
-Reads results/WS7_charge_marginals.json (emitted by
+Reads results/charge_marginals.json (emitted by
 scripts/synthetic/charge_marginals.py) exclusively. No number in this script is
 typed by hand. Every plotted series comes from a model or exact target computed
 by that script; A2/A3-deployed/A6 are single-seed (seed 0) retrains whose derived
@@ -26,7 +26,7 @@ import numpy as np
 from matplotlib import font_manager as fm
 import glob
 
-REPO = Path(__file__).resolve().parents[2] if "__file__" in dir() else Path("/Users/jp/cpt-ms")
+REPO = Path(__file__).resolve().parents[2] if "__file__" in dir() else Path(__file__).resolve().parents[2]
 
 for f in glob.glob('/usr/local/texlive/2026/texmf-dist/fonts/opentype/public/montserrat/Montserrat-*.otf'):
     fm.fontManager.addfont(f)
@@ -38,14 +38,14 @@ TILT_COLOR = '#C0392B'   # alarm/comparator hue, distinct from the violet family
 A6_COLOR = '#E08214'     # amber -- the trained approximation of the tilt
 DATA_COLOR = '#9AA5B8'   # light neutral -- background reference, not a claim series
 
-with open(REPO / "results" / "WS7_charge_marginals.json") as fh:
+with open(REPO / "results" / "charge_marginals.json") as fh:
     artifact = json.load(fh)
 payload = artifact["payload"]
 dist = payload["distributions"]
 
 data = dist["data_S_conditioned"]
 tilt = dist["tilt"]
-a2 = dist["A2_mask_only"]
+a2 = dist["mask_only"]
 a3d = dist["A3_deployed"]
 a6 = dist["A6"]
 
@@ -61,7 +61,7 @@ fig, ax = plt.subplots(figsize=(3.4, 3.05))
 # same hue on top (A6), so the near-overlap reads as "A6 hit its target" rather
 # than as a missing curve.
 series = [
-    ("A2_mask_only", a2, SLATE,
+    ("mask_only", a2, SLATE,
      "A2: mask only, trained (var 8.82; unconstrained data var 8.56)", 0.95, '-', 1.6, 2),
     ("tilt", tilt, TILT_COLOR, "exact tilt: sequence-optimal (var 10.45)", 0.55, '-', 3.2, 3),
     ("A6", a6, A6_COLOR, "A6: trained toward the tilt (var 10.50)", 1.0, '--', 1.4, 4),
@@ -97,8 +97,8 @@ ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.24), fontsize=5.6,
           handlelength=1.6, frameon=False, ncol=1)
 
 fig.tight_layout()
-fig.savefig(REPO / "figures" / "fig1_charge_distributions.png", dpi=300, bbox_inches='tight')
-fig.savefig(REPO / "template" / "figures" / "fig1_charge_distributions.pdf", bbox_inches='tight')
+fig.savefig(REPO / "development" / "figures" / "fig1_charge_distributions.png", dpi=300, bbox_inches='tight')
+fig.savefig(REPO / "development" / "docs" / "template" / "figures" / "fig1_charge_distributions.pdf", bbox_inches='tight')
 
 # --- Verification: read plotted line data back off the artists and compare
 verified = 0
@@ -121,6 +121,6 @@ assert var_proj < var_data < var_tilt, (
 )
 assert var_a6 > var_data, f"A6 should also spread beyond data variance: A6={var_a6} data={var_data}"
 
-print(f"fig1: {verified}/{len(series)} series verified against results/WS7_charge_marginals.json")
+print(f"fig1: {verified}/{len(series)} series verified against results/charge_marginals.json")
 print(f"anti-concentration ordering holds: projection ({var_proj:.3f}) < data ({var_data:.3f}) "
       f"< tilt ({var_tilt:.3f}); A6 ({var_a6:.3f}) tracks the tilt")

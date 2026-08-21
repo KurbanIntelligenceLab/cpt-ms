@@ -12,7 +12,11 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
-RW = ROOT / "paper" / "related_work.md"
+RW = ROOT / "development" / "docs" / "paper" / "related_work.md"
+
+from _devtree import requires_dev_tree
+
+pytestmark = requires_dev_tree
 
 # Surname -> (venue string that must appear in the entry, must-appear-in-prose)
 EXPECTED = {

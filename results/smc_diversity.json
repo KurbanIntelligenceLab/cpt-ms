@@ -1,0 +1,119 @@
+{
+  "schema_version": "1.0",
+  "artifact_name": "CPR7b_smc_diversity",
+  "script": "scripts/crystal/smc_diversity.py",
+  "git_commit": "5e963cc6b84d7045ace5e3139800ffd7cb12c972-dirty",
+  "config": {
+    "K": 16,
+    "sigma": 0.5,
+    "targets": [
+      1.5,
+      2.0,
+      3.0,
+      5.0,
+      6.317,
+      8.0,
+      10.0
+    ],
+    "trials": 100,
+    "checkpoint": "A3_d5.0.pt"
+  },
+  "config_hash": "07a17fe5c0c0127f",
+  "seeds": [
+    0
+  ],
+  "created_utc": "2026-08-21T15:10:08.478231+00:00",
+  "python": "3.11.15",
+  "platform": "macOS-26.5.2-arm64-arm-64bit",
+  "payload_sha256": "87a8d326042e67c55e909e094d944050c82a6f305edf5e976a6ee6608d7b7a0a",
+  "payload": {
+    "arm": "SMC steering, tuned sigma, diversity measured over independent runs",
+    "checkpoint": "A3_d5.0.pt",
+    "K": 16,
+    "sigma": 0.5,
+    "trials": 100,
+    "rows": [
+      {
+        "target": 1.5,
+        "K": 16,
+        "sigma": 0.5,
+        "trials": 100,
+        "n_valid": 100,
+        "mean_error": 0.8743644251232129,
+        "sd_error": 0.6715918727575649,
+        "unique_formula_fraction": 0.99,
+        "n_outputs": 100
+      },
+      {
+        "target": 2.0,
+        "K": 16,
+        "sigma": 0.5,
+        "trials": 100,
+        "n_valid": 100,
+        "mean_error": 0.7805034845849511,
+        "sd_error": 0.876466755195289,
+        "unique_formula_fraction": 0.95,
+        "n_outputs": 100
+      },
+      {
+        "target": 3.0,
+        "K": 16,
+        "sigma": 0.5,
+        "trials": 100,
+        "n_valid": 100,
+        "mean_error": 0.5761256054498533,
+        "sd_error": 0.6683032912635554,
+        "unique_formula_fraction": 0.78,
+        "n_outputs": 100
+      },
+      {
+        "target": 5.0,
+        "K": 16,
+        "sigma": 0.5,
+        "trials": 100,
+        "n_valid": 100,
+        "mean_error": 0.37286858909717646,
+        "sd_error": 0.2957973654834474,
+        "unique_formula_fraction": 0.51,
+        "n_outputs": 100
+      },
+      {
+        "target": 6.317,
+        "K": 16,
+        "sigma": 0.5,
+        "trials": 100,
+        "n_valid": 100,
+        "mean_error": 0.5062491508611017,
+        "sd_error": 0.42101751485159533,
+        "unique_formula_fraction": 0.46,
+        "n_outputs": 100
+      },
+      {
+        "target": 8.0,
+        "K": 16,
+        "sigma": 0.5,
+        "trials": 100,
+        "n_valid": 100,
+        "mean_error": 0.8133328152510453,
+        "sd_error": 0.6219716004386561,
+        "unique_formula_fraction": 0.41,
+        "n_outputs": 100
+      },
+      {
+        "target": 10.0,
+        "K": 16,
+        "sigma": 0.5,
+        "trials": 100,
+        "n_valid": 100,
+        "mean_error": 1.1727604633082895,
+        "sd_error": 0.7973858930533639,
+        "unique_formula_fraction": 0.64,
+        "n_outputs": 100
+      }
+    ],
+    "mean_error_over_targets": 0.7280292190965186,
+    "mean_unique_formula_fraction_over_targets": 0.677142857142857,
+    "protocol_note": "Each row is `trials` INDEPENDENT SMC runs (K forward passes each), one accepted output per run. Unique-formula-fraction is measured across those independent accepted outputs. This is the closest like-for-like counterpart to best_of_n.py's diversity definition available for SMC: SMC has no larger pool to subsample from (each run already spends its full K-particle budget to produce one output), so diversity here is measured across repeated independent runs at the tuned budget rather than by resampling within one pool.",
+    "wall_clock_s": 142.1
+  }
+}

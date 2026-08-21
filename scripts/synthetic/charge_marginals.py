@@ -2,8 +2,8 @@
 
 compute_fig1_charge_distributions.py could only plot 3 objects because two required
 arms -- A3's trained-and-deployed system and A6's trained model -- were never saved as
-checkpoints; only their scalar summaries (results/A2_training_summary.json,
-results/WS7_a6_tilt_comparator.json) survive. This script closes that gap honestly by
+checkpoints; only their scalar summaries (results/training_summary.json,
+results/a6_tilt_comparator.json) survive. This script closes that gap honestly by
 RETRAINING those arms at a single seed (seed 0), using the identical hyperparameters,
 architecture and training loop as the published multi-seed runs (scripts/train/train_a2.py,
 scripts/synthetic/train_a6.py), and then computing each arm's EXACT induced distribution
@@ -11,7 +11,7 @@ over all 65,536 enumerable sequences (`induced_distribution_from_model`), margin
 the integer total-charge statistic.
 
 Single seed, not the published 3 -- retraining 3 seeds of A3 alone costs ~30 minutes of the
-~35 s/1000-step A3 wall clock reported in A2_training_summary.json. The scalar summaries
+~35 s/1000-step A3 wall clock reported in training_summary.json. The scalar summaries
 derived from this single seed's marginal are checked against the published multi-seed
 mean +/- sd below; if a value falls outside a plausible seed spread that is reported rather
 than silently shipped.
@@ -19,7 +19,7 @@ than silently shipped.
 Arms produced here:
   data          exact data/base distribution (Regime S applied), no training
   tilt          exact sequence-level KL-optimal tilt, no training
-  A2_mask_only  trained mask-only decoder, backbone reading (no projection)
+  mask_only  trained mask-only decoder, backbone reading (no projection)
   A3_backbone   trained projection-decoder, read WITHOUT the projection (what the
                 network internalized on its own)
   A3_deployed   trained projection-decoder, read WITH the same projection it trained
@@ -54,8 +54,8 @@ SEED = 0
 STEPS = 4000
 
 # Published multi-seed reference values, read from stored artifacts (not hand-typed).
-_A2_SUMMARY = "results/A2_training_summary.json"
-_A6_SUMMARY = "results/WS7_a6_tilt_comparator.json"
+_A2_SUMMARY = "results/training_summary.json"
+_A6_SUMMARY = "results/a6_tilt_comparator.json"
 
 
 def marginalize(charge: np.ndarray, p: np.ndarray) -> dict:
@@ -79,7 +79,7 @@ def train_arm(arm: str, task, cfg: TaskConfig, dev, seed: int = SEED,
     Identical model init, data order, optimizer schedule and step count as the
     published run at this seed -- the only published run this script's seed=0
     exactly matches is one of the 3 seeds already averaged into
-    results/A2_training_summary.json.
+    results/training_summary.json.
     """
     tcfg = TrainConfig(arm=arm, steps=steps, seed=seed)
     torch.manual_seed(tcfg.seed)
@@ -198,7 +198,7 @@ def main(smoke: bool = False) -> Path:
         "tilt": {**marginalize(charge, tilt), **scalar_stats(charge, tilt),
                   "label": "exact sequence-level KL-optimal tilt (no training)",
                   "multiplier": float(lam)},
-        "A2_mask_only": {**marginalize(charge, q_a2), **scalar_stats(charge, q_a2),
+        "mask_only": {**marginalize(charge, q_a2), **scalar_stats(charge, q_a2),
                           "label": "trained A2 (mask only), backbone reading",
                           "seed": SEED, "steps": tcfg_a2.steps, "wall_clock_s": wall_a2},
         "A3_backbone": {**marginalize(charge, q_a3_backbone), **scalar_stats(charge, q_a3_backbone),
@@ -220,10 +220,10 @@ def main(smoke: bool = False) -> Path:
         a6_summary = _json.loads(Path(_A6_SUMMARY).read_text())["payload"]
 
         checks = [
-            ("A2_mask_only", "mean_charge", distributions["A2_mask_only"]["mean_charge"],
-             a2_summary["A2_masked"]["mean_charge"][0], a2_summary["A2_masked"]["mean_charge"][1]),
-            ("A2_mask_only", "charge_variance", distributions["A2_mask_only"]["charge_variance"],
-             a2_summary["A2_masked"]["charge_variance"][0], a2_summary["A2_masked"]["charge_variance"][1]),
+            ("mask_only", "mean_charge", distributions["mask_only"]["mean_charge"],
+             a2_summary["masked"]["mean_charge"][0], a2_summary["masked"]["mean_charge"][1]),
+            ("mask_only", "charge_variance", distributions["mask_only"]["charge_variance"],
+             a2_summary["masked"]["charge_variance"][0], a2_summary["masked"]["charge_variance"][1]),
             ("A3_deployed", "mean_charge", distributions["A3_deployed"]["mean_charge"],
              a2_summary["A3_deployed"]["mean_charge"][0], a2_summary["A3_deployed"]["mean_charge"][1]),
             ("A3_deployed", "charge_variance", distributions["A3_deployed"]["charge_variance"],
@@ -263,7 +263,7 @@ def main(smoke: bool = False) -> Path:
     }
 
     return emit(
-        "WS7_charge_marginals" + ("_smoke" if smoke else ""),
+        "charge_marginals" + ("_smoke" if smoke else ""),
         payload,
         config=cfg.as_dict() | {"seed": SEED, "steps": steps, "smoke": smoke},
         seeds=[SEED],

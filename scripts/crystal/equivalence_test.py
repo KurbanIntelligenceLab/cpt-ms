@@ -9,7 +9,7 @@ design could detect, and a two-one-sided-tests procedure against a pre-specified
 
 THE MARGIN IS READ FROM THE PRE-REGISTRATION, NOT FROM THIS FILE. A margin living in the
 analysis script is a margin that can be edited after seeing the result, which is not a
-pre-specification. `preregistration/WS4_equivalence_margin.md` carries the value, the rule
+pre-specification. `preregistration/equivalence_margin.md` carries the value, the rule
 that produced it (the retargeted arm's own mean within-target seed sd), and the two-part
 decision rule; this script parses it and fails loudly if it is absent or disagrees with the
 rule. A difference smaller than the method's own run-to-run reproducibility is not one
@@ -39,7 +39,7 @@ from scripts.common.artifacts import emit
 SCRIPT = "scripts/crystal/equivalence_test.py"
 
 PREREG = (Path(__file__).resolve().parents[2] / "preregistration"
-          / "WS4_equivalence_margin.md")
+          / "equivalence_margin.md")
 
 
 def read_prereg_margin() -> tuple[float, Path]:
@@ -62,7 +62,7 @@ def read_prereg_margin() -> tuple[float, Path]:
 
 def main(results_dir: str | Path = "results", smoke: bool = False) -> Path:
     rd = Path(results_dir)
-    rep = json.loads((rd / "WS4_retargeting_seed_replication.json").read_text())["payload"]
+    rep = json.loads((rd / "retargeting_seed_replication.json").read_text())["payload"]
     rows = rep["paired_vs_frontier"]
 
     ret = np.array([r["retarget_mean_error"] for r in rows], dtype=float)
@@ -172,7 +172,7 @@ def main(results_dir: str | Path = "results", smoke: bool = False) -> Path:
             f"exclude effects up to {mde:.3f} g/cm^3."
         )
 
-    return emit("WS4_equivalence" + ("_smoke" if smoke else ""), payload,
+    return emit("equivalence" + ("_smoke" if smoke else ""), payload,
                 config={"results_dir": str(rd), "margin_rule": "mean retarget seed sd",
                         "margin_read_from": str(PREREG.name)},
                 seeds=[0, 1, 2], script=SCRIPT)

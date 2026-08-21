@@ -20,7 +20,7 @@ from pathlib import Path
 import pytest
 
 REPO = Path(__file__).resolve().parents[1]
-REPORTS = REPO / "reports"
+REPORTS = REPO / "development" / "reports"
 
 WORDS = {
     "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6,
@@ -144,8 +144,8 @@ def test_token_position_claims_match_the_artifact():
     """
     import json
 
-    art = REPO / "results" / "WS2_family_determinability.json"
-    note = REPORTS / "WS2_family_determinability_notes.md"
+    art = REPO / "results" / "family_determinability.json"
+    note = REPORTS / "family_determinability_notes.md"
     if not art.exists() or not note.exists():
         pytest.skip("determinability artifact or note not present")
 

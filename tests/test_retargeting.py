@@ -120,7 +120,7 @@ def test_trainer_exposes_target_and_seed_and_ckpt():
 def test_frontier_targets_match_the_published_frontier():
     """Retargeting columns must be the frontier's own targets, or the diagonal cannot
     be compared against the existing per-target result."""
-    rows = RESULTS / "WS3_steering_frontier_rows.json"
+    rows = RESULTS / "steering_frontier_rows.json"
     if not rows.exists():
         pytest.skip("frontier artifact absent")
     import json
@@ -138,7 +138,7 @@ def test_retargeting_artifact_keeps_train_and_deploy_separate():
     The claim is about off-diagonal cells. A row that records only one target cannot
     say whether it is evidence for the claim or the pre-existing result restated.
     """
-    art = RESULTS / "WS4_zero_shot_retargeting.json"
+    art = RESULTS / "zero_shot_retargeting.json"
     if not art.exists():
         pytest.skip("retargeting artifact absent; run scripts.crystal.retarget")
     import json
@@ -162,7 +162,7 @@ def test_retargeting_validity_is_exact_everywhere():
     """Regime S is a property of the mask, so it must hold at deployment targets the
     checkpoint never trained for. If it does not, the mask claim is narrower than
     stated and the scope section is wrong."""
-    art = RESULTS / "WS4_zero_shot_retargeting.json"
+    art = RESULTS / "zero_shot_retargeting.json"
     if not art.exists():
         pytest.skip("retargeting artifact absent")
     import json

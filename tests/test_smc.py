@@ -18,8 +18,8 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-ART = ROOT / "results" / "WS6_smc_steering.json"
-NOTES = ROOT / "reports" / "WS6b_smc_notes.md"
+ART = ROOT / "results" / "smc_steering.json"
+NOTES = ROOT / "development" / "reports" / "smc_notes.md"
 
 
 def _p() -> dict:

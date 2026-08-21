@@ -11,7 +11,7 @@ decoding would multiply sequence length by roughly forty for no change in the
 constraint structure. What matters for the projection is that composition tokens
 appear before the constraint must be evaluated, which this preserves.
 
-The density dial is primary here, per `preregistration/WS2_dial_assignment.md`: it
+The density dial is primary here, per `preregistration/dial_assignment.md`: it
 has strictly more actionable room than charge on every backbone.
 """
 

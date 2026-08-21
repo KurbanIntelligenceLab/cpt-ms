@@ -100,9 +100,9 @@ def check_oracle_coverage() -> dict:
     """
     from scripts.common.artifacts import RESULTS_DIR
 
-    path = RESULTS_DIR / "CP2_gradient_verification.json"
+    path = RESULTS_DIR / "gradient_verification.json"
     if not path.exists():
-        return {"skipped": "CP2_gradient_verification.json not yet emitted"}
+        return {"skipped": "gradient_verification.json not yet emitted"}
     tol = json.loads(path.read_text())["payload"]["tolerances"]
     n = tol.get("cvxpylayers_configs_compared", 0)
     return {

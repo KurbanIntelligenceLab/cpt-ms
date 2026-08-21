@@ -1,9 +1,9 @@
 """WS7 charge marginals must agree with the published multi-seed summaries and must
 exhibit the paper's anti-concentration ordering.
 
-results/WS7_charge_marginals.json retrains A2, A3, and A6 at a single seed to recover
+results/charge_marginals.json retrains A2, A3, and A6 at a single seed to recover
 exact per-charge-value marginals that were never stored (only scalar summaries were,
-in results/A2_training_summary.json and results/WS7_a6_tilt_comparator.json). This file
+in results/training_summary.json and results/a6_tilt_comparator.json). This file
 checks that the single-seed marginals' derived scalars are consistent with those
 published multi-seed summaries, and that the headline mechanism -- the per-step
 projection CONCENTRATES mass near the constraint target while the sequence-level tilt
@@ -18,9 +18,9 @@ import numpy as np
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
-ARTIFACT = ROOT / "results" / "WS7_charge_marginals.json"
-A2_SUMMARY = ROOT / "results" / "A2_training_summary.json"
-A6_SUMMARY = ROOT / "results" / "WS7_a6_tilt_comparator.json"
+ARTIFACT = ROOT / "results" / "charge_marginals.json"
+A2_SUMMARY = ROOT / "results" / "training_summary.json"
+A6_SUMMARY = ROOT / "results" / "a6_tilt_comparator.json"
 
 
 def _payload(path: Path) -> dict:
@@ -62,10 +62,10 @@ def test_agreement_check_matches_published_artifacts_directly():
             return abs(single - mean) < 0.5
         return abs(single - mean) <= k * sd
 
-    assert within(dist["A2_mask_only"]["mean_charge"],
-                  a2["A2_masked"]["mean_charge"][0], a2["A2_masked"]["mean_charge"][1])
-    assert within(dist["A2_mask_only"]["charge_variance"],
-                  a2["A2_masked"]["charge_variance"][0], a2["A2_masked"]["charge_variance"][1])
+    assert within(dist["mask_only"]["mean_charge"],
+                  a2["masked"]["mean_charge"][0], a2["masked"]["mean_charge"][1])
+    assert within(dist["mask_only"]["charge_variance"],
+                  a2["masked"]["charge_variance"][0], a2["masked"]["charge_variance"][1])
     assert within(dist["A3_deployed"]["mean_charge"],
                   a2["A3_deployed"]["mean_charge"][0], a2["A3_deployed"]["mean_charge"][1])
     assert within(dist["A3_deployed"]["charge_variance"],

@@ -278,7 +278,7 @@ def main(smoke: bool = False) -> Path:
     }
 
     return emit(
-        "WS1_induced_vs_tilt" + ("_smoke" if smoke else ""),
+        "induced_vs_tilt" + ("_smoke" if smoke else ""),
         payload,
         config=cfg.as_dict() | {"smoke": smoke},
         seeds=[cfg.markov_seed],

@@ -1,6 +1,6 @@
 """Figure 4 -- infeasibility at convergence vs. requested target, with repair factor.
 
-Reads results/FIG4_infeasibility_vs_target.json exclusively. No number in
+Reads results/fig_infeasibility_vs_target.json exclusively. No number in
 this script is typed by hand. Repair factor = ratio of seed-averaged means
 (infeas_init_mean / infeas_final_mean) per target -- see the artifact's own
 `repair_factor_convention` field.
@@ -16,7 +16,7 @@ import numpy as np
 from matplotlib import font_manager as fm
 import glob
 
-REPO = Path("/Users/jp/cpt-ms")
+REPO = Path(__file__).resolve().parents[2]
 
 for f in glob.glob('/usr/local/texlive/2026/texmf-dist/fonts/opentype/public/montserrat/Montserrat-*.otf'):
     fm.fontManager.addfont(f)
@@ -25,7 +25,7 @@ apply_figure_style(font='Montserrat')
 
 INK, VIOLET, LILAC, SLATE, LINE = '#0D1526', '#6C5CF6', '#B49BFB', '#5C6C87', '#E3DFF8'
 
-with open(REPO / "results" / "FIG4_infeasibility_vs_target.json") as fh:
+with open(REPO / "results" / "fig_infeasibility_vs_target.json") as fh:
     artifact = json.load(fh)
 payload = artifact["payload"]
 rows = sorted(payload["per_target"], key=lambda r: r["target"])
@@ -69,8 +69,8 @@ ax.legend(lines1 + lines2, labels1 + labels2, loc='center right', fontsize=6.0,
           handlelength=1.6, frameon=False)
 
 fig.tight_layout()
-fig.savefig(REPO / "figures" / "fig4_infeasibility_vs_target.png", dpi=300)
-fig.savefig(REPO / "template" / "figures" / "fig4_infeasibility_vs_target.pdf")
+fig.savefig(REPO / "development" / "figures" / "fig4_infeasibility_vs_target.png", dpi=300)
+fig.savefig(REPO / "development" / "docs" / "template" / "figures" / "fig4_infeasibility_vs_target.pdf")
 
 # --- Verification
 init_line = [ln for ln in ax.get_lines() if ln.get_label() == 'initial (pre-training)'][0]
@@ -81,4 +81,4 @@ assert np.allclose(init_line.get_xdata(), targets) and np.allclose(init_line.get
 assert np.allclose(final_line.get_xdata(), targets) and np.allclose(final_line.get_ydata(), final), "fig4 final mismatch"
 assert np.allclose(repair_line.get_xdata(), targets) and np.allclose(repair_line.get_ydata(), repair), "fig4 repair mismatch"
 
-print("fig4: 3/3 series verified against results/FIG4_infeasibility_vs_target.json")
+print("fig4: 3/3 series verified against results/fig_infeasibility_vs_target.json")

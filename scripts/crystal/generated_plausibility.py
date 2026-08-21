@@ -1,0 +1,187 @@
+from __future__ import annotations
+
+import argparse
+import sys
+import warnings
+from pathlib import Path
+
+import numpy as np
+import torch
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+warnings.filterwarnings("ignore")
+
+from scripts.common.artifacts import emit, load
+from scripts.crystal.mp20 import ATOMIC_MASS, CrystalVocab
+from scripts.crystal.plausibility_screen import _smact_screens
+from scripts.train.train_crystal import CrystalDecoder, CrystalTrainConfig, GrammarMask, sample
+
+SCRIPT = "scripts/crystal/generated_plausibility.py"
+CKPT_PATH = Path(__file__).resolve().parents[2] / "ckpt" / "A3_d5.0.pt"
+
+
+def sequences_to_items(seqs, V):
+    items = []
+    n_parsed = 0
+    for s in seqs:
+        toks = [V.tokens[i] for i in s]
+        ok = (toks.count("<COMP>") == 1 and toks.count("<END_COMP>") == 1
+              and toks.count("<CELL>") == 1 and toks.count("<END_CELL>") == 1
+              and sum(t.startswith("len:") for t in toks) == 3
+              and sum(t.startswith("ang:") for t in toks) == 3
+              and sum(t.startswith("el:") for t in toks)
+              == sum(t.startswith("cnt:") for t in toks)
+              and sum(t.startswith("el:") for t in toks) >= 1)
+        if not ok:
+            continue
+        n_parsed += 1
+        formula, cur_el, lens, angs = {}, None, [], []
+        for tok in toks:
+            if tok.startswith("el:"):
+                cur_el = tok[3:]
+            elif tok.startswith("cnt:") and cur_el:
+                formula[cur_el] = formula.get(cur_el, 0) + int(tok[4:])
+                cur_el = None
+            elif tok.startswith("len:"):
+                j = int(tok[4:])
+                lens.append(V.LEN_LO + (j + 0.5) * (V.LEN_HI - V.LEN_LO) / V.N_LEN)
+            elif tok.startswith("ang:"):
+                j = int(tok[4:])
+                angs.append(V.ANG_LO + (j + 0.5) * (V.ANG_HI - V.ANG_LO) / V.N_ANG)
+        vol = V.cell_volume(lens, angs) if len(lens) == 3 and len(angs) == 3 else None
+        n_atoms = sum(formula.values())
+        if not formula or vol is None or n_atoms == 0:
+            continue
+        if any(e not in ATOMIC_MASS for e in formula):
+            continue
+        items.append((formula, vol, n_atoms))
+    return items, n_parsed
+
+
+def screen_items(items, vpa_lo, vpa_hi):
+    n = 0
+    bal = ordered = packed = 0
+    for formula, volume, n_atoms in items:
+        n += 1
+        b, o = _smact_screens(formula)
+        bal += b
+        ordered += o
+        vpa = volume / n_atoms
+        packed += (vpa_lo <= vpa <= vpa_hi)
+    if not n:
+        return {"n_screened": 0}
+    return {
+        "n_screened": n,
+        "charge_balanced_rate": bal / n,
+        "electronegativity_ordered_rate": ordered / n,
+        "packing_plausible_rate": packed / n,
+    }
+
+
+def main(n_samples: int = 2048, smoke: bool = False) -> Path:
+    n_samples = 64 if smoke else n_samples
+    ref = load("plausibility_reference")["payload"]
+    lo = ref["packing_window_a3_per_atom"]["lo_1pct"]
+    hi = ref["packing_window_a3_per_atom"]["hi_99pct"]
+    reference_ceiling = ref["data_reference"]
+
+    ckpt = torch.load(CKPT_PATH, map_location="cpu")
+    tc = dict(ckpt["train_config"])
+    cfg = CrystalTrainConfig(**tc)
+    dev = torch.device("cpu")
+    V = CrystalVocab(ckpt["elements"], order=ckpt["vocab_order"])
+    gm = GrammarMask(V, order=ckpt["vocab_order"])
+    model = CrystalDecoder(ckpt["vocab_size"], ckpt["max_len"] + 2, cfg).to(dev)
+    model.load_state_dict(ckpt["state_dict"])
+    model.eval()
+
+    torch.manual_seed(0)
+    torch.use_deterministic_algorithms(True)
+    rng = np.random.default_rng(0)
+    seqs, diag = sample(model, V, gm, cfg, dev, n_samples, use_mask=True,
+                        project_at_inference=True, max_len=ckpt["max_len"] + 2, rng=rng)
+
+    n_sampled = len(seqs)
+    items, n_parsed = sequences_to_items(seqs, V)
+    n_built = len(items)
+    screened = screen_items(items, lo, hi)
+
+    funnel = {
+        "n_sampled": n_sampled,
+        "n_parsed_grammar_complete": n_parsed,
+        "parsed_rate": n_parsed / n_sampled,
+        "n_built_composition_cell": n_built,
+        "built_given_parsed_rate": (n_built / n_parsed) if n_parsed else None,
+        "built_rate_of_sampled": n_built / n_sampled,
+        "screens_on_built": screened,
+    }
+
+    payload = {
+        "checkpoint": str(CKPT_PATH),
+        "checkpoint_arm": ckpt["train_config"]["arm"],
+        "checkpoint_density_target": ckpt["trained_density_target"],
+        "sampling": {
+            "n_samples": n_samples,
+            "use_mask": True,
+            "project_at_inference": True,
+            "per_step_infeasible_fraction": diag["per_step_infeasible_fraction"],
+            "degenerate_row_rate": diag["degenerate_row_rate"],
+        },
+        "funnel": funnel,
+        "reference_ceiling": {
+            "n_screened": reference_ceiling["n_screened"],
+            "charge_balanced_rate": reference_ceiling["charge_balanced_rate"],
+            "electronegativity_ordered_rate": reference_ceiling["electronegativity_ordered_rate"],
+            "packing_plausible_rate": reference_ceiling["packing_plausible_rate"],
+        },
+        "packing_window_a3_per_atom": {"lo_1pct": lo, "hi_99pct": hi},
+        "min_interatomic_distance": {
+            "computable": False,
+            "reason": (
+                "The generated serialization encodes composition (element, count) "
+                "and cell (lengths, angles) tokens only; there are no fractional "
+                "coordinate or Wyckoff-position tokens in the vocabulary "
+                "(CrystalVocab defines only el:, cnt:, len:, ang: token families). "
+                "Minimum interatomic distance requires atomic positions, which the "
+                "model does not emit and does not attempt to predict."
+            ),
+        },
+        "dft_subset": {
+            "attempted": False,
+            "reason": ref["why_not_energy"],
+        },
+        "note": (
+            "charge_balanced_rate, electronegativity_ordered_rate and "
+            "packing_plausible_rate are computed by the IDENTICAL screen path "
+            "(scripts/crystal/plausibility_screen.py::_smact_screens and the same "
+            "packing window) used for the reference, applied to generated "
+            "compositions and cells that parsed and built."
+        ),
+        "scope_note": (
+            "This funnel scores the actual crystal-generation model (A3, "
+            "scripts/train/train_crystal.py, CrystalVocab), whose token vocabulary "
+            "has no atomic-position tokens at all. It is a different serialization "
+            "from the standalone character-level CIF grammar in "
+            "scripts/crystal/cif_grammar.py used by parse_validity, which does "
+            "emit placeholder fractional-coordinate numbers and is where the "
+            "reviewer-cited 47 percent structure-build rate originates. Parse here "
+            "means grammar-complete composition+cell tokens; build here means the "
+            "decoded cell has a valid triclinic volume and every element resolves "
+            "to a known atomic mass. Neither step in this funnel produces or could "
+            "produce atomic positions."
+        ),
+    }
+    return emit(
+        "generated_plausibility" + ("_smoke" if smoke else ""),
+        payload,
+        config={"n_samples": n_samples, "smoke": smoke, "checkpoint": str(CKPT_PATH)},
+        seeds=[0], script=SCRIPT,
+    )
+
+
+if __name__ == "__main__":
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--n-samples", type=int, default=2048)
+    ap.add_argument("--smoke", action="store_true")
+    a = ap.parse_args()
+    print(main(n_samples=a.n_samples, smoke=a.smoke))

@@ -1,0 +1,65 @@
+{
+  "schema_version": "1.0",
+  "artifact_name": "CPR4_generated_plausibility",
+  "script": "scripts/crystal/generated_plausibility.py",
+  "git_commit": "5e963cc6b84d7045ace5e3139800ffd7cb12c972-dirty",
+  "config": {
+    "n_samples": 2048,
+    "smoke": false,
+    "checkpoint": "/Users/jp/cpt-ms/ckpt/A3_d5.0.pt"
+  },
+  "config_hash": "933c8fe75060d3f7",
+  "seeds": [
+    0
+  ],
+  "created_utc": "2026-08-21T15:07:25.781908+00:00",
+  "python": "3.11.15",
+  "platform": "macOS-26.5.2-arm64-arm-64bit",
+  "payload_sha256": "e6578e9984126fe768a6574ecfc5904e1be5499be7be4f1f6190a11411fb9932",
+  "payload": {
+    "checkpoint": "/Users/jp/cpt-ms/ckpt/A3_d5.0.pt",
+    "checkpoint_arm": "A3",
+    "checkpoint_density_target": 5.0,
+    "sampling": {
+      "n_samples": 2048,
+      "use_mask": true,
+      "project_at_inference": true,
+      "per_step_infeasible_fraction": 0.04901181161403656,
+      "degenerate_row_rate": 0.0
+    },
+    "funnel": {
+      "n_sampled": 2048,
+      "n_parsed_grammar_complete": 2048,
+      "parsed_rate": 1.0,
+      "n_built_composition_cell": 2031,
+      "built_given_parsed_rate": 0.99169921875,
+      "built_rate_of_sampled": 0.99169921875,
+      "screens_on_built": {
+        "n_screened": 2031,
+        "charge_balanced_rate": 0.48399803052683404,
+        "electronegativity_ordered_rate": 0.4549483013293944,
+        "packing_plausible_rate": 0.794190054160512
+      }
+    },
+    "reference_ceiling": {
+      "n_screened": 800,
+      "charge_balanced_rate": 0.715,
+      "electronegativity_ordered_rate": 0.64,
+      "packing_plausible_rate": 0.9775
+    },
+    "packing_window_a3_per_atom": {
+      "lo_1pct": 8.919033410425,
+      "hi_99pct": 46.301696929933335
+    },
+    "min_interatomic_distance": {
+      "computable": false,
+      "reason": "The generated serialization encodes composition (element, count) and cell (lengths, angles) tokens only; there are no fractional coordinate or Wyckoff-position tokens in the vocabulary (CrystalVocab defines only el:, cnt:, len:, ang: token families). Minimum interatomic distance requires atomic positions, which the model does not emit and does not attempt to predict."
+    },
+    "dft_subset": {
+      "attempted": false,
+      "reason": "Generated serialization is composition + cell with no atomic positions. An energy model requires positions; obtaining them is crystal structure prediction, which the model does not attempt. Relaxing from random positions would measure the initialization, not the generated crystal. The calibrated CHGNet screen therefore applies to reference structures only."
+    },
+    "note": "charge_balanced_rate, electronegativity_ordered_rate and packing_plausible_rate are computed by the IDENTICAL screen path (scripts/crystal/plausibility_screen.py::_smact_screens and the same packing window) used for the reference, applied to generated compositions and cells that parsed and built.",
+    "scope_note": "This funnel scores the actual crystal-generation model (A3, scripts/train/train_crystal.py, CrystalVocab), whose token vocabulary has no atomic-position tokens at all. It is a different serialization from the standalone character-level CIF grammar in scripts/crystal/cif_grammar.py used by WS2_parse_validity, which does emit placeholder fractional-coordinate numbers and is where the reviewer-cited 47 percent structure-build rate originates. Parse here means grammar-complete composition+cell tokens; build here means the decoded cell has a valid triclinic volume and every element resolves to a known atomic mass. Neither step in this funnel produces or could produce atomic positions."
+  }
+}

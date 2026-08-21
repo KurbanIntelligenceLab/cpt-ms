@@ -131,7 +131,7 @@ def main(targets: list[float], tol: float = 0.5, smoke: bool = False) -> Path:
         },
     }
     return emit(
-        "WS3_fidelity_baseline" + ("_smoke" if smoke else ""),
+        "fidelity_baseline" + ("_smoke" if smoke else ""),
         payload,
         config={"targets": targets, "tolerance": tol, "smoke": smoke},
         seeds=[], script=SCRIPT,

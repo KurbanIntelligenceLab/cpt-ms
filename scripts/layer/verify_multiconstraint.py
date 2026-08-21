@@ -232,7 +232,7 @@ def main(smoke: bool = False) -> Path:
         "fractions_are_grid_dependent": True,
     }
     return emit(
-        "CP6_multiconstraint" + ("_smoke" if smoke else ""),
+        "multiconstraint" + ("_smoke" if smoke else ""),
         {
             "question": "Does the dual solve stay exact with several simultaneous "
                         "expectation constraints, and which target pairs are jointly "

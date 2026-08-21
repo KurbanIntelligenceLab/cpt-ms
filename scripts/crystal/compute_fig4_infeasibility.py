@@ -1,11 +1,11 @@
 """Infeasibility at convergence vs. requested target, and the repair factor.
 
-Source: results/WS3_steering_frontier_rows.json (18 per-run rows, each
+Source: results/steering_frontier_rows.json (18 per-run rows, each
 carrying `infeas_init` and `infeas` -- the running-budget infeasibility
 fraction before and after training through the projection).
 
 Repair factor convention: RATIO OF SEED-AVERAGED MEANS per target,
-mean(infeas_init) / mean(infeas), matching reports/WS3_steering_frontier_notes.md
+mean(infeas_init) / mean(infeas), matching reports/steering_frontier_crystal_notes.md
 ("29.2x at target 1.5, 0.97x at 20.0"). The alternative convention, the
 per-run mean of per-run ratios, gives 29.39x at target 1.5 -- the "29.3x"
 figure a prior session flagged as a rounding inconsistency with the frontier
@@ -29,7 +29,7 @@ REPO = Path(__file__).resolve().parents[2]
 
 
 def main() -> Path:
-    with open(REPO / "results" / "WS3_steering_frontier_rows.json") as fh:
+    with open(REPO / "results" / "steering_frontier_rows.json") as fh:
         src = json.load(fh)
     rows = list(src["payload"]["rows"].values())
     targets = sorted(set(r["target"] for r in rows))
@@ -51,16 +51,16 @@ def main() -> Path:
         })
 
     payload = {
-        "repair_factor_convention": "ratio of seed-averaged means per target (matches reports/WS3_steering_frontier_notes.md: 29.2x at target 1.5, 0.97x at 20.0)",
+        "repair_factor_convention": "ratio of seed-averaged means per target (matches reports/steering_frontier_crystal_notes.md: 29.2x at target 1.5, 0.97x at 20.0)",
         "per_target": per_target,
         "weakest_steering_repair_factor": per_target[0]["repair_factor_ratio_of_means"],
         "strongest_steering_repair_factor": per_target[-1]["repair_factor_ratio_of_means"],
     }
 
     return emit(
-        "FIG4_infeasibility_vs_target",
+        "fig_infeasibility_vs_target",
         payload,
-        config={"source": "WS3_steering_frontier_rows"},
+        config={"source": "steering_frontier_rows"},
         seeds=[0, 1],
         script=SCRIPT,
     )

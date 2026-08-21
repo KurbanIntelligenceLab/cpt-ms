@@ -1,6 +1,6 @@
 """Compute and emit the exact constrained targets for the synthetic task.
 
-Produces `results/WS2_synthetic_ground_truth.json`, the artifact every synthetic
+Produces `results/synthetic_ground_truth.json`, the artifact every synthetic
 distortion result is measured against. Run with `--smoke` for the pre-flight
 shard (short sequences, seconds) required before any real launch.
 
@@ -115,7 +115,7 @@ def main(smoke: bool = False) -> Path:
     }
 
     return emit(
-        "WS2_synthetic_ground_truth" + ("_smoke" if smoke else ""),
+        "synthetic_ground_truth" + ("_smoke" if smoke else ""),
         payload,
         config=config.as_dict() | {"smoke": smoke},
         seeds=[config.markov_seed],

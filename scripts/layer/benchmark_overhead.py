@@ -1,6 +1,6 @@
 """CP2 overhead benchmark: projection layer vs the A2 masked-softmax baseline.
 
-Measures the pre-registered quantity in `preregistration/CP2_overhead_budget.md`:
+Measures the pre-registered quantity in `preregistration/overhead_budget.md`:
 per-token wall-clock overhead of the Regime-E projection against the identical A2
 masked-softmax forward pass, reported per active-constraint count, with a 30%
 ceiling.
@@ -232,7 +232,7 @@ def main(smoke: bool = False) -> Path:
         ),
     }
     return emit(
-        "CP2_overhead_benchmark" + ("_smoke" if smoke else ""),
+        "overhead_benchmark" + ("_smoke" if smoke else ""),
         payload,
         config={"batch": B, "vocab": V, "repeats": repeats, "warmup": warmup,
                 "constraint_counts": list(constraint_counts), "smoke": smoke},

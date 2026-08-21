@@ -280,7 +280,7 @@ def main(smoke: bool = False) -> Path:
     }
 
     return emit(
-        "WS1_steering_frontier" + ("_smoke" if smoke else ""),
+        "steering_frontier" + ("_smoke" if smoke else ""),
         payload,
         config=cfg.as_dict() | {"targets": targets, "smoke": smoke},
         seeds=[cfg.markov_seed],

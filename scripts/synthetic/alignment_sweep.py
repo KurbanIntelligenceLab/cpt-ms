@@ -178,7 +178,7 @@ def main(smoke: bool = False) -> Path:
     }
 
     return emit(
-        "WS2_alignment_sweep" + ("_smoke" if smoke else ""),
+        "alignment_sweep" + ("_smoke" if smoke else ""),
         payload,
         config=base_config.as_dict() | {"biases": biases, "smoke": smoke},
         seeds=[base_config.markov_seed],
