@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "artifact_name": "equivalence",
   "script": "scripts/crystal/equivalence_test.py",
-  "git_commit": "401ca1eb5133222320c95fc643146386d532ca45-dirty",
+  "git_commit": "f85888eaa45939eea10dd99033f0c1fb12002c68",
   "config": {
     "results_dir": "results",
     "margin_rule": "mean retarget seed sd",
@@ -14,7 +14,7 @@
     1,
     2
   ],
-  "created_utc": "2026-08-21T22:21:15.260688+00:00",
+  "created_utc": "2026-08-21T22:34:11.672989+00:00",
   "python": "3.13.2",
   "platform": "macOS-26.5.2-arm64-arm-64bit-Mach-O",
   "payload_sha256": "2090d4b6ff91735fb7d1c08c8d3191a85ec4b3a2e39b780e0539cab7b31409f7",
