@@ -51,13 +51,13 @@ scipy carry it.
     export PYTHONPATH="$PWD"
     python -m pytest tests/ -q
 
-On a fresh clone with no MP-20 data and no optional extras, expect **167 passed, 119
+On a fresh clone with no MP-20 data and no optional extras, expect **250 passed, 120
 skipped, 0 failed**. Nothing should fail. Anything skipped names its own reason: the
 manuscript-consistency checks need the paper sources under `development/`, which are not
 distributed; the crystal tests need the MP-20 CSVs in `data/`; four plausibility tests need
 `smact` from the `crystal` extra.
 
-With MP-20 in place and the extras installed, the same command gives **277 passed, 9
+With MP-20 in place and the extras installed, the same command gives **391 passed, 11
 skipped**. A failure means a real disagreement between code and artifact -- that is the
 point of the suite, and it is why missing inputs skip rather than fail.
 
