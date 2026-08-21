@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0",
-  "artifact_name": "FIG1_charge_distributions",
+  "artifact_name": "fig_charge_distributions",
   "script": "scripts/synthetic/compute_fig1_charge_distributions.py",
-  "git_commit": "a08c4cf83c8ef2cd801224d4c2acfae5fbdd2cb2-dirty",
+  "git_commit": "1ea51cc8b7c01c821836ed3b26cebc72e5e3132d",
   "config": {
     "symbols": [
       "A",
@@ -27,10 +27,10 @@
   "seeds": [
     0
   ],
-  "created_utc": "2026-08-15T20:52:49.631326+00:00",
-  "python": "3.11.15",
-  "platform": "macOS-26.5.2-arm64-arm-64bit",
-  "payload_sha256": "df23a09e1fd8eb020fc4e2ea81807bea8a0ce6f3affb10e5682a322fe6208274",
+  "created_utc": "2026-08-21T18:43:37.787958+00:00",
+  "python": "3.13.2",
+  "platform": "macOS-26.5.2-arm64-arm-64bit-Mach-O",
+  "payload_sha256": "7d79f90240a9aca3593e202fab740709ce30767f23f9e1c69d98b7c27a185df2",
   "payload": {
     "distributions": {
       "base_S_mask_only": {
@@ -106,7 +106,7 @@
         ],
         "mean_charge": 2.5164330452453623,
         "charge_variance": 8.56361361318514,
-        "label": "A2 proxy: base distribution conditioned on Regime-S mask (exact)"
+        "label": "mask-only proxy: base distribution conditioned on Regime-S mask (exact)"
       },
       "tilt": {
         "values": [
@@ -181,7 +181,7 @@
         ],
         "mean_charge": 1.1102230246251565e-16,
         "charge_variance": 10.451958002729187,
-        "label": "exact sequence-level tilt (A6's training target)",
+        "label": "exact sequence-level tilt (comparator's training target)",
         "multiplier": -0.2574681118515768
       },
       "induced_projection": {
@@ -257,14 +257,14 @@
         ],
         "mean_charge": 0.10279134161286849,
         "charge_variance": 3.1025173925512823,
-        "label": "per-step projection applied to the untrained base distribution (exact mechanism, not the trained-and-deployed A3 checkpoint)",
+        "label": "per-step projection applied to the untrained base distribution (exact mechanism, not the trained-and-deployed projected checkpoint)",
         "per_step_infeasible_fraction": 0.3712886255064401
       }
     },
     "gap": {
-      "a6_trained_marginal_unavailable": "results/WS7_a6_tilt_comparator.json stores only scalar summary statistics (mean_charge, kl_from_tilt, tv_vs_tilt, ...) for A6's 3 seeds -- no per-charge-value histogram, and no saved model weights for the synthetic task exist to re-derive one without retraining.",
-      "a3_deployed_marginal_unavailable": "results/A2_train_A3_seed*.json store only scalar summary statistics for the trained-and-deployed A3 system (final.deployed.*) -- no per-charge-value histogram, and ckpt/ contains only the crystal checkpoint (A3_d5.0.pt), not a synthetic-task checkpoint. The 'induced_projection' series here is the exact projection mechanism applied to the UNTRAINED backbone and is a different object from A3-deployed, whose mean charge is measurably closer to zero (+0.0170 vs this series' +0.1028, per results/A2_training_summary.json)."
+      "a6_trained_marginal_unavailable": "results/a6_tilt_comparator.json stores only scalar summary statistics (mean_charge, kl_from_tilt, tv_vs_tilt, ...) for comparator's 3 seeds -- no per-charge-value histogram, and no saved model weights for the synthetic task exist to re-derive one without retraining.",
+      "a3_deployed_marginal_unavailable": "results/train_projected_seed*.json store only scalar summary statistics for the trained-and-deployed projected system (final.deployed.*) -- no per-charge-value histogram, and ckpt/ contains only the crystal checkpoint (A3_d5.0.pt), not a synthetic-task checkpoint. The 'induced_projection' series here is the exact projection mechanism applied to the UNTRAINED backbone and is a different object from projected-deployed, whose mean charge is measurably closer to zero (+0.0170 vs this series' +0.1028, per results/training_summary.json)."
     },
-    "cross_check_against_WS1": "base_S mean/var and induced mean/var reproduce results/WS1_induced_vs_tilt.json payload.distributions.base_S and .induced to machine precision; tilt mean/var reproduce payload.distributions.tilt."
+    "cross_check_against_WS1": "base_S mean/var and induced mean/var reproduce results/induced_vs_tilt.json payload.distributions.base_S and .induced to machine precision; tilt mean/var reproduce payload.distributions.tilt."
   }
 }

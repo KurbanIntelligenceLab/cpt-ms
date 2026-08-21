@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0",
-  "artifact_name": "CPR1_fallback_gradients",
+  "artifact_name": "fallback_gradients",
   "script": "scripts/crystal/analyze_fallback_stability.py",
-  "git_commit": "5e963cc6b84d7045ace5e3139800ffd7cb12c972-dirty",
+  "git_commit": "1ea51cc8b7c01c821836ed3b26cebc72e5e3132d",
   "config": {
     "seed": 0
   },
@@ -10,10 +10,10 @@
   "seeds": [
     0
   ],
-  "created_utc": "2026-08-20T23:44:37.836790+00:00",
-  "python": "3.11.15",
-  "platform": "macOS-26.5.2-arm64-arm-64bit",
-  "payload_sha256": "7192f4db17dd645705f598e9dd6841bfbe467d653ede0a226aa181be4d6f81be",
+  "created_utc": "2026-08-21T18:43:30.646233+00:00",
+  "python": "3.13.2",
+  "platform": "macOS-26.5.2-arm64-arm-64bit-Mach-O",
+  "payload_sha256": "e1bc2da5e1adc4fdf5aff1797ab5aec34435f485d5399af7caa962a29ead6749",
   "payload": {
     "call_site_audit": {
       "train_crystal.py:801": {
@@ -244,7 +244,7 @@
     },
     "training_stability_relation": {
       "deployed_outcome_vs_infeasibility": {
-        "source_artifact": "results/WS3_steering_frontier_rows.json",
+        "source_artifact": "results/steering_frontier_rows.json",
         "n_runs": 18,
         "infeas_deployed_range": [
           0.007381184957921505,
@@ -254,19 +254,19 @@
           0.23037923872470856,
           0.40999114513397217
         ],
-        "pearson_r_infeas_deployed_vs_abs_density_error": 0.9868874933889725,
+        "pearson_r_infeas_deployed_vs_abs_density_error": 0.9868874933889726,
         "pearson_p_infeas_deployed_vs_abs_density_error": 4.21754406717527e-14,
-        "pearson_r_infeas_deployed_vs_deployed_sd": 0.9672274789613354,
+        "pearson_r_infeas_deployed_vs_deployed_sd": 0.9672274789613353,
         "pearson_p_infeas_deployed_vs_deployed_sd": 6.03721347392664e-11,
-        "pearson_r_infeas_init_vs_abs_density_error": 0.6311309527394833,
-        "pearson_p_infeas_init_vs_abs_density_error": 0.004972538202877675,
+        "pearson_r_infeas_init_vs_abs_density_error": 0.6311309527394834,
+        "pearson_p_infeas_init_vs_abs_density_error": 0.004972538202877656,
         "pearson_r_infeas_init_vs_deployed_sd": 0.8648485301635496,
         "pearson_p_infeas_init_vs_deployed_sd": 3.6312440709627513e-06
       },
       "training_dynamics_vs_infeasibility": {
         "crystal_arm": {
-          "source_artifact": "results/CPR1_stability_regrun.json",
-          "note": "crystal A3 re-runs at fixed density targets converge to near-zero training-time infeasibility once trained at that target; the ceiling regime is only visible in the frontier's deployed (zero-shot) reading, not in matched-target training curves",
+          "source_artifact": "results/stability_regrun.json",
+          "note": "crystal projected re-runs at fixed density targets converge to near-zero training-time infeasibility once trained at that target; the ceiling regime is only visible in the frontier's deployed (zero-shot) reading, not in matched-target training curves",
           "within_run": {
             "5.0": {
               "within_run_r_infeas_vs_grad_norm": null,
@@ -286,40 +286,40 @@
           }
         },
         "synthetic_arm": {
-          "source_artifact": "results/CPR1_synthetic_stability_regrun.json",
+          "source_artifact": "results/synthetic_stability_regrun.json",
           "cross_target_pearson_r_infeas_vs_loss_variance_full_run": -0.7116873261555134,
           "cross_target_pearson_r_infeas_vs_grad_norm_variance_full_run": -0.615215060014783,
           "cross_target_pearson_r_infeas_vs_loss_variance_late_window": -0.6625959934253995,
           "cross_target_pearson_r_infeas_vs_grad_norm_variance_late_window": -0.38019055584012257,
           "within_run": {
             "0.0": {
-              "within_run_r_infeas_vs_grad_norm": 0.04266675775544047,
-              "within_run_r_infeas_vs_loss": 0.0023663522051296623,
+              "within_run_r_infeas_vs_grad_norm": 0.04266675775544049,
+              "within_run_r_infeas_vs_loss": 0.0023663522051296667,
               "mean_infeasible_fraction": 0.092146728515625
             },
             "2.0": {
-              "within_run_r_infeas_vs_grad_norm": -0.00025768660249874623,
-              "within_run_r_infeas_vs_loss": -0.06478211498010866,
+              "within_run_r_infeas_vs_grad_norm": -0.0002576866024987157,
+              "within_run_r_infeas_vs_loss": -0.06478211498010861,
               "mean_infeasible_fraction": 0.074533447265625
             },
             "4.0": {
               "within_run_r_infeas_vs_grad_norm": 0.021989038017576373,
-              "within_run_r_infeas_vs_loss": 0.057076788677006066,
+              "within_run_r_infeas_vs_loss": 0.05707678867700613,
               "mean_infeasible_fraction": 0.099576904296875
             },
             "5.0": {
-              "within_run_r_infeas_vs_grad_norm": -0.020971160992414837,
-              "within_run_r_infeas_vs_loss": 0.14311145982883589,
+              "within_run_r_infeas_vs_grad_norm": -0.02097116099241481,
+              "within_run_r_infeas_vs_loss": 0.1431114598288359,
               "mean_infeasible_fraction": 0.149353515625
             },
             "6.0": {
-              "within_run_r_infeas_vs_grad_norm": -0.009521810640035409,
+              "within_run_r_infeas_vs_grad_norm": -0.009521810640035426,
               "within_run_r_infeas_vs_loss": 0.07944964350306023,
               "mean_infeasible_fraction": 0.192886962890625
             },
             "6.5": {
-              "within_run_r_infeas_vs_grad_norm": -0.015008031557380643,
-              "within_run_r_infeas_vs_loss": 0.40975857301791274,
+              "within_run_r_infeas_vs_grad_norm": -0.015008031557380664,
+              "within_run_r_infeas_vs_loss": 0.40975857301791285,
               "mean_infeasible_fraction": 0.256123046875
             }
           },

@@ -1,26 +1,26 @@
 {
   "schema_version": "1.0",
-  "artifact_name": "CPR2_infeasibility_correlation",
+  "artifact_name": "infeasibility_correlation",
   "script": "scripts/crystal/compute_infeasibility_correlation.py",
-  "git_commit": "5e963cc6b84d7045ace5e3139800ffd7cb12c972-dirty",
+  "git_commit": "1ea51cc8b7c01c821836ed3b26cebc72e5e3132d",
   "config": {
     "source": [
-      "WS3_steering_frontier_rows",
-      "WS3_conditional_baseline"
+      "steering_frontier_rows",
+      "conditional_baseline"
     ]
   },
-  "config_hash": "c158408461690e75",
+  "config_hash": "faba887934b8624d",
   "seeds": [
     0,
     1
   ],
-  "created_utc": "2026-08-20T22:14:51.298788+00:00",
-  "python": "3.11.15",
-  "platform": "macOS-26.5.2-arm64-arm-64bit",
-  "payload_sha256": "f50d7948e1788753a05ab7fa1a8d1aea727a96dfbcd2f7668d4b5f84ea9969e6",
+  "created_utc": "2026-08-21T18:43:38.506753+00:00",
+  "python": "3.13.2",
+  "platform": "macOS-26.5.2-arm64-arm-64bit-Mach-O",
+  "payload_sha256": "998b28804b584e04d26a05a9535da42ef772d0c6c74ed6aaaa4f1f1759d6f5fa",
   "payload": {
-    "locus_note": "infeas_init and infeas in WS3_steering_frontier_rows.json are both measured at the INFERENCE locus by scripts/train/train_crystal.py's sample() function with project_at_inference=True and use_mask=True, called once against the untrained weights at step 0 (infeas_init) and once against the trained weights at the final step (infeas, the deployed reading). Both are the per-step infeasible-step fraction averaged over generated sequences, i.e. weighted by the model's own induced sampling distribution, matching the convention results/A2_training_summary.json payload.notes calls probability-weighted -- not the unweighted enumeration-mean reading that note contrasts it with. Neither number is a TEACHER-FORCED training-time rate: the A3 training loop (scripts/train/train_crystal.py lines ~707-829) does run the projection against real MP-20 prefixes every training step, but it does not accumulate an infeasible-step counter for that pass the way sample() does for A7's joint_stats; no training-locus infeasibility series exists in the repo for the A3 arm. So 'infeas_init vs infeas' answers 'before training vs after training, both read at inference', not 'training vs inference' as literally phrased by the reviewer; this artifact reports that distinction rather than fabricating the missing training-locus series.",
-    "diversity_note": "No per-target unique-formula fraction exists for all 18 frontier runs. results/WS3_conditional_baseline.json reports the A3 arm's unique_formula_fraction for exactly 4 of the 10 frontier targets (3.0, 5.0, 8.0, 10.0), 2 seeds each. Its per-seed dep_density and dep_infeas fields are bit-exact matches (16+ significant figures) to the corresponding deployed_density and infeas fields in WS3_steering_frontier_rows.json, so this is the SAME underlying set of runs read through a second extraction script, not an independent evaluation job -- the unique_formula_fraction values are additional fields recorded on the same rows, not a fresh sample. results/WS4_zero_shot_retargeting.json's on-target diagonal cells (3.0, 5.0, 10.0, single seed, checkpoint-based) give a third, non-identical reading of three of those targets from a genuinely separate job and are not merged in here. The diversity correlation below is reported at n=4 and, since the infeasibility and diversity values share the same runs rather than an independent replication, is not claimed to generalize beyond these four targets.",
+    "locus_note": "infeas_init and infeas in steering_frontier_rows.json are both measured at the INFERENCE locus by scripts/train/train_crystal.py's sample() function with project_at_inference=True and use_mask=True, called once against the untrained weights at step 0 (infeas_init) and once against the trained weights at the final step (infeas, the deployed reading). Both are the per-step infeasible-step fraction averaged over generated sequences, i.e. weighted by the model's own induced sampling distribution, matching the convention results/training_summary.json payload.notes calls probability-weighted -- not the unweighted enumeration-mean reading that note contrasts it with. Neither number is a TEACHER-FORCED training-time rate: the projected training loop (scripts/train/train_crystal.py lines ~707-829) does run the projection against real MP-20 prefixes every training step, but it does not accumulate an infeasible-step counter for that pass the way sample() does for joint's joint_stats; no training-locus infeasibility series exists in the repo for the projected arm. So 'infeas_init vs infeas' answers 'before training vs after training, both read at inference', not 'training vs inference' as literally phrased by the reviewer; this artifact reports that distinction rather than fabricating the missing training-locus series.",
+    "diversity_note": "No per-target unique-formula fraction exists for all 18 frontier runs. results/conditional_baseline.json reports the projected arm's unique_formula_fraction for exactly 4 of the 10 frontier targets (3.0, 5.0, 8.0, 10.0), 2 seeds each. Its per-seed dep_density and dep_infeas fields are bit-exact matches (16+ significant figures) to the corresponding deployed_density and infeas fields in steering_frontier_rows.json, so this is the SAME underlying set of runs read through a second extraction script, not an independent evaluation job -- the unique_formula_fraction values are additional fields recorded on the same rows, not a fresh sample. results/zero_shot_retargeting.json's on-target diagonal cells (3.0, 5.0, 10.0, single seed, checkpoint-based) give a third, non-identical reading of three of those targets from a genuinely separate job and are not merged in here. The diversity correlation below is reported at n=4 and, since the infeasibility and diversity values share the same runs rather than an independent replication, is not claimed to generalize beyond these four targets.",
     "per_target": [
       {
         "target": 1.5,
@@ -30,7 +30,7 @@
         "repair_factor_ratio_of_means": 29.24744667318205,
         "deployed_density_mean": 1.8478035438388247,
         "abs_error_vs_target": 0.3478035438388247,
-        "unique_formula_fraction_A3": null
+        "unique_formula_fraction_projected": null
       },
       {
         "target": 2.0,
@@ -40,7 +40,7 @@
         "repair_factor_ratio_of_means": 22.211928360860238,
         "deployed_density_mean": 2.265929547514812,
         "abs_error_vs_target": 0.265929547514812,
-        "unique_formula_fraction_A3": null
+        "unique_formula_fraction_projected": null
       },
       {
         "target": 3.0,
@@ -50,7 +50,7 @@
         "repair_factor_ratio_of_means": 13.601541632250187,
         "deployed_density_mean": 3.2402136100959193,
         "abs_error_vs_target": 0.24021361009591935,
-        "unique_formula_fraction_A3": 0.640380859375
+        "unique_formula_fraction_projected": 0.640380859375
       },
       {
         "target": 5.0,
@@ -60,7 +60,7 @@
         "repair_factor_ratio_of_means": 6.9999817888869,
         "deployed_density_mean": 4.848935188374567,
         "abs_error_vs_target": 0.1510648116254334,
-        "unique_formula_fraction_A3": 0.7822265625
+        "unique_formula_fraction_projected": 0.7822265625
       },
       {
         "target": 6.317,
@@ -70,7 +70,7 @@
         "repair_factor_ratio_of_means": 5.433269873836639,
         "deployed_density_mean": 5.5983369318984995,
         "abs_error_vs_target": 0.7186630681015007,
-        "unique_formula_fraction_A3": null
+        "unique_formula_fraction_projected": null
       },
       {
         "target": 8.0,
@@ -80,7 +80,7 @@
         "repair_factor_ratio_of_means": 4.1885772146123195,
         "deployed_density_mean": 6.759691054909876,
         "abs_error_vs_target": 1.2403089450901241,
-        "unique_formula_fraction_A3": 0.8448486328125
+        "unique_formula_fraction_projected": 0.8448486328125
       },
       {
         "target": 10.0,
@@ -90,7 +90,7 @@
         "repair_factor_ratio_of_means": 3.084486672460288,
         "deployed_density_mean": 8.330272697757442,
         "abs_error_vs_target": 1.669727302242558,
-        "unique_formula_fraction_A3": 0.875732421875
+        "unique_formula_fraction_projected": 0.875732421875
       },
       {
         "target": 13.0,
@@ -100,7 +100,7 @@
         "repair_factor_ratio_of_means": 1.909342137445442,
         "deployed_density_mean": 8.74408941492318,
         "abs_error_vs_target": 4.255910585076821,
-        "unique_formula_fraction_A3": null
+        "unique_formula_fraction_projected": null
       },
       {
         "target": 16.0,
@@ -110,7 +110,7 @@
         "repair_factor_ratio_of_means": 1.259392442133602,
         "deployed_density_mean": 9.87475693450942,
         "abs_error_vs_target": 6.125243065490579,
-        "unique_formula_fraction_A3": null
+        "unique_formula_fraction_projected": null
       },
       {
         "target": 20.0,
@@ -120,7 +120,7 @@
         "repair_factor_ratio_of_means": 0.9683973370182741,
         "deployed_density_mean": 10.4047287830039,
         "abs_error_vs_target": 9.5952712169961,
-        "unique_formula_fraction_A3": null
+        "unique_formula_fraction_projected": null
       }
     ],
     "diversity_targets_available": [
@@ -133,23 +133,23 @@
       "abs_error_vs_infeas_final": {
         "n": 10,
         "spearman_r": 0.8787878787878788,
-        "spearman_p": 0.0008138621117322102,
+        "spearman_p": 0.0008138621117322101,
         "pearson_r": 0.9889621274590072,
         "pearson_p": 6.408486347960754e-08
       },
       "abs_error_vs_infeas_init": {
         "n": 10,
         "spearman_r": 0.8666666666666665,
-        "spearman_p": 0.001173538180155469,
-        "pearson_r": 0.6571173057664218,
+        "spearman_p": 0.0011735381801554687,
+        "pearson_r": 0.6571173057664219,
         "pearson_p": 0.03897145144660776
       },
       "abs_error_vs_target": {
         "n": 10,
         "spearman_r": 0.8787878787878788,
-        "spearman_p": 0.0008138621117322102,
-        "pearson_r": 0.9474657983003093,
-        "pearson_p": 3.126810229832661e-05
+        "spearman_p": 0.0008138621117322101,
+        "pearson_r": 0.9474657983003094,
+        "pearson_p": 3.12681022983261e-05
       },
       "unique_formula_fraction_vs_infeas_final": {
         "n": 4,

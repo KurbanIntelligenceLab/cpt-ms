@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0",
-  "artifact_name": "CPR3_implementation_details",
+  "artifact_name": "implementation_details",
   "script": "scripts/crystal/implementation_details.py",
-  "git_commit": "5e963cc6b84d7045ace5e3139800ffd7cb12c972-dirty",
+  "git_commit": "1ea51cc8b7c01c821836ed3b26cebc72e5e3132d",
   "config": {
     "reviewer_points": [
       "W4",
@@ -16,13 +16,13 @@
     1,
     2
   ],
-  "created_utc": "2026-08-20T22:11:32.090277+00:00",
-  "python": "3.11.15",
-  "platform": "macOS-26.5.2-arm64-arm-64bit",
-  "payload_sha256": "9c8595573b43e7745df09558c2165f4e41c27a8976e8f7be0afb1878d9a1772a",
+  "created_utc": "2026-08-21T18:42:54.479467+00:00",
+  "python": "3.13.2",
+  "platform": "macOS-26.5.2-arm64-arm-64bit-Mach-O",
+  "payload_sha256": "979c2ce5ae67627c24ee7b416f48676e84ad834a9390a3262c997c33a42897b7",
   "payload": {
     "crystal_arms": {
-      "A1": {
+      "unconstrained": {
         "train_config_shared": {
           "arm": "A1",
           "d_model": 256,
@@ -55,12 +55,12 @@
         },
         "wall_clock_s_mean": 161.3,
         "source_artifacts": [
-          "results/WS3_crystal_A1_seed0.json",
-          "results/WS3_crystal_A1_seed1.json",
-          "results/WS3_crystal_A1_seed2.json"
+          "results/crystal_unconstrained_seed0.json",
+          "results/crystal_unconstrained_seed1.json",
+          "results/crystal_unconstrained_seed2.json"
         ]
       },
-      "A2": {
+      "mask_only": {
         "train_config_shared": {
           "arm": "A2",
           "d_model": 256,
@@ -93,12 +93,12 @@
         },
         "wall_clock_s_mean": 215.36666666666665,
         "source_artifacts": [
-          "results/WS3_crystal_A2_seed0.json",
-          "results/WS3_crystal_A2_seed1.json",
-          "results/WS3_crystal_A2_seed2.json"
+          "results/crystal_mask_only_seed0.json",
+          "results/crystal_mask_only_seed1.json",
+          "results/crystal_mask_only_seed2.json"
         ]
       },
-      "A3": {
+      "projected": {
         "train_config_shared": {
           "arm": "A3",
           "d_model": 256,
@@ -131,14 +131,14 @@
         },
         "wall_clock_s_mean": 384.7666666666667,
         "source_artifacts": [
-          "results/WS3_crystal_A3_seed0.json",
-          "results/WS3_crystal_A3_seed1.json",
-          "results/WS3_crystal_A3_seed2.json"
+          "results/crystal_projected_seed0.json",
+          "results/crystal_projected_seed1.json",
+          "results/crystal_projected_seed2.json"
         ]
       }
     },
     "crystal_variant_runs": {
-      "A3_f2_cell_first_static_channel": {
+      "projected_cell_first_static_channel": {
         "train_config": {
           "arm": "A3",
           "d_model": 256,
@@ -162,10 +162,10 @@
         "n_parameters": 5002228,
         "vocab_size": 500,
         "wall_clock_s": 1923.9,
-        "note": "same architecture and vocab as the main A3 arm; wall clock differs because this run includes the joint two-constraint solve path",
-        "source_artifact": "results/WS3_crystal_A3_f2_seed0.json"
+        "note": "same architecture and vocab as the main projected arm; wall clock differs because this run includes the joint two-constraint solve path",
+        "source_artifact": "results/crystal_projected_cell_first_seed0.json"
       },
-      "A4_smoke": {
+      "conditional_smoke": {
         "train_config": {
           "arm": "A4",
           "d_model": 256,
@@ -191,11 +191,11 @@
         "vocab_size": 884,
         "wall_clock_s": 110.6,
         "note": "884-token vocab, CPU device, 300 steps, filter_tol 0.5 -- a smoke-test configuration, not a reported result",
-        "source_artifact": "results/WS3_crystal_A4_smoke.json"
+        "source_artifact": "results/crystal_conditional_smoke.json"
       }
     },
     "synthetic_arms": {
-      "A1": {
+      "unconstrained": {
         "train_config_shared": {
           "arm": "A1",
           "d_model": 128,
@@ -243,12 +243,12 @@
         },
         "wall_clock_s_mean": 68.26666666666667,
         "source_artifacts": [
-          "results/A2_train_A1_seed0.json",
-          "results/A2_train_A1_seed1.json",
-          "results/A2_train_A1_seed2.json"
+          "results/train_unconstrained_seed0.json",
+          "results/train_unconstrained_seed1.json",
+          "results/train_unconstrained_seed2.json"
         ]
       },
-      "A2": {
+      "mask_only": {
         "train_config_shared": {
           "arm": "A2",
           "d_model": 128,
@@ -296,12 +296,12 @@
         },
         "wall_clock_s_mean": 90.7,
         "source_artifacts": [
-          "results/A2_train_A2_seed0.json",
-          "results/A2_train_A2_seed1.json",
-          "results/A2_train_A2_seed2.json"
+          "results/train_mask_only_seed0.json",
+          "results/train_mask_only_seed1.json",
+          "results/train_mask_only_seed2.json"
         ]
       },
-      "A3": {
+      "projected": {
         "train_config_shared": {
           "arm": "A3",
           "d_model": 128,
@@ -349,9 +349,9 @@
         },
         "wall_clock_s_mean": 547.4666666666667,
         "source_artifacts": [
-          "results/A2_train_A3_seed0.json",
-          "results/A2_train_A3_seed1.json",
-          "results/A2_train_A3_seed2.json"
+          "results/train_projected_seed0.json",
+          "results/train_projected_seed1.json",
+          "results/train_projected_seed2.json"
         ]
       }
     },
@@ -364,13 +364,13 @@
       },
       "wall_clock_ratio_A3_over_A2_published": 5.992649761117236,
       "wall_clock_ratio_A3_over_A2_recomputed_from_per_seed": 6.036016170525542,
-      "source_artifact": "results/A2_training_summary.json"
+      "source_artifact": "results/training_summary.json"
     },
     "tokenizer": {
       "crystal": {
         "level": "line-level pseudo-token stream (not per-character); the grammar mask itself operates per-character over a CIF skeleton (scripts/crystal/cif_grammar.py) but the trained model's vocabulary is the coarser CrystalVocab token set",
         "vocab_size_default": 500,
-        "vocab_size_A4_smoke_variant": 884,
+        "vocab_size_conditional_smoke_variant": 884,
         "vocab_composition": {
           "special": [
             "<BOS>",
@@ -403,7 +403,7 @@
           "ANG_LO": 5.0,
           "ANG_HI": 175.0
         },
-        "resolution_rationale": "chosen from measured MP-20 median relative discretization error, not convention: 64/32 bins -> 4.4%, 128/64 -> 2.4%, 256/128 -> 1.1%, 512/256 -> 0.6% (all measured under an earlier, narrower bin range). All WS3_crystal_A{1,2,3}_seed*.json runs used the 256/128 setting and its earlier range, giving vocab_size=500 as recorded in every one of those artifacts. A later fix widened the bin range to cover the full MP-20 support after a clamping defect was found (bin_index_caveat, below) and re-set resolution to 512/256 together with the new range, giving an 884-token vocabulary with 0.84% overall error; WS3_crystal_A4_smoke.json is the one artifact in this repository built with that corrected tokenizer.",
+        "resolution_rationale": "chosen from measured MP-20 median relative discretization error, not convention: 64/32 bins -> 4.4%, 128/64 -> 2.4%, 256/128 -> 1.1%, 512/256 -> 0.6% (all measured under an earlier, narrower bin range). All crystal_A{1,2,3}_seed*.json runs used the 256/128 setting and its earlier range, giving vocab_size=500 as recorded in every one of those artifacts. A later fix widened the bin range to cover the full MP-20 support after a clamping defect was found (bin_index_caveat, below) and re-set resolution to 512/256 together with the new range, giving an 884-token vocabulary with 0.84% overall error; crystal_A4_smoke.json is the one artifact in this repository built with that corrected tokenizer.",
         "serialization_order": "cell_first (default) or comp_first; cell_first is required for the density constraint to be expressible as a per-step linear budget, since density is mass/volume and the volume must close before the mass channel can be evaluated",
         "bin_index_caveat": "len:/ang: token payloads are BIN INDICES, not physical values; a past defect in scripts/train/train_crystal.py read them as floats directly, inflating the decoded cell volume by a factor of hundreds and silently producing a plausible-looking but wrong budget. The budget computation now always maps the index through the bin centre (V.LEN_LO + (j + 0.5) * (V.LEN_HI - V.LEN_LO) / V.N_LEN) before using it."
       },
@@ -574,7 +574,7 @@
         "validity_all_arms_all_targets": 1.0
       },
       "wall_clock_s": {
-        "A3_per_run": [
+        "projected_per_run": [
           2631.0,
           1290.7,
           1273.9,
@@ -584,9 +584,9 @@
           1197.0,
           2127.2
         ],
-        "A3_mean": 1672.65,
-        "A3_total_8_runs": 13381.2,
-        "A4_per_run": [
+        "projected_mean": 1672.65,
+        "projected_total_8_runs": 13381.2,
+        "conditional_per_run": [
           202.9,
           211.7,
           231.8,
@@ -596,11 +596,11 @@
           209.0,
           211.8
         ],
-        "A4_mean": 216.45,
-        "A4_total_8_runs": 1731.6,
-        "hardware_note": "the WS3_conditional_baseline.json record itself was written on a macOS/arm64 host (record platform field), which is inconsistent with the per-run wall clocks; this artifact carries the wall-clock figures exactly as stored and does not alter them, but the hardware for THESE 16 runs is not independently confirmed to be the RTX 5090 recorded on the WS3_crystal_A*_seed*.json single-checkpoint runs, unlike those, which explicitly stamp gpu='NVIDIA GeForce RTX 5090'"
+        "conditional_mean": 216.45,
+        "conditional_total_8_runs": 1731.6,
+        "hardware_note": "the conditional_baseline.json record itself was written on a macOS/arm64 host (record platform field), which is inconsistent with the per-run wall clocks; this artifact carries the wall-clock figures exactly as stored and does not alter them, but the hardware for THESE 16 runs is not independently confirmed to be the RTX 5090 recorded on the crystal_A*_seed*.json single-checkpoint runs, unlike those, which explicitly stamp gpu='NVIDIA GeForce RTX 5090'"
       },
-      "source_artifact": "results/WS3_conditional_baseline.json"
+      "source_artifact": "results/conditional_baseline.json"
     },
     "overhead_benchmark": {
       "superseded_note": "The first published scoping table combined a per-token figure measured at batch 256 with shares measured at up to 8192 rows, and its m=2 rows silently used the opt-in fast Hessian while being presented as the default. Both defects are corrected above. The m=1 shares were correct; the m=2 shares were optimistic by the fast-vs-accurate factor (70.1% reported against 167.6% measured at every position).",
@@ -740,19 +740,19 @@
         "vs_training_step_actionable_density_m2": "46.9%-64.9%",
         "requires_team_decision": true
       },
-      "source_artifact": "results/CP2_overhead_benchmark.json"
+      "source_artifact": "results/overhead_benchmark.json"
     },
     "compute_normalized_comparison": {
-      "what_is_matched": "The crystal A1/A2/A3 single-checkpoint runs (results/WS3_crystal_{A1,A2,A3}_seed{0,1,2}.json) share architecture (d_model=256, 6 layers, 8 heads, 5,002,228 parameters), vocabulary (500 tokens), step count (6000), batch size (128), optimizer, schedule, training data (26,910 structures) and hardware (cuda, NVIDIA GeForce RTX 5090); they differ only in whether the mask (A2) or mask-plus-trained-through-projection (A3) is applied, so the A3/A2 wall-clock ratio computed from these runs isolates the projection layer's marginal training cost on identical hardware and identical step count.",
-      "what_is_not_matched": "The results/WS3_conditional_baseline.json sweep (A3 vs A4, 8 runs each across 4 targets x 2 seeds) is NOT matched to the single-checkpoint runs on hardware: its stored JSON record carries platform='macOS-26.5.2-arm64-arm-64bit', while every WS3_crystal_A*_seed*.json run explicitly stamps device='cuda', gpu='NVIDIA GeForce RTX 5090'. Step count is also not confirmed identical between A3 and A4 inside that sweep from the stored payload (train_config per run is not recorded in the runs dict, only loss/wall/target/seed/n_train), so the A3/A4 wall-clock ratio from WS3_conditional_baseline.json is NOT presented as a controlled overhead measurement -- it is reported as the raw cost of the two training regimes as actually run, with the hardware caveat stated explicitly wherever it is used.",
+      "what_is_matched": "The crystal unconstrained/mask-only/projected single-checkpoint runs (results/crystal_{unconstrained,mask-only,projected}_seed{0,1,2}.json) share architecture (d_model=256, 6 layers, 8 heads, 5,002,228 parameters), vocabulary (500 tokens), step count (6000), batch size (128), optimizer, schedule, training data (26,910 structures) and hardware (cuda, NVIDIA GeForce RTX 5090); they differ only in whether the mask (mask-only) or mask-plus-trained-through-projection (projected) is applied, so the projected/mask-only wall-clock ratio computed from these runs isolates the projection layer's marginal training cost on identical hardware and identical step count.",
+      "what_is_not_matched": "The results/conditional_baseline.json sweep (projected vs conditional, 8 runs each across 4 targets x 2 seeds) is NOT matched to the single-checkpoint runs on hardware: its stored JSON record carries platform='macOS-26.5.2-arm64-arm-64bit', while every crystal_A*_seed*.json run explicitly stamps device='cuda', gpu='NVIDIA GeForce RTX 5090'. Step count is also not confirmed identical between projected and conditional inside that sweep from the stored payload (train_config per run is not recorded in the runs dict, only loss/wall/target/seed/n_train), so the projected/conditional wall-clock ratio from conditional_baseline.json is NOT presented as a controlled overhead measurement -- it is reported as the raw cost of the two training regimes as actually run, with the hardware caveat stated explicitly wherever it is used.",
       "single_checkpoint_vs_mask_only": {
-        "crystal_A3_over_A2_wall_clock_ratio": 1.7865655471289277,
-        "crystal_A3_over_A1_wall_clock_ratio": 2.38541020872081,
-        "synthetic_A3_over_A2_wall_clock_ratio_published": 5.992649761117236,
+        "crystal_projected_over_mask_only_wall_clock_ratio": 1.7865655471289277,
+        "crystal_projected_over_unconstrained_wall_clock_ratio": 2.38541020872081,
+        "synthetic_projected_over_mask_only_wall_clock_ratio_published": 5.992649761117236,
         "note": "crystal ratio is smaller than the synthetic 6.0x figure reported in si:overhead because the crystal backbone (5.0M params, 6000 steps) is far larger than the per-step projection overhead relative to its own forward/backward cost, whereas the synthetic backbone (0.8M params, 4000 steps) is small enough that the projection solve dominates a larger fraction of each step"
       },
       "cost_structure_headline": {
-        "claim": "one projection-trained checkpoint (A3), deployed at inference time across a family of targets with no retraining, versus one conditionally-trained checkpoint (A4) PER target",
+        "claim": "one projection-trained checkpoint (projected), deployed at inference time across a family of targets with no retraining, versus one conditionally-trained checkpoint (conditional) PER target",
         "single_checkpoint_training_wall_clock_s": 384.7666666666667,
         "n_conditional_checkpoints_for_a_7_target_family": 7,
         "conditional_baseline_mean_wall_clock_s_per_checkpoint": 216.45,
@@ -761,9 +761,9 @@
         "retargeting_inference_overhead_s": {
           "three_checkpoints_x_ten_targets_total_s": 241,
           "one_training_run_s_approx": 1660,
-          "source": "reports/WS4_retargeting_notes.md; results/WS4_zero_shot_retargeting.json (per-checkpoint wall_clock_s)"
+          "source": "reports/retargeting_notes.md; results/zero_shot_retargeting.json (per-checkpoint wall_clock_s)"
         },
-        "caveat": "the A4 mean wall clock above (216.45 s) is read from WS3_conditional_baseline.json, whose record is stamped with a different platform than the RTX-5090 single-checkpoint runs (see what_is_not_matched); it is used here only because it is the sole measured A4 training cost in the repository, and the ratio is reported as an as-measured cost-structure figure, not a hardware-controlled benchmark"
+        "caveat": "the conditional mean wall clock above (216.45 s) is read from conditional_baseline.json, whose record is stamped with a different platform than the RTX-5090 single-checkpoint runs (see what_is_not_matched); it is used here only because it is the sole measured conditional training cost in the repository, and the ratio is reported as an as-measured cost-structure figure, not a hardware-controlled benchmark"
       }
     }
   }

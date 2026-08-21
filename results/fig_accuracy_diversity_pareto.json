@@ -1,20 +1,20 @@
 {
   "schema_version": "1.0",
-  "artifact_name": "FIG3_accuracy_diversity_pareto",
+  "artifact_name": "fig_accuracy_diversity_pareto",
   "script": "scripts/crystal/compute_fig3_pareto.py",
-  "git_commit": "5e963cc6b84d7045ace5e3139800ffd7cb12c972-dirty",
+  "git_commit": "1ea51cc8b7c01c821836ed3b26cebc72e5e3132d",
   "config": {
-    "ceiling_source": "FIG2_steering_frontier"
+    "ceiling_source": "fig_steering_frontier"
   },
-  "config_hash": "3ee4a04536341110",
+  "config_hash": "1ce4777c30aae0ff",
   "seeds": [
     0,
     1
   ],
-  "created_utc": "2026-08-21T15:12:02.300624+00:00",
-  "python": "3.11.15",
-  "platform": "macOS-26.5.2-arm64-arm-64bit",
-  "payload_sha256": "9a2d8c8d3eea7a14c00108b564f38054b890dec22bb6862b84610474aa5a3b93",
+  "created_utc": "2026-08-21T18:43:42.127109+00:00",
+  "python": "3.13.2",
+  "platform": "macOS-26.5.2-arm64-arm-64bit-Mach-O",
+  "payload_sha256": "fe2b44605caf63ac12caf0fc99125293b7719b46ae9fc149d3fe416763a15d1d",
   "payload": {
     "steering_ceiling_g_per_cm3": 10.4047287830039,
     "sub_ceiling_targets": [
@@ -61,8 +61,8 @@
         8.0,
         10.0
       ],
-      "source": "results/WS3_conditional_baseline.json per_target.<t>.A3",
-      "why_excluded": "WS3_conditional_baseline's err is |mean density - target|, the error OF THE MEAN, whereas best_of_n_curve, hybrid_curve and smc_tuned_point all report the mean of PER-SAMPLE absolute errors. Measured on one shared pool of 512 samples per target, the two statistics differ by 2.3x to 2.7x across seeds, the error of the mean being the smaller whenever the samples have spread. Plotting both on one axis overstated the projection's accuracy relative to every other arm. Projection-alone is instead read off hybrid_curve at n=1, which is the same model and the same statistic as the arms it is compared to."
+      "source": "results/conditional_baseline.json per_target.<t>.projected",
+      "why_excluded": "conditional_baseline's err is |mean density - target|, the error OF THE MEAN, whereas best_of_n_curve, hybrid_curve and smc_tuned_point all report the mean of PER-SAMPLE absolute errors. Measured on one shared pool of 512 samples per target, the two statistics differ by 2.3x to 2.7x across seeds, the error of the mean being the smaller whenever the samples have spread. Plotting both on one axis overstated the projection's accuracy relative to every other arm. Projection-alone is instead read off hybrid_curve at n=1, which is the same model and the same statistic as the arms it is compared to."
     },
     "hybrid_curve": [
       {
@@ -96,7 +96,7 @@
         "n_targets_averaged": 7
       }
     ],
-    "hybrid_curve_note": "results/CPR6_hybrid_selection.json: n steered samples drawn per target from the projection-deployed A3 checkpoint, keep the closest on density. n=1 is projection-alone; n>1 adds best-of-n selection on top of the steered pool.",
+    "hybrid_curve_note": "results/hybrid_selection.json: n steered samples drawn per target from the projection-deployed projected checkpoint, keep the closest on density. n=1 is projection-alone; n>1 adds best-of-n selection on top of the steered pool.",
     "smc_tuned_point": {
       "K": 16,
       "sigma": 0.5,
@@ -111,8 +111,8 @@
         8.0,
         10.0
       ],
-      "source": "results/CPR7b_smc_diversity.json rows"
+      "source": "results/smc_diversity.json rows"
     },
-    "smc_tuned_point_note": "results/CPR7_smc_tuned.json identifies sigma=0.5 as the best fixed potential width at K=16 over a nine-point sweep (0.1-3.0), evaluated honestly (chosen without looking at per-target error, unlike the biased best-per-target row in that artifact). results/CPR7b_smc_diversity.json then measures unique-formula fraction for that tuned (K=16, sigma=0.5) setting across 100 independent SMC runs per target, giving SMC its first placement on this figure's diversity axis."
+    "smc_tuned_point_note": "results/smc_tuned.json identifies sigma=0.5 as the best fixed potential width at K=16 over a nine-point sweep (0.1-3.0), evaluated honestly (chosen without looking at per-target error, unlike the biased best-per-target row in that artifact). results/smc_diversity.json then measures unique-formula fraction for that tuned (K=16, sigma=0.5) setting across 100 independent SMC runs per target, giving SMC its first placement on this figure's diversity axis."
   }
 }
