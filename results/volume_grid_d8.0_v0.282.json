@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "artifact_name": "WS3_crystal_A7",
+  "artifact_name": "volume_grid_d8.0_v0.282",
   "script": "scripts/train/train_crystal.py",
   "git_commit": "UNVERSIONED",
   "config": {

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "artifact_name": "CP9_serialization_expressibility",
+  "artifact_name": "serialization_expressibility",
   "script": "scripts/crystal/serialization_expressibility.py",
   "git_commit": "dedb27f0011fa55e6706547cc2dd61c6d6630fda-dirty",
   "config": {

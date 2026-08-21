@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "artifact_name": "FIG4_infeasibility_vs_target",
+  "artifact_name": "fig_infeasibility_vs_target",
   "script": "scripts/crystal/compute_fig4_infeasibility.py",
   "git_commit": "a08c4cf83c8ef2cd801224d4c2acfae5fbdd2cb2-dirty",
   "config": {

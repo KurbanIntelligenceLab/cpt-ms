@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "artifact_name": "CPR7b_smc_diversity",
+  "artifact_name": "smc_diversity",
   "script": "scripts/crystal/smc_diversity.py",
   "git_commit": "5e963cc6b84d7045ace5e3139800ffd7cb12c972-dirty",
   "config": {

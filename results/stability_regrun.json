@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "artifact_name": "CPR1_stability_regrun",
+  "artifact_name": "stability_regrun",
   "script": "scripts/crystal/measure_fallback_stability.py",
   "git_commit": "5e963cc6b84d7045ace5e3139800ffd7cb12c972-dirty",
   "config": {

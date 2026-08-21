@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "artifact_name": "WS3_energy_calibration",
+  "artifact_name": "energy_calibration",
   "script": "scripts/crystal/energy_screen.py",
   "git_commit": "53d9c98e75c822d0320f6956c741cd8dba9afd3f-dirty",
   "config": {

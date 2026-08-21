@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "artifact_name": "WS4_zero_shot_retargeting",
+  "artifact_name": "zero_shot_retargeting",
   "script": "scripts/crystal/retarget.py",
   "git_commit": "UNVERSIONED",
   "config": {

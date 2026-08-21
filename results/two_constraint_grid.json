@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "artifact_name": "WS5_two_constraint_grid",
+  "artifact_name": "two_constraint_grid",
   "script": "scripts/crystal/analyze_a7_grid.py",
   "git_commit": "3538c7969ebc337ea294ceb6784a7bc83546bd4a-dirty",
   "config": {

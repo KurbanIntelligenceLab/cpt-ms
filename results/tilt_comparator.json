@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "artifact_name": "WS7_a6_tilt_comparator",
+  "artifact_name": "tilt_comparator",
   "script": "scripts/synthetic/train_a6.py",
   "git_commit": "a8eb1b36947bca493c2aaa8fd366673902942d08-dirty",
   "config": {

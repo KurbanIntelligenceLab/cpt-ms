@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "artifact_name": "CP6_multiconstraint",
+  "artifact_name": "multiconstraint",
   "script": "scripts/layer/verify_multiconstraint.py",
   "git_commit": "4ed209d4b669d038a3fb35eab602dbdfd3c1b1bd-dirty",
   "config": {

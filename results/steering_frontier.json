@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "artifact_name": "WS1_steering_frontier",
+  "artifact_name": "steering_frontier",
   "script": "scripts/synthetic/steering_frontier.py",
   "git_commit": "07ac3429d848cda09d8c1af4953a7b7baa0c5a53",
   "config": {

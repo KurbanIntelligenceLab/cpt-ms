@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "artifact_name": "WS3_crystal_A4_smoke",
+  "artifact_name": "crystal_conditional_smoke",
   "script": "scripts/train/train_crystal.py",
   "git_commit": "479c3ab0bfb2224609d0d7b4d81d053121cafb4e-dirty",
   "config": {
