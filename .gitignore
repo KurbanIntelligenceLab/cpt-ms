@@ -1,46 +1,32 @@
 # Python
 __pycache__/
 *.py[cod]
-**/.pytest_cache/
-.venv/
 *.egg-info/
+.pytest_cache/
+.venv/
 
-# Development-only material: run notes, preregistration records, the manuscript
-# sources (docs/), figure-inspection renders and training logs. None of it is
-# needed to install, verify, or reproduce a result; the scripts and the artifacts
-# they emit stay tracked. See development/README.md.
-development/
-.claude
 # macOS
 .DS_Store
 
-# Pre-flight shards are regenerable in seconds and would otherwise churn the
-# history on every launch. The full artifacts they mirror ARE tracked, because
-# they are the evidence reports are built from.
-results/*_smoke.json
-results/preflight_report.json
-
-# ...except this one. It is not a pre-flight shard: it is the only artifact built
-# with the corrected tokenizer, the SI cites it by name, and implementation_details
-# records it as a source. Evidence the manuscript points at has to ship.
-!results/crystal_conditional_smoke.json
-
-# The run ledger is append-only and machine-local: two machines appending to the
-# same file produce conflicts on every push for no benefit. Runs that matter are
-# traceable through the artifacts they name.
-results/run_ledger.jsonl
-
-# SSH keys for rented compute — never commit
+# SSH keys for rented compute
 .vast/
 
-# scratch intermediates
-results/_*.json
+# Manuscript sources, run notes, preregistration, logs, checkpoints.
+# See development/README.md.
+development/
 
-# MP-20 CSVs are ~58MB and re-downloadable from the CDVAE repo
+# MP-20 CSVs: ~58MB, re-downloadable from the CDVAE repo
 data/
 
-# Trained checkpoints are build products of a documented training command, not
-# evidence. They are large, they are not needed to verify any claim in the
-# manuscript, and a stale one is worse than none. Reproduce with scripts/train/.
-/ckpt/
-development/ckpt/
+# Checkpoints are build products of a training command, not evidence
+*.pt
+
+# Regenerable pre-flight shards, scratch, and the machine-local run ledger
+results/*_smoke.json
+results/preflight_report.json
+results/_*.json
+results/run_ledger.jsonl
+
+# ...but this one is cited by the SI and by implementation_details.json,
+# so it has to ship
+!results/crystal_conditional_smoke.json
