@@ -13,6 +13,10 @@ import pytest
 
 from scripts.crystal.analyze_sweep import _ols
 
+from _devtree import requires_mp20
+
+pytestmark = requires_mp20
+
 
 def _verdict(fit: dict) -> bool:
     """The rule used in analyze_sweep: significant AND materially nonzero."""

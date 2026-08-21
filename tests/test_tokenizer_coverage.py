@@ -16,6 +16,10 @@ import pytest
 
 from scripts.crystal.mp20 import CrystalVocab, ELEMENTS, load_split
 
+from _devtree import requires_mp20
+
+pytestmark = requires_mp20
+
 
 @pytest.fixture(scope="module")
 def data():

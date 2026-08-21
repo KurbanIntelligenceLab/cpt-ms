@@ -19,6 +19,10 @@ import pytest
 from scripts.crystal.mp20 import ELEMENTS, CrystalVocab, load_split
 from scripts.train.train_crystal import CrystalTrainConfig, _coverage
 
+from _devtree import requires_mp20
+
+pytestmark = requires_mp20
+
 
 def test_filter_retains_a_trainable_subset_at_every_swept_target():
     """The conditional baseline must be runnable wherever it is compared, or the comparison has a hole."""

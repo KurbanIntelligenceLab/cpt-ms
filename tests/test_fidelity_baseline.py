@@ -15,6 +15,10 @@ import pytest
 from scripts.crystal.fidelity_baseline import _composition_profile, _tv, rejection_arm
 from scripts.crystal.mp20 import load_split
 
+from _devtree import requires_mp20
+
+pytestmark = requires_mp20
+
 
 @pytest.fixture(scope="module")
 def train():

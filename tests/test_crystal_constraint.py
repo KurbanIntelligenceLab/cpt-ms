@@ -25,6 +25,10 @@ from scripts.train.train_crystal import (
     CrystalTrainConfig, GrammarMask, _element_position, _mass_budget, pad_batch,
 )
 
+from _devtree import requires_mp20
+
+pytestmark = requires_mp20
+
 
 @pytest.fixture(scope="module")
 def data():

@@ -18,6 +18,10 @@ from scripts.train.train_crystal import (
     structural_metrics,
 )
 
+from _devtree import requires_mp20
+
+pytestmark = requires_mp20
+
 
 @pytest.fixture(scope="module")
 def setup():
