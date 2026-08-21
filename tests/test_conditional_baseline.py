@@ -60,8 +60,8 @@ def test_novelty_is_relative_to_what_the_arm_trained_on():
 
 def test_a4_step_budget_is_not_reduced():
     """The baseline must not be handicapped by a smaller budget."""
-    a2, a4 = CrystalTrainConfig(arm="mask_only"), CrystalTrainConfig(arm="conditional")
-    assert a4.steps == a2.steps and a4.batch == a2.batch and a4.lr == a2.lr
+    mask_only, conditional = CrystalTrainConfig(arm="mask_only"), CrystalTrainConfig(arm="conditional")
+    assert conditional.steps == mask_only.steps and conditional.batch == mask_only.batch and conditional.lr == mask_only.lr
 
 
 def _element_freq(items):

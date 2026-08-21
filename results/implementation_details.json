@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "artifact_name": "implementation_details",
   "script": "scripts/crystal/implementation_details.py",
-  "git_commit": "1ea51cc8b7c01c821836ed3b26cebc72e5e3132d",
+  "git_commit": "999dee783e89a156636a3ecff3f0e43f07aedc8a",
   "config": {
     "reviewer_points": [
       "W4",
@@ -16,10 +16,10 @@
     1,
     2
   ],
-  "created_utc": "2026-08-21T18:42:54.479467+00:00",
+  "created_utc": "2026-08-21T22:24:17.670836+00:00",
   "python": "3.13.2",
   "platform": "macOS-26.5.2-arm64-arm-64bit-Mach-O",
-  "payload_sha256": "979c2ce5ae67627c24ee7b416f48676e84ad834a9390a3262c997c33a42897b7",
+  "payload_sha256": "b4dd35eeb97141306fa59b4705e8e678b68f125bfa3aa48d900cdd4f754c5e89",
   "payload": {
     "crystal_arms": {
       "unconstrained": {
@@ -761,7 +761,7 @@
         "retargeting_inference_overhead_s": {
           "three_checkpoints_x_ten_targets_total_s": 241,
           "one_training_run_s_approx": 1660,
-          "source": "reports/retargeting_notes.md; results/zero_shot_retargeting.json (per-checkpoint wall_clock_s)"
+          "source": "results/zero_shot_retargeting.json (per-checkpoint wall_clock_s)"
         },
         "caveat": "the conditional mean wall clock above (216.45 s) is read from conditional_baseline.json, whose record is stamped with a different platform than the RTX-5090 single-checkpoint runs (see what_is_not_matched); it is used here only because it is the sole measured conditional training cost in the repository, and the ratio is reported as an as-measured cost-structure figure, not a hardware-controlled benchmark"
       }

@@ -44,12 +44,12 @@ def test_density_comparison_uses_matched_targets_only():
     p = _payload()
     s = p["summary"]
     matched = set(s["matched_density_targets"])
-    a7_targets = {c["density_target"] for c in p["cells"]
+    joint_targets = {c["density_target"] for c in p["cells"]
                   if c["deployed_density"] is not None}
     ctrl_targets = {float(k) for k, v in p["controls"].items()
                     if v["deployed_density"] is not None}
-    assert matched == a7_targets & ctrl_targets, (
-        f"matched set {matched} is not the intersection of joint {a7_targets} and controls "
+    assert matched == joint_targets & ctrl_targets, (
+        f"matched set {matched} is not the intersection of joint {joint_targets} and controls "
         f"{ctrl_targets}"
     )
     assert "density_mae_A7" not in s, (

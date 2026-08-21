@@ -55,26 +55,26 @@ def _main_text() -> str:
 
 def test_concentration_numbers_match_their_artifacts():
     """The paper's central claim, recomputed from the two artifacts that hold it."""
-    a2 = normalize(_p("training_summary.json")["arms"])
-    a6 = _p("tilt_comparator.json")
+    mask_only = normalize(_p("training_summary.json")["arms"])
+    comparator = _p("tilt_comparator.json")
     src = _src()
 
-    a3_var = a2["projected"]["charge_variance"][0]
-    a3_viol = a2["projected"]["violation_rate"][0]
-    tilt_var = a6["reference"]["tilt"]["charge_variance"]
-    tilt_viol = a6["reference"]["tilt"]["hard_violation_rate"]
-    data_var = a6["reference"]["base_S_conditioned"]["charge_variance"]
+    projected_var = mask_only["projected"]["charge_variance"][0]
+    projected_viol = mask_only["projected"]["violation_rate"][0]
+    tilt_var = comparator["reference"]["tilt"]["charge_variance"]
+    tilt_viol = comparator["reference"]["tilt"]["hard_violation_rate"]
+    data_var = comparator["reference"]["base_S_conditioned"]["charge_variance"]
 
-    for value in (f"{a3_var:.3f}", f"{tilt_var:.3f}", f"{data_var:.3f}"):
+    for value in (f"{projected_var:.3f}", f"{tilt_var:.3f}", f"{data_var:.3f}"):
         assert value in src, f"charge variance {value} missing from the manuscript"
 
-    assert f"{tilt_var / a3_var:.2f}" in src, (
+    assert f"{tilt_var / projected_var:.2f}" in src, (
         "the variance factor must be quoted against the sequence-level optimum; "
         "quoting it against the mask-only arm answers a different question"
     )
-    assert f"{tilt_viol / a3_viol:.2f}" in src, "per-sequence violation ratio missing"
+    assert f"{tilt_viol / projected_viol:.2f}" in src, "per-sequence violation ratio missing"
 
-    assert tilt_var > data_var > a3_var, (
+    assert tilt_var > data_var > projected_var, (
         "the ordering projection < data < optimum is the mechanism; if a rerun "
         "reversed it, every concentration sentence in the paper is wrong"
     )

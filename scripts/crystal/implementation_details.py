@@ -149,8 +149,8 @@ def main() -> Path:
     synthetic_summary = _load("training_summary")
 
     cb = _load("conditional_baseline")
-    a3_walls = [v["wall"] for v in cb["runs"].values() if resolve(v["arm"]) == "projected"]
-    a4_walls = [v["wall"] for v in cb["runs"].values() if resolve(v["arm"]) == "conditional"]
+    projected_walls = [v["wall"] for v in cb["runs"].values() if resolve(v["arm"]) == "projected"]
+    conditional_walls = [v["wall"] for v in cb["runs"].values() if resolve(v["arm"]) == "conditional"]
 
     overhead = _load("overhead_benchmark")
 
@@ -199,12 +199,12 @@ def main() -> Path:
             "per_target": cb["per_target"],
             "summary": cb["summary"],
             "wall_clock_s": {
-                "projected_per_run": a3_walls,
-                "projected_mean": float(np.mean(a3_walls)),
-                "projected_total_8_runs": float(np.sum(a3_walls)),
-                "conditional_per_run": a4_walls,
-                "conditional_mean": float(np.mean(a4_walls)),
-                "conditional_total_8_runs": float(np.sum(a4_walls)),
+                "projected_per_run": projected_walls,
+                "projected_mean": float(np.mean(projected_walls)),
+                "projected_total_8_runs": float(np.sum(projected_walls)),
+                "conditional_per_run": conditional_walls,
+                "conditional_mean": float(np.mean(conditional_walls)),
+                "conditional_total_8_runs": float(np.sum(conditional_walls)),
                 "hardware_note": (
                     "the conditional_baseline.json record itself was written on a "
                     "macOS/arm64 host (record platform field), which is inconsistent with the "
@@ -257,10 +257,10 @@ def main() -> Path:
                 "claim": "one projection-trained checkpoint (projected), deployed at inference time across a family of targets with no retraining, versus one conditionally-trained checkpoint (conditional) PER target",
                 "single_checkpoint_training_wall_clock_s": crystal_arms["projected"]["wall_clock_s_mean"],
                 "n_conditional_checkpoints_for_a_7_target_family": 7,
-                "conditional_baseline_mean_wall_clock_s_per_checkpoint": float(np.mean(a4_walls)),
-                "conditional_baseline_total_wall_clock_s_for_7_checkpoints_at_measured_mean": 7 * float(np.mean(a4_walls)),
+                "conditional_baseline_mean_wall_clock_s_per_checkpoint": float(np.mean(conditional_walls)),
+                "conditional_baseline_total_wall_clock_s_for_7_checkpoints_at_measured_mean": 7 * float(np.mean(conditional_walls)),
                 "ratio_conditional_7x_over_single_projection_checkpoint": (
-                    7 * float(np.mean(a4_walls)) / crystal_arms["projected"]["wall_clock_s_mean"]
+                    7 * float(np.mean(conditional_walls)) / crystal_arms["projected"]["wall_clock_s_mean"]
                 ),
                 "retargeting_inference_overhead_s": {
                     "three_checkpoints_x_ten_targets_total_s": 241,

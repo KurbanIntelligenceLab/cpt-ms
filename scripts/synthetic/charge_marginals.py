@@ -172,26 +172,26 @@ def main(smoke: bool = False) -> Path:
     import json as _json
     agreement = []
     if not smoke:
-        a2_summary = normalize(_json.loads(Path(_A2_SUMMARY).read_text())["payload"]["arms"])
-        a6_summary = _json.loads(Path(_A6_SUMMARY).read_text())["payload"]
+        mask_only_summary = normalize(_json.loads(Path(_A2_SUMMARY).read_text())["payload"]["arms"])
+        comparator_summary = _json.loads(Path(_A6_SUMMARY).read_text())["payload"]
 
         checks = [
             ("mask_only", "mean_charge", distributions["mask_only"]["mean_charge"],
-             a2_summary["masked"]["mean_charge"][0], a2_summary["masked"]["mean_charge"][1]),
+             mask_only_summary["masked"]["mean_charge"][0], mask_only_summary["masked"]["mean_charge"][1]),
             ("mask_only", "charge_variance", distributions["mask_only"]["charge_variance"],
-             a2_summary["masked"]["charge_variance"][0], a2_summary["masked"]["charge_variance"][1]),
+             mask_only_summary["masked"]["charge_variance"][0], mask_only_summary["masked"]["charge_variance"][1]),
             ("projected", "mean_charge", distributions["projected"]["mean_charge"],
-             a2_summary["projected"]["mean_charge"][0], a2_summary["projected"]["mean_charge"][1]),
+             mask_only_summary["projected"]["mean_charge"][0], mask_only_summary["projected"]["mean_charge"][1]),
             ("projected", "charge_variance", distributions["projected"]["charge_variance"],
-             a2_summary["projected"]["charge_variance"][0], a2_summary["projected"]["charge_variance"][1]),
+             mask_only_summary["projected"]["charge_variance"][0], mask_only_summary["projected"]["charge_variance"][1]),
             ("comparator", "mean_charge", distributions["comparator"]["mean_charge"],
-             a6_summary["summary"]["mean_charge"]["mean"], a6_summary["summary"]["mean_charge"]["sd"]),
+             comparator_summary["summary"]["mean_charge"]["mean"], comparator_summary["summary"]["mean_charge"]["sd"]),
             ("comparator", "charge_variance", distributions["comparator"]["charge_variance"],
-             a6_summary["summary"]["charge_variance"]["mean"], a6_summary["summary"]["charge_variance"]["sd"]),
+             comparator_summary["summary"]["charge_variance"]["mean"], comparator_summary["summary"]["charge_variance"]["sd"]),
             ("tilt", "charge_variance", distributions["tilt"]["charge_variance"],
-             a6_summary["reference"]["tilt"]["charge_variance"], 0.0),
+             comparator_summary["reference"]["tilt"]["charge_variance"], 0.0),
             ("data_S_conditioned", "charge_variance", distributions["data_S_conditioned"]["charge_variance"],
-             a6_summary["reference"]["base_S_conditioned"]["charge_variance"], 0.0),
+             comparator_summary["reference"]["base_S_conditioned"]["charge_variance"], 0.0),
         ]
         for arm, quantity, single, pub_mean, pub_sd in checks:
             ok = _plausible(single, pub_mean, pub_sd)

@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "artifact_name": "infeasibility_correlation",
   "script": "scripts/crystal/compute_infeasibility_correlation.py",
-  "git_commit": "1ea51cc8b7c01c821836ed3b26cebc72e5e3132d",
+  "git_commit": "999dee783e89a156636a3ecff3f0e43f07aedc8a",
   "config": {
     "source": [
       "steering_frontier_rows",
@@ -14,7 +14,7 @@
     0,
     1
   ],
-  "created_utc": "2026-08-21T18:43:38.506753+00:00",
+  "created_utc": "2026-08-21T22:24:16.876013+00:00",
   "python": "3.13.2",
   "platform": "macOS-26.5.2-arm64-arm-64bit-Mach-O",
   "payload_sha256": "998b28804b584e04d26a05a9535da42ef772d0c6c74ed6aaaa4f1f1759d6f5fa",

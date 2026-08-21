@@ -11,8 +11,8 @@ from scripts.common.arms import normalize, pick
 
 ROOT = Path(__file__).resolve().parents[1]
 ARTIFACT = ROOT / "results" / "charge_marginals.json"
-A2_SUMMARY = ROOT / "results" / "training_summary.json"
-A6_SUMMARY = ROOT / "results" / "tilt_comparator.json"
+MASK_ONLY_SUMMARY = ROOT / "results" / "training_summary.json"
+COMPARATOR_SUMMARY = ROOT / "results" / "tilt_comparator.json"
 
 
 def _payload(path: Path) -> dict:
@@ -42,8 +42,8 @@ def test_agreement_check_recorded_and_within_bounds():
 def test_agreement_check_matches_published_artifacts_directly():
     """Recompute the comparison from the published artifacts rather than trusting the recorded check."""
     p = _payload(ARTIFACT)
-    a2 = normalize(_payload(A2_SUMMARY)["arms"])
-    a6 = _payload(A6_SUMMARY)
+    mask_only = normalize(_payload(MASK_ONLY_SUMMARY)["arms"])
+    comparator = _payload(COMPARATOR_SUMMARY)
 
     dist = normalize(p["distributions"])
 
@@ -53,21 +53,21 @@ def test_agreement_check_matches_published_artifacts_directly():
         return abs(single - mean) <= k * sd
 
     assert within(pick(dist, "mask_only")["mean_charge"],
-                  pick(a2, "mask_only")["mean_charge"][0], pick(a2, "mask_only")["mean_charge"][1])
+                  pick(mask_only, "mask_only")["mean_charge"][0], pick(mask_only, "mask_only")["mean_charge"][1])
     assert within(pick(dist, "mask_only")["charge_variance"],
-                  pick(a2, "mask_only")["charge_variance"][0], pick(a2, "mask_only")["charge_variance"][1])
+                  pick(mask_only, "mask_only")["charge_variance"][0], pick(mask_only, "mask_only")["charge_variance"][1])
     assert within(dist["projected"]["mean_charge"],
-                  a2["projected"]["mean_charge"][0], a2["projected"]["mean_charge"][1])
+                  mask_only["projected"]["mean_charge"][0], mask_only["projected"]["mean_charge"][1])
     assert within(dist["projected"]["charge_variance"],
-                  a2["projected"]["charge_variance"][0], a2["projected"]["charge_variance"][1])
+                  mask_only["projected"]["charge_variance"][0], mask_only["projected"]["charge_variance"][1])
     assert within(dist["comparator"]["mean_charge"],
-                  a6["summary"]["mean_charge"]["mean"], a6["summary"]["mean_charge"]["sd"])
+                  comparator["summary"]["mean_charge"]["mean"], comparator["summary"]["mean_charge"]["sd"])
     assert within(dist["comparator"]["charge_variance"],
-                  a6["summary"]["charge_variance"]["mean"], a6["summary"]["charge_variance"]["sd"])
+                  comparator["summary"]["charge_variance"]["mean"], comparator["summary"]["charge_variance"]["sd"])
     assert dist["tilt"]["charge_variance"] == pytest.approx(
-        a6["reference"]["tilt"]["charge_variance"], abs=1e-9)
+        comparator["reference"]["tilt"]["charge_variance"], abs=1e-9)
     assert dist["data_S_conditioned"]["charge_variance"] == pytest.approx(
-        a6["reference"]["base_S_conditioned"]["charge_variance"], abs=1e-9)
+        comparator["reference"]["base_S_conditioned"]["charge_variance"], abs=1e-9)
 
 
 def test_anti_concentration_ordering_holds():
