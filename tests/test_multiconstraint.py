@@ -1,10 +1,4 @@
-"""Tests for the joint-constraint solve and the attainability map.
-
-The multi-constraint claim is that several expectation constraints are solved EXACTLY
-and simultaneously, so these tests pin exactness and the things that could make an
-exact-looking solve untrustworthy: a near-singular multiplier Hessian, and an
-attainability fraction quoted without the grid it was measured on.
-"""
+"""Tests for the joint-constraint solve and the attainability map."""
 from __future__ import annotations
 
 import json
@@ -29,11 +23,7 @@ RESULTS = Path(__file__).resolve().parents[1] / "results"
 
 
 def test_joint_solve_is_exact_at_several_constraint_counts():
-    """Residual must stay at solver precision as constraints are added.
-
-    A projection that drifts with constraint count is not solving the joint problem, and
-    the composition claim would be false in a way a single m=1 check cannot see.
-    """
+    """Residual must stay at solver precision as constraints are added."""
     for m in (1, 2, 3, 4):
         row = joint_solve_case(B=6, V=128, m=m, seed=0)
         assert row["all_converged"], f"m={m} failed to converge"
@@ -45,11 +35,7 @@ def test_joint_solve_is_exact_at_several_constraint_counts():
 
 
 def test_hessian_conditioning_is_reported_and_finite():
-    """A converged solve on a near-singular Hessian is not trustworthy.
-
-    Reporting only the residual would hide the case where two constraint rows are nearly
-    the same constraint, so the conditioning must be present and finite.
-    """
+    """A converged solve on a near-singular Hessian is not trustworthy."""
     for m in (2, 3, 4):
         row = joint_solve_case(B=6, V=128, m=m, seed=1)
         assert "hessian_cond_max" in row
@@ -57,18 +43,12 @@ def test_hessian_conditioning_is_reported_and_finite():
 
 
 def test_collinear_constraints_are_not_silently_accepted():
-    """Two identical constraint rows make the multiplier solve ill-posed.
-
-    The Hessian is the covariance of the constraint statistics, so duplicating a row
-    makes it singular. The test asserts the pathology is VISIBLE in the conditioning
-    rather than hidden behind a small residual, since a caller reading only the residual
-    would conclude the joint solve succeeded.
-    """
+    """Two identical constraint rows make the multiplier solve ill-posed."""
     g = torch.Generator().manual_seed(0)
     V = 64
     logits = torch.randn(1, V, generator=g, dtype=torch.float64)
     row = torch.randn(V, generator=g, dtype=torch.float64)
-    A = torch.stack([row, row.clone()]).unsqueeze(0)   # deliberately collinear
+    A = torch.stack([row, row.clone()]).unsqueeze(0)
     p = torch.softmax(logits, -1)
     b0 = torch.einsum("bmv,bv->bm", A, p)
     res = project(logits, A, b0, None, max_iter=100, tol=1e-12)
@@ -83,11 +63,7 @@ def test_collinear_constraints_are_not_silently_accepted():
 
 
 def test_attainable_range_bounds_are_vertex_values():
-    """The range of a linear functional over a simplex is its coefficient min and max.
-
-    This is what makes an out-of-range target diagnosable as infeasible-by-construction
-    rather than as a solver failure, so it must not drift.
-    """
+    """The range of a linear functional over a simplex is its coefficient min and max."""
     a = torch.tensor([3.0, -1.0, 7.5, 0.0])
     mask = torch.tensor([True, True, True, False])
     lo, hi = _attainable_range(a, mask)
@@ -95,12 +71,7 @@ def test_attainable_range_bounds_are_vertex_values():
 
 
 def test_grid_points_lie_inside_each_marginal_range():
-    """Every grid point must be individually attainable by construction.
-
-    If a point sits outside its own marginal range it is trivially infeasible, and
-    counting it as jointly infeasible would inflate the infeasible region with cases
-    that say nothing about composition.
-    """
+    """Every grid point must be individually attainable by construction."""
     g = attainability_grid(V=32, seed=0, n_grid=5)
     lo1, hi1 = g["mass_attainable_range"]
     lo2, hi2 = g["charge_attainable_range"]
@@ -114,12 +85,7 @@ def test_grid_points_lie_inside_each_marginal_range():
 
 
 def test_joint_infeasibility_exists_at_small_vocabulary():
-    """The attainability map must be able to report infeasibility at all.
-
-    A map that returns "everything composes" everywhere tests nothing. At a small
-    vocabulary the attainable polytope is small enough that two constraints genuinely
-    conflict, so this is the case that proves the map has discriminating power.
-    """
+    """The attainability map must be able to report infeasibility at all."""
     g = attainability_grid(V=8, seed=0, n_grid=9)
     n = len(g["cells"])
     frac = g["regime_counts"].get("individually_only", 0) / n
@@ -130,12 +96,7 @@ def test_joint_infeasibility_exists_at_small_vocabulary():
 
 
 def test_attainability_fraction_is_grid_dependent_and_says_so():
-    """The joint fraction changes with grid resolution, so it must carry that caveat.
-
-    Measured at V=64 the fraction rises with resolution because a coarse grid places
-    proportionally more points near the polytope corners. Quoting a bare fraction as
-    "the size of the feasible region" would be wrong, so the artifact must disclose it.
-    """
+    """The joint fraction changes with grid resolution, so it must carry that caveat."""
     coarse = attainability_grid(V=64, seed=0, n_grid=5)
     fine = attainability_grid(V=64, seed=0, n_grid=15)
     fc = coarse["regime_counts"].get("jointly_attainable", 0) / len(coarse["cells"])
@@ -152,12 +113,7 @@ def test_attainability_fraction_is_grid_dependent_and_says_so():
 
 
 def test_composition_gets_easier_with_vocabulary_size():
-    """Joint attainability must be reported as a function of vocabulary, not a scalar.
-
-    At V=512 the full grid composes, which alone would read as "constraints always
-    compose". The monotone rise from a small vocabulary is the actual finding, and the
-    artifact has to carry the sweep for it to be checkable.
-    """
+    """Joint attainability must be reported as a function of vocabulary, not a scalar."""
     art = RESULTS / "multiconstraint.json"
     if not art.exists():
         pytest.skip("multiconstraint artifact absent; run scripts.layer.verify_multiconstraint")

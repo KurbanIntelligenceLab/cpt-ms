@@ -1,13 +1,4 @@
-"""Artifact emission convention.
-
-Every script that produces a number writes it through `emit`, which stamps the
-payload with the emitting script's identity, a hash of its configuration, the
-seeds used, and a content checksum. Reports are built from these files; nothing
-quantitative is ever typed by hand.
-
-This is the day-one logging convention referred to in the reporting protocol.
-The hash-enforced report builder (due CP3) consumes exactly this schema.
-"""
+"""Artifact emission convention."""
 
 from __future__ import annotations
 
@@ -26,24 +17,6 @@ RESULTS_DIR = REPO_ROOT / "results"
 
 
 def _git_commit() -> str:
-    """Commit of the SOURCE tree, or a sentinel when version control is absent.
-
-    Never fabricate a hash: a missing commit is recorded as such so the report
-    builder can flag artifacts that predate version control.
-
-    Dirtiness is judged over source only — `scripts/` and `tests/` — and
-    deliberately excludes `results/`, `reports/`, and `figures/`. The reason is
-    ordering, not convenience. An artifact records the code that produced it, and
-    it necessarily exists BEFORE the commit that contains it, so its own presence
-    in the working tree must not count against the provenance of the code. When
-    several scripts are re-emitted in sequence the first one's output would
-    otherwise dirty the tree for every script after it, stamping them `-dirty`
-    against a commit whose source was in fact pristine — a misleading record,
-    since nothing about the code differed between the runs.
-
-    What `-dirty` means here is therefore precise and useful: the code that
-    produced this artifact is not exactly the code at the recorded commit.
-    """
     try:
         head = subprocess.run(
             ["git", "-C", str(REPO_ROOT), "rev-parse", "HEAD"],
@@ -77,13 +50,7 @@ def emit(
     script: str,
     results_dir: Path | None = None,
 ) -> Path:
-    """Write a results artifact and return its path.
-
-    `name` becomes `results/<name>.json`. The payload is wrapped in a record
-    carrying provenance; the content checksum covers the payload only, so
-    re-running with identical inputs produces an identical checksum even though
-    the timestamp differs.
-    """
+    """Write a results artifact and return its path."""
     out_dir = Path(results_dir) if results_dir is not None else RESULTS_DIR
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -110,13 +77,7 @@ def emit(
 
 def assert_fresh(name: str, max_age_s: float = 3600.0,
                  results_dir: Path | None = None) -> None:
-    """Fail if an artifact on disk predates the current run.
-
-    Guards the failure mode where a measurement script raises, its stderr is
-    suppressed, and the PREVIOUS run's artifact is still on disk — so a reader
-    sees a plausible file and no error. Call this after a run that was expected to
-    re-emit, or in a report builder before consuming an artifact.
-    """
+    """Fail if an artifact on disk predates the current run."""
     out_dir = Path(results_dir) if results_dir is not None else RESULTS_DIR
     path = out_dir / f"{name}.json"
     if not path.exists():

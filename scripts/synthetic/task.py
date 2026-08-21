@@ -1,29 +1,4 @@
-"""Synthetic constrained-sequence task (WS-2).
-
-The only setting in the project where the constrained target is computable
-exactly rather than estimated. Everything here is brute-force enumerable by
-construction, so the "ground truth" is arithmetic, not a fit.
-
-Design mirrors the crystal setting in miniature:
-
-  Regime S (support restriction)   a running multiplicity budget — each symbol
-                                   may appear at most `max_count` times. Prefix-
-                                   closed, so it is exactly a per-step mask,
-                                   which is what makes mask-only representable.
-
-  Regime E (expectation constraint) a charge-balance analogue — each symbol
-                                   carries an integer charge and the constraint
-                                   is on the expected total. Linear in the
-                                   distribution, satisfied in expectation only,
-                                   with per-sample violations that the exact
-                                   target does not eliminate. This is the point.
-
-The base/data distribution is a first-order Markov chain, deliberately biased so
-that it does NOT already satisfy the charge constraint. If it did, the tilt
-would be zero and every target would collapse onto the data distribution — the
-degenerate case, and the one worth being able to switch on and off when probing
-multiplier decay.
-"""
+"""Synthetic constrained-sequence task."""
 
 from __future__ import annotations
 
@@ -40,10 +15,10 @@ class TaskConfig:
     symbols: tuple[str, ...] = ("A", "B", "C", "D")
     charges: tuple[int, ...] = (2, 1, -1, -2)
     length: int = 8
-    max_count: int = 3          # Regime S: per-symbol occurrence budget
-    charge_target: float = 0.0  # Regime E: constraint on E[total charge]
+    max_count: int = 3
+    charge_target: float = 0.0
     markov_seed: int = 0
-    markov_bias: float = 1.6    # >1 tilts the chain toward positive charge
+    markov_bias: float = 1.6
     markov_temperature: float = 0.8
 
     @property
@@ -59,12 +34,12 @@ class EnumeratedTask:
     """The task, fully enumerated. All arrays are indexed by sequence id."""
 
     config: TaskConfig
-    sequences: np.ndarray      # (N, L) int8 token ids
-    log_p_data: np.ndarray     # (N,) log probability under the data distribution
-    total_charge: np.ndarray   # (N,) int  — the Regime-E statistic phi(x)
-    feasible_S: np.ndarray     # (N,) bool — satisfies the multiplicity budget
-    transition: np.ndarray = field(repr=False, default=None)  # (V, V)
-    initial: np.ndarray = field(repr=False, default=None)     # (V,)
+    sequences: np.ndarray
+    log_p_data: np.ndarray
+    total_charge: np.ndarray
+    feasible_S: np.ndarray
+    transition: np.ndarray = field(repr=False, default=None)
+    initial: np.ndarray = field(repr=False, default=None)
 
     @property
     def p_data(self) -> np.ndarray:
@@ -72,12 +47,7 @@ class EnumeratedTask:
 
 
 def build_markov(config: TaskConfig) -> tuple[np.ndarray, np.ndarray]:
-    """Seeded first-order Markov chain over the vocabulary.
-
-    The charge bias is applied as a multiplicative tilt on the emission of each
-    symbol, which is what pushes E[total charge] away from the target and makes
-    the Regime-E constraint bind.
-    """
+    """Seeded first-order Markov chain over the vocabulary."""
     rng = np.random.default_rng(config.markov_seed)
     V = config.vocab_size
     charges = np.asarray(config.charges, dtype=float)
@@ -131,12 +101,7 @@ def enumerate_task(config: TaskConfig | None = None) -> EnumeratedTask:
 
 
 def prefix_allowed_mask(config: TaskConfig, prefix: tuple[int, ...]) -> np.ndarray:
-    """Regime-S mask: which next tokens keep the multiplicity budget satisfiable.
-
-    Prefix-closed by construction — a prefix that has already spent a symbol's
-    budget can never recover it — which is exactly the property that makes the
-    mask emitter well-defined and mask-only trainable without straight-through.
-    """
+    """Regime-S mask: which next tokens keep the multiplicity budget satisfiable."""
     V = config.vocab_size
     counts = np.zeros(V, dtype=np.int64)
     for tok in prefix:

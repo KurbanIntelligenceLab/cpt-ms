@@ -1,9 +1,4 @@
-"""The energy surrogate must be calibrated, and labelled as a surrogate.
-
-This is an ML-potential screen, not DFT. Two failure modes are pinned: reporting
-agreement on the structures the elemental references were fitted to, and letting a
-rank-deficient or rare-element-driven fit pass as calibration.
-"""
+"""The energy surrogate must be calibrated, and labelled as a surrogate."""
 
 from __future__ import annotations
 
@@ -48,11 +43,7 @@ def test_fit_is_not_rank_deficient(cal):
 
 
 def test_agreement_is_good_enough_to_screen_with(cal):
-    """MAE must be small against the spread of the labels it is predicting.
-
-    An MAE comparable to the label spread would mean the screen carries no
-    information, however high its correlation.
-    """
+    """MAE must be small against the spread of the labels it is predicting."""
     h = cal["held_out_agreement"]
     assert h["mae_ev_per_atom"] < 0.05, f"MAE {h['mae_ev_per_atom']:.4f} eV/atom"
     assert h["mae_ev_per_atom"] < 0.1 * h["label_spread_ev_per_atom"]
@@ -82,14 +73,7 @@ def test_reference_fit_refuses_an_empty_split():
 
 
 def test_disclaimer_does_not_claim_dft_is_unavailable(cal):
-    """The surrogate must be justified by what it is for, not by a false scarcity.
-
-    An earlier version of this disclaimer asserted no DFT engine was available. That was
-    never tested against GPAW, the research plan's designated engine, and it is false:
-    GPAW 25.7.0 installs and runs on the compute host. The surrogate's justification is
-    that MP-20 already carries DFT labels for these reference structures. Stating a
-    capability gap that does not exist would misrepresent the work's constraints.
-    """
+    """The surrogate must be justified by what it is for, not by a false scarcity."""
     d = cal["disclaimer"]
     assert "No DFT engine is available" not in d
     assert "GPAW" in d, "the disclaimer must record that a DFT engine IS available"

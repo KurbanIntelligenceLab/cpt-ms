@@ -1,13 +1,4 @@
-"""Compute and emit the exact constrained targets for the synthetic task.
-
-Produces `results/synthetic_ground_truth.json`, the artifact every synthetic
-distortion result is measured against. Run with `--smoke` for the pre-flight
-shard (short sequences, seconds) required before any real launch.
-
-Usage:
-    python -m scripts.synthetic.compute_ground_truth
-    python -m scripts.synthetic.compute_ground_truth --smoke
-"""
+"""Compute and emit the exact constrained targets for the synthetic task."""
 
 from __future__ import annotations
 
@@ -63,13 +54,11 @@ def main(smoke: bool = False) -> Path:
 
     p_data = task.p_data
 
-    # Target (i): data distribution restricted to the feasible set.
     t_S = conditioning_target(task, apply_S=True, charge_equals=None)
     t_SE_hard = conditioning_target(
         task, apply_S=True, charge_equals=int(config.charge_target)
     )
 
-    # Regime-E sequence-level ideal: the KL-optimal expectation-constrained tilt.
     t_E_tilt, lam_E = tilting_target(task, apply_S=False)
     t_SE_tilt, lam_SE = tilting_target(task, apply_S=True)
 
@@ -81,7 +70,6 @@ def main(smoke: bool = False) -> Path:
         "SE_tilt": summarize(task, "SE_tilt", t_SE_tilt, extra={"multiplier_lambda": lam_SE}),
     }
 
-    # The comparison that decides which target a distortion claim is made against.
     separation = {
         "kl_tilt_vs_hard_nats": kl(t_SE_tilt, t_SE_hard),
         "kl_hard_vs_tilt_nats": kl(t_SE_hard, t_SE_tilt),

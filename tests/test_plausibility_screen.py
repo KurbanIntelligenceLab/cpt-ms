@@ -1,10 +1,4 @@
-"""Plausibility screens must be measured against the data, not against 100%.
-
-Real MP-20 structures score 0.715 on the charge-neutrality screen, because oxidation-state
-enumeration covers only common states. A generated arm reported against an assumed ceiling
-of 1.0 would therefore look bad for a reason that has nothing to do with the model, and an
-arm scoring 0.70 would be indistinguishable from the data without the reference in hand.
-"""
+"""Plausibility screens must be measured against the data, not against 100%."""
 
 from __future__ import annotations
 

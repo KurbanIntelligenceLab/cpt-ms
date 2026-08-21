@@ -1,9 +1,4 @@
-"""Verification for the incremental parser and the determinability measurement.
-
-Each test checks a property by a route independent of the implementation: the
-volume against its closed-form value, prefix-purity against recomputation from
-scratch, and determinability positions against brute-force scanning.
-"""
+"""Verification for the incremental parser and the determinability measurement."""
 
 from __future__ import annotations
 
@@ -59,11 +54,7 @@ def test_end_lattice_marker_alone_does_not_determine_volume():
 
 @pytest.mark.parametrize("backbone,builder", [("B1", build_b1), ("B2", build_b2)])
 def test_state_is_a_pure_function_of_the_prefix(backbone, builder):
-    """Stepping to position k equals re-running the first k tokens from scratch.
-
-    This is the property the projection layer depends on: no state may leak
-    information from tokens the model has not emitted yet.
-    """
+    """Stepping to position k equals re-running the first k tokens from scratch."""
     toks = builder(3, 8)
     p = IncrementalParser(backbone)
     states = list(p.run(toks))
@@ -87,26 +78,14 @@ def test_determinability_position_is_the_first_such_position(backbone, builder):
 
 
 def test_b1_charge_is_near_terminal_and_b2_is_not():
-    """The backbone asymmetry the report turns on, asserted as a property.
-
-    On a CIF character stream the composition is spelled out in the atom-site
-    loop at the end, so charge balance is determined only in the final few
-    percent of the sequence. On a structured stream it closes early.
-    """
+    """The backbone asymmetry the report turns on, asserted as a property."""
     t1, t2 = build_b1(3, 8), build_b2(3, 8)
     assert family_i_profile(t1, "B1").usable_fraction < 0.05
     assert family_i_profile(t2, "B2").usable_fraction > 0.5
 
 
 def test_reference_ordering_makes_charge_determined_early():
-    """The B1 blocker dissolves under the reference model's own field order.
-
-    CrystaLLM emits `data_{comp_str}` as the first line, carrying the complete
-    cell composition with counts. Parsing it there determines charge balance at
-    the top of the file instead of in the trailing atom-site loop, which is the
-    difference between a constraint that can carry a steering sweep and one that
-    cannot.
-    """
+    """The B1 blocker dissolves under the reference model's own field order."""
     from scripts.crystal.determinability import build_b1_reference
 
     for ne, ns in [(2, 4), (3, 8), (5, 20)]:
@@ -117,13 +96,7 @@ def test_reference_ordering_makes_charge_determined_early():
 
 
 def test_reference_ordering_keeps_density_usable():
-    """Moving composition first must not cost family (ii).
-
-    Regression for a real defect: the reference fixture used CIF's actual
-    `_cell_angle_*` spelling while the parser matched only `_cell_length_*`, so
-    all three angles were dropped, the lattice never closed, and density read as
-    unusable everywhere.
-    """
+    """Moving composition first must not cost family (ii)."""
     from scripts.crystal.determinability import build_b1_reference
 
     for ne, ns in [(2, 4), (3, 8), (5, 20)]:
@@ -134,11 +107,7 @@ def test_reference_ordering_keeps_density_usable():
 
 
 def test_cif_angle_tags_are_parsed():
-    """`_cell_angle_alpha` is what real CIF writes; it must be understood.
-
-    Matching only `_cell_length_alpha` parses lengths and silently drops angles,
-    leaving the lattice permanently open. That fails on any actual CIF file.
-    """
+    """`_cell_angle_alpha` is what real CIF writes; it must be understood."""
     p = IncrementalParser("B1")
     cif = ("_cell_length_a 4.0000\n_cell_length_b 5.0000\n_cell_length_c 6.0000\n"
            "_cell_angle_alpha 90.0000\n_cell_angle_beta 90.0000\n_cell_angle_gamma 90.0000\n")
@@ -156,13 +125,7 @@ def test_composition_marker_requires_a_parsed_composition():
 
 
 def test_verdicts_are_derived_not_asserted():
-    """No narrative field in the artifact may contradict the data beside it.
-
-    A hand-written verdict stored next to its own computation can drift from it
-    silently when the computation changes. This test regenerates the payload and
-    checks every verdict band follows from its own summary figure, so a future
-    change to the parser cannot leave a stale claim in the artifact.
-    """
+    """No narrative field in the artifact may contradict the data beside it."""
     from scripts.crystal.determinability import main
     import json
 

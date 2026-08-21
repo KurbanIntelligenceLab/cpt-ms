@@ -1,35 +1,4 @@
-"""Energy screening of generated structures with an ML potential (WS-3 / CP5).
-
-NOT DFT. This module screens with CHGNet and every number it produces is labelled an
-ML-potential screen. That is the standard practice the crystal-generation benchmarks use
-for screening at scale, but it is a surrogate and the paper says so.
-
-A working DFT engine IS available: GPAW 25.7.0 installs from conda-forge on the compute
-box, with libxc, PAW datasets and MPI, and runs a PBE calculation on Si diamond in 3.2 s.
-An earlier version of this docstring claimed no DFT engine was available; that was
-asserted without ever testing GPAW, the research plan's own designated engine, and it was
-wrong. The surrogate is used here because MP-20 already carries DFT labels for reference
-structures, so recomputing them buys nothing -- not because DFT is unavailable.
-
-The reason neither DFT nor an ML potential reaches our GENERATED samples is that the
-serialization has no atomic positions; see plausibility_screen.py.
-
-The surrogate is calibrated against MP-20's own DFT labels before it is used to judge
-anything, because a screen whose agreement with DFT is unmeasured is not a screen.
-
-CHGNet predicts TOTAL energy per atom. Formation energy needs elemental references,
-
-    E_f = (E_tot - sum_i n_i mu_i) / N,
-
-and the references mu_i are fitted by least squares against MP's labelled formation
-energies. Two properties of that fit are enforced rather than assumed:
-
-  - Agreement is reported on a HELD-OUT split, never on the structures the references
-    were fitted to.
-  - An element seen too few times in the fit split gets its reference from almost no
-    data, so structures containing rare elements are excluded from the reported
-    agreement and the exclusion is counted rather than hidden.
-"""
+"""Energy screening of generated structures with an ML potential."""
 
 from __future__ import annotations
 
@@ -77,11 +46,7 @@ def score_structures(cifs, labels=None, cache: Path | None = None):
 
 
 def fit_references(recs, min_occ: int = MIN_OCCURRENCES):
-    """Least-squares elemental references from labelled structures.
-
-    Returns the reference dict, the elements that met the occurrence threshold, and the
-    design-matrix rank so a rank-deficient fit cannot pass silently.
-    """
+    """Least-squares elemental references from labelled structures."""
     labelled = [r for r in recs if r["label_ef"] is not None]
     occ = Counter(e for r in labelled for e in r["comp"])
     keep = {e for e, k in occ.items() if k >= min_occ}
@@ -94,7 +59,6 @@ def fit_references(recs, min_occ: int = MIN_OCCURRENCES):
     for i, r in enumerate(use):
         for e, n in r["comp"].items():
             A[i, els.index(e)] = n
-        # E_tot - N * E_f_label = sum_i n_i mu_i
         y[i] = r["e_total"] - r["n_atoms"] * r["label_ef"]
     mu, *_ = np.linalg.lstsq(A, y, rcond=None)
     rank = int(np.linalg.matrix_rank(A))
@@ -116,7 +80,6 @@ def main(n_calib: int = 3000, seed: int = 0, smoke: bool = False) -> Path:
     cache = Path(f"/tmp/chgnet_scores_{n_calib}_{seed}.pkl")
     recs = score_structures(list(d.cif), list(d.formation_energy_per_atom), cache=cache)
 
-    # Split BEFORE fitting: references come from the fit half only.
     rng = np.random.default_rng(seed)
     idx = rng.permutation(len(recs))
     cut = len(recs) // 2

@@ -1,27 +1,4 @@
-"""Synthetic task: the unconstrained, mask-only and projected arms trained on the synthetic constrained-sequence task.
-
-mask-only is the Regime-S arm — a decoder whose per-step distribution is restricted to the
-mask's legal set, with no Regime-E projection. It is the baseline every later claim
-is measured against, and it is what CP0's converged-stage reading, the unconstrained-vs-mask-only
-delta, and the CP2 benchmark all wait on.
-
-Trained on the synthetic task rather than crystals deliberately: the synthetic task
-has exact enumerable targets, so a trained model's induced distribution can be
-compared against the sequence-level optimum computed in closed form. On MP-20 no
-such ground truth exists and every comparison would be against another
-approximation.
-
-Three arms, so the comparison the project needs is available at the end:
-
-  unconstrained  unconstrained decoder, no mask         — the "does masking help" control
-  mask-only  masked decoder, Regime S only          — the baseline
-  projected  masked decoder + per-step projection   — the method, at one active constraint,
-                                               which the CP2 benchmark found to be
-                                               the affordable configuration
-
-Every arm shares initialization, data order, and optimizer settings, so differences
-are attributable to the constraint treatment rather than to training noise.
-"""
+"""Train the unconstrained, mask-only and projected arms on the exactly enumerable synthetic task."""
 
 from __future__ import annotations
 
@@ -62,15 +39,11 @@ class TrainConfig:
 
 
 class TinyDecoder(nn.Module):
-    """Causal decoder over the synthetic vocabulary.
-
-    Deliberately small: the task has a 4-symbol vocabulary at length 8, so capacity
-    is not the interesting variable — the constraint treatment is.
-    """
+    """Causal decoder over the synthetic vocabulary."""
 
     def __init__(self, vocab: int, length: int, cfg: TrainConfig):
         super().__init__()
-        self.tok = nn.Embedding(vocab + 1, cfg.d_model)   # +1 for BOS
+        self.tok = nn.Embedding(vocab + 1, cfg.d_model)
         self.pos = nn.Embedding(length, cfg.d_model)
         layer = nn.TransformerEncoderLayer(
             cfg.d_model, cfg.n_head, 4 * cfg.d_model,
@@ -96,12 +69,7 @@ def sample_data(task, n: int, rng: np.random.Generator) -> np.ndarray:
 
 
 def prefix_masks(task, seqs: np.ndarray, cfg: TaskConfig) -> np.ndarray:
-    """Legal-token mask at every position, computed from the prefix alone.
-
-    Regime S is a per-symbol multiplicity budget, which is prefix-closed, so no
-    lookahead is needed. That is what makes mask-only trainable without a straight-through
-    estimator.
-    """
+    """Legal-token mask at every position, computed from the prefix alone."""
     n, L = seqs.shape
     V = cfg.vocab_size
     out = np.ones((n, L, V), dtype=bool)
@@ -118,25 +86,7 @@ def induced_distribution_from_model(
     model, task, cfg, tcfg, device, *, project_at_inference: bool = False,
     fast_hessian: bool = False,
 ) -> np.ndarray:
-    """Exact induced distribution over all sequences, by enumeration.
-
-    The task is small enough to score every sequence, so the trained model's
-    distribution is obtained exactly rather than estimated by sampling. That removes
-    sampling error from every downstream comparison against the closed-form optimum.
-
-    `project_at_inference` distinguishes two genuinely different quantities, and
-    conflating them is the easy mistake here:
-
-      False — what the BACKBONE INTERNALIZED. The model is read with the mask only.
-              For projected this answers "did training through the projection teach the
-              network the constraint", which is the interesting scientific question
-              but is NOT the system anyone would deploy.
-      True  — the DEPLOYED SYSTEM: model plus the same projection it trained with,
-              applied at generation time. This is what an projected user would actually run.
-
-    Both are reported for projected. Reporting only the first would understate the system;
-    reporting only the second would hide whether the network learned anything.
-    """
+    """Exact induced distribution over all sequences, by enumeration."""
     model.eval()
     seqs = torch.from_numpy(task.sequences.astype(np.int64)).to(device)
     N, L = seqs.shape
@@ -161,32 +111,12 @@ def induced_distribution_from_model(
         mkf = mk.reshape(N * L, V)
         res = project(flat, A, b, mkf,
                       fast_hessian_dtype=(torch.float32 if fast_hessian else None))
-        # Infeasible-step rate: the budget is unattainable when the required
-        # increment lies outside the attainable range of the legal tokens. This is
-        # the mechanism behind the residual error, so it is measured rather than
-        # inferred.
         lo_att = torch.where(mkf, A[:, 0, :], torch.full_like(flat, float("inf"))).min(-1).values
         hi_att = torch.where(mkf, A[:, 0, :], torch.full_like(flat, float("-inf"))).max(-1).values
         bb = b.squeeze(-1)
-        # Weighted by the sequence's own induced probability, NOT an unweighted mean
-        # over the enumeration. The unweighted version is model-independent -- b
-        # depends only on the sequence and the attainable range only on the mask --
-        # so it cannot be compared against WS1's probability-weighted figure. Bit
-        # -identical values across seeds is the signature of that mistake.
         globals()["_LAST_INFEASIBLE_MATRIX"] = (
             (bb < lo_att - 1e-9) | (bb > hi_att + 1e-9)
         ).reshape(N, L).double()
-        # No clamp when SCORING. The projection returns exactly 0.0 at masked
-        # entries, so an illegal token must score as log(0) = -inf and contribute
-        # exactly zero mass. Clamping to a positive floor gives every illegal token
-        # a probability of that floor instead, and a sequence with one illegal token
-        # then carries ~1e-30 -- which is a representable number, not underflow, and
-        # is precisely the residual that appeared in the first deployed reading.
-        # It was an artifact of the evaluation, never a property of the layer.
-        #
-        # The training path keeps its clamp: there the log feeds a loss whose
-        # gradient must stay finite, and the targets are drawn from the feasible
-        # support so no illegal token is ever scored.
         logp = torch.log(res.q).reshape(N, L, V)
     else:
         logp = torch.log_softmax(logits, dim=-1)
@@ -204,8 +134,6 @@ def _metrics(q, task, tcfg, base, tilt) -> dict:
         "mean_charge": mean,
         "charge_error": mean - tcfg.charge_target,
         "charge_variance": float(q @ (phi - mean) ** 2),
-        # The Regime-S claim in one number: a masked model puts NO mass outside
-        # the feasible set. For unconstrained this is the control that should be non-zero.
         "infeasible_mass": float(q[~task.feasible_S].sum()),
         "kl_from_data": kl(q, base),
         "kl_from_tilt": kl(q, tilt),
@@ -215,13 +143,6 @@ def _metrics(q, task, tcfg, base, tilt) -> dict:
 
 
 def _sampled_detectability(q_exact, q_fast, task, tcfg, *, n_samples, seed) -> dict:
-    """Would a reviewer detect the fp32-Hessian route from generated samples?
-
-    Draws n_samples from each deployed distribution and compares the metrics that
-    actually get reported — validity, violation rate, mean charge — with a
-    two-proportion test on the violation rate. A null result here is only
-    meaningful with the sample size stated, so it is recorded.
-    """
     rng = np.random.default_rng(seed)
     phi = task.total_charge.astype(np.float64)
     ie = rng.choice(len(q_exact), size=n_samples, p=q_exact / q_exact.sum())
@@ -253,21 +174,10 @@ def evaluate(model, task, cfg, tcfg, device, base, tilt) -> dict:
         qd = induced_distribution_from_model(model, task, cfg, tcfg, device,
                                              project_at_inference=True)
         m["deployed"] = _metrics(qd, task, tcfg, base, tilt)
-        # Train/inference precision mismatch: the fp32-Hessian route would deploy a
-        # distribution perturbed inside the tolerance ball relative to the one the
-        # model trained against. This project's thesis is that train/inference
-        # mismatch is the problem worth solving, so shipping one inside the solver
-        # needs a measurement, not an argument. Both deployed distributions are
-        # computed from the SAME trained weights, so any difference is the
-        # precision, not training noise.
         qf = induced_distribution_from_model(model, task, cfg, tcfg, device,
                                              project_at_inference=True,
                                              fast_hessian=True)
         m["deployed_fast_hessian"] = _metrics(qf, task, tcfg, base, tilt)
-        # Direct sampled-metric test, not only the distributional bound: draw from
-        # both deployed distributions and test the metrics a reviewer would report.
-        # The distributions are exact, so sampling error is the ONLY source of
-        # difference beyond the precision effect.
         m["precision_mismatch_sampled"] = _sampled_detectability(
             qd, qf, task, tcfg, n_samples=1_000_000, seed=tcfg.seed)
         m["precision_mismatch"] = {
@@ -280,7 +190,7 @@ def evaluate(model, task, cfg, tcfg, device, base, tilt) -> dict:
         }
         M = globals().get("_LAST_INFEASIBLE_MATRIX")
         if M is not None:
-            w = torch.from_numpy(qd).to(M.device)          # induced sequence mass
+            w = torch.from_numpy(qd).to(M.device)
             m["deployed"]["per_step_infeasible_fraction"] = float(
                 (M.mean(dim=1) * w).sum()
             )

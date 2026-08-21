@@ -1,45 +1,4 @@
-"""A second constraint family on real crystals, and why it is not charge neutrality.
-
-WHY NOT CHARGE NEUTRALITY. The plan's family (i) is charge balance, and the obvious move
-is to make it a Regime E target so the paper has a constraint the model does not directly
-emit. It cannot be done with this layer, and the reason is structural rather than an
-implementation gap.
-
-The layer constrains a LINEAR functional of the next token: sum_i a_i q_i = b. Charge
-neutrality as SMACT defines it -- and as this project's own plausibility screen measures
-it, at a real-data rate of 0.7150 -- is not a linear functional. It is an EXISTENTIAL
-predicate over oxidation-state assignments: a composition is balanced if THERE EXISTS an
-assignment of formal charges, drawn from each element's allowed states, summing to zero.
-In MP-20's training split 71 of 85 elements carry more than one allowed oxidation state,
-and 81.8% of element-occurrences involve a multivalent element, so the existential
-quantifier is doing nearly all the work.
-
-Collapsing it to one charge per element makes it linear and destroys it. Measured on 4,000
-training structures: SMACT calls 71.07% balanced, the linear proxy using each element's
-first-listed oxidation state calls 7.95% balanced, the two agree on 36.78% of structures,
-and the proxy recovers only 11.12% of the SMACT-balanced set -- 2,527 false negatives
-against 2 false positives. A Regime E target built on that proxy would be steering a
-quantity that has almost nothing to do with the screen the paper reports.
-
-So charge neutrality is recorded as OUTSIDE the expressible class, which is a scope result
-worth stating plainly, and the second family is chosen to be genuinely linear.
-
-WHAT THE SECOND FAMILY IS. Valence electron count per unit volume: sum over the formula of
-each element's valence electron count, divided by the cell volume. It is additive in
-element counts, so it fits the channel exactly; it is defined for every element in the
-split (100% computable, against 98.9% for mean electronegativity); it is chemically
-meaningful, being the quantity electron-count rules are written in; and it is NOT directly
-emitted -- the model emits elements, counts and lattice parameters, never an electron
-count.
-
-Critically it is not a restatement of density. Across the 26,910 training structures the
-correlation between mass density and valence electron density is 0.725. That matters
-because the multiplier Hessian is the covariance of the constraint statistics, so two
-nearly collinear constraints make the joint solve ill-posed -- the pathology this
-project's own multi-constraint tests construct deliberately. A correlation of 0.725 is
-high enough that the pair is a real test of composition and low enough to stay
-conditioned, which is measured here rather than assumed.
-"""
+"""A second constraint family on real crystals, and why it is not charge neutrality."""
 from __future__ import annotations
 
 import argparse
@@ -64,7 +23,6 @@ from scripts.train.train_crystal import (
 
 SCRIPT = "scripts/crystal/second_channel.py"
 
-# amu/A^3 -> g/cm^3, the same conversion the density channel uses.
 AMU_PER_A3_TO_G_PER_CM3 = 1.66053906660
 
 
@@ -83,12 +41,7 @@ def valence_table(elements=None) -> dict[str, int]:
 
 
 def charge_linearity_evidence(n_structures: int = 4000) -> dict:
-    """Measure how badly a linear proxy approximates the SMACT charge screen.
-
-    This is the evidence for the scope claim, not an assertion of it. If a future
-    serialization or oxidation-state table made the proxy adequate, this measurement
-    would say so.
-    """
+    """Measure how badly a linear proxy approximates the SMACT charge screen."""
     from smact import Element
     train = load_split("train")
     els = sorted({e for c in train for e in c.formula})
@@ -166,24 +119,12 @@ def channel_statistics() -> dict:
 
 
 def _rank_ratio(cm: np.ndarray, cv: np.ndarray) -> float:
-    """Second singular value over the first for the 2-row channel matrix.
-
-    Zero means the two channels are the same constraint on this support, so the joint
-    solve is asking for one constraint twice and its Hessian is singular by construction
-    rather than by numerical accident.
-    """
     s = np.linalg.svd(np.stack([cm, cv]), compute_uv=False)
     return float(s[1] / s[0]) if s[0] > 0 else 0.0
 
 
 def joint_conditioning(n_prefixes: int = 64, seed: int = 0) -> dict:
-    """Solve BOTH constraints jointly on real crystal prefixes and report conditioning.
-
-    Targets are set from the statistic of the unconstrained masked distribution and
-    perturbed, so they sit inside the attainable range by construction -- any failure is
-    the solver's, not an infeasible ask. This is the crystal-data counterpart of the
-    synthetic multi-constraint check.
-    """
+    """Solve BOTH constraints jointly on real crystal prefixes and report conditioning."""
     from scripts.train.train_crystal import CrystalTrainConfig, GrammarMask
 
     train = load_split("train", limit=2000)
@@ -191,25 +132,8 @@ def joint_conditioning(n_prefixes: int = 64, seed: int = 0) -> dict:
     gm = GrammarMask(V, order="cell_first")
     VE = valence_table()
     enc = [V.encode(c) for c in train[:n_prefixes]]
-    # Truncate to a length where the grammar still offers a CHOICE. Past the end of a
-    # sequence only <EOS> is legal, so a prefix cut there has a one-token mask and the
-    # constraint has nothing to act on: the attainable range is a single point and the
-    # solve is vacuous. Measured allowed-token counts by position on this serialization
-    # are 512 at the lattice slots, 94 and 16 alternating at element and count slots, and
-    # 1 past the end -- so prefixes are cut at each row's own element/count positions
-    # rather than at a fixed index.
     def next_token_mask(prefix: np.ndarray) -> np.ndarray:
-        """Mask for the token about to be APPENDED after `prefix`.
-
-        `masks_for` returns the mask AT each existing position, so index -1 is the mask
-        for the token already emitted. Taking it directly describes the wrong position:
-        the channel would be evaluated for the next token while the mask constrained the
-        previous one, and the two would disagree about which slot is being filled. The
-        sampling loop documents the same trap and solves it the same way -- pad by one
-        column and take the last. Getting this wrong is not a small error: it silently
-        produced a support on which the mass channel was identically zero, i.e. an
-        attainable range of {0}, which then read as ill-conditioning.
-        """
+        """Mask for the token about to be APPENDED after `prefix`."""
         padded = np.concatenate(
             [prefix, np.zeros((prefix.shape[0], 1), dtype=prefix.dtype)], axis=1)
         return gm.masks_for(padded)[0, -1, :]
@@ -226,23 +150,12 @@ def joint_conditioning(n_prefixes: int = 64, seed: int = 0) -> dict:
             mk = next_token_mask(pre)
             if mk.sum() <= 1:
                 continue
-            # Require the constraint to be ACTIONABLE at this position: at least two
-            # allowed tokens must carry different channel values, or no substitution can
-            # move the constrained quantity and the solve is vacuous regardless of
-            # conditioning. This is the actionability boundary WS-2 measured, applied as
-            # a precondition on which prefixes can test the joint solve at all.
             cm = weight_channel(pre, V, ATOMIC_MASS)[0][mk]
             cv = weight_channel(pre, V, val_tbl)[0][mk]
             if np.unique(cm).size > 1 and np.unique(cv).size > 1:
                 cand.append((cut, _rank_ratio(cm, cv)))
         if not cand:
             continue
-        # Split by whether the two channels are linearly independent on this support.
-        # At a COUNT position with pending element E the two channels are MASS[E]*k and
-        # VALENCE[E]*k over the tokens cnt:k, so both are proportional to k and the pair
-        # is exactly collinear: one constraint, written twice. Only ELEMENT positions
-        # carry rank 2. This is a property of the serialization, and it is the answer to
-        # "where can two additive-per-element quantities be steered jointly".
         indep = [cut for cut, rr in cand if rr > 1e-6]
         collin = [cut for cut, rr in cand if rr <= 1e-6]
         n_collinear_positions += len(collin)

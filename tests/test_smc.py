@@ -1,10 +1,4 @@
-"""Tests for the SMC baseline, and for the honesty of how it is reported.
-
-Two things need pinning. The density SMC steers must be the density the projection targets, or
-the two methods are compared on different quantities. And the reporting must stay honest in a
-specific way: a best-per-target width selected on the same runs that report the error is
-selection on the evaluation set, so that number must never become the headline.
-"""
+"""Tests for the SMC baseline, and for the honesty of how it is reported."""
 from __future__ import annotations
 
 import json
@@ -33,11 +27,7 @@ def _p() -> dict:
 
 
 def test_smc_scores_the_same_density_the_projection_targets():
-    """The SMC potential's density estimate must equal the published decoder exactly.
-
-    A second parse could disagree about bucket centres, and the two methods would then be
-    compared on different densities without anything looking wrong.
-    """
+    """The SMC potential's density estimate must equal the published decoder exactly."""
     from scripts.crystal.mp20 import ELEMENTS, CrystalVocab, load_split
     from scripts.crystal.smc_steering import _density_estimate
 
@@ -84,11 +74,7 @@ def test_error_falls_with_particle_count_on_average():
 
 
 def test_the_tuned_number_is_not_reported_as_smc_performance():
-    """Selection on the evaluation set must be disclosed, not used.
-
-    The best-per-target width gives a better mean than any fixed width. If that number ever
-    becomes the reported result, this test fails.
-    """
+    """Selection on the evaluation set must be disclosed, not used."""
     p = _p()
     sweep = p.get("sigma_sweep")
     if not sweep:

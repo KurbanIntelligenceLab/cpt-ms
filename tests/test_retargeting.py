@@ -1,10 +1,4 @@
-"""Tests for checkpoint persistence and zero-shot retargeting.
-
-These exist because the retargeting claim is a claim about what a checkpoint carries.
-If a checkpoint silently loses the target it trained at, or if the retargeting script
-overwrites it with the deployment target, the matrix's diagonal becomes
-indistinguishable from its off-diagonal and the headline claim becomes unfalsifiable.
-"""
+"""Tests for checkpoint persistence and zero-shot retargeting."""
 from __future__ import annotations
 
 import sys
@@ -29,7 +23,6 @@ RESULTS = Path(__file__).resolve().parents[1] / "results"
 
 
 def _fake_checkpoint(tmp_path: Path, trained_at: float = 5.0, order: str = "cell_first"):
-    """A checkpoint written the same way the trainer writes one, at tiny scale."""
     cfg = CrystalTrainConfig(arm="projected", d_model=32, n_layer=1, n_head=2,
                              density_target=trained_at, order=order)
     V = CrystalVocab(ELEMENTS, order=order)
@@ -51,12 +44,7 @@ def _fake_checkpoint(tmp_path: Path, trained_at: float = 5.0, order: str = "cell
 
 
 def test_checkpoint_records_the_target_it_trained_at(tmp_path):
-    """The trained target must survive the round trip.
-
-    Retargeting is only meaningful relative to where the checkpoint started. A
-    checkpoint that does not carry its own training target cannot be placed on the
-    matrix at all.
-    """
+    """The trained target must survive the round trip."""
     p, _, _, _ = _fake_checkpoint(tmp_path, trained_at=3.0)
     model, ck = load_checkpoint(p, torch.device("cpu"))
     assert ck["trained_density_target"] == 3.0
@@ -64,11 +52,7 @@ def test_checkpoint_records_the_target_it_trained_at(tmp_path):
 
 
 def test_checkpoint_rebuild_is_exact(tmp_path):
-    """Rebuilt weights must equal saved weights, parameter by parameter.
-
-    A retargeting result read off a model that differs from the trained one measures
-    the rebuild, not the transfer.
-    """
+    """Rebuilt weights must equal saved weights, parameter by parameter."""
     p, cfg, V, max_len = _fake_checkpoint(tmp_path)
     model, ck = load_checkpoint(p, torch.device("cpu"))
     saved = ck["state_dict"]
@@ -79,12 +63,7 @@ def test_checkpoint_rebuild_is_exact(tmp_path):
 
 
 def test_rebuild_rejects_vocabulary_drift(tmp_path):
-    """A checkpoint whose stored vocab size disagrees with the rebuilt one must raise.
-
-    Silently padding or truncating would produce a model that samples from a different
-    grammar than it trained on, and the failure would show up as a plausible-looking
-    density rather than as an error.
-    """
+    """A checkpoint whose stored vocab size disagrees with the rebuilt one must raise."""
     p, _, _, _ = _fake_checkpoint(tmp_path)
     ck = torch.load(p, map_location="cpu", weights_only=False)
     ck["vocab_size"] = ck["vocab_size"] + 1
@@ -104,11 +83,7 @@ def test_rebuild_rejects_architecture_drift(tmp_path):
 
 
 def test_trainer_exposes_target_and_seed_and_ckpt():
-    """The retargeting matrix needs several checkpoints differing only in target/seed.
-
-    If these are not arguments, building the matrix means editing a dataclass between
-    runs, which is exactly how a run gets mislabelled.
-    """
+    """The retargeting matrix needs several checkpoints differing only in target/seed."""
     import inspect
 
     from scripts.train.train_crystal import main
@@ -118,8 +93,7 @@ def test_trainer_exposes_target_and_seed_and_ckpt():
 
 
 def test_frontier_targets_match_the_published_frontier():
-    """Retargeting columns must be the frontier's own targets, or the diagonal cannot
-    be compared against the existing per-target result."""
+    """Retargeting columns must be the frontier's own targets, or the diagonal is not comparable."""
     rows = RESULTS / "steering_frontier_rows.json"
     if not rows.exists():
         pytest.skip("frontier artifact absent")
@@ -133,11 +107,7 @@ def test_frontier_targets_match_the_published_frontier():
 
 
 def test_retargeting_artifact_keeps_train_and_deploy_separate():
-    """Every emitted row must carry BOTH targets and an explicit diagonal flag.
-
-    The claim is about off-diagonal cells. A row that records only one target cannot
-    say whether it is evidence for the claim or the pre-existing result restated.
-    """
+    """Every emitted row must carry BOTH targets and an explicit diagonal flag."""
     art = RESULTS / "zero_shot_retargeting.json"
     if not art.exists():
         pytest.skip("retargeting artifact absent; run scripts.crystal.retarget")
@@ -159,9 +129,7 @@ def test_retargeting_artifact_keeps_train_and_deploy_separate():
 
 
 def test_retargeting_validity_is_exact_everywhere():
-    """Regime S is a property of the mask, so it must hold at deployment targets the
-    checkpoint never trained for. If it does not, the mask claim is narrower than
-    stated and the scope section is wrong."""
+    """Mask validity is a property of the mask, so it must hold at targets never trained for."""
     art = RESULTS / "zero_shot_retargeting.json"
     if not art.exists():
         pytest.skip("retargeting artifact absent")

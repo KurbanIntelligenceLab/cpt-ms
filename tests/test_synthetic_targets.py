@@ -1,9 +1,4 @@
-"""Verification for the synthetic task and its exact targets.
-
-Each test checks a property by an independent route rather than re-running the
-implementation: enumeration against sampling, the tilt against its defining
-optimality condition, the mask against brute-force feasibility.
-"""
+"""Verification for the synthetic task and its exact targets."""
 
 from __future__ import annotations
 
@@ -53,8 +48,6 @@ def test_data_probabilities_match_sampling(task):
 
     powers = (V ** np.arange(L - 1, -1, -1)).astype(np.int64)
     emp = np.bincount(draws.astype(np.int64) @ powers, minlength=V ** L) / n
-    # Monte Carlo error at n draws; compare on total variation, which is the
-    # aggregate the sampling noise bounds cleanly.
     assert 0.5 * np.abs(emp - task.p_data).sum() < 0.02
 
 
@@ -82,11 +75,7 @@ def test_tilt_satisfies_expectation_constraint(task):
 
 
 def test_tilt_is_kl_optimal(task):
-    """No feasible perturbation meeting the constraint lowers KL to the base.
-
-    The exponential-family tilt is the unique minimizer of KL(q || p) subject to
-    E_q[phi] = c. Verified against random constraint-preserving perturbations.
-    """
+    """No feasible perturbation meeting the constraint lowers KL to the base."""
     base = conditioning_target(task, apply_S=True)
     q_star, _ = tilting_target(task, apply_S=True, charge_target=0.0)
     kl_star = kl(q_star, base)
@@ -97,7 +86,6 @@ def test_tilt_is_kl_optimal(task):
     for _ in range(50):
         pert = np.zeros_like(q_star)
         pert[support] = rng.normal(0, 1, size=support.size) * q_star[support]
-        # Project the perturbation to preserve both normalization and E[phi].
         A = np.vstack([np.ones_like(phi[support]), phi[support]])
         coef, *_ = np.linalg.lstsq(A.T, np.vstack([pert[support]]).T, rcond=None)
         pert[support] -= A.T @ coef.ravel()
@@ -112,23 +100,14 @@ def test_tilt_is_kl_optimal(task):
 
 
 def test_expectation_target_still_violates_per_sample(task):
-    """The core scoping claim: expectation satisfaction is not per-sample.
-
-    The KL-optimal expectation-constrained distribution places non-trivial mass
-    on individually violating sequences. This is Regime E's stated limitation,
-    verified rather than asserted.
-    """
+    """The core scoping claim: expectation satisfaction is not per-sample."""
     q, _ = tilting_target(task, apply_S=True, charge_target=0.0)
     assert np.isclose(q @ task.total_charge, 0.0, atol=1e-9)
     assert violation_rate(task, q) > 0.5
 
 
 def test_hard_and_tilt_targets_are_distinct(task):
-    """Conditioning and tilting give different distributions.
-
-    If they coincided, the plan's per-step-proxy vs sequence-level-exact
-    comparison would be vacuous.
-    """
+    """Conditioning and tilting give different distributions."""
     hard = conditioning_target(task, apply_S=True, charge_equals=0)
     tilt, _ = tilting_target(task, apply_S=True, charge_target=0.0)
     assert violation_rate(task, hard) == pytest.approx(0.0, abs=1e-12)

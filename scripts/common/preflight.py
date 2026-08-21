@@ -1,24 +1,4 @@
-"""Pre-flight smoke-test harness (WS-7).
-
-Runs before any real launch, especially a remote one. Its job is to fail in
-seconds on the machine that will run the job, rather than in hours after a
-queue wait.
-
-Each check answers a question that has silently broken a run somewhere:
-
-  imports        Does the code import at all in this environment?
-  determinism    Does a fixed seed give the same numbers twice?
-  ledger         Can the ledger be written and read back here?
-  artifacts      Does artifact emission round-trip with an intact checksum?
-  solver         Does the projection converge to its tolerance on this machine's
-                 float behavior? A residual floor from a numerics difference is
-                 exactly the failure mode CP2 verification uncovered locally.
-  unfinished     Are there runs still marked 'started' from a previous crash?
-
-The harness reports every check rather than stopping at the first failure, since
-a remote box usually has more than one thing wrong with it and one round trip per
-problem is expensive.
-"""
+"""Pre-flight smoke-test harness."""
 
 from __future__ import annotations
 
@@ -54,8 +34,6 @@ def check_imports() -> dict:
             __import__(m)
         except Exception as exc:
             failed[m] = f"{type(exc).__name__}: {exc}"
-    # torch-dependent modules are optional: the synthetic and parser tracks run
-    # without them, so a missing torch is reported rather than fatal.
     optional = {}
     for m in ("scripts.layer.projection",):
         try:
@@ -89,15 +67,7 @@ def check_ledger() -> dict:
 
 
 def check_oracle_coverage() -> dict:
-    """Fail if a verification artifact recorded zero oracle comparisons.
-
-    The gradient verification degrades gracefully when cvxpylayers is missing: it
-    records the oracle as unavailable rather than crashing. That is the right
-    behavior, but it means an artifact can exist, look complete, and carry a null
-    tolerance — and a report citing a figure from an earlier run will keep citing
-    it. Checking the comparison COUNT catches the degraded artifact; checking only
-    for the file's existence does not.
-    """
+    """Fail if a verification artifact recorded zero oracle comparisons."""
     from scripts.common.artifacts import RESULTS_DIR
 
     path = RESULTS_DIR / "gradient_verification.json"
@@ -128,13 +98,7 @@ def check_artifacts() -> dict:
 
 
 def check_solver() -> dict:
-    """Projection must converge to tolerance on this machine.
-
-    Includes the near-optimal-at-initialization case, where the dual is flattest.
-    That configuration is what a line-search regression would silently break,
-    reintroducing a residual floor that biases the active-multiplier fraction —
-    the quantity CP0 gates on.
-    """
+    """Projection must converge to tolerance on this machine."""
     try:
         import torch
         from scripts.layer.projection import project
@@ -149,8 +113,8 @@ def check_solver() -> dict:
     b0 = torch.einsum("bmv,bv->bm", A, p)
 
     far = project(logits, A, b0 + 0.3)
-    near = project(logits, A, b0 + 1e-9)     # dual is flattest here
-    exact = project(logits, A, b0)           # constraint already satisfied
+    near = project(logits, A, b0 + 1e-9)
+    exact = project(logits, A, b0)
 
     worst = max(float(r.residual.abs().max()) for r in (far, near, exact))
     return {

@@ -1,29 +1,4 @@
-"""Priority 2: joint constraints at inference, and the attainability map.
-
-WHAT IS NEW HERE AND WHAT IS NOT. The solver has always taken `A` of shape (B, m, V)
-and returned m multipliers, and CP2 benchmarked its cost at m = 1, 2, 4, 8. So
-multi-constraint capability is not new code. What has never been done is verifying that
-the joint solve is CORRECT at m > 1 with the same protocol used at m = 1, and mapping
-which pairs of targets are jointly attainable. Both are done here.
-
-WHY AN ATTAINABILITY MAP IS THE INTERESTING ARTIFACT. Two constraints that are each
-individually satisfiable need not be jointly satisfiable: the attainable set of a
-distribution over a finite vocabulary is a convex polytope, and two linear functionals
-can pin it to an empty intersection. A per-target error number cannot express that.
-The map distinguishes three regimes, which is the result:
-
-  jointly attainable      both targets inside the polytope; the dual solve converges
-  individually only       each target reachable alone, no distribution meets both
-  neither                 at least one target outside its own attainable range
-
-WHAT THE VERIFICATION MUST RULE OUT. At m = 1 a wrong Jacobian still often produces a
-plausible-looking projection, which is why CP2 used two independent oracles. The same
-risk is worse at m > 1, because the multiplier Hessian is now a genuine m x m matrix
-that can be near-singular when two constraint rows are nearly collinear. So this script
-reports the Hessian condition number alongside the residual: a converged solve on a
-badly conditioned system is not a trustworthy one, and reporting only the residual would
-hide it.
-"""
+"""Priority 2: joint constraints at inference, and the attainability map."""
 from __future__ import annotations
 
 import argparse
@@ -42,23 +17,12 @@ SCRIPT = "scripts/layer/verify_multiconstraint.py"
 
 
 def _attainable_range(a_row: torch.Tensor, mask: torch.Tensor) -> tuple[float, float]:
-    """Min and max of a linear functional over the simplex on the allowed support.
-
-    The extremes of a linear functional over a simplex are attained at vertices, so the
-    range is simply the min and max coefficient among allowed tokens. Anything outside
-    it is infeasible for a reason that has nothing to do with the solver.
-    """
     vals = a_row[mask]
     return float(vals.min()), float(vals.max())
 
 
 def joint_solve_case(B: int, V: int, m: int, seed: int, dtype=torch.float64) -> dict:
-    """One randomized joint-constraint solve, verified the CP2 way.
-
-    Targets are set from the statistic of the unconstrained distribution and then
-    perturbed, so they sit inside the attainable range by construction: a convergence
-    failure here is a solver problem, never an infeasible ask.
-    """
+    """One randomized joint-constraint solve, verified the way."""
     g = torch.Generator().manual_seed(seed)
     logits = torch.randn(B, V, generator=g, dtype=dtype)
     A = torch.randn(B, m, V, generator=g, dtype=dtype)
@@ -71,9 +35,6 @@ def joint_solve_case(B: int, V: int, m: int, seed: int, dtype=torch.float64) -> 
     achieved = torch.einsum("bmv,bv->bm", A, q)
     residual = (achieved - b).abs()
 
-    # Dual Hessian is the covariance of the constraint statistics under q. Its
-    # conditioning bounds how well the multipliers are determined; a near-singular
-    # Hessian means two constraints are nearly the same constraint.
     conds = []
     for i in range(B):
         Ai, qi = A[i], q[i]
@@ -98,25 +59,16 @@ def joint_solve_case(B: int, V: int, m: int, seed: int, dtype=torch.float64) -> 
 
 def attainability_grid(V: int, seed: int, n_grid: int = 9,
                        dtype=torch.float64) -> dict:
-    """Map the joint feasible region of two constraints over one distribution.
-
-    Constraint 1 is a mass-like positive statistic, constraint 2 a signed charge-like
-    statistic, chosen to mirror the two families this project actually instruments
-    (density and charge balance) rather than two arbitrary random rows: the question is
-    whether a realistic PAIR composes, and two random Gaussian rows would be nearly
-    orthogonal by construction and so unrealistically easy.
-    """
+    """Map the joint feasible region of two constraints over one distribution."""
     g = torch.Generator().manual_seed(seed)
     logits = torch.randn(1, V, generator=g, dtype=dtype)
-    mass = torch.rand(V, generator=g, dtype=dtype) * 200.0 + 1.0     # strictly positive
-    charge = torch.randint(-3, 4, (V,), generator=g).to(dtype)       # signed integers
+    mass = torch.rand(V, generator=g, dtype=dtype) * 200.0 + 1.0
+    charge = torch.randint(-3, 4, (V,), generator=g).to(dtype)
     A = torch.stack([mass, charge]).unsqueeze(0)
     mask = torch.ones(1, V, dtype=torch.bool)
 
     r1 = _attainable_range(mass, mask[0])
     r2 = _attainable_range(charge, mask[0])
-    # Grid strictly inside each marginal range: a point outside is trivially infeasible
-    # and would tell us nothing about JOINT attainability, which is the question.
     g1 = np.linspace(r1[0] + 0.05 * (r1[1] - r1[0]), r1[1] - 0.05 * (r1[1] - r1[0]), n_grid)
     g2 = np.linspace(r2[0] + 0.05 * (r2[1] - r2[0]), r2[1] - 0.05 * (r2[1] - r2[0]), n_grid)
 
@@ -128,7 +80,6 @@ def attainability_grid(V: int, seed: int, n_grid: int = 9,
             ach = torch.einsum("bmv,bv->bm", A, res.q)
             resid = float((ach - b).abs().max())
             conv = bool(res.converged.all()) and resid < 1e-6
-            # Individual attainability: solve each constraint alone.
             solo = []
             for j in range(2):
                 rj = project(logits, A[:, j:j + 1, :], b[:, j:j + 1], mask,
@@ -164,14 +115,7 @@ def attainability_grid(V: int, seed: int, n_grid: int = 9,
 
 
 def vocabulary_sweep(seed: int = 0, n_grid: int = 9, sizes=None) -> dict:
-    """How joint attainability depends on vocabulary size.
-
-    A single grid at one vocabulary size would have reported "everything composes",
-    which is an artifact of a large vocabulary rather than a property of the method: the
-    attainable polytope of a distribution over V tokens grows with V, so two constraints
-    that pin a small vocabulary to an empty intersection have room to coexist in a large
-    one. The dependence is the result; a single number would have concealed it.
-    """
+    """How joint attainability depends on vocabulary size."""
     out = []
     for V in (sizes or [8, 16, 32, 64, 128, 256, 512]):
         g = attainability_grid(V=V, seed=seed, n_grid=n_grid)

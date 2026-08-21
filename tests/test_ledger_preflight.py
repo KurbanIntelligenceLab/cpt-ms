@@ -45,7 +45,7 @@ def test_started_record_is_not_rewritten(ledger):
 
 def test_unfinished_runs_are_detected(ledger):
     a = start_run("train", "s.py", {}, [0], ledger_path=ledger)
-    start_run("train", "s.py", {}, [1], ledger_path=ledger)   # never finished
+    start_run("train", "s.py", {}, [1], ledger_path=ledger)
     finish_run(a, "completed", ledger_path=ledger)
     stale = unfinished(ledger_path=ledger)
     assert len(stale) == 1
@@ -67,7 +67,7 @@ def test_config_hash_is_stable_and_discriminating(ledger):
     a = start_run("train", "s.py", {"lr": 1e-3, "n": 4}, [0], ledger_path=ledger)
     b = start_run("train", "s.py", {"n": 4, "lr": 1e-3}, [0], ledger_path=ledger)
     c = start_run("train", "s.py", {"lr": 2e-3, "n": 4}, [0], ledger_path=ledger)
-    assert a.config_hash == b.config_hash      # key order must not matter
+    assert a.config_hash == b.config_hash
     assert a.config_hash != c.config_hash
 
 
@@ -101,13 +101,7 @@ def test_preflight_runs_every_check_despite_failure(monkeypatch):
 
 
 def test_preflight_solver_check_catches_a_residual_floor():
-    """The regression the team asked for, at harness level.
-
-    The near-optimal-at-initialization case is where the dual is flattest and a
-    line-search regression reintroduces a residual floor. The harness must fail
-    rather than pass when that happens, because a floor biases the
-    active-multiplier fraction that CP0 gates on.
-    """
+    """The regression the team asked for, at harness level."""
     torch = pytest.importorskip("torch")
     from scripts.common.preflight import check_solver
 

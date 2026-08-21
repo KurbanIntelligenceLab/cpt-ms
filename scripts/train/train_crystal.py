@@ -1,27 +1,4 @@
-"""Crystal mask-only: the three arms on MP-20 with a real backbone (WS-3).
-
-The synthetic task established the mechanism against exact enumerable targets. This
-carries it to MP-20, where the targets are approximate and the backbone is a real
-model trained on real structures. Two conventions carry over unchanged, per the
-review:
-
-  TWO READINGS FOR projected. The backbone reading applies the mask only and reports what
-  the network internalized; the deployed reading applies the same projection the
-  model trained with and is the system anyone would run. Reporting either alone
-  misleads in opposite directions, and the gap between them IS the internalization
-  result.
-
-  PROBABILITY-WEIGHTED INFEASIBLE-STEP FRACTION. An unweighted mean over a fixed
-  evaluation set is model-independent and therefore not comparable across arms.
-
-What necessarily differs from the synthetic task: the sequence space is not
-enumerable, so every distributional quantity is estimated from samples rather than
-computed exactly. Sample sizes are stated with each figure and the same draw count
-is used for every arm.
-
-The steered quantity is DENSITY, primary on all backbones per
-`preregistration/dial_assignment.md`.
-"""
+"""Crystal mask-only: the three arms on MP-20 with a real backbone."""
 
 from __future__ import annotations
 
@@ -61,25 +38,13 @@ class CrystalTrainConfig:
     seed: int = 0
     eval_every: int = 1000
     n_eval_samples: int = 4096
-    density_target: float = 5.0     # g/cm^3, set from the data below the median
+    density_target: float = 5.0
     train_limit: int | None = None
-    order: str = "cell_first"      # density needs the volume before the composition
-    expected_atoms: float = 10.4    # mean atoms per MP-20 structure
-    channel: str = "static"   # "static" = formulation 2; "prefix" = formulation 3
-    # conditional: conditional-training baseline. Train the masked model on the SUBSET of MP-20
-    # within `filter_tol` of the target instead of applying any constraint at decode
-    # time. This is the "just retrain on filtered data" objection, and it is the
-    # baseline a reviewer reaches for first, so it gets the same budget as mask-only/projected and
-    # its own arm rather than a footnote. Steps are held equal, which is deliberately
-    # generous: the filtered set is smaller, so conditional sees each structure more often.
+    order: str = "cell_first"
+    expected_atoms: float = 10.4
+    channel: str = "static"
     filter_tol: float = 0.5
-    # joint: TWO simultaneous Regime E constraints, density and valence electron density.
-    # The second target is per cubic angstrom, so its unit factor is 1 while mass needs
-    # the amu/A^3 -> g/cm^3 conversion. CP-7 measured that the two channels are linearly
-    # independent only at ELEMENT positions -- at a count position both are proportional
-    # to the count -- and density steering already restricts actionability to element
-    # positions, so the second constraint costs no actionable positions.
-    valence_target: float = 0.48    # e/A^3; data mean is 0.4839
+    valence_target: float = 0.48
 
 
 class CrystalDecoder(nn.Module):
@@ -101,12 +66,7 @@ class CrystalDecoder(nn.Module):
 
 
 class GrammarMask:
-    """Regime S for the crystal serialization: which tokens are legal next.
-
-    Prefix-closed by construction — the legal set depends only on which block is
-    open and what has been emitted — which is what makes the mask trainable without
-    a straight-through estimator, exactly as on the synthetic task.
-    """
+    """Regime S for the crystal serialization: which tokens are legal next."""
 
     def __init__(self, V: CrystalVocab, max_elements: int = 6, order: str = "cell_first"):
         self.V = V
@@ -120,13 +80,7 @@ class GrammarMask:
                   ("<BOS>","<COMP>","<END_COMP>","<CELL>","<END_CELL>","<EOS>")}
 
     def masks_for(self, ids: np.ndarray) -> np.ndarray:
-        """Legal-token mask at every position of every sequence in the batch.
-
-        `out[r, t]` is the set of tokens legal AT position t, i.e. after consuming
-        ids[r, :t]. So the state must be advanced by token t-1 before writing row t.
-        Writing the mask before consuming the current token instead describes what
-        may follow position t-1, which rejects the data's own sequences.
-        """
+        """Legal-token mask at every position of every sequence in the batch."""
         n, L = ids.shape
         out = np.zeros((n, L, len(self.V)), dtype=bool)
         for r in range(n):
@@ -156,7 +110,7 @@ class GrammarMask:
                 elif state == "want_el":
                     m[self.el] = True
                     for e in seen:
-                        m[self.V.index[f"el:{e}"]] = False       # no repeats
+                        m[self.V.index[f"el:{e}"]] = False
                     if n_el >= 1:
                         m[self.i["<END_COMP>"]] = True
                     if n_el >= self.max_elements:
@@ -181,18 +135,7 @@ class GrammarMask:
 
 def weight_channel(ids: np.ndarray, V: CrystalVocab,
                    table: dict[str, float]) -> np.ndarray:
-    """Per-token contribution of ANY additive per-element quantity, given the prefix.
-
-    This is `mass_channel` generalized over the weight table. Charge balance, valence
-    electron count and mass are all sums of a per-element weight times its count, so
-    they share one channel construction; only the table differs. Keeping a single
-    implementation matters because the prefix logic below is the subtle part -- an
-    element token commits nothing until its count arrives -- and two copies of it would
-    drift.
-
-    `mass_channel` is retained as the ATOMIC_MASS specialization so existing callers and
-    every published density artifact keep their exact code path.
-    """
+    """Per-token contribution of ANY additive per-element quantity, given the prefix."""
     n = ids.shape[0]
     out = np.zeros((n, len(V)), dtype=np.float32)
     cnt_idx = [(i, int(t[4:])) for i, t in enumerate(V.tokens) if t.startswith("cnt:")]
@@ -216,19 +159,7 @@ def weight_channel(ids: np.ndarray, V: CrystalVocab,
 
 
 def mass_channel(ids: np.ndarray, V: CrystalVocab) -> np.ndarray:
-    """Per-token mass contribution GIVEN the prefix. Shape (n, vocab).
-
-    The constraint channel is prefix-dependent here, which the synthetic task did
-    not require. An element token `el:E` contributes nothing on its own — the mass
-    it adds is decided by the count token that follows, as ATOMIC_MASS[E] * n. So
-    at a count position with pending element E the channel value of `cnt:n` is
-    ATOMIC_MASS[E] * n, and at an element position the channel is the element's own
-    mass as a proxy for the mass about to be committed.
-
-    A fixed per-token channel makes every count position carry mass zero, so the
-    attainable range collapses to {0} and any nonzero budget is infeasible there.
-    That is a property of the serialization, not of the constraint.
-    """
+    """Per-token mass contribution GIVEN the prefix. Shape (n, vocab)."""
     n = ids.shape[0]
     out = np.zeros((n, len(V)), dtype=np.float32)
     cnt_idx = [(i, int(t[4:])) for i, t in enumerate(V.tokens) if t.startswith("cnt:")]
@@ -252,12 +183,6 @@ def mass_channel(ids: np.ndarray, V: CrystalVocab) -> np.ndarray:
 
 
 def _element_position(ids: np.ndarray, V: CrystalVocab) -> np.ndarray:
-    """True where the NEXT token is an element symbol.
-
-    With the static mass channel these are the only positions at which the
-    constraint is actionable: everywhere else every legal token has channel value
-    zero, so no substitution can move the constrained quantity.
-    """
     n = ids.shape[0]
     out = np.zeros(n, dtype=bool)
     for r in range(n):
@@ -278,20 +203,6 @@ def _element_position(ids: np.ndarray, V: CrystalVocab) -> np.ndarray:
 
 def _additive_budget(ids: np.ndarray, V: CrystalVocab, cfg, table: dict[str, float],
                      target: float, unit_factor: float) -> tuple[np.ndarray, np.ndarray]:
-    """Remaining amount of an additive per-element quantity, and remaining atom slots.
-
-    `_mass_budget` generalized over the weight table, exactly as `weight_channel`
-    generalizes `mass_channel`. The quantity is sum over the formula of table[element]
-    times its count; the target is a DENSITY, so the total the target implies is
-    `target * volume / unit_factor`. For mass, `unit_factor` converts g/cm^3 to amu/A^3.
-    For a count-valued quantity such as valence electrons the target is already per
-    cubic angstrom, so `unit_factor` is 1.
-
-    Everything else follows `_mass_budget` unchanged: NaN until the cell block closes,
-    because the volume is not determined before then, and the denominator is remaining
-    ATOMS rather than element tokens so the target sits on the same per-atom footing as
-    the channel.
-    """
     n, L = ids.shape
     budget = np.full(n, np.nan, dtype=np.float64)
     slots = np.zeros(n, dtype=np.float64)
@@ -300,10 +211,6 @@ def _additive_budget(ids: np.ndarray, V: CrystalVocab, cfg, table: dict[str, flo
         cur_el = None
         for t in range(L):
             tok = V.tokens[ids[r, t]]
-            # len:/ang: payloads are BIN INDICES, not physical values. Reading them as
-            # floats inflates the cell volume by a factor of hundreds and silently
-            # produces a budget that looks plausible; the bin centre is the value the
-            # rest of the code means.
             if tok.startswith("len:"):
                 j = int(tok[4:])
                 lens.append(V.LEN_LO + (j + 0.5) * (V.LEN_HI - V.LEN_LO) / V.N_LEN)
@@ -329,27 +236,6 @@ def _additive_budget(ids: np.ndarray, V: CrystalVocab, cfg, table: dict[str, flo
 
 
 def _mass_budget(ids: np.ndarray, V: CrystalVocab, cfg) -> tuple[np.ndarray, np.ndarray]:
-    """Remaining mass to reach the target density, and remaining element slots.
-
-    Returns (budget_u, slots). Budget is NaN until the cell block closes, because
-    until then the volume — and therefore the total mass a target density implies —
-    is not determined. That is the actionability boundary WS-2 measured, appearing
-    here as an explicit precondition rather than as a silent wrong answer.
-
-    The denominator is remaining ATOMS, not remaining element tokens. The static
-    channel gives an element token its ATOMIC mass — a per-atom quantity — while the
-    mass it actually commits is that atomic mass times the count that follows. So
-    dividing the budget by element slots demands, on MP-20, about three times the
-    mass the data's own next element carries (median 177u demanded against 59u
-    actual), and a third of positions demand more than the heaviest available
-    element. Dividing by remaining atoms puts the target on the same per-atom footing
-    as the channel.
-
-    The atom count cannot be known exactly (the model decides it), so it is estimated
-    from the data mean. An estimate is sound here because the budget is re-derived at
-    every step from the mass actually emitted, so an over- or under-estimate corrects
-    itself on the next token rather than accumulating.
-    """
     n, L = ids.shape
     budget = np.full(n, np.nan, dtype=np.float64)
     slots = np.zeros(n, dtype=np.float64)
@@ -369,7 +255,7 @@ def _mass_budget(ids: np.ndarray, V: CrystalVocab, cfg) -> tuple[np.ndarray, np.
             elif tok.startswith("cnt:") and cur_el:
                 k = int(tok[4:])
                 mass += ATOMIC_MASS.get(cur_el, 0.0) * k
-                n_el += k          # atoms committed, not element tokens
+                n_el += k
                 cur_el = None
         if cell_closed:
             vol = V.cell_volume(lens, angs)
@@ -406,44 +292,19 @@ def sample(model, V, gm, cfg, device, n, *, use_mask: bool, project_at_inference
     for _ in range(max_len - 1):
         logits = model(ids)[:, -1, :]
         if use_mask:
-            # The mask needed is the one for the token about to be APPENDED, i.e.
-            # at position len(ids). masks_for returns the mask AT each existing
-            # position, so index -1 gives the mask for the token already emitted and
-            # every token is generated twice. Pad by one column and take the last.
             cur = ids.cpu().numpy()
             padded = np.concatenate([cur, np.zeros((cur.shape[0], 1), dtype=cur.dtype)], axis=1)
             mk = torch.from_numpy(gm.masks_for(padded)[:, -1, :]).to(device)
-            # A finished row has no legal token; let it emit EOS so the batch is
-            # rectangular without corrupting the mask semantics for live rows.
             mk[done] = False
             mk[done, eos] = True
             logits = logits.masked_fill(~mk, float("-inf"))
 
         if project_at_inference:
-            # RUNNING MASS BUDGET, not a fixed mass per token.
-            #
-            # Density is mass/volume, so a target density fixes a total mass budget
-            # rho*V/1.66054 once the cell is known. Cell-first ordering makes V
-            # determined before any element token, so the per-step target is the
-            # remaining mass spread over the remaining element slots -- the same
-            # running-budget form the synthetic task validated.
-            #
-            # Targeting a constant density value on the mass channel instead (the
-            # first version of this code) asks for 5 u per token, lighter than
-            # lithium, and drives the composition toward the lightest elements.
             B, Vsz = logits.shape
             live = mk if use_mask else torch.ones_like(logits, dtype=torch.bool)
             budget, slots = _mass_budget(ids.cpu().numpy(), V, cfg)
             budget = torch.from_numpy(budget).to(device).float()
             slots = torch.from_numpy(slots).to(device).float()
-            # ACTIONABLE POSITIONS ONLY, per preregistration/actionable_window.md.
-            # With the static channel, only element positions carry nonzero mass: at
-            # a count or structural position every legal token has channel value 0,
-            # so the attainable range is {0} and any nonzero budget is infeasible by
-            # construction. Counting those as infeasible steps measures the
-            # serialization, not the constraint -- it was inflating the reported
-            # infeasible fraction from 0.331 to 0.52 without the projection ever
-            # having had a decision to make there.
             el_next = torch.from_numpy(_element_position(ids.cpu().numpy(), V)).to(device)
             active = (slots > 0) & torch.isfinite(budget) & ~done & el_next
             if cfg.channel == "prefix":
@@ -465,26 +326,11 @@ def sample(model, V, gm, cfg, device, n, *, use_mask: bool, project_at_inference
         else:
             q = torch.softmax(logits, dim=-1)
 
-        # Sanitize before sampling, and fall back on a row that has no mass left.
-        #
-        # `clamp_min(0).nan_to_num()` was not enough and it failed intermittently:
-        # clamp leaves NaN as NaN, nan_to_num then maps it to 0, so an all-NaN row
-        # becomes an all-ZERO row and multinomial raises a device-side assert. Two
-        # runs of twenty died this way, on different seeds at different targets --
-        # seed-dependent rather than target-dependent, which is the signature of a
-        # rare degenerate solve rather than of an unreachable target.
-        #
-        # A row can lose all mass legitimately: where the projection is asked for a
-        # near-degenerate distribution the solved q can underflow across every legal
-        # token. The masked softmax is always a valid distribution at those
-        # positions, so it is the correct fallback, and rows falling back are counted
-        # rather than silently repaired.
         q = torch.nan_to_num(q, nan=0.0, posinf=0.0, neginf=0.0).clamp_min(0)
         bad = q.sum(-1) <= 0
         if bool(bad.any()):
             safe = torch.softmax(logits, dim=-1)
             safe = torch.nan_to_num(safe, nan=0.0, posinf=0.0, neginf=0.0).clamp_min(0)
-            # If even the masked softmax is degenerate the row is finished; emit EOS.
             still_bad = bad & (safe.sum(-1) <= 0)
             q = torch.where(bad.unsqueeze(-1), safe, q)
             if bool(still_bad.any()):
@@ -505,9 +351,6 @@ def sample(model, V, gm, cfg, device, n, *, use_mask: bool, project_at_inference
     return seqs, {
         "per_step_infeasible_fraction": float((n_infeasible / tot).mean()),
         "mean_steps_projected": float(n_projected.mean()),
-        # Rows that lost all probability mass and fell back to the masked softmax.
-        # Reported rather than hidden: a nonzero rate means the solve is degenerating
-        # somewhere and the fallback is doing work the projection should be doing.
         "degenerate_row_rate": float((n_degenerate / tot).mean()),
         "sequences_with_any_degenerate_step": float((n_degenerate > 0).float().mean()),
     }
@@ -515,31 +358,7 @@ def sample(model, V, gm, cfg, device, n, *, use_mask: bool, project_at_inference
 
 def structural_metrics(seqs, V, gm, cfg, train_formulas=None,
                        full_element_freq=None) -> dict:
-    """Validity, density, and DISTRIBUTIONAL COVERAGE of generated sequences.
-
-    Accuracy at the target is not sufficient to compare arms. A model trained only on
-    structures near the target can hit it precisely while generating a narrow slice of
-    chemistry; a steered model reaches the target from the full distribution. Coverage
-    is therefore measured alongside accuracy, and the two are reported together:
-
-      distinct_elements / element_entropy  -- chemical breadth of the samples
-      unique_formula_fraction             -- collapse onto repeated compositions
-      novel_formula_fraction              -- formulas absent from the TRAINING set
-      element_tv_vs_full_data             -- SHIFT from the full data's chemistry
-
-    The last is NOT a diversity measure and must not be read as one. Any arm hitting a
-    target away from the data mean must shift its chemistry to get there, so both arms
-    have a large TV by construction, and the two can order either way: measured across
-    targets 3.0 and 5.0 the conditional arm had the larger TV at one and the smaller at
-    the other. What TV does establish is reproduction: the conditional arm's TV tracks
-    the TV between its own filtered training slice and the full data to within 0.004
-    (0.3919 vs 0.3836 at target 3.0; 0.2028 vs 0.1988 at 5.0), which is what
-    reproducing a slice looks like. Diversity is carried by the unique- and
-    novel-formula fractions, which do not confound the two.
-
-    A high-accuracy, low-coverage arm and a lower-accuracy, high-coverage arm are
-    different propositions, and a single error figure cannot distinguish them.
-    """
+    """Validity, density, and DISTRIBUTIONAL COVERAGE of generated sequences."""
     dens, vdens, valid, complete = [], [], 0, 0
     el_counter: Counter = Counter()
     formulas: list[tuple] = []
@@ -565,10 +384,6 @@ def structural_metrics(seqs, V, gm, cfg, train_formulas=None,
         if d is not None and np.isfinite(d) and 0 < d < 100:
             complete += 1
             dens.append(d)
-            # Valence electron density on the SAME acceptance condition as mass density,
-            # so the two are measured over an identical sample and their errors are
-            # directly comparable. Computing it over a different subset would make the
-            # two dials incomparable for no reason.
             vdv = V.decode_weighted_density(s, VALENCE)
             if vdv is not None and np.isfinite(vdv):
                 vdens.append(vdv)
@@ -592,7 +407,6 @@ def structural_metrics(seqs, V, gm, cfg, train_formulas=None,
 
 
 def _coverage(el_counter, formulas, train_formulas, full_element_freq) -> dict:
-    """Chemical breadth of a sample, and its departure from the reference chemistry."""
     tot = sum(el_counter.values())
     if not tot:
         return {"distinct_elements": 0, "element_entropy_nats": None,
@@ -622,8 +436,6 @@ def main(smoke: bool = False, arm: str = "mask_only", steps: int | None = None,
          ckpt: str | Path | None = None, valence_target: float | None = None) -> Path:
     dev = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     cfg = CrystalTrainConfig(arm=arm, steps=steps or (300 if smoke else 6000))
-    # The target and seed are explicit arguments rather than config-file edits because
-    # the retargeting matrix needs several checkpoints that differ only in those two.
     if density_target is not None:
         cfg.density_target = float(density_target)
     if valence_target is not None:
@@ -634,20 +446,12 @@ def main(smoke: bool = False, arm: str = "mask_only", steps: int | None = None,
         cfg.eval_every, cfg.n_eval_samples, cfg.train_limit = 150, 512, 2000
 
     train = load_split("train", limit=cfg.train_limit)
-    # conditional conditional training: restrict the TRAINING SET to structures near the target
-    # and apply no decode-time constraint. The full-data density statistics are kept
-    # separately, because every arm must be scored against the same reference — scoring
-    # conditional against its own filtered mean would flatter it by construction.
     full_train = list(train)
     full_density = np.array([c.density for c in train])
     n_full = len(train)
     if cfg.arm == "conditional":
         train = [c for c in train
                  if abs(c.density - cfg.density_target) <= cfg.filter_tol]
-        # Floor of 20, not 100. An earlier floor of 100 was a guess, and it was about
-        # to carry a claim that conditional "starves" at sparse targets -- asserting a failure
-        # without running it. The sparse regime is now measured; below 20 structures
-        # there is genuinely nothing to train on and the refusal is itself the result.
         if len(train) < 20:
             raise ValueError(
                 f"conditional filter at target {cfg.density_target} +/- {cfg.filter_tol} left "
@@ -658,13 +462,7 @@ def main(smoke: bool = False, arm: str = "mask_only", steps: int | None = None,
     enc = [V.encode(c) for c in train]
     max_len = max(len(e) for e in enc)
     data = pad_batch(enc, V.index["<EOS>"])
-    # Scoring reference is ALWAYS the full data, never the arm's own training subset:
-    # conditional trains on a filtered slice, and scoring it against that slice's mean would
-    # flatter it by construction. For unconstrained/mask-only/projected the two are identical.
     data_density = full_density
-    # Reference chemistry for coverage metrics: element frequencies over the FULL split
-    # so every arm is compared against the same distribution, and the formula set of
-    # THIS arm's training data so novelty means "not in what this model saw".
     _full_el: Counter = Counter()
     for c in full_train:
         for e, k in c.formula.items():
@@ -682,10 +480,6 @@ def main(smoke: bool = False, arm: str = "mask_only", steps: int | None = None,
     mass_t = torch.tensor([ATOMIC_MASS.get(t[3:], 0.0) if t.startswith("el:") else 0.0
                            for t in V.tokens], device=dev, dtype=torch.float32)
 
-    # Initialization baseline for the projected arm. The decisive quantity is whether the
-    # probability-weighted infeasible-step fraction FALLS through training, as it did
-    # 19.9x on the synthetic task. Measuring it only at convergence cannot answer
-    # that, so it is measured at step 0 against the identical untrained weights.
     init_ref = None
     if cfg.arm in ("projected", "joint"):
         s0, d0 = sample(model, V, gm, cfg, dev, cfg.n_eval_samples, use_mask=True,
@@ -711,9 +505,6 @@ def main(smoke: bool = False, arm: str = "mask_only", steps: int | None = None,
             B, L, Vs = logits.shape
             flat = logits.reshape(B * L, Vs)
             mkf = mk.reshape(B * L, Vs)
-            # Same running-budget target as inference, computed per prefix. Training
-            # and deployment must solve the identical problem, or the layer is
-            # trained against a constraint the deployed system never applies.
             bud = np.empty((B, L)); slt = np.empty((B, L))
             chan = np.empty((B, L, Vs), dtype=np.float32)
             xc = x.cpu().numpy()
@@ -739,10 +530,6 @@ def main(smoke: bool = False, arm: str = "mask_only", steps: int | None = None,
             b = torch.where(act, bt / st.clamp_min(1), lo).clamp(min=lo, max=hi).unsqueeze(-1)
 
             if cfg.arm == "joint":
-                # Second constraint, assembled identically so the two are solved as one
-                # joint problem rather than sequentially. Sequential projection would
-                # satisfy whichever constraint was applied last, which is not the KL
-                # optimum for the pair and is not what CP-7 verified.
                 bud2 = np.empty((B, L)); slt2 = np.empty((B, L))
                 chan2 = np.empty((B, L, Vs), dtype=np.float32)
                 for t in range(L):
@@ -759,43 +546,7 @@ def main(smoke: bool = False, arm: str = "mask_only", steps: int | None = None,
                 b2 = torch.where((st2 > 0) & torch.isfinite(bt2),
                                  bt2 / st2.clamp_min(1), lo2)
                 b2 = b2.clamp(min=lo2, max=hi2).unsqueeze(-1)
-                # Solve jointly only where BOTH channels vary on the allowed support;
-                # where the second is degenerate the pair is rank 1 and the joint solve
-                # is one constraint written twice, so fall back to density alone rather
-                # than feed the solver a singular Hessian.
                 spread2 = (hi2 - lo2) > 1e-9
-                # JOINT FEASIBILITY IS NOT IMPLIED BY TWO FEASIBLE MARGINS. Both targets
-                # can sit inside their own attainable ranges while no single distribution
-                # meets both, which is exactly the "individually attainable only" regime
-                # CP-7 mapped on synthetic grids. On real prefixes the common cause is an
-                # EXHAUSTED budget: once one quantity has reached its target the running
-                # budget for it is 0 while the other is still positive, so the pair demands
-                # a ratio of 0 or infinity that no convex combination of per-token ratios
-                # can produce. Measured on a 4-sequence batch, 5 of 19 actionable positions
-                # were infeasible this way with rank 2 everywhere -- so this is a target
-                # problem, not a conditioning one.
-                #
-                # Feeding those positions to the joint solver produces a non-converged
-                # result that would then be silently discarded, which throws away a
-                # perfectly good SINGLE-constraint projection at a position where density
-                # steering is still feasible. So joint positions are restricted to those
-                # whose required ratio is attainable, and the rest fall back to density
-                # alone and are counted.
-                # Deciding joint feasibility CHEAPLY is not possible here. The obvious
-                # test -- is the required ratio b2/b1 inside the range of per-token
-                # ratios c_i/a_i -- is necessary but not sufficient: checked against an
-                # exact linear program on 400 random two-row systems it agrees on only
-                # 266, calling 134 infeasible systems feasible. An exact test is an LP
-                # per position, which is far more expensive than the projection it would
-                # be guarding.
-                #
-                # So feasibility is not predicted, it is OBSERVED: the dual solve already
-                # reports non-convergence, and for a target outside the attainable set
-                # that is the correct verdict rather than a numerical failure. A position
-                # is treated as joint when the joint solve converged there, and falls back
-                # to the single-constraint projection otherwise. The counts below record
-                # how often that happens, so the fallback rate is a reported quantity
-                # rather than a hidden one.
                 both_pos = (bt > 0) & (bt2 > 0)
                 eligible = act & spread2 & both_pos
                 A = torch.cat([A, A2c], dim=1)
@@ -803,11 +554,6 @@ def main(smoke: bool = False, arm: str = "mask_only", steps: int | None = None,
                 res_j = project(flat, A, b, mkf)
                 res_1 = project(flat, A[:, :1, :], b[:, :1], mkf)
                 joint = eligible & res_j.converged
-                # Per-row choice: the joint solution where it converged, otherwise the
-                # single-constraint projection where THAT converged, otherwise the masked
-                # softmax. The ordering matters -- discarding a good density projection
-                # because the joint solve failed would make joint worse than projected at positions
-                # where the second target simply was not jointly attainable.
                 q = torch.where(joint.unsqueeze(-1), res_j.q,
                                 torch.where((res_1.converged & act).unsqueeze(-1),
                                             res_1.q, torch.softmax(flat, -1)))
@@ -850,10 +596,6 @@ def main(smoke: bool = False, arm: str = "mask_only", steps: int | None = None,
                                 use_mask=True, project_at_inference=True,
                                 max_len=max_len + 2, rng=rng)
                 m["deployed"] = structural_metrics(sd, V, gm, cfg, **COV) | dg
-                # COMPENSATION TEST. If the backbone biases its unaided predictions
-                # to offset a projection that reliably pulls one way, the offset
-                # should scale with the pull. Both are recorded per target so the
-                # sweep can regress one on the other.
                 if m["mean_density"] is not None and m["deployed"]["mean_density"] is not None:
                     m["projection_pull"] = m["mean_density"] - m["deployed"]["mean_density"]
                     m["backbone_offset_vs_data"] = m["mean_density"] - float(data_density.mean())
@@ -889,13 +631,6 @@ def main(smoke: bool = False, arm: str = "mask_only", steps: int | None = None,
         "valence_target": (cfg.valence_target if cfg.arm == "joint" else None),
         "wall_clock_s": round(time.time() - t0, 1),
     }
-    # WEIGHT PERSISTENCE. Every run before this one trained, evaluated in-process and
-    # discarded its weights, so a checkpoint could not be redeployed at a target other
-    # than the one it trained for. Zero-shot retargeting needs exactly that, so the
-    # weights are saved with everything required to rebuild the model without reloading
-    # the training data: max_len and the vocab order fix the geometry, and the config
-    # records the target this checkpoint was TRAINED at, which is not necessarily the
-    # target it will later be DEPLOYED at.
     if ckpt is not None:
         ckpt = Path(ckpt)
         ckpt.parent.mkdir(parents=True, exist_ok=True)
@@ -931,8 +666,6 @@ def main(smoke: bool = False, arm: str = "mask_only", steps: int | None = None,
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--smoke", action="store_true")
-    # Canonical names; the old A-codes still resolve so command lines in old run
-    # notes keep working. scripts/common/arms.py is the vocabulary.
     ap.add_argument("--arm", default="mask_only", type=resolve,
                     choices=["unconstrained", "mask_only", "projected", "conditional", "joint"])
     ap.add_argument("--steps", type=int, default=None)

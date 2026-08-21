@@ -1,10 +1,4 @@
-"""The compensation regression must recover a known answer before it reads real data.
-
-The compensation hypothesis is decided by a slope. An estimator that cannot recover a
-slope it was given, or a verdict rule that fires on a slope of zero, would turn an
-analysis bug into a finding — so both are checked against constructed data where the
-answer is known in advance.
-"""
+"""The compensation regression must recover a known answer before it reads real data."""
 
 from __future__ import annotations
 
@@ -19,7 +13,6 @@ pytestmark = requires_mp20
 
 
 def _verdict(fit: dict) -> bool:
-    """The rule used in analyze_sweep: significant AND materially nonzero."""
     return fit["slope_t_vs_zero"] > 2.0 and fit["slope"] > 0.3
 
 
@@ -42,12 +35,7 @@ def test_verdict_rejects_a_flat_slope():
 
 
 def test_verdict_rejects_a_significant_but_tiny_slope():
-    """Significance alone is not the criterion; the magnitude gate is load-bearing.
-
-    With low noise a slope of 0.05 is estimated precisely enough to clear any
-    t-threshold while being physically meaningless. If the magnitude gate were
-    dropped, this case would be reported as compensation.
-    """
+    """Significance alone is not the criterion; the magnitude gate is load-bearing."""
     rng = np.random.default_rng(2)
     x = np.linspace(-3, 3, 12)
     fit = _ols(x, 0.05 * x + rng.normal(0, 0.01, len(x)))
@@ -86,12 +74,7 @@ def test_rejection_cost_matches_a_direct_count():
 
 
 def test_bulk_targets_are_cheap_for_rejection():
-    """Pins the design gap: inside the data bulk, rejection is not expensive.
-
-    The efficiency leg of the frontier only bites where rejection is costly. If a
-    sweep covers only bulk targets it cannot produce an efficiency result, and this
-    test exists so that limitation is asserted rather than discovered late.
-    """
+    """Pins the design gap: inside the data bulk, rejection is not expensive."""
     from scripts.crystal.analyze_sweep import rejection_cost
     for t in (3.0, 5.0, 6.317, 8.0):
         assert rejection_cost(t)["expected_draws"] < 25, (
@@ -104,24 +87,13 @@ def test_bulk_targets_are_cheap_for_rejection():
 
 
 def test_offset_and_pull_share_a_term_so_their_regression_is_invalid():
-    """The compensation test must not regress a quantity on itself plus a term.
-
-    `backbone_offset_vs_data = backbone - data_mean` and
-    `projection_pull = backbone - deployed` both carry the backbone density with a
-    positive sign, so offset - pull == deployed - data_mean identically. Regressing
-    one on the other therefore has an algebraic slope near 1 regardless of whether
-    any compensation exists, and the first version of this test reported slope 0.585
-    with t = 3.66 on that basis alone.
-
-    The valid regressor is the TARGET, which shares no term with the offset.
-    """
+    """The compensation test must not regress a quantity on itself plus a term."""
     rng = np.random.default_rng(7)
     backbone = rng.normal(9.0, 2.0, 40)
     deployed = rng.normal(5.0, 1.0, 40)
     data_mean = 6.679
     offset = backbone - data_mean
     pull = backbone - deployed
-    # The identity holds for ANY inputs -- that is exactly why the regression is void.
     assert np.abs((offset - pull) - (deployed - data_mean)).max() < 1e-12
     fit = _ols(pull, offset)
     assert fit["slope"] > 0.3 and fit["slope_t_vs_zero"] > 2.0, (
@@ -139,16 +111,9 @@ def _quad(x, y):
 
 
 def test_a_linear_fit_cannot_rule_out_a_non_monotone_relationship():
-    """A near-zero linear slope is not evidence of no relationship.
-
-    The backbone offset varies as an inverted U in the target: the linear fit gives
-    R^2 = 0.02 while the quadratic gives 0.83 on the same rows. Reporting "no
-    relationship" from the linear test alone is the same class of error as
-    regressing a quantity on itself, and this test makes the shape check mandatory
-    by showing a synthetic inverted U that the linear test declares flat.
-    """
+    """A near-zero linear slope is not evidence of no relationship."""
     x = np.linspace(1.0, 20.0, 12)
-    y = 4.0 - 0.04 * (x - 10.0) ** 2          # symmetric about 10, so no linear trend
+    y = 4.0 - 0.04 * (x - 10.0) ** 2
     lin = _ols(x, y)
     _, r2q, vertex = _quad(x, y)
     assert abs(lin["slope"]) < 0.05 and lin["r_squared"] < 0.05, (
@@ -159,11 +124,7 @@ def test_a_linear_fit_cannot_rule_out_a_non_monotone_relationship():
 
 
 def test_quadratic_vertex_is_not_the_argmax_of_the_observations():
-    """Peak VALUE and vertex LOCATION are different quantities.
-
-    Conflating them puts the mechanism at the wrong place on the axis: the largest
-    observed offset sits at one target while the fitted vertex sits elsewhere.
-    """
+    """Peak VALUE and vertex LOCATION are different quantities."""
     x = np.array([1.5, 2.0, 3.0, 5.0, 6.317, 8.0, 13.0, 16.0, 20.0])
     y = np.array([1.408, 1.512, 2.355, 2.517, 3.743, 3.582, 3.119, 1.779, 1.124])
     _, r2q, vertex = _quad(x, y)

@@ -1,32 +1,4 @@
-"""Comparator: fine-tune toward the sequence-level tilt directly, the GDC/DPG comparator.
-
-WHAT THIS COMPARES AND WHY IT IS THE RIGHT COMPARISON. Khalifa, Elsahar and Dymetman
-(ICLR 2021) pose controlled generation as moment constraints and derive the same KL-minimal
-exponential-family optimum this project calls the tilt, then train an autoregressive model
-toward it by distributional policy gradient. That is the sequence-level target the per-step
-projection approximates, so "how much does the surrogate lose?" is answerable only against a
-model actually trained toward the tilt. Everything before this measured the surrogate against
-the tilt's exact distribution; this measures it against a TRAINED APPROXIMATION of the tilt,
-which is what a practitioner would deploy.
-
-WHY THE SYNTHETIC TASK IS THE STRONGEST PLACE FOR IT. The task is exactly enumerable, so both
-arms' induced distributions are computed rather than sampled and every divergence below is
-exact. On crystals the same comparison would rest on sampled estimates of a distribution over
-an astronomically large space, which is a weaker measurement of the same thing.
-
-HOW comparator IS TRAINED. The tilt is available in closed form here, so comparator does maximum likelihood on
-samples drawn from it. That is the fixed point DPG converges to when its proposal matches the
-target: DPG's gradient is an importance-weighted likelihood gradient, and with exact samples
-the weights are one. Training on exact tilt samples therefore gives comparator the BEST case of the
-method it stands for, rather than a reimplementation whose gradient estimator could be blamed
-for the result. comparator gets the mask (Regime S) like every other arm; the difference from projected is
-that comparator has no decode-time projection and projected has no tilt supervision.
-
-WHAT WOULD FALSIFY THE PAPER'S FRAMING. If comparator reached the tilt closely AND matched projected on
-constraint satisfaction, the projection would be a worse route to the same place and the
-contribution would be the cost structure alone. That is the outcome this script is set up to
-detect, not to avoid.
-"""
+"""Comparator: fine-tune toward the sequence-level tilt directly, the GDC/DPG comparator."""
 from __future__ import annotations
 
 import argparse
@@ -69,11 +41,6 @@ def main(steps: int | None = None, seeds=None, smoke: bool = False) -> Path:
         mu = float((q * charge).sum())
         return {
             "mean_charge": mu,
-            # CHARGE VARIANCE IS THE CONCENTRATION QUANTITY, and it belongs on every arm
-            # including the exact optimum. The claim is that per-step bounding concentrates
-            # the constrained total RELATIVE TO THE SEQUENCE-LEVEL OPTIMUM; comparing only
-            # against the unconstrained arm answers a different question. Exact here,
-            # because the distribution is enumerated rather than sampled.
             "charge_variance": float((q * (charge - mu) ** 2).sum()),
             "kl_from_tilt": kl(tilt, q),
             "kl_to_tilt": kl(q, tilt),
@@ -95,7 +62,6 @@ def main(steps: int | None = None, seeds=None, smoke: bool = False) -> Path:
             opt, lambda s: min(1.0, (s + 1) / tcfg.warmup))
         t0 = time.time()
         for _ in range(1, tcfg.steps + 1):
-            # MLE on exact tilt samples: DPG's fixed point with unit importance weights.
             seqs = sample_from(tilt, task, tcfg.batch, rng)
             x = torch.from_numpy(seqs.astype(np.int64)).to(dev)
             inp = torch.cat([torch.full((tcfg.batch, 1), model.bos, device=dev,

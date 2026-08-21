@@ -1,11 +1,4 @@
-"""The manuscript's numbers must match the artifacts they cite.
-
-A figure quoted in a caption, a table cell and a body sentence is three chances to drift,
-and the failure mode this suite is built around is prose that no longer matches a rerun.
-Each test below recomputes a load-bearing value from its artifact and asserts the
-compiled source still carries it. A rounding convention change is a legitimate reason for
-one of these to fail; a rerun that moved a number is the reason they exist.
-"""
+"""The manuscript's numbers must match the artifacts they cite."""
 
 from __future__ import annotations
 
@@ -23,8 +16,6 @@ TEX = ROOT / "development" / "docs" / "template" / "main.tex"
 BIB = ROOT / "development" / "docs" / "template" / "references.bib"
 RESULTS = ROOT / "results"
 
-# Two guards, in one list. A previous version assigned pytestmark twice and the
-# second assignment silently discarded the first.
 pytestmark = [
     requires_dev_tree,
     pytest.mark.skipif(not TEX.exists(), reason="manuscript source not present"),
@@ -36,13 +27,6 @@ def _p(name: str) -> dict:
 
 
 def _assembled() -> str:
-    """main.tex with every \\input inlined.
-
-    The manuscript is split across sections/*.tex, so main.tex on its own is a preamble
-    and a list of includes -- reading it directly makes every prose assertion below pass
-    vacuously or fail spuriously depending on which way the check runs. Resolve the
-    includes so the tests see the document a reader sees.
-    """
     text = TEX.read_text()
 
     def inline(match: "re.Match[str]") -> str:
@@ -53,7 +37,7 @@ def _assembled() -> str:
                 return path.read_text()
         raise AssertionError(f"\\input{{{rel}}} does not resolve from {TEX.parent}")
 
-    for _ in range(3):  # inputs may nest
+    for _ in range(3):
         text, n = re.subn(r"\\input\{([^}]+)\}", inline, text)
         if not n:
             break
@@ -75,8 +59,6 @@ def test_concentration_numbers_match_their_artifacts():
     a6 = _p("tilt_comparator.json")
     src = _src()
 
-    # These arrays are [mean, sd] pairs, NOT per-seed lists. Averaging them yields a
-    # number that is not any real quantity -- a mistake made once already.
     a3_var = a2["projected"]["charge_variance"][0]
     a3_viol = a2["projected"]["violation_rate"][0]
     tilt_var = a6["reference"]["tilt"]["charge_variance"]
@@ -86,14 +68,12 @@ def test_concentration_numbers_match_their_artifacts():
     for value in (f"{a3_var:.3f}", f"{tilt_var:.3f}", f"{data_var:.3f}"):
         assert value in src, f"charge variance {value} missing from the manuscript"
 
-    # The claim is stated against the OPTIMUM, not against the unconstrained arm.
     assert f"{tilt_var / a3_var:.2f}" in src, (
         "the variance factor must be quoted against the sequence-level optimum; "
         "quoting it against the mask-only arm answers a different question"
     )
     assert f"{tilt_viol / a3_viol:.2f}" in src, "per-sequence violation ratio missing"
 
-    # Anti-concentration: the optimum raises variance above the data it started from.
     assert tilt_var > data_var > a3_var, (
         "the ordering projection < data < optimum is the mechanism; if a rerun "
         "reversed it, every concentration sentence in the paper is wrong"
@@ -186,12 +166,6 @@ def test_every_bib_entry_is_cited_and_every_citation_resolves():
 
 
 def _no_comments(text: str) -> str:
-    """Blank LaTeX comment bodies, preserving line structure.
-
-    Comments matter here because affiliations.tex rules its sections off with `% ---
-    home ---...`, and those dashes are invisible to a reader. A check that counts them
-    reports 49 em dashes on a manuscript that has none in prose.
-    """
     return re.sub(r"(?<!\\)%[^\n]*", "%", text)
 
 
@@ -222,7 +196,7 @@ def test_figures_referenced_by_the_manuscript_exist_as_vector_pdfs():
 
 
 def test_generated_plausibility_funnel_matches_its_artifact():
-    """CPR4 was regenerated after the sampling-seed fix; the funnel table must track it."""
+    """Was regenerated after the sampling-seed fix; the funnel table must track it."""
     f = _p("generated_plausibility.json")["funnel"]
     rc = _p("generated_plausibility.json")["reference_ceiling"]
     src = _src()
@@ -236,8 +210,6 @@ def test_generated_plausibility_funnel_matches_its_artifact():
     assert f"{rc['electronegativity_ordered_rate']:.4f}" in src
     assert f"{rc['packing_plausible_rate']:.4f}" in src
 
-    # The gaps quoted in prose must be the artifact's own ceiling minus its own rate,
-    # not a stale value carried over from a pre-regeneration draft.
     gap_charge = rc["charge_balanced_rate"] - scr["charge_balanced_rate"]
     gap_eneg = rc["electronegativity_ordered_rate"] - scr["electronegativity_ordered_rate"]
     gap_pack = rc["packing_plausible_rate"] - scr["packing_plausible_rate"]
@@ -263,9 +235,6 @@ def test_hybrid_selection_table_matches_the_regenerated_fig3_curve():
     assert f"{smc['mean_error']:.3f}" in src
     assert f"{smc['mean_unique_fraction']:.3f}" in src
 
-    # The removed projection-alone diamond must not resurface as a separately plotted
-    # point in the figure caption text (a %% provenance comment naming the artifact
-    # field is fine; a caption claiming a standalone "projection" marker is not).
     caption_text = re.search(r"\\caption\{.*?fig:pareto", _assembled(), re.S)
     main_caption = re.search(
         r"\\caption\{\\textbf\{Accuracy bought.*?\\label\{fig:pareto\}", _assembled(), re.S
@@ -300,8 +269,6 @@ def test_solver_robustness_conditioning_gap_is_internally_consistent():
     gap_orders = math.log10(collinear / realistic)
     src = _src()
 
-    # The manuscript must not claim a "three orders of magnitude" gap when the
-    # artifact's own two condition numbers are roughly ten orders of magnitude apart.
     assert gap_orders > 9, "test fixture assumption changed; re-check the artifact"
     assert "three orders of magnitude below the near-collinear" not in src
     assert "ten orders of magnitude below the near-collinear" in src

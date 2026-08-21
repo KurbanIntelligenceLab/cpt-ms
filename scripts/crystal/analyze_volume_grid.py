@@ -1,17 +1,4 @@
-"""Analyze the joint two-constraint grid: does a second additive constraint steer?
-
-WHAT THIS TESTS. joint trains through a JOINT projection of mass density and valence
-electron density. The grid crosses three density targets with three valence targets, and
-each row is accompanied by a single-constraint projected control at the same density target, so
-any difference is attributable to the second constraint rather than to training noise.
-
-THE DECISIVE QUANTITY IS PASS-THROUGH, NOT ERROR. A dial that reports a plausible value
-at every target has not necessarily been steered: it may simply be reproducing whatever
-the unconstrained model does. So the measure here is the RANGE of achieved values divided
-by the range of requested values, checked against the control, and monotonicity in the
-target. A non-monotone response means the dial is not being controlled at all, however
-small the apparent errors.
-"""
+"""Analyze the joint two-constraint grid: does a second additive constraint steer?"""
 from __future__ import annotations
 
 import argparse
@@ -27,7 +14,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from scripts.common.artifacts import emit
 
 SCRIPT = "scripts/crystal/analyze_a7_grid.py"
-DATA_VALENCE_SD = 0.2019   # second_channel.json channel_statistics
+DATA_VALENCE_SD = 0.2019
 DATA_VALENCE_MEAN = 0.4839
 
 
@@ -128,11 +115,6 @@ def main(results_dir: str | Path = "results", smoke: bool = False) -> Path:
     rows = per_row(cells, controls)
     complete = [r for r in rows if r.get("complete")]
 
-    # MATCHED TARGETS ONLY. Averaging joint over the density targets it reached against
-    # controls over all three is confounded: the d=8.0 control sits above the reachable
-    # ceiling and carries an error of 1.26, so an unmatched comparison would credit joint
-    # with an advantage that is really the absence of that cell. Only density targets
-    # present in BOTH arms are compared.
     have_a7 = {c["density_target"] for c in cells if c["deployed_density"] is not None}
     matched = sorted(t for t in have_a7 if controls.get(t, {}).get("deployed_density"))
     dens_err = [abs(c["deployed_density"] - c["density_target"]) for c in cells
@@ -140,12 +122,6 @@ def main(results_dir: str | Path = "results", smoke: bool = False) -> Path:
                 and c["density_target"] in matched]
     ctrl_err = [abs(controls[t]["deployed_density"] - t) for t in matched]
 
-    # FIXED-TARGET COLUMN. A row needs two valence cells for pass-through, so a partial row
-    # contributes nothing to that measure. But the cells at a SHARED valence target across
-    # density rows are directly comparable, and they test the constraint's effect more
-    # cleanly than pass-through does: each cell is paired with its own single-constraint
-    # control, so the comparison is deviation-from-control rather than an absolute level
-    # that the density constraint drags around on its own.
     by_vt: dict[float, list[dict]] = {}
     for c in cells:
         by_vt.setdefault(c["valence_target"], []).append(c)
@@ -206,7 +182,6 @@ def main(results_dir: str | Path = "results", smoke: bool = False) -> Path:
         mono = [r["monotone_in_target"] for r in complete]
         summary["max_pass_through"] = max(pt) if pt else None
         summary["any_row_monotone"] = any(mono)
-        # The verdict is derived from the measurements, not asserted alongside them.
         if pt and max(pt) < 0.25 and not any(mono):
             summary["verdict"] = (
                 "The second constraint does not steer: pass-through below 25% on every "

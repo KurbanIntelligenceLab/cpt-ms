@@ -1,34 +1,4 @@
-"""Why a real-valued budget is not a finite automaton at usable size.
-
-WHAT THIS ARGUES AND WHAT IT DOES NOT. Ctrl-G and GeLaTo amortize constraint control across
-constraints without retraining -- the same word this paper uses for its own central claim --
-so the distinction has to be made rather than assumed. Theirs is not a weaker method: for the
-constraint class they target, a deterministic finite automaton over tokens, they are exact and
-require no per-constraint training at all. The claim here is narrow: the constraint class
-differs, because tracking a real-valued running budget to a useful tolerance needs a number of
-automaton states that grows inversely with that tolerance.
-
-The argument is arithmetic, not empirical, so this script computes rather than measures. What
-it takes from data is the range the budget must cover and the tolerance the task actually
-demands -- both read from MP-20 and from the vocabulary's own discretization, so the table
-says what THIS task needs rather than what a hypothetical one might.
-
-WHAT THE ARITHMETIC ACTUALLY SHOWS, INCLUDING AGAINST THE FRAMING THIS SCRIPT WAS WRITTEN TO
-SUPPORT. The intended conclusion was that the automaton is intractably large. It is not. At the
-finest tolerance this serialization can express -- one cell-parameter bin, 1/512 relative --
-the budget needs about 100 buckets and the product with parse position is under 10^5 states,
-which is a fraction of the model's parameter count and entirely buildable. That conclusion is
-recorded here rather than deleted, because it was wrong for a reason worth stating: a size
-argument was the intuitive objection and the measurement does not support it.
-
-The real distinction is per-instance construction. A DFA encodes ONE constraint instance: the
-budget bound is compiled into the transition structure, so a different density target is a
-different automaton. Their amortization is across constraints at a fixed model; the claim here
-is across targets of one constraint at a fixed model. The two are compatible and neither
-subsumes the other. The measurable consequence is that the ten frontier targets in this paper
-would require ten automata totalling ~10^6 states, against one dual solve that takes the target
-as a runtime argument.
-"""
+"""Why a real-valued budget is not a finite automaton at usable size."""
 from __future__ import annotations
 
 import argparse
@@ -58,9 +28,6 @@ def main(smoke: bool = False) -> Path:
     V = CrystalVocab(ELEMENTS)
     el_mass = np.array([ATOMIC_MASS[e] for e in ELEMENTS], dtype=float)
 
-    # The vocabulary's own discretization floor: the cell-parameter tokens are binned, so the
-    # achieved density cannot be resolved more finely than one bin. Any tolerance below this
-    # is finer than the task can express and would be a spurious demand on the automaton.
     n_len_bins = sum(1 for t in V.tokens if t.startswith("len:"))
     n_ang_bins = sum(1 for t in V.tokens if t.startswith("ang:"))
     floor_rel = 1.0 / n_len_bins if n_len_bins else float("nan")
@@ -76,13 +43,11 @@ def main(smoke: bool = False) -> Path:
             "at_or_below_task_floor": bool(tol_rel < floor_rel),
         })
 
-    # A DFA over tokens must also carry the parse position, since the same budget value means
-    # different things at an element slot and a count slot. That is a product, not a sum.
     parse_states = int(len(V.tokens))
     for r in rows:
         r["with_parse_state_product"] = int(r["budget_states"] * parse_states)
 
-    model_params = 5_000_000       # the backbone this paper trains
+    model_params = 5_000_000
     for r in rows:
         r["states_over_model_params"] = r["with_parse_state_product"] / model_params
 
@@ -105,7 +70,6 @@ def main(smoke: bool = False) -> Path:
         "consequence": None,
     }
 
-    # The row at the tolerance the task actually demands
     usable = [r for r in rows if not r["at_or_below_task_floor"]]
     tight = min(usable, key=lambda r: r["relative_tolerance"]) if usable else rows[0]
     n_targets = len(FRONTIER_TARGETS)

@@ -1,9 +1,4 @@
-"""Every cited work must be pointed at in prose, and every prose citation must resolve.
-
-A reference list nobody points at is not a citation, and a name in prose with no entry is
-worse. These tests keep the two halves in correspondence, and pin the two attributions that
-external review got wrong or that are easy to get wrong.
-"""
+"""Every cited work must be pointed at in prose, and every prose citation must resolve."""
 from __future__ import annotations
 
 import re
@@ -18,7 +13,6 @@ from _devtree import requires_dev_tree
 
 pytestmark = requires_dev_tree
 
-# Surname -> (venue string that must appear in the entry, must-appear-in-prose)
 EXPECTED = {
     "Khalifa": "ICLR",
     "Kruszewski": "ACL",
@@ -66,8 +60,7 @@ def test_venues_are_as_the_publisher_states_them():
 
 
 def test_the_two_systems_are_findable_by_name():
-    """GeLaTo and Ctrl-G are referred to by system name in prose; a reader must be able to
-    connect those names to the author-year entries."""
+    """Systems named in prose must be connectable to their author-year entries."""
     body, refs = _split()
     for sysname in ("GeLaTo", "Ctrl-G"):
         assert sysname in body, f"{sysname} not discussed in prose"
@@ -89,8 +82,7 @@ def test_mattergen_is_positioned_against_the_composition_result():
 
 
 def test_the_scale_limitation_is_stated_where_the_external_models_are_cited():
-    """Citing CrystaLLM and MatterGen invites a scale comparison; state it rather than let a
-    reviewer notice it."""
+    """Citing the external models invites a scale comparison, so state the limitation there."""
     body, _ = _split()
     txt = re.sub(r"\s+", " ", body)
     assert "smaller" in txt and (

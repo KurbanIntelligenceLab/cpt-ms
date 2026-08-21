@@ -1,9 +1,4 @@
-"""CIF grammar soundness, non-triviality, and the syntactic/semantic boundary.
-
-Soundness is checked against pymatgen's CifParser, which shares no code with the
-emitter. That independence is load-bearing: it caught a missing required column
-(`_atom_site_label`) that reading the specification had not.
-"""
+"""CIF grammar soundness, non-triviality, and the syntactic/semantic boundary."""
 
 from __future__ import annotations
 
@@ -35,22 +30,13 @@ def _sample(seed: int) -> str:
 
 @pytest.mark.parametrize("seed", range(12))
 def test_every_masked_sample_is_syntactically_valid(seed):
-    """Soundness: the mask must make syntactic invalidity impossible.
-
-    This is the whole claim of Regime S on this backbone. A single failure here is
-    a defect in the grammar, not a statistical shortfall.
-    """
+    """Soundness: the mask must make syntactic invalidity impossible."""
     ok, kind = parses(_sample(seed))
     assert ok, f"seed {seed}: masked sample failed to parse ({kind})"
 
 
 def test_mask_is_not_a_single_forced_path():
-    """Non-triviality: 'valid by construction' must not mean 'one output'.
-
-    If the mask admitted one character at every step the comparison against
-    unconstrained decoding would be vacuous, so the branching factor and the
-    diversity of completed samples are both asserted.
-    """
+    """Non-triviality: 'valid by construction' must not mean 'one output'."""
     rng = np.random.default_rng(3)
     s, widths = GrammarState(), []
     for _ in range(900):
@@ -78,12 +64,7 @@ def test_grammar_terminates_in_the_done_phase():
 
 
 def test_mask_is_strictly_narrower_than_the_vocabulary():
-    """The mask must actually exclude characters, at every step of a full run.
-
-    A mask equal to the vocabulary would be no mask at all. Checked at every
-    position rather than once, so a grammar that stops constraining partway
-    through cannot pass.
-    """
+    """The mask must actually exclude characters, at every step of a full run."""
     vocab = set(full_vocabulary())
     rng = np.random.default_rng(2)
     s = GrammarState()
@@ -97,12 +78,7 @@ def test_mask_is_strictly_narrower_than_the_vocabulary():
 
 
 def test_required_label_column_is_present():
-    """Regression: pymatgen raises KeyError without `_atom_site_label`.
-
-    Found by running the emitter's output through the independent parser rather
-    than by reading the CIF specification, which is why the soundness oracle is
-    third-party.
-    """
+    """Regression: pymatgen raises KeyError without `_atom_site_label`."""
     text = _sample(0)
     assert "_atom_site_label" in text
     ok, kind = parses(text)
@@ -110,13 +86,7 @@ def test_required_label_column_is_present():
 
 
 def test_syntactic_and_semantic_validity_are_measured_separately():
-    """The scope boundary, asserted rather than described.
-
-    Masking guarantees syntax and says nothing about physical coherence. If these
-    two rates were equal the distinction would be untestable and the earlier
-    conflation — which reported the masked arm at 47% when every sample was
-    syntactically valid — could recur unnoticed.
-    """
+    """The scope boundary, asserted rather than described."""
     syn = sem = 0
     for seed in range(24):
         text = _sample(seed)
@@ -132,12 +102,7 @@ def test_syntactic_and_semantic_validity_are_measured_separately():
 
 
 def test_absurd_angles_are_a_semantic_not_syntactic_failure():
-    """Pin the specific mechanism behind the syntactic/semantic gap.
-
-    A cell with near-degenerate angles parses cleanly and then fails to yield a
-    lattice. Substituting right angles must convert a semantic failure into a
-    success without touching the syntax.
-    """
+    """Pin the specific mechanism behind the syntactic/semantic gap."""
     import re
 
     bad = next(t for t in (_sample(i) for i in range(30))

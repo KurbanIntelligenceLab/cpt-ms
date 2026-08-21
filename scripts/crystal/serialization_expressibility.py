@@ -1,28 +1,4 @@
-"""Why the second serialization is not a training run: the constraint does not exist there.
-
-WHAT WAS ASKED FOR AND WHY IT CANNOT BE RUN AS SCOPED. The review asks for the density arm
-retrained on a second serialization, to separate properties of the method from properties of
-this token ordering. The trainer would need a backbone flag, and the flag is the easy part.
-The obstacle is prior: under composition-first ordering the density constraint is not
-expressible as a per-step linear expectation AT ALL, so the arm would train with zero
-actionable positions and the comparison would measure nothing.
-
-THE REASON IS ARITHMETIC, NOT ENGINEERING. Density is mass over volume, a RATIO. A target
-density fixes a total mass budget only once the volume is known. Under cell-first the cell
-tokens close before any element token, so the running budget rho*V/1.6605 minus mass-so-far
-is a determined real number and the constraint takes exactly the form the synthetic task
-validated. Under composition-first the volume is still undetermined while element tokens are
-being emitted, so there is no budget to project onto; targeting a fixed mass per token
-instead is a DIFFERENT constraint, and it drives the composition toward the lightest
-available elements, which is what the project's first crystal run did before the ordering was
-changed.
-
-WHAT THIS SCRIPT MEASURES. The fraction of element positions at which the density budget is
-determined, under each ordering, on real prefixes. That converts the docstring's assertion
-into a measurement, and it is the honest form of the limitation the review wanted addressed:
-not "we did not get to the second serialization" but "the constraint class and the
-serialization are coupled, and here is the coupling".
-"""
+"""Why the second serialization is not a training run: the constraint does not exist there."""
 from __future__ import annotations
 
 import argparse
@@ -64,8 +40,6 @@ def main(n_structures: int = 400, smoke: bool = False) -> Path:
                 tot += 1
                 if np.isfinite(b[0]) and slots[0] > 0:
                     det += 1
-                # The second family is also a density (per volume), so it inherits the
-                # same dependence -- checked rather than assumed by analogy.
                 bv, sv = _additive_budget(pre, V, cfg, {k: float(v) for k, v in VALENCE.items()},
                                           0.48, 1.0)
                 tot_val += 1

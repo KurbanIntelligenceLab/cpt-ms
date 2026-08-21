@@ -1,26 +1,4 @@
-"""Is one retargeted checkpoint EQUIVALENT to seven trained models, or merely not-different?
-
-WHY THIS EXISTS. The amortization claim rests on a paired comparison that returns p = 1.0.
-A large p-value is not evidence of equivalence -- it is the absence of evidence of
-difference, and with seven paired targets a reviewer is right to ask whether the test could
-have detected anything at all. This script answers that question three ways rather than
-asserting it: the confidence interval on the paired difference, the minimum effect the
-design could detect, and a two-one-sided-tests procedure against a pre-specified margin.
-
-THE MARGIN IS READ FROM THE PRE-REGISTRATION, NOT FROM THIS FILE. A margin living in the
-analysis script is a margin that can be edited after seeing the result, which is not a
-pre-specification. `preregistration/equivalence_margin.md` carries the value, the rule
-that produced it (the retargeted arm's own mean within-target seed sd), and the two-part
-decision rule; this script parses it and fails loudly if it is absent or disagrees with the
-rule. A difference smaller than the method's own run-to-run reproducibility is not one
-anyone could act on, and a margin tied to the arm's own noise cannot be widened to pass
-without changing the arm.
-
-WHY THE WILCOXON RESULT IS REPORTED WITH ITS FLOOR. At n = 7 the smallest attainable
-two-sided p is 2/2^7 = 0.015625 under any data whatsoever, so a large p carries very little
-information and quoting it alone would overstate what the difference test can establish.
-The floor is computed here rather than asserted.
-"""
+"""Is one retargeted checkpoint EQUIVALENT to seven trained models, or merely not-different?"""
 from __future__ import annotations
 
 import argparse
@@ -43,11 +21,7 @@ PREREG = (Path(__file__).resolve().parents[2] / "development" / "preregistration
 
 
 def read_prereg_margin() -> tuple[float, Path]:
-    """The margin is a pre-registration, so it is read from one.
-
-    Kept out of this script deliberately: a constant here could be edited after seeing the
-    result, and a margin that can be edited after the fact is not a pre-specification.
-    """
+    """The margin is a pre-registration, so it is read from one."""
     if not PREREG.exists():
         raise FileNotFoundError(
             f"no pre-registered margin at {PREREG}; the equivalence claim requires one"
@@ -56,8 +30,6 @@ def read_prereg_margin() -> tuple[float, Path]:
     if not m:
         raise ValueError(f"{PREREG} does not define EQUIVALENCE_MARGIN_G_PER_CM3")
     return float(m.group(1)), PREREG
-
-
 
 
 def main(results_dir: str | Path = "results", smoke: bool = False) -> Path:
@@ -94,15 +66,10 @@ def main(results_dir: str | Path = "results", smoke: bool = False) -> Path:
     p_primary = tost(margin)
     sensitivity = {f"{m:.2f}": tost(m) for m in (0.10, 0.15, 0.20, 0.25)}
 
-    # Bootstrap CI on the mean paired difference: 10,000 paired resamples. The parametric
-    # interval assumes normality of seven differences, which is not checkable at n = 7,
-    # so both are reported and the claim uses whichever is wider.
     rng = np.random.default_rng(0)
     boot = np.array([d[rng.integers(0, n, n)].mean() for _ in range(10_000)])
     ci_boot = (float(np.percentile(boot, 2.5)), float(np.percentile(boot, 97.5)))
 
-    # The Wilcoxon floor is a property of n, not of the data: with n paired observations
-    # the smallest attainable two-sided p is 2/2^n. Computed, not asserted.
     wilcoxon_floor = 2.0 / (2 ** n)
 
     w = stats.wilcoxon(ret, fro)

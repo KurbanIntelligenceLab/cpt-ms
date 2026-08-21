@@ -1,32 +1,4 @@
-"""Exact per-charge-value marginals recovered by RETRAINING the missing arms (WS7 fix).
-
-compute_fig1_charge_distributions.py could only plot 3 objects because two required
-arms -- projected's trained-and-deployed system and comparator's trained model -- were never saved as
-checkpoints; only their scalar summaries (results/training_summary.json,
-results/tilt_comparator.json) survive. This script closes that gap honestly by
-RETRAINING those arms at a single seed (seed 0), using the identical hyperparameters,
-architecture and training loop as the published multi-seed runs (scripts/train/train_synthetic.py,
-scripts/synthetic/train_comparator.py), and then computing each arm's EXACT induced distribution
-over all 65,536 enumerable sequences (`induced_distribution_from_model`), marginalized onto
-the integer total-charge statistic.
-
-Single seed, not the published 3 -- retraining 3 seeds of projected alone costs ~30 minutes of the
-~35 s/1000-step projected wall clock reported in training_summary.json. The scalar summaries
-derived from this single seed's marginal are checked against the published multi-seed
-mean +/- sd below; if a value falls outside a plausible seed spread that is reported rather
-than silently shipped.
-
-Arms produced here:
-  data          exact data/base distribution (Regime S applied), no training
-  tilt          exact sequence-level KL-optimal tilt, no training
-  mask_only  trained mask-only decoder, backbone reading (no projection)
-  A3_backbone   trained projection-decoder, read WITHOUT the projection (what the
-                network internalized on its own)
-  A3_deployed   trained projection-decoder, read WITH the same projection it trained
-                with (the system a user would actually run)
-  comparator            decoder trained by MLE on exact tilt samples (train_comparator.py's rule),
-                backbone reading -- comparator has no decode-time projection by construction
-"""
+"""Exact per-charge-value marginals recovered by RETRAINING the missing arms fix)."""
 from __future__ import annotations
 
 import argparse
@@ -55,7 +27,6 @@ SCRIPT = "scripts/synthetic/charge_marginals.py"
 SEED = 0
 STEPS = 4000
 
-# Published multi-seed reference values, read from stored artifacts (not hand-typed).
 _A2_SUMMARY = "results/training_summary.json"
 _A6_SUMMARY = "results/tilt_comparator.json"
 
@@ -76,13 +47,7 @@ def scalar_stats(charge: np.ndarray, q: np.ndarray, target: float = 0.0) -> dict
 
 def train_arm(arm: str, task, cfg: TaskConfig, dev, seed: int = SEED,
               steps: int = STEPS):
-    """Reproduce train_synthetic.main()'s training loop exactly, for arm in {unconstrained, mask-only, projected}.
-
-    Identical model init, data order, optimizer schedule and step count as the
-    published run at this seed -- the only published run this script's seed=0
-    exactly matches is one of the 3 seeds already averaged into
-    results/training_summary.json.
-    """
+    """Reproduce train_synthetic's training loop exactly for one arm."""
     tcfg = TrainConfig(arm=arm, steps=steps, seed=seed)
     torch.manual_seed(tcfg.seed)
     rng = np.random.default_rng(tcfg.seed)
@@ -125,9 +90,8 @@ def train_arm(arm: str, task, cfg: TaskConfig, dev, seed: int = SEED,
 
 def train_comparator_arm(task, cfg: TaskConfig, tilt: np.ndarray, dev, seed: int = SEED,
                   steps: int = STEPS):
-    """Reproduce train_comparator.main()'s single-seed training rule exactly: MLE on exact
-    tilt samples, mask active, no decode-time projection."""
-    tcfg = TrainConfig(arm="mask_only", steps=steps, seed=seed)  # comparator uses the mask-only arch/mask
+    """Reproduce train_comparator's rule exactly: MLE on exact tilt samples, mask active, no decode-time projection."""
+    tcfg = TrainConfig(arm="mask_only", steps=steps, seed=seed)
     torch.manual_seed(seed)
     rng = np.random.default_rng(seed)
     model = TinyDecoder(cfg.vocab_size, cfg.length, tcfg).to(dev)
@@ -154,12 +118,6 @@ def train_comparator_arm(task, cfg: TaskConfig, tilt: np.ndarray, dev, seed: int
 
 
 def _plausible(single: float, mean: float, sd: float, k: float = 4.0) -> bool:
-    """Loose seed-spread check: within k standard deviations of the published mean.
-
-    k=4 rather than ~2 because this is ONE seed being checked against a 3-seed
-    mean/sd where sd itself is estimated from only 3 points -- a tight z-test would
-    flag ordinary seed variance as a discrepancy.
-    """
     if sd == 0.0:
         return abs(single - mean) < 1e-6 or abs(single - mean) < 0.5
     return abs(single - mean) <= k * sd
@@ -177,19 +135,16 @@ def main(smoke: bool = False) -> Path:
     base_S = base_S / base_S.sum()
     tilt, lam = tilting_target(task, apply_S=True)
 
-    # --- mask-only: mask-only decoder, backbone reading ---
     model_a2, tcfg_a2, wall_a2 = train_arm("mask_only", task, cfg, dev, steps=steps)
     q_a2 = induced_distribution_from_model(model_a2, task, cfg, tcfg_a2, dev,
                                             project_at_inference=False)
 
-    # --- projected: mask + projection decoder, backbone AND deployed readings ---
     model_a3, tcfg_a3, wall_a3 = train_arm("projected", task, cfg, dev, steps=steps)
     q_a3_backbone = induced_distribution_from_model(model_a3, task, cfg, tcfg_a3, dev,
                                                       project_at_inference=False)
     q_a3_deployed = induced_distribution_from_model(model_a3, task, cfg, tcfg_a3, dev,
                                                        project_at_inference=True)
 
-    # --- comparator: MLE on exact tilt samples, no decode-time projection ---
     model_a6, tcfg_a6, wall_a6 = train_comparator_arm(task, cfg, tilt, dev, steps=steps)
     q_a6 = induced_distribution_from_model(model_a6, task, cfg, tcfg_a6, dev,
                                             project_at_inference=False)
@@ -214,7 +169,6 @@ def main(smoke: bool = False) -> Path:
                "seed": SEED, "steps": tcfg_a6.steps, "wall_clock_s": wall_a6},
     }
 
-    # --- Agreement check against published multi-seed summaries ---
     import json as _json
     agreement = []
     if not smoke:

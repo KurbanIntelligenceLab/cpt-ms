@@ -1,10 +1,4 @@
-"""Shared guard for tests that read the manuscript sources.
-
-The manuscript lives under `development/`, which is gitignored: a public clone has
-the code, the tests and the artifacts, but not the paper. Those tests must skip
-there rather than error on a missing path, so the suite a reader runs is honest
-about what it can and cannot check.
-"""
+"""Shared guard for tests that read the manuscript sources."""
 
 from __future__ import annotations
 
@@ -29,12 +23,7 @@ requires_mp20 = pytest.mark.skipif(
 
 
 def requires(module: str) -> pytest.MarkDecorator:
-    """Skip when an optional dependency is absent.
-
-    A missing extra is an install state, not a failed claim. Without this a reader
-    who ran a bare `uv sync` sees red and reasonably concludes the results do not
-    reproduce, when nothing has been measured at all.
-    """
+    """Skip when an optional dependency is absent."""
     return pytest.mark.skipif(
         __import__("importlib.util", fromlist=["util"]).find_spec(module) is None,
         reason=f"{module} is not installed; it comes with the 'crystal' extra")

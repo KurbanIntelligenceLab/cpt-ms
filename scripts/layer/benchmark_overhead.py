@@ -1,34 +1,4 @@
-"""CP2 overhead benchmark: projection layer vs the mask-only masked-softmax baseline.
-
-Measures the pre-registered quantity in `preregistration/overhead_budget.md`:
-per-token wall-clock overhead of the Regime-E projection against the identical mask-only
-masked-softmax forward pass, reported per active-constraint count, with a 30%
-ceiling.
-
-Design decisions that matter for the number being meaningful:
-
-  SAME PASS, NOT A MICROBENCHMARK. The mask-only arm is the identical masked-softmax
-  forward the projected arm performs before projecting, so the comparison isolates the
-  projection's marginal cost rather than comparing two unrelated kernels.
-
-  FLOAT64 INTERNAL SOLVE. The projection solves in float64 regardless of input
-  dtype, because at float32 only a fraction of batch entries converge and half
-  precision raises outright. That is what will run in training, so it is what is
-  benchmarked; timing the input-dtype version would measure unusable code.
-
-  CUDA SYNCHRONIZATION. Every timed region is bracketed by
-  `torch.cuda.synchronize()`. Without it the CPU races ahead of the queued
-  kernels and the projection appears nearly free.
-
-  WARMUP AND MEDIAN. The first calls include allocator and autotune costs.
-  Warmup iterations are discarded and the median over repeats is reported
-  alongside the mean, since a single slow iteration from a background process
-  skews a mean on a shared box.
-
-The hardware is recorded in the artifact. CP2's threshold is pre-registered
-against the training setting, so a benchmark from a different GPU class is not a
-valid test of it.
-"""
+"""Overhead benchmark: projection layer vs the mask-only masked-softmax baseline."""
 
 from __future__ import annotations
 
@@ -50,7 +20,6 @@ SCRIPT = "scripts/layer/benchmark_overhead.py"
 
 
 def _masked_softmax(logits: torch.Tensor, mask: torch.Tensor) -> torch.Tensor:
-    """The mask-only baseline: exactly the pass projected performs before projecting."""
     z = logits.masked_fill(~mask, float("-inf"))
     return torch.softmax(z, dim=-1)
 
@@ -98,8 +67,6 @@ def hardware() -> dict:
             "gpu_capability": f"sm_{p.major}{p.minor}",
             "cuda_runtime": torch.version.cuda,
             "arch_list": torch.cuda.get_arch_list(),
-            # A capability absent from the arch list means kernels cannot launch
-            # even though is_available() reports True — the documented sm_120 trap.
             "capability_in_arch_list": f"sm_{p.major}{p.minor}" in torch.cuda.get_arch_list(),
         }
     return info
@@ -126,10 +93,8 @@ def main(smoke: bool = False) -> Path:
         logits = torch.randn(B, V, device=dev, dtype=torch.float32)
         A = torch.randn(B, m, V, device=dev, dtype=torch.float32)
         mask = torch.rand(B, V, device=dev) > 0.15
-        mask[:, 0] = True                      # never fully mask a row
+        mask[:, 0] = True
         q0 = _masked_softmax(logits, mask)
-        # Feasible targets: the base distribution's own moments, so the solve is
-        # not measured on an infeasible problem it would abandon early.
         b = torch.einsum("bmv,bv->bm", A, q0).detach()
 
         base = _time_region(lambda: _masked_softmax(logits, mask), dev, repeats, warmup)
@@ -137,10 +102,6 @@ def main(smoke: bool = False) -> Path:
             lambda: project(logits, A, b, mask, max_iter=50, tol=1e-10),
             dev, repeats, warmup,
         )
-        # Second arm: float32 Hessian. Opt-in in the layer because it perturbs the
-        # stopping point, but the dominant cost on consumer Blackwell, where
-        # float64 throughput is ~43x lower than float32. Reported alongside so the
-        # accuracy/speed trade is visible rather than chosen silently.
         fast = _time_region(
             lambda: project(logits, A, b, mask, max_iter=50, tol=1e-10,
                             fast_hessian_dtype=torch.float32),
@@ -150,8 +111,6 @@ def main(smoke: bool = False) -> Path:
                            fast_hessian_dtype=torch.float32)
 
         res = project(logits, A, b, mask, max_iter=50, tol=1e-10)
-        # Overhead is the MARGINAL cost: the projection call already includes its
-        # own masked-softmax, so subtracting the baseline gives the added time.
         row = {
             "n_constraints": m,
             "batch": B,
@@ -174,8 +133,6 @@ def main(smoke: bool = False) -> Path:
         }
         rows.append(row)
 
-    # Gradient path timed separately: training pays forward AND backward, so a
-    # forward-only figure would understate the training-time cost.
     grad_rows = []
     for m in constraint_counts:
         logits = torch.randn(B, V, device=dev, dtype=torch.float32, requires_grad=True)

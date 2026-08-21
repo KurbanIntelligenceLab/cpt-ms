@@ -1,23 +1,4 @@
-"""Steering sweep analysis and the compensation regression (WS-3).
-
-Two questions from one sweep:
-
-  STEERING. Does deployed density track the requested target across the range, and
-  how does the divergence cost behave? This is the crystal analogue of the synthetic
-  steering frontier.
-
-  COMPENSATION. The crystal backbone reads far ABOVE the data mean under a constraint
-  pulling density down. The hypothesis is that the backbone biases its unaided
-  predictions to offset a projection it knows will pull one way, so the post-projection
-  result matches the data. If so, the backbone's offset scales with the projection's
-  pull across targets.
-
-The test is a regression of offset on pull. A slope near 1 is compensation; a flat
-slope means the offset is target-independent and compensation is not the explanation.
-The control cell is the target at the data median, where the projection has almost
-nothing to pull against and both quantities should approach zero — a slope that
-survives with that cell included is the stronger result.
-"""
+"""Steering sweep analysis and the compensation regression."""
 
 from __future__ import annotations
 
@@ -37,7 +18,6 @@ SCRIPT = "scripts/crystal/analyze_sweep.py"
 
 
 def _ols(x: np.ndarray, y: np.ndarray) -> dict:
-    """Least squares with an intercept, plus the statistics needed to judge it."""
     n = len(x)
     X = np.column_stack([np.ones(n), x])
     beta, *_ = np.linalg.lstsq(X, y, rcond=None)
@@ -46,7 +26,6 @@ def _ols(x: np.ndarray, y: np.ndarray) -> dict:
     ss_res = float(resid @ resid)
     ss_tot = float(((y - y.mean()) ** 2).sum())
     r2 = 1.0 - ss_res / ss_tot if ss_tot > 0 else float("nan")
-    # Standard error of the slope, so "near 1" can be judged rather than asserted.
     dof = n - 2
     s2 = ss_res / dof if dof > 0 else float("nan")
     sxx = float(((x - x.mean()) ** 2).sum())
@@ -64,16 +43,7 @@ def _ols(x: np.ndarray, y: np.ndarray) -> dict:
 
 
 def rejection_cost(target: float, tol: float = 0.5) -> dict:
-    """Expected draws for rejection sampling from the data distribution.
-
-    This is the efficiency baseline, computed exactly from MP-20 rather than
-    estimated: the fraction of structures within tol of the target is the acceptance
-    rate, and its reciprocal is the expected number of draws per accepted sample.
-
-    It is deliberately generous to the baseline — it assumes a generator that
-    reproduces the data distribution perfectly, which mask-only approximates but does not
-    achieve. A projection that beats THIS is beating an idealized filter.
-    """
+    """Expected draws for rejection sampling from the data distribution."""
     from scripts.crystal.mp20 import load_split
     global _DENSITY_CACHE
     try:
@@ -129,11 +99,8 @@ def main(pattern: str, smoke: bool = False) -> Path:
     off = np.array([r["backbone_offset_vs_data"] for r in rows])
     data_mean = rows[0]["data_mean"]
 
-    # Steering: does the deployed density track the request?
     steering = _ols(tgt, dep)
 
-    # Compensation, with and without the control cell, so the control's leverage is
-    # visible rather than buried. The control is the target nearest the data median.
     compensation = _ols(pull, off)
     ctrl = float(tgt[np.argmin(np.abs(tgt - np.median(np.unique(tgt))))])
     keep = np.abs(tgt - ctrl) > 1e-9
@@ -161,8 +128,6 @@ def main(pattern: str, smoke: bool = False) -> Path:
         else "compensation NOT supported: offset does not scale with pull"
     )
 
-    # Efficiency baseline per target, so the frontier's three legs match the
-    # synthetic study: accuracy, divergence cost, and cost against rejection.
     rejection = {f"{t:g}": rejection_cost(t) for t in sorted(set(tgt.tolist()))}
     bulk = [k for k, v in rejection.items() if v["in_data_bulk"]]
 

@@ -1,30 +1,4 @@
-"""Run ledger (WS-7).
-
-Every training or evaluation run appends one immutable record here. The ledger is
-the join key between a claim in a report and the run that produced it: a number
-that cannot be traced to a ledger entry does not go in a paper.
-
-Design constraints, all of which come from how this gets misused rather than how
-it gets used:
-
-  Append-only.      Records are never edited in place. A correction is a new
-                    record that supersedes an earlier one by id, so the history
-                    of a claim stays visible.
-
-  Line-delimited.   One JSON object per line. A crashed run leaves a truncated
-                    final line rather than an unparseable file, and concurrent
-                    appends from separate processes interleave safely because
-                    each write is a single line under O_APPEND.
-
-  Self-describing.  Each record carries the config hash, seeds, git commit, and
-                    environment. Reproducing a run requires the ledger and the
-                    repository, not a memory of what was passed on the command
-                    line.
-
-The ledger deliberately does NOT store results. Results are artifacts; the ledger
-stores what produced them and which artifacts they are. Keeping numbers out of it
-prevents the ledger and the artifact from disagreeing.
-"""
+"""Run ledger."""
 
 from __future__ import annotations
 
@@ -50,9 +24,9 @@ class RunRecord:
     """One entry. Immutable once written."""
 
     run_id: str
-    kind: str                      # "train" | "eval" | "benchmark" | "analysis"
+    kind: str
     script: str
-    status: str                    # "started" | "completed" | "failed" | "superseded"
+    status: str
     config: dict[str, Any]
     config_hash: str
     seeds: list[int]
@@ -116,12 +90,7 @@ def finish_run(
     notes: str = "",
     ledger_path: Path | None = None,
 ) -> RunRecord:
-    """Append the terminal record for a run.
-
-    The started record is left in place rather than rewritten: the pair is the
-    audit trail, and a run that started but never finished must remain visible
-    as exactly that.
-    """
+    """Append the terminal record for a run."""
     if status not in ("completed", "failed", "superseded"):
         raise ValueError(f"terminal status must be completed/failed/superseded, got {status!r}")
     done = RunRecord(
@@ -140,8 +109,6 @@ def finish_run(
 def _append(rec: RunRecord, ledger_path: Path | None = None) -> None:
     path = Path(ledger_path) if ledger_path is not None else LEDGER_PATH
     path.parent.mkdir(parents=True, exist_ok=True)
-    # O_APPEND with a single write keeps concurrent writers from interleaving
-    # partial lines.
     with open(path, "a", encoding="utf-8") as fh:
         fh.write(rec.as_line() + "\n")
 
@@ -159,8 +126,6 @@ def read_ledger(ledger_path: Path | None = None) -> list[dict[str, Any]]:
         try:
             out.append(json.loads(line))
         except json.JSONDecodeError:
-            # A truncated tail is expected after a hard kill; earlier records
-            # remain valid and are what matters.
             continue
     return out
 
@@ -174,9 +139,5 @@ def latest_status(ledger_path: Path | None = None) -> dict[str, dict[str, Any]]:
 
 
 def unfinished(ledger_path: Path | None = None) -> list[dict[str, Any]]:
-    """Runs that started and never reached a terminal status.
-
-    These are the entries that silently corrupt a results table: a run that
-    crashed mid-way may still have written partial artifacts.
-    """
+    """Runs that started and never reached a terminal status."""
     return [r for r in latest_status(ledger_path).values() if r["status"] == "started"]

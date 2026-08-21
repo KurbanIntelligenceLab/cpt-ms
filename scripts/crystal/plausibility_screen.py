@@ -1,33 +1,4 @@
-"""Physical plausibility of generated crystals, without atomic positions (WS-3 / CP5).
-
-WHY THIS AND NOT AN ENERGY SCREEN. The serialization the model generates is composition
-plus cell — no Wyckoff positions and no fractional coordinates. An energy model needs
-atomic positions, so generated samples cannot be scored energetically without first
-solving for positions given the composition and cell, which is crystal structure
-prediction: a separate problem the model does not attempt. Relaxing from random positions
-would produce energies dominated by the initialization rather than by the generated
-composition and cell, so it would not measure the claim under test. The calibrated CHGNet
-screen in `energy_screen.py` therefore applies to reference structures only, and this
-module carries the plausibility question for generated samples.
-
-Three screens, all computable from composition and cell alone:
-
-  CHARGE NEUTRALITY. SMACT's oxidation-state enumeration: does any assignment of common
-  oxidation states to the generated composition sum to zero? This is the standard
-  composition filter in the crystal-generation literature.
-
-  ELECTRONEGATIVITY ORDER. Of the charge-balanced assignments, does one respect Pauling
-  electronegativity ordering (more electronegative species taking the more negative
-  state)?
-
-  PACKING PLAUSIBILITY. Is the generated cell volume consistent with its composition?
-  Scored as volume per atom against MP-20's own distribution, since a cell far too small
-  for its atom count is unphysical regardless of chemistry, and this is the screen the
-  density constraint most directly touches.
-
-Every rate is reported per arm against the SAME data reference, and the data itself is
-scored through the identical path so the reference is measured rather than assumed.
-"""
+"""Physical plausibility of generated crystals, without atomic positions."""
 
 from __future__ import annotations
 
@@ -48,7 +19,6 @@ SCRIPT = "scripts/crystal/plausibility_screen.py"
 
 
 def _smact_screens(formula: dict[str, int]) -> tuple[bool, bool]:
-    """(charge_balanced, electronegativity_ordered) for one composition."""
     from smact import Element, neutral_ratios
     from smact.screening import pauling_test
     try:
@@ -105,7 +75,6 @@ def main(limit: int = 500, smoke: bool = False) -> Path:
     limit = 40 if smoke else limit
     train = load_split("train")
     vpa = np.array([c.volume / c.n_atoms for c in train])
-    # Window from the data itself rather than a chosen constant.
     lo, hi = float(np.percentile(vpa, 1)), float(np.percentile(vpa, 99))
 
     rng = np.random.default_rng(0)

@@ -1,10 +1,4 @@
-"""Consolidate the three t=10.0 retargeting seeds into one artifact.
-
-The seed-0 matrix was emitted by retarget.py; seeds 1 and 2 were written raw with --out
-so they could be inspected before being folded in. This merges them and computes the
-paired comparison against the published frontier, which is the quantity the amortization
-claim rests on.
-"""
+"""Consolidate the three t=10.0 retargeting seeds into one artifact."""
 import json, sys
 from pathlib import Path
 import numpy as np

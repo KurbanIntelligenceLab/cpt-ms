@@ -1,9 +1,4 @@
-"""Tests for the external comparisons: best-of-n, the automaton argument, the margin.
-
-Two of these guard results that run AGAINST the paper's preferred framing, which is exactly
-the kind of finding a later edit quietly softens. Best-of-n beats the projection on accuracy
-at most targets, and the DFA size objection was computed and refuted. Both must survive.
-"""
+"""Tests for the external comparisons: best-of-n, the automaton argument, the margin."""
 from __future__ import annotations
 
 import json
@@ -30,11 +25,7 @@ def _load(name: str) -> dict:
 
 
 def test_best_of_n_estimates_expectation_not_the_pool_best():
-    """Reporting the single best draw in a large pool would overstate best-of-n.
-
-    The artifact must show repeated subsampling, and the error at n=1 must be close to the
-    pool's mean absolute deviation from target rather than near zero.
-    """
+    """Reporting the single best draw in a large pool would overstate best-of-n."""
     p = _load("best_of_n.json")
     for r in p["rows"]:
         assert r["trials"] > 1, "best-of-n must be estimated over repeated draws"
@@ -60,8 +51,7 @@ def test_best_of_n_error_falls_monotonically_with_n():
 
 
 def test_the_diversity_cost_of_selection_is_recorded():
-    """The accuracy-only comparison favours best-of-n; the diversity column is the honest
-    counterweight and must not be dropped."""
+    """An accuracy-only comparison flatters selection, so the diversity cost must be recorded."""
     p = _load("best_of_n.json")
     assert "diversity" in p and p["diversity"], "diversity measurement missing"
     by: dict[float, dict[int, float]] = {}
@@ -147,12 +137,7 @@ def test_preregistered_decision_rule_is_two_part_and_satisfied():
 
 
 def test_crossing_counts_in_prose_match_the_artifact():
-    """The n-to-match counts are easy to hardcode and were once wrong.
-
-    A reviewer caught 'four targets' where the artifact gives five. These counts are now
-    recomputed from the best-of-n rows against the published frontier and asserted against
-    the prose, so a literal cannot drift from the data again.
-    """
+    """The n-to-match counts are easy to hardcode and were once wrong."""
     bon = _load("best_of_n.json")
     front = RES / "steering_frontier_rows.json"
     if not front.exists():
@@ -173,7 +158,8 @@ def test_crossing_counts_in_prose_match_the_artifact():
     n_any = sum(1 for v in cross.values() if v is not None)
     n_at_smallest_useful = sum(1 for v in cross.values() if v == 4)
 
-    for name in ("reports/external_baselines_notes.md", "paper/results.md"):
+    for name in ("development/reports/external_baselines_notes.md",
+                 "development/docs/paper/results.md"):
         f = ROOT / name
         if not f.exists():
             continue

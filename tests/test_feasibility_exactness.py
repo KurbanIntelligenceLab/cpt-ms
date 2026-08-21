@@ -1,11 +1,4 @@
-"""Feasibility must be EXACT, and the evaluation must not manufacture a leak.
-
-The strongest claim in the project is that a masked model places identically zero
-mass outside the feasible set -- not "small", zero, because masking makes infeasible
-sequences unreachable. A scoring path that floors probabilities at a positive
-constant silently converts that exact zero into a tiny positive number, which is
-worse than a wrong number: it looks like a property of the method.
-"""
+"""Feasibility must be EXACT, and the evaluation must not manufacture a leak."""
 
 from __future__ import annotations
 
@@ -37,7 +30,6 @@ def _masks(task, cfg):
 
 
 def _score(task, cfg, clamp: float | None):
-    """Score every sequence through the projected path, with or without a floor."""
     torch.manual_seed(0)
     V, L = cfg.vocab_size, cfg.length
     seqs = torch.from_numpy(task.sequences.astype(np.int64))
@@ -86,14 +78,7 @@ def test_unclamped_scoring_gives_identically_zero_infeasible_mass(small):
 
 
 def test_a_clamped_scorer_manufactures_a_leak_at_the_clamp_scale(small):
-    """Pins the diagnosis: the residual came from the floor, not from the layer.
-
-    This is the defect that was reported as float underflow. It is not underflow --
-    1e-30 is representable in float64, whose denormals reach ~5e-324 -- it is a
-    scoring floor. A sequence with exactly one illegal token carries the floor times
-    an O(1) product of legal-step probabilities, so the leak lands within an order of
-    magnitude of the clamp value itself.
-    """
+    """Pins the diagnosis: the residual came from the floor, not from the layer."""
     cfg, task = small
     clamp = 1e-30
     leaked = _score(task, cfg, clamp=clamp)[~task.feasible_S].sum()
@@ -112,13 +97,7 @@ def test_the_clamp_value_is_representable_not_underflow():
 
 
 def test_regime_S_exactness_is_measured_not_hardcoded():
-    """The exactness claim must read a field the artifact actually carries.
-
-    This was previously reported from a literal 0.0 printed by an audit script, with a
-    verification check written as `D['induced'][key] if key in D['induced'] else True`
-    — which passed vacuously because the key did not exist. A check that cannot fail
-    measures nothing, so the field is now emitted and read.
-    """
+    """The exactness claim must read a field the artifact actually carries."""
     import json
     from pathlib import Path
     art = Path("results/induced_vs_tilt.json")

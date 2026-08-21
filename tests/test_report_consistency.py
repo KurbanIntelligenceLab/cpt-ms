@@ -1,14 +1,4 @@
-"""Reports must not carry counts that contradict the repository.
-
-A hand-typed test count in a standing note drifts the moment a test is added,
-and it drifts silently: nothing fails, the note simply becomes wrong. This
-collects the real counts and checks every claim a report makes about them.
-
-The same class of defect — a narrative number stored beside the thing it
-describes, with no mechanism tying them together — was already fixed once in the
-determinability artifact by deriving its verdicts. This closes it for the prose
-reports, which cannot derive their text but can at least be checked.
-"""
+"""Reports must not carry counts that contradict the repository."""
 
 from __future__ import annotations
 
@@ -32,7 +22,6 @@ WORDS = {
 
 
 def _counts() -> dict[str, int]:
-    """Tests per file, collected from pytest rather than assumed."""
     out = subprocess.run(
         [sys.executable, "-m", "pytest", str(REPO / "tests"), "-q", "--collect-only"],
         capture_output=True, text=True, cwd=REPO,
@@ -61,20 +50,7 @@ def counts():
 
 
 def test_per_file_counts_in_reports_are_current(counts):
-    """Any '<N> [tests] in `tests/<file>`' claim must match that file.
-
-    Two loopholes in an earlier version of this check let real errors ship through a
-    green suite, and both are closed here.
-
-    The word 'tests' was REQUIRED before 'in'. Enumerations write it once and then
-    elide it ('22 here, 7 in `a.py`, 9 in `b.py`'), so every entry after the first was
-    invisible to the check — which is most of them.
-
-    Whitespace was matched with `\\s+`, which spans newlines, but the elided form was
-    not matched at all, so a claim broken across a line break ('and 3 in\\n`tests/
-    test_report_consistency.py`') escaped twice over. That exact claim was wrong by one
-    and survived.
-    """
+    """Any '<N> [tests] in `tests/<file>`' claim must match that file."""
     pattern = re.compile(
         r"(\d+|[A-Za-z]+)\s+(?:tests?\s+)?in\s+`tests/([A-Za-z0-9_]+\.py)`", re.I
     )
@@ -89,22 +65,11 @@ def test_per_file_counts_in_reports_are_current(counts):
             if claimed != counts[fname]:
                 problems.append(f"{md.name}: claims {claimed} for {fname}, actual {counts[fname]}")
     assert not problems, "; ".join(problems)
-    # The elided form dominates the enumerations, so a low count here means the regex
-    # has regressed to matching only the spelled-out entries.
     assert checked >= 15, f"only {checked} per-file claims parsed; the check is not binding"
 
 
 def test_multi_file_count_claims_are_current(counts):
-    """'<N> tests across `a.py` and `b.py`' must equal the sum of those files.
-
-    Regression for a real miss: a report claimed "Fourteen tests across
-    tests/test_energy_screen.py and tests/test_plausibility_screen.py" after two
-    tests had been added to the first file, making the true total sixteen. The
-    per-file check above did not catch it because it matches the phrasing
-    "N tests in `file`" and this sentence says "across X and Y" — so a stale
-    total sat in a shipped report through a green suite. Any aggregate over named
-    files is now checked against the sum of its own operands.
-    """
+    """'<N> tests across `a.py` and `b.py`' must equal the sum of those files."""
     pattern = re.compile(
         r"([A-Za-z]+|\d+)\s+tests?\s+across\s+((?:`tests/[A-Za-z0-9_]+\.py`"
         r"(?:\s*\(\d+\))?[\s,]*(?:and\s*)?)+)",
@@ -131,17 +96,7 @@ def test_multi_file_count_claims_are_current(counts):
 
 
 def test_token_position_claims_match_the_artifact():
-    """Reports must not carry token ranges that contradict their own source.
-
-    Regression for a real drift: the determinability note claimed B1 charge was
-    determined at "token 322-780 of 323-781" while the artifact it names as its
-    sole source said 322-772 of 323-773. The note had been written before a
-    fixture fix shortened the atom-site lines, and the prose was not re-derived
-    when the measurement was re-run.
-
-    Test counts were already covered by a consistency check; measured values were
-    not, which is the gap this closes.
-    """
+    """Reports must not carry token ranges that contradict their own source."""
     import json
 
     art = REPO / "results" / "family_determinability.json"
@@ -181,10 +136,6 @@ def test_token_position_claims_match_the_artifact():
         checked += 1
     assert checked >= 4, f"only {checked} position claims parsed; the check is not binding"
 
-    # Prose claims too, not just table rows. The table-only version of this check
-    # missed a stale denominator sitting two paragraphs above a row it had just
-    # corrected, because it regexed the numerator and ignored the "of N-M" part.
-    # Every "token N of A-B" in the note must match some measured row.
     all_tokens = sorted({r["n_tokens"] for r in rows})
     valid_spans = {
         (min(r["n_tokens"] for r in rows if r["backbone"] == bb),

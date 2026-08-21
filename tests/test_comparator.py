@@ -1,16 +1,4 @@
-"""Tests for the comparator comparator and the claim it supports.
-
-The claim is unusual and therefore easy to overstate: the surrogate is not a worse
-approximation to the tilt, it approximates something else that violates less per sequence.
-That reading only holds if comparator actually reached its own target, so the first test pins that.
-If comparator ever fails to converge, the comparison becomes "our method beats a broken baseline" and
-must not be reported as a structural finding.
-
-One test exists because of a mistake made while writing this up: the mask-only training summary
-stores [mean, sd] pairs, not per-seed lists, and averaging over a pair silently produced a
-violation rate of 0.31 where the truth is 0.62. Anything reading those arrays must index
-rather than aggregate.
-"""
+"""Tests for the comparator comparator and the claim it supports."""
 from __future__ import annotations
 
 import json
@@ -56,8 +44,7 @@ def test_comparator_reached_its_target_so_the_comparison_is_fair():
 
 
 def test_comparator_inherits_the_tilts_violation_rate():
-    """The comparator approximating the tilt must inherit its per-sequence violation, or it is not
-    approximating the tilt in the way the argument assumes."""
+    """Approximating the tilt means inheriting its per-sequence violation rate."""
     p = _p("tilt_comparator.json")
     a6 = p["summary"]["hard_violation_rate"]["mean"]
     tilt = p["reference"]["tilt"]["hard_violation_rate"]
@@ -69,11 +56,7 @@ def test_comparator_inherits_the_tilts_violation_rate():
 
 
 def test_mean_sd_pairs_are_indexed_not_averaged():
-    """The mask-only summary stores [mean, sd]; averaging the pair corrupts every figure.
-
-    This is pinned because it happened: mean([0.6155, 0.0080]) = 0.3117 was reported as a
-    violation rate before the pair structure was noticed.
-    """
+    """The mask-only summary stores [mean, sd]; averaging the pair corrupts every figure."""
     p = _p("training_summary.json")
     for arm, d in p["arms"].items():
         for field, v in d.items():
@@ -100,14 +83,7 @@ def test_mean_sd_pairs_are_indexed_not_averaged():
 
 
 def test_concentration_is_measured_against_the_optimum_not_the_unconstrained_arm():
-    """The claim is concentration relative to the SEQUENCE-LEVEL OPTIMUM.
-
-    An earlier draft compared projected's charge variance against the unconstrained arm, which is a
-    true statement answering a different question: any constraint concentrates relative to no
-    constraint. The claim being made is that the projection concentrates where the optimum
-    does not, so the comparison must name the optimum. A reviewer caught this; the test keeps
-    it caught.
-    """
+    """The claim is concentration relative to the SEQUENCE-LEVEL OPTIMUM."""
     a2p = _p("training_summary.json")
     a6p = _p("tilt_comparator.json")
     a3 = pick(a2p["arms"], "projected")["charge_variance"][0]
@@ -137,11 +113,7 @@ def test_concentration_is_measured_against_the_optimum_not_the_unconstrained_arm
 
 
 def test_the_optimum_anti_concentrates_relative_to_the_data():
-    """The optimum's variance EXCEEDS the distribution it started from.
-
-    This is the mechanism, and it is stronger than 'the optimum does not concentrate'. If a
-    later run reversed it, the prose would be wrong in a way no other test would catch.
-    """
+    """The optimum's variance EXCEEDS the distribution it started from."""
     a6p = _p("tilt_comparator.json")
     tilt = a6p["reference"]["tilt"]["charge_variance"]
     base = a6p["reference"]["base_S_conditioned"]["charge_variance"]
@@ -157,11 +129,7 @@ def test_the_optimum_anti_concentrates_relative_to_the_data():
 
 
 def test_the_claim_is_not_stated_as_beating_the_baseline_on_its_own_terms():
-    """The projected arm does not approximate the tilt better than comparator does; it approximates something else.
-
-    Overstating this as 'the surrogate is a better tilt approximation' would be false, since
-    comparator's KL from the tilt is far smaller than the induced distribution's.
-    """
+    """The projected arm approximates a different distribution, not the tilt better."""
     if not NOTES.exists():
         pytest.skip("notes absent")
     txt = re.sub(r"\s+", " ", NOTES.read_text())

@@ -1,23 +1,4 @@
-"""Zero-shot retargeting: deploy one trained checkpoint at targets it never saw.
-
-THE CLAIM THIS TESTS. The constraint target is an ARGUMENT to the dual solve, not a
-training-time label, so one training run should cover a family of targets at inference.
-The conditional baseline conditional needs one training run per target. If a checkpoint trained
-at 5.0 g/cm^3 can be deployed at 1.5 or 10.0 without retraining, the method buys
-amortized multi-target control, which is an axis no baseline here competes on.
-
-WHAT IS HELD FIXED. Only `cfg.density_target` changes between deployments. The weights,
-the vocabulary, the grammar mask, the sampling temperature and the seed are identical,
-so any difference in achieved density is attributable to the deployment target alone.
-The checkpoint records the target it TRAINED at, which this script never overwrites --
-`trained_density_target` and `deploy_target` are separate fields in every row, because
-the diagonal of the retargeting matrix (train == deploy) is the existing result and must
-stay distinguishable from the off-diagonal.
-
-WHY THE BACKBONE READING IS ALSO REPORTED. A deployed reading alone cannot say whether
-retargeting works through the layer or because the backbone happens to sit near the new
-target. Both readings are emitted at every cell, as everywhere else in this project.
-"""
+"""Zero-shot retargeting: deploy one trained checkpoint at targets it never saw."""
 from __future__ import annotations
 
 import argparse
@@ -46,17 +27,11 @@ from scripts.train.train_crystal import (
 
 SCRIPT = "scripts/crystal/retarget.py"
 
-# The ten frontier targets, so the matrix columns line up with the published frontier.
 FRONTIER_TARGETS = [1.5, 2.0, 3.0, 5.0, 6.317, 8.0, 10.0, 13.0, 16.0, 20.0]
 
 
 def load_checkpoint(path: str | Path, device) -> tuple[torch.nn.Module, dict]:
-    """Rebuild the model from a checkpoint without touching the training data.
-
-    The geometry (vocab size, max_len) comes from the checkpoint rather than from a
-    fresh data load, so a retargeting run cannot silently disagree with the model it
-    is deploying. A mismatch raises instead of being padded or truncated into place.
-    """
+    """Rebuild the model from a checkpoint without touching the training data."""
     ck = torch.load(Path(path), map_location="cpu", weights_only=False)
     cfg = CrystalTrainConfig(**ck["train_config"])
     V = CrystalVocab(ck.get("elements", ELEMENTS), order=ck["vocab_order"])
@@ -93,8 +68,6 @@ def retarget(ckpt: str | Path, targets=None, n_samples: int | None = None,
     gm = GrammarMask(V, order=ck["vocab_order"])
     max_len = int(ck["max_len"])
 
-    # Scoring reference is the FULL split, identical to training, so a retargeted
-    # reading is comparable to the frontier row at the same target.
     train = load_split("train", limit=(2000 if smoke else None))
     data_density = np.array([c.density for c in train])
     from collections import Counter

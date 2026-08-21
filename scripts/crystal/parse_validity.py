@@ -1,36 +1,4 @@
-"""Parse validity: grammar-masked vs unconstrained decoding (WS-2 / CP4).
-
-The structural half of the parse-validity claim, and it needs no trained model.
-
-The claim under test is narrow and worth stating precisely: a decoder restricted
-to a grammar's per-step legal set cannot emit a syntactically invalid file, so the
-syntactic failure mode is removed by CONSTRUCTION rather than reduced. That is a
-property of the mask, not of any particular model, which is why it is measurable
-now.
-
-What this does NOT claim. It says nothing about whether the structures are
-physically sensible — overlapping sites, absurd lattice parameters, and
-unphysical stoichiometries all parse. It also does not predict the parse-failure
-rate of a specific published model, whose losses are attributed partly to prompt
-handling. The comparison here is between two decoding procedures over the same
-character distribution, which isolates the grammar's contribution.
-
-Design. Both arms sample from the same character-level proposal distribution, so
-the only difference is whether the per-step legal set is enforced:
-
-  MASKED     sample only from the grammar's allowed set at each step
-  UNMASKED   sample from the full vocabulary, stop at the end marker or a length
-             cap, and let the file be whatever it is
-
-Judgement is by pymatgen's CifParser, which shares no code with the emitter. A
-masked sample that fails to parse is a defect in the grammar, reported as such.
-
-The unmasked arm is deliberately given a favourable proposal: characters are
-weighted by their frequency in valid CIFs, so it is not a uniform-random baseline
-that would fail trivially. The point is that even a well-shaped unconstrained
-sampler emits unparseable output, because validity is a global property that
-per-character likelihood does not enforce.
-"""
+"""Parse validity: grammar-masked vs unconstrained decoding."""
 
 from __future__ import annotations
 
@@ -58,13 +26,7 @@ MAX_CHARS = 900
 
 
 def reference_char_distribution(n: int = 400, seed: int = 0) -> dict[str, float]:
-    """Character frequencies in grammar-valid CIFs.
-
-    Used to shape the UNMASKED arm's proposal so the comparison is against a
-    plausible character model rather than a uniform sampler. Built from masked
-    samples, which is legitimate here: it gives the unconstrained arm the best
-    per-character information available.
-    """
+    """Character frequencies in grammar-valid CIFs."""
     rng = np.random.default_rng(seed)
     counts: Counter[str] = Counter()
     for _ in range(n):
@@ -87,7 +49,7 @@ def sample_masked(rng: np.random.Generator) -> tuple[str, bool]:
     for _ in range(MAX_CHARS):
         a = allowed(s)
         if not a:
-            return render(out), True          # reached `done`
+            return render(out), True
         ch = a[rng.integers(len(a))]
         out.append(ch)
         s = step(s, ch)
@@ -103,20 +65,11 @@ def sample_unmasked(rng: np.random.Generator, vocab: str,
         if ch == "\x03":
             return render(out), True
         out.append(ch)
-    return render(out), False                  # hit the length cap
+    return render(out), False
 
 
 def parses(text: str) -> tuple[bool, str]:
-    """SYNTACTIC judgement: does the text parse as a CIF at all?
-
-    This is what grammar masking claims to guarantee, and it must be measured
-    separately from structure construction. Building a structure additionally
-    requires the values to be physically coherent — a cell with 8.9-degree angles
-    parses perfectly and then fails to yield a lattice. Conflating the two would
-    charge the grammar for semantic failures it never claimed to prevent, and an
-    earlier version of this script did exactly that: it reported the masked arm at
-    47% when every one of its samples was syntactically valid.
-    """
+    """SYNTACTIC judgement: does the text parse as a CIF at all?"""
     from pymatgen.io.cif import CifParser
 
     with warnings.catch_warnings():
@@ -132,12 +85,7 @@ def parses(text: str) -> tuple[bool, str]:
 
 
 def builds_structure(text: str) -> tuple[bool, str]:
-    """SEMANTIC judgement: does a coherent structure come out?
-
-    Reported alongside the syntactic rate, never instead of it. The gap between
-    the two is the honest scope boundary of Regime S: masking removes syntactic
-    invalidity by construction and leaves semantic invalidity entirely open.
-    """
+    """SEMANTIC judgement: does a coherent structure come out?"""
     from pymatgen.io.cif import CifParser
 
     with warnings.catch_warnings():
@@ -158,7 +106,6 @@ def main(smoke: bool = False) -> Path:
 
     vocab = full_vocabulary()
     freq = reference_char_distribution(n=40 if smoke else 400)
-    # Unseen characters get a small floor so the proposal has full support.
     w = np.array([freq.get(c, 1e-4) for c in vocab], dtype=np.float64)
     probs = w / w.sum()
 
@@ -201,15 +148,11 @@ def main(smoke: bool = False) -> Path:
             "mean_length_chars": float(np.mean(lengths)),
             "syntactic_failure_kinds": dict(fails.most_common()),
             "semantic_failure_kinds": dict(sem_fails.most_common()),
-            # Non-triviality: a constrained decoder that emits one file is not a
-            # decoder. Distinct formulas and site-count spread show the masked arm
-            # still explores.
             "distinct_formulas_among_parsed": len(formulas),
             "site_count_range": ([min(site_counts), max(site_counts)]
                                  if site_counts else None),
         }
 
-    # Branching factor: how much freedom the mask leaves, averaged over positions.
     rng_b = np.random.default_rng(5)
     branch, singleton = [], 0
     for _ in range(40 if smoke else 200):

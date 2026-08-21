@@ -1,23 +1,4 @@
-"""Rejection-accepted versus steered samples at the same target (WS-3).
-
-The efficiency leg of the steering claim — how many draws rejection sampling needs —
-is the weakest of the three, and it weakens further wherever the baseline happens to
-be cheap. This module measures the argument that does not weaken: at a given target,
-rejection sampling and a steered model return DIFFERENT OBJECTS.
-
-Rejection returns data-distribution samples that happen to land near the target. A
-steered model returns structures generated toward it. Beyond the data's support
-rejection returns nothing at all while the projection still produces valid output.
-
-Both are reported. The draw count is the cost argument; the distributional comparison
-below is the fidelity argument, and it is the one that survives a reviewer observing
-that rejection is cheap in the bulk.
-
-The rejection arm here is deliberately generous: it draws from the EMPIRICAL data
-rather than from a trained generator, i.e. it assumes a model that reproduces the data
-distribution perfectly. mask-only approximates that but does not achieve it, so a difference
-measured against this arm understates the difference against any real baseline.
-"""
+"""Rejection-accepted versus steered samples at the same target."""
 
 from __future__ import annotations
 
@@ -37,7 +18,6 @@ SCRIPT = "scripts/crystal/fidelity_baseline.py"
 
 
 def _composition_profile(crystals) -> dict:
-    """Element-frequency and stoichiometry summary of a sample."""
     el = Counter()
     n_el, n_at, mass = [], [], []
     for c in crystals:
@@ -59,7 +39,6 @@ def _composition_profile(crystals) -> dict:
 
 
 def _tv(p: dict, q: dict) -> float:
-    """Total variation between two element-frequency distributions."""
     keys = set(p) | set(q)
     return 0.5 * sum(abs(p.get(k, 0.0) - q.get(k, 0.0)) for k in keys)
 
@@ -95,10 +74,6 @@ def main(targets: list[float], tol: float = 0.5, smoke: bool = False) -> Path:
     for t in targets:
         arm = rejection_arm(train, t, tol)
         if arm["reachable"]:
-            # How different is the accepted subset from the data as a whole? A large
-            # difference means rejection is not returning "the data near the target",
-            # it is returning a biased slice of it -- which is the point: the slice is
-            # whatever the data happens to contain there, not what was asked for.
             arm["tv_vs_full_data"] = _tv(
                 arm["composition"]["element_frequencies"],
                 all_prof["element_frequencies"],

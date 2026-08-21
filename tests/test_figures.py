@@ -1,11 +1,4 @@
-"""Figures must exist, be referenced by artifact marker, and carry captions whose numbers
-agree with the artifacts they plot.
-
-Two failure modes motivated this file. A figure referenced by bare filename breaks whenever
-two artifacts share a name, and an image path that resolved to an absolute local path at
-authoring time is unusable to anyone else — both happened here. And a caption is prose like
-any other, so its numbers drift from the data exactly as body text does.
-"""
+"""Figures must exist, be referenced by artifact marker, and carry captions whose numbers match their artifacts."""
 from __future__ import annotations
 
 import json
@@ -105,11 +98,7 @@ def test_composition_caption_numbers_match_the_artifact():
 
 
 def test_partial_rows_are_labelled_as_partial():
-    """A partial row plotted beside a complete one must say so.
-
-    Driven by the artifact rather than by a hardcoded row: whichever rows are incomplete must
-    be disclosed, and a row that has since COMPLETED must no longer be described as partial.
-    """
+    """A partial row plotted beside a complete one must say so."""
     art = ROOT / "results" / "two_constraint_grid.json"
     if not art.exists():
         pytest.skip("grid artifact absent")

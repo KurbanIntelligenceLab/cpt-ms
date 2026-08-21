@@ -1,10 +1,4 @@
-"""The crystal grammar mask must accept the data and constrain generation.
-
-Two off-by-one defects lived here and each produced a plausible-looking number
-rather than a crash: a mask written before consuming the current token rejected
-every real transition, and a sampler indexing the mask AT the last position instead
-of the NEXT one emitted every token twice. Both are pinned below.
-"""
+"""The crystal grammar mask must accept the data and constrain generation."""
 
 from __future__ import annotations
 

@@ -1,19 +1,4 @@
-"""The crystal mass budget must be dimensionally consistent with its channel.
-
-Two defects lived here, both of which trained without error while producing a
-constraint the data itself could not satisfy:
-
-  - The budget was divided by remaining ELEMENT TOKENS while the channel gives a
-    per-ATOM mass, so the demanded per-step mass was ~3x what the data's own next
-    element carries and a third of positions demanded more than the heaviest
-    element in the periodic table.
-  - The constraint was applied at every position, including count and structural
-    positions where the static channel is identically zero, so infeasibility was
-    guaranteed there by construction and inflated the reported rate.
-
-Both are checked against the data rather than against the implementation: if the
-constraint is right, the real structures should mostly satisfy it.
-"""
+"""The crystal mass budget must be dimensionally consistent with its channel."""
 
 from __future__ import annotations
 
@@ -43,7 +28,6 @@ def data():
 
 
 def _demands(cfg, V, ids, mass):
-    """(demanded per-step mass, true next-token mass) at actionable positions."""
     out = []
     for r in range(len(ids)):
         for t in range(1, ids.shape[1]):

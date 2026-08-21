@@ -1,22 +1,4 @@
-"""Best-of-n from the unsteered model: the baseline a reviewer asks for first.
-
-WHY THIS IS MANDATORY. The amortization claim has so far been argued against conditional
-training, which needs a model per target. Best-of-n needs no training at all: sample n
-completions from the masked-but-unsteered model and keep whichever lands closest to the
-target. It amortizes perfectly across targets by construction -- one model, any target -- so
-it is the cheapest thing that does what this paper claims to do, and the paper is weaker
-until it is measured rather than dismissed.
-
-WHAT IT COSTS AND WHY THAT IS THE POINT. Best-of-n pays at inference, every time, in
-proportion to n. The projection pays once at training. So the two are not points on the same
-axis and the comparison is a curve against a point: the question is what n the unsteered model
-needs to match one steered sample, and whether that n is affordable at the targets that matter.
-Reporting the accuracy alone would flatter whichever arm the axis was chosen to favour.
-
-SELECTION IS FROM THE SAME POOL. Best-of-n draws from the projected checkpoint's BACKBONE reading
-(mask on, projection off), not from a separately trained model, so the comparison isolates
-selection-at-inference against projection-at-training with the weights held fixed.
-"""
+"""Best-of-n from the unsteered model: the baseline a reviewer asks for first."""
 from __future__ import annotations
 
 import argparse
@@ -53,19 +35,12 @@ def main(ckpt: str, targets: list[float] | None = None, pool: int = 512,
     gm = GrammarMask(V, order=ck["vocab_order"])
     max_len = int(ck["max_len"])
 
-    # ONE pool of unsteered samples, reused for every target and every n. Drawing a fresh
-    # pool per target would confound n with sampling noise, and best-of-n against a target
-    # does not change how the samples were generated -- only which one is kept.
     t0 = time.time()
     rng = np.random.default_rng(seed)
     seqs, _ = sample(model, V, gm, cfg, dev, pool, use_mask=True,
                      project_at_inference=False, max_len=max_len + 2, rng=rng)
     wall_pool = time.time() - t0
 
-    # Per-sample densities via the same public decoder structural_metrics uses. That
-    # function returns aggregates only, and best-of-n needs the individual values; decoding
-    # here rather than widening the shared function keeps every published aggregate on the
-    # identical code path it was computed with.
     dens = np.array([d for d in (V.decode_density(s) for s in seqs)
                      if d is not None and np.isfinite(d) and 0 < d < 100], dtype=float)
     if dens.size == 0:
@@ -76,9 +51,6 @@ def main(ckpt: str, targets: list[float] | None = None, pool: int = 512,
     trials = 40 if smoke else 200
     for t in tg:
         for n in n_vals:
-            # Expected best-of-n error by resampling n draws from the pool: this estimates
-            # what a practitioner running best-of-n would get, rather than reporting the
-            # single best draw in the pool and calling it best-of-n.
             errs = [float(np.min(np.abs(dens[rng2.choice(len(dens),
                                                          size=min(n, len(dens)),
                                                          replace=False)] - t)))
@@ -92,10 +64,6 @@ def main(ckpt: str, targets: list[float] | None = None, pool: int = 512,
                 "inference_samples_per_output": int(n),
             })
 
-    # THE COMPARISON THAT MATTERS IS NOT ACCURACY ALONE. Best-of-n buys accuracy by
-    # DISCARDING samples, so the accepted set is the pool's tail near the target and its
-    # diversity falls with n. Measuring only error against compute would hide that, and it
-    # is the axis on which selection and shaping genuinely differ.
     formulas = []
     for sq in seqs:
         d = V.decode_density(sq)
@@ -153,8 +121,6 @@ def main(ckpt: str, targets: list[float] | None = None, pool: int = 512,
             "Accuracy alone is therefore not the comparison."),
     }
 
-    # Best-of-n can only return what the pool contains: a target outside the pool span
-    # is unreachable by selection at ANY n, which no accuracy-versus-compute curve shows.
     unreachable = [float(t) for t in tg if t > float(dens.max()) or t < float(dens.min())]
     payload["targets_outside_pool_support"] = unreachable
     payload["support_note"] = (

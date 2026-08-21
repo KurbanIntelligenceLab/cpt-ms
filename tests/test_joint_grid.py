@@ -1,10 +1,4 @@
-"""Tests for the joint two-constraint grid and its analysis.
-
-The WS-5 conclusion is a NEGATIVE result, which makes it exactly the kind of claim that
-rots quietly: if a later change makes the second dial steer, the report must stop saying it
-does not. These tests pin the criteria the verdict is derived from, so the verdict cannot
-survive a change in the underlying measurement.
-"""
+"""Tests for the joint two-constraint grid and its analysis."""
 from __future__ import annotations
 
 import json
@@ -29,11 +23,7 @@ def _payload():
 
 
 def test_verdict_follows_from_the_measurements():
-    """The verdict text must match what pass-through and monotonicity actually show.
-
-    A verdict asserted beside numbers rather than derived from them is how a report comes
-    to disagree with its own artifact.
-    """
+    """The verdict text must match what pass-through and monotonicity actually show."""
     p = _payload()
     s = p["summary"]
     complete = [r for r in p["rows"] if r.get("complete")]
@@ -50,12 +40,7 @@ def test_verdict_follows_from_the_measurements():
 
 
 def test_density_comparison_uses_matched_targets_only():
-    """Averaging arms over different target sets would manufacture an advantage.
-
-    The d=8.0 control sits above the reachable ceiling and carries a large error, so an
-    unmatched mean would credit joint with the absence of that cell rather than with anything
-    the second constraint did.
-    """
+    """Averaging arms over different target sets would manufacture an advantage."""
     p = _payload()
     s = p["summary"]
     matched = set(s["matched_density_targets"])
@@ -73,11 +58,7 @@ def test_density_comparison_uses_matched_targets_only():
 
 
 def test_regime_s_survives_a_second_regime_e_constraint():
-    """Validity must stay exactly 1.0 in every cell and control.
-
-    The mask is enforced by construction, so anything below 1.0 means adding a second
-    expectation constraint broke a guarantee that does not depend on the projection.
-    """
+    """Validity must stay exactly 1.0 in every cell and control."""
     p = _payload()
     vals = {c["validity"] for c in p["cells"]} | {
         v["validity"] for v in p["controls"].values()}
@@ -85,12 +66,7 @@ def test_regime_s_survives_a_second_regime_e_constraint():
 
 
 def test_fallback_rate_rises_with_the_second_target():
-    """The competition mechanism, not just the outcome.
-
-    Fallback must rise with the second target in EVERY row: a harder second ask means more
-    positions where no distribution satisfies both budgets, regardless of compatibility.
-    This is the part of the mechanism that does not depend on which row you look at.
-    """
+    """The competition mechanism, not just the outcome."""
     p = _payload()
     for r in p["rows"]:
         if not r.get("complete"):
@@ -104,21 +80,12 @@ def test_fallback_rate_rises_with_the_second_target():
 
 
 def test_joint_position_direction_tracks_target_compatibility():
-    """The finding the second row produced, pinned so it cannot be flattened back.
-
-    Joint positions do NOT simply collapse with the second target. They fall where the two
-    targets conflict (low density wanting light or few atoms, high valence wanting many
-    electrons per volume) and rise where they agree. An earlier version of this test asserted
-    the collapse unconditionally, which was the one-row reading; asserting the
-    compatibility-dependent direction is what the completed rows support.
-    """
+    """The finding the second row produced, pinned so it cannot be flattened back."""
     p = _payload()
     rows = {r["density_target"]: r for r in p["rows"] if r.get("complete")}
     if len(rows) < 2:
         pytest.skip("fewer than two complete rows")
 
-    # The conflicting row is the one whose density target is furthest BELOW the data mean;
-    # the compatible row is above it. Derived from the artifact, not hardcoded.
     mean = p["data_reference"]["density_mean"] if "density_mean" in p.get(
         "data_reference", {}) else 6.679
     below = [t for t in rows if t < mean]
@@ -166,7 +133,6 @@ def test_notes_do_not_overclaim_the_incomplete_grid():
     n_complete = sum(1 for r in p["rows"] if r.get("complete"))
     n_rows_planned = 3
     if n_complete < n_rows_planned:
-        # The disclosure must state the count, not merely gesture at incompleteness.
         words = {1: "One", 2: "Two", 3: "Three"}
         forms = [f"{n_complete} rows of {n_rows_planned}",
                  f"{n_complete} of {n_rows_planned}",
@@ -180,10 +146,6 @@ def test_notes_do_not_overclaim_the_incomplete_grid():
         for bad in ["all three rows", "the full grid shows", "across all nine cells"]:
             assert bad not in txt, f"notes overclaim with {bad!r} on an incomplete grid"
     if n_complete >= 2:
-        # With two rows the single-row conclusion is falsified and must not be ASSERTED.
-        # A sentence that explicitly disavows it ("Not 'they do not compose' -- that was the
-        # one-row reading") is the correct way to retire a claim, so only unquoted assertions
-        # count as a violation.
         for line in txt.splitlines():
             if "do not compose" not in line:
                 continue
@@ -209,13 +171,7 @@ def test_valence_reference_matches_cp7():
 
 
 def test_fixed_valence_columns_use_partial_rows_correctly():
-    """A partial row is valid for the direction analysis and invalid for pass-through.
-
-    Pass-through is a range over valence targets, so one cell cannot produce it. The
-    deviation-from-control comparison at a shared valence target across density rows needs only
-    one cell per row. This test pins both halves: the partial row must be absent from
-    pass-through and present in the columns.
-    """
+    """A partial row is valid for the direction analysis and invalid for pass-through."""
     p = _payload()
     cols = p["summary"].get("fixed_valence_columns")
     if not cols:
@@ -235,11 +191,7 @@ def test_fixed_valence_columns_use_partial_rows_correctly():
 
 
 def test_direction_is_measured_against_each_cells_own_control():
-    """Deviation must be from the matching single-constraint control, not a global mean.
-
-    The achieved valence rises with the density target even with no valence constraint, so an
-    absolute level would show apparent steering where there is none.
-    """
+    """Deviation must be from the matching single-constraint control, not a global mean."""
     p = _payload()
     cols = p["summary"].get("fixed_valence_columns") or []
     if not cols:
@@ -259,11 +211,7 @@ def test_direction_is_measured_against_each_cells_own_control():
 
 
 def test_the_directional_asymmetry_is_reported_if_present():
-    """Lowering the quantity is always affordable; raising it is not once the budget is spent.
-
-    If this asymmetry is in the data it must be in the notes, because it is a mechanism claim a
-    reader can check and a later edit could quietly drop.
-    """
+    """Lowering the quantity is always affordable; raising it is not once the budget is spent."""
     p = _payload()
     cols = p["summary"].get("fixed_valence_columns") or []
     if not cols:

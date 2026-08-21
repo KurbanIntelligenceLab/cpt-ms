@@ -1,14 +1,4 @@
-"""Provenance stamping must describe the CODE, not the output directory.
-
-An artifact necessarily exists before the commit that contains it, so its own
-presence in the working tree must not count against the provenance of the code
-that produced it. Without that scoping, re-emitting several artifacts in sequence
-stamps every one after the first as `-dirty` against a commit whose source was
-pristine — a false record, since nothing about the code differed between runs.
-
-These tests build throwaway repositories rather than inspecting this one, so they
-assert the rule itself and not the current state of the checkout.
-"""
+"""Provenance stamping must describe the CODE, not the output directory."""
 
 from __future__ import annotations
 
@@ -82,19 +72,14 @@ def test_reports_and_figures_do_not_dirty_provenance(repo):
 
 
 def test_stale_artifact_is_rejected(tmp_path):
-    """A stale file must not pass for a fresh measurement.
-
-    This is the guard against the suppressed-stderr failure: the script raises,
-    the previous run's artifact remains on disk, and a reader sees a plausible
-    file with no indication anything went wrong.
-    """
+    """A stale file must not pass for a fresh measurement."""
     import os
     import time
 
     from scripts.common.artifacts import assert_fresh, emit
 
     emit("probe", {"v": 1}, config={}, seeds=[], script="t", results_dir=tmp_path)
-    assert_fresh("probe", max_age_s=3600, results_dir=tmp_path)      # fresh: passes
+    assert_fresh("probe", max_age_s=3600, results_dir=tmp_path)
 
     old = time.time() - 7200
     os.utime(tmp_path / "probe.json", (old, old))

@@ -1,14 +1,4 @@
-"""WS7 charge marginals must agree with the published multi-seed summaries and must
-exhibit the paper's anti-concentration ordering.
-
-results/charge_marginals.json retrains mask-only, projected, and comparator at a single seed to recover
-exact per-charge-value marginals that were never stored (only scalar summaries were,
-in results/training_summary.json and results/tilt_comparator.json). This file
-checks that the single-seed marginals' derived scalars are consistent with those
-published multi-seed summaries, and that the headline mechanism -- the per-step
-projection CONCENTRATES mass near the constraint target while the sequence-level tilt
-SPREADS mass toward both extremes to hit the same mean -- is visible in the numbers.
-"""
+"""Single-seed charge marginals must match the published summaries and show the anti-concentration ordering."""
 from __future__ import annotations
 
 import json
@@ -41,8 +31,7 @@ def test_marginals_are_normalized_and_cover_the_full_support():
 
 
 def test_agreement_check_recorded_and_within_bounds():
-    """Every scalar the script itself checked against published multi-seed values
-    must be recorded as within a plausible seed spread (4 published sd)."""
+    """Every scalar checked against published values must be recorded as within four published sd."""
     p = _payload(ARTIFACT)
     checks = p.get("agreement_check_vs_published")
     assert checks, "no agreement_check_vs_published recorded in the artifact"
@@ -51,8 +40,7 @@ def test_agreement_check_recorded_and_within_bounds():
 
 
 def test_agreement_check_matches_published_artifacts_directly():
-    """Independently recompute the same comparison from the published summary
-    artifacts, rather than trusting the recorded check alone."""
+    """Recompute the comparison from the published artifacts rather than trusting the recorded check."""
     p = _payload(ARTIFACT)
     a2 = normalize(_payload(A2_SUMMARY)["arms"])
     a6 = _payload(A6_SUMMARY)
@@ -76,7 +64,6 @@ def test_agreement_check_matches_published_artifacts_directly():
                   a6["summary"]["mean_charge"]["mean"], a6["summary"]["mean_charge"]["sd"])
     assert within(dist["comparator"]["charge_variance"],
                   a6["summary"]["charge_variance"]["mean"], a6["summary"]["charge_variance"]["sd"])
-    # Exact (no-seed) objects must match to machine precision.
     assert dist["tilt"]["charge_variance"] == pytest.approx(
         a6["reference"]["tilt"]["charge_variance"], abs=1e-9)
     assert dist["data_S_conditioned"]["charge_variance"] == pytest.approx(
@@ -84,9 +71,7 @@ def test_agreement_check_matches_published_artifacts_directly():
 
 
 def test_anti_concentration_ordering_holds():
-    """The paper's headline mechanism: projection concentrates below the data's own
-    spread, while the sequence-level tilt (and comparator, which targets it) spread wider
-    than the data to buy a mean of zero."""
+    """Projection concentrates below the data's spread while the tilt spreads wider to buy the same mean."""
     p = _payload(ARTIFACT)
     dist = normalize(p["distributions"])
     var_proj = dist["projected"]["charge_variance"]
@@ -107,8 +92,7 @@ def test_a3_deployed_mean_charge_near_target():
 
 
 def test_single_seed_caveat_is_disclosed():
-    """The artifact must not silently present a single seed as the published multi-seed
-    result."""
+    """A single seed must not be presented as the published multi-seed result."""
     p = _payload(ARTIFACT)
     assert "single_seed_caveat" in p, "single-seed caveat must be recorded in the artifact"
     assert p["config"]["seed"] == 0 if "config" in p else True

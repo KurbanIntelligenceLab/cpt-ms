@@ -1,33 +1,4 @@
-"""Data-constraint alignment sweep: a controlled probe of multiplier decay (Risk 1).
-
-The research plan (v2) states the mechanism in risk-register item 1 — constraints
-internalized at convergence turn the projection into an identity, so projected's
-endpoint equals mask-only's — and states the expectation in its "Abstract register"
-section: multiplier decay is the modal outcome rather than a tail risk, because
-training data is real materials and so satisfies the constraints, and any
-constraint the data satisfies will see multipliers shrink as the model learns.
-On MP-20 both are claims available only after training. Here it is a dial.
-
-`markov_bias` controls how far the data distribution's mean charge sits from the
-constraint target. At bias = 1 the chain is unbiased; above 1 it favors positive
-charge. Sweeping it traces multiplier magnitude as a function of
-data-constraint alignment, with the exact answer known at every point.
-
-What is measured at each alignment level, all in closed form:
-
-  lambda*        the exact multiplier the sequence-level tilt requires. This is
-                 the quantity that decays. At perfect alignment it is zero and
-                 the constrained target equals the base — the degenerate case in
-                 which projected's endpoint provably equals mask-only's.
-
-  KL(tilt||base) the work the constraint does. Decays quadratically in the mean
-                 gap near alignment, so it vanishes faster than the gap itself.
-
-  TV, violation  the per-sample cost, which by Lemma 1 are the same number.
-
-This is the cheapest experiment in the project and it answers the question the
-whole CP0 gate is built around, so it runs before any crystal training.
-"""
+"""Data-constraint alignment sweep: a controlled probe of multiplier decay (Risk 1)."""
 
 from __future__ import annotations
 
@@ -109,8 +80,6 @@ def main(smoke: bool = False) -> Path:
     signed_lams = np.array([p["multiplier_lambda"] for p in feasible])
     viols = np.array([p["tilt_violation_rate"] for p in feasible])
 
-    # Near-alignment scaling: |lambda| ~ gap and KL ~ gap^2 are the expected
-    # exponential-family rates. Fit on the closest-aligned half of the sweep.
     order = np.argsort(gaps)
     near = order[: max(3, len(order) // 2)]
     fits = {}
@@ -133,14 +102,7 @@ def main(smoke: bool = False) -> Path:
             "kl_tilt_from_base_nats": aligned["kl_tilt_from_base_nats"],
         },
         "scaling_fits": fits,
-        # Monotonicity is checked in the SIGNED gap, not its magnitude. The tilt
-        # is not symmetric about the alignment point — the attainable charge
-        # distribution is skewed — so two points at nearly equal |gap| on
-        # opposite sides can order either way without contradicting anything.
         "monotonicity": {
-            # lambda is strictly DECREASING in the signed gap: when the data mean
-            # sits above the target the multiplier is negative, pulling mass back
-            # down, and vice versa. Monotone decrease is the correctness check.
             "signed_multiplier_decreases_with_signed_gap": bool(
                 np.all(np.diff(signed_lams[np.argsort(signed_gaps)]) <= 1e-9)
             ),
@@ -155,11 +117,6 @@ def main(smoke: bool = False) -> Path:
                 )
             },
         },
-        # The per-sample violation rate of the tilt barely moves across the sweep
-        # even as the multiplier and the KL move by orders of magnitude. Recorded
-        # explicitly because it means per-sample violation is NOT a proxy for
-        # constraint activity: a near-flat violation rate is compatible with the
-        # constraint doing anything from almost no work to a great deal of it.
         "violation_decoupling": {
             "tilt_violation_min": float(viols.min()),
             "tilt_violation_max": float(viols.max()),

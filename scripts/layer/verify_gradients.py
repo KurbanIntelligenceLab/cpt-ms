@@ -1,24 +1,4 @@
-"""CP2 gradient verification: implicit-function gradients vs two oracles.
-
-Emits `results/gradient_verification.json` with measured tolerances, which is
-the artifact CP2 reads. Nothing here is asserted: every tolerance in the report
-is a number this script computed.
-
-Two independent oracles, because they fail in different ways:
-
-  finite differences   Model-free. Catches a wrong Jacobian but is itself noisy,
-                       so it bounds the error only to roughly sqrt(eps).
-
-  cvxpylayers          Differentiates the general cone program via its own
-                       implicit differentiation of the KKT system. It shares no
-                       code path with our closed-form tilt, so agreement is
-                       genuine cross-validation rather than a tautology.
-
-The randomized Jacobian rank check the plan also requires is included: the
-constraint set must have the rank the configuration implies, or the multiplier
-solve is ill-posed and the covariance Hessian is singular for a structural
-reason rather than a numerical one.
-"""
+"""Gradient verification: implicit-function gradients vs two oracles."""
 
 from __future__ import annotations
 
@@ -42,9 +22,6 @@ def make_case(rng: np.random.Generator, B: int, V: int, m: int, seed: int):
     g = torch.Generator().manual_seed(seed)
     logits = torch.randn(B, V, generator=g, dtype=torch.float64)
     A = torch.randn(B, m, V, generator=g, dtype=torch.float64)
-    # Target the statistic of the UNCONSTRAINED distribution, perturbed. This
-    # keeps b inside the attainable range by construction, so any convergence
-    # failure is a solver problem rather than an infeasible ask.
     p = torch.softmax(logits, dim=-1)
     b0 = torch.einsum("bmv,bv->bm", A, p)
     b = b0 + 0.25 * torch.randn(B, m, generator=g, dtype=torch.float64)
@@ -55,11 +32,7 @@ FD_STEPS = (1e-2, 1e-3, 1e-4, 1e-5, 1e-6)
 
 
 def _fd_at(logits, A, b, w, eps):
-    """Central-difference gradient of sum(w*q) at one step size."""
     def f(x):
-        # Tighter than the default forward tolerance: the finite-difference
-        # quotient divides the solve's own error by eps, so a loose forward
-        # solve masquerades as a gradient discrepancy.
         return (project(x, A, b, max_iter=200, tol=1e-14).q * w).sum()
 
     grad = torch.zeros_like(logits)
@@ -72,17 +45,7 @@ def _fd_at(logits, A, b, w, eps):
 
 
 def finite_difference_jacobian(logits, A, b):
-    """Finite-difference oracle, swept over step size.
-
-    Central differences carry two competing errors: truncation, which falls as
-    eps^2, and roundoff amplification, which grows as 1/eps because the quotient
-    divides the forward solve's own convergence error by the step. The optimum
-    sits at the bottom of that U, and quoting a single arbitrary step reports a
-    point on one arm of it rather than the oracle's actual accuracy.
-
-    Returns the best-agreeing step alongside the full sweep, so the report shows
-    the U-shape rather than asserting a tolerance from one point.
-    """
+    """Finite-difference oracle, swept over step size."""
     g = torch.Generator().manual_seed(0)
     w = torch.randn(*logits.shape, generator=g, dtype=torch.float64)
     return {eps: _fd_at(logits, A, b, w, eps) for eps in FD_STEPS}, w
@@ -95,11 +58,7 @@ def analytic_gradient(logits, A, b, w):
 
 
 def cvxpylayers_gradient(logits, A, b, w):
-    """Oracle gradient from cvxpylayers' KKT differentiation.
-
-    Returns None when cvxpylayers is unavailable, so the report records the
-    oracle as unavailable rather than silently dropping the comparison.
-    """
+    """Oracle gradient from cvxpylayers' KKT differentiation."""
     try:
         import cvxpy as cp
         from cvxpylayers.torch import CvxpyLayer
@@ -113,7 +72,6 @@ def cvxpylayers_gradient(logits, A, b, w):
     p_par = cp.Parameter(V, nonneg=True)
     A_par = cp.Parameter((m, V))
     b_par = cp.Parameter(m)
-    # KL(q||p) = sum q log(q/p); cvxpy expresses this with kl_div.
     obj = cp.Minimize(cp.sum(cp.kl_div(q, p_par)))
     cons = [cp.sum(q) == 1, A_par @ q == b_par]
     layer = CvxpyLayer(cp.Problem(obj, cons), parameters=[p_par, A_par, b_par], variables=[q])

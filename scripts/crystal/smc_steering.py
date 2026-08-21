@@ -1,30 +1,4 @@
-"""Sequential Monte Carlo steering: the principled inference-time alternative.
-
-WHY THIS BASELINE. Best-of-n is the cheapest thing that amortizes across targets and it beats
-the projection on accuracy given enough samples. SMC is the strong version of the same idea:
-instead of drawing n complete sequences and discarding all but one, it carries K partial
-sequences and reallocates them as information arrives, so compute is spent where it changes
-the outcome. If the projection's advantage were merely that naive selection is wasteful, SMC
-would erase it. The comparison is therefore the honest one and is what a reviewer will ask for.
-
-THE POTENTIAL. At each element position the running mass budget is determined (cell-first
-ordering closes the volume first), so a particle's expected final density is estimable from
-its prefix: mass so far plus the remaining slots' worth of budget, over the known volume. The
-potential is a Gaussian on that estimate against the target, which is the standard twist for
-a soft terminal constraint. Resampling happens at element positions only, matching the
-positions where the projection is actionable, so the two methods are compared on the same
-decision points rather than on different ones.
-
-TUNING MATTERS AND IS THEREFORE MEASURED. A first pass fixed sigma = 1.0 g/cm^3 and reported
-SMC as roughly four times worse than best-of-n at equal compute -- which would have been a
-claim about this implementation dressed up as a claim about SMC. A sweep at one target showed
-the potential's width is the dominant knob (mean error 0.259 at sigma = 0.3 against 0.640 at
-sigma = 1.0, a factor of 2.5 from one number), so sigma is swept here and the best value per
-target is reported alongside the fixed-sigma result. No proposal is learned and no adaptive
-resampling threshold is tuned, so these numbers remain a lower bound on what SMC can achieve
-rather than its ceiling; the purpose is to locate the crossover for a competently tuned
-implementation and to say plainly which knobs were left untouched.
-"""
+"""Sequential Monte Carlo steering: the principled inference-time alternative."""
 from __future__ import annotations
 
 import argparse
@@ -47,14 +21,6 @@ AMU_PER_A3_TO_G_CM3 = 1.6605390666
 
 
 def _density_estimate(prefix_ids: np.ndarray, V, cfg) -> np.ndarray:
-    """Expected final density for each particle, from its prefix.
-
-    Bin centres and the volume formula are recovered exactly as `decode_density` does --
-    the same LEN_LO/LEN_HI/N_LEN arithmetic and the same triclinic determinant -- so an SMC
-    particle is scored on the identical quantity the published density metrics report. A
-    second implementation of this parse could disagree about bucket centres and the two
-    methods would then be compared on different densities.
-    """
     from scripts.crystal.mp20 import ATOMIC_MASS
 
     out = np.full(prefix_ids.shape[0], np.nan)
@@ -108,7 +74,6 @@ def smc(model, V, gm, cfg, device, K: int, target: float, max_len: int,
         ids = torch.cat([ids, nxt], dim=1)
         done = done | (nxt.squeeze(-1) == eos)
 
-        # Reweight at element positions -- the same decision points the projection uses.
         tok_names = [V.tokens[int(t)] for t in nxt.squeeze(-1).cpu().numpy()]
         if any(t.startswith("cnt:") for t in tok_names) and not bool(done.all()):
             est = _density_estimate(ids.cpu().numpy(), V, cfg)
@@ -118,7 +83,7 @@ def smc(model, V, gm, cfg, device, K: int, target: float, max_len: int,
                 logw = logw + torch.tensor(pot, device=device, dtype=logw.dtype)
                 w = torch.softmax(logw, 0)
                 ess = 1.0 / float((w ** 2).sum())
-                if ess < K / 2:                      # standard ESS/2 trigger
+                if ess < K / 2:
                     idx = torch.multinomial(w, K, replacement=True)
                     ids = ids[idx]
                     done = done[idx]
@@ -176,7 +141,6 @@ def main(ckpt: str, targets=None, k_values=None, runs: int = 32,
                     "forward_passes_per_output": int(K),
                 })
 
-    # Best sigma per (target, K): the honest number for a tuned implementation.
     best = {}
     for r in rows:
         key = (r["target"], r["K"])

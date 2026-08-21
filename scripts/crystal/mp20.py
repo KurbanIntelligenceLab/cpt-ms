@@ -1,19 +1,4 @@
-"""MP-20 loading and tokenization for the crystal arms (WS-3).
-
-Serializes each structure into the B1ref token order established in WS-2 — the
-reference implementation places the complete cell composition in the opening data
-tag, which is what makes the composition-dependent constraints determinable near the
-start of the file rather than in the trailing atom-site loop.
-
-Tokenization is at the CIF-line level rather than per character. The determinability
-and actionability measurements were made against a token stream, and per-character
-decoding would multiply sequence length by roughly forty for no change in the
-constraint structure. What matters for the projection is that composition tokens
-appear before the constraint must be evaluated, which this preserves.
-
-The density dial is primary here, per `preregistration/dial_assignment.md`: it
-has strictly more actionable room than charge on every backbone.
-"""
+"""MP-20 loading and tokenization for the crystal arms."""
 
 from __future__ import annotations
 
@@ -26,8 +11,6 @@ import pandas as pd
 
 DATA = Path(__file__).resolve().parents[2] / "data"
 
-# Elements ordered by atomic number so an index maps to a mass and a plausible
-# oxidation state without a lookup table at decode time.
 ELEMENTS = [
     "H","He","Li","Be","B","C","N","O","F","Ne","Na","Mg","Al","Si","P","S","Cl","Ar",
     "K","Ca","Sc","Ti","V","Cr","Mn","Fe","Co","Ni","Cu","Zn","Ga","Ge","As","Se","Br",
@@ -36,13 +19,7 @@ ELEMENTS = [
     "Yb","Lu","Hf","Ta","W","Re","Os","Ir","Pt","Au","Hg","Tl","Pb","Bi","Po","At","Rn",
     "Fr","Ra","Ac","Th","Pa","U","Np","Pu",
 ]
-# Valence electron count per element, generated once from SMACT 4.0.0 rather than
-# imported at runtime: the training loop must not depend on smact, and a static table is
-# reviewable in the diff. Covers every element in ELEMENTS. Note these are total valence
-# electron counts including filled d shells (Fe is 8, Cu is 11), which is the convention
-# SMACT's num_valence uses; the constraint only needs the quantity to be additive and
-# consistently defined, not to follow a particular chemical convention.
-VALENCE = {  # valence electron count per element, from SMACT 4.0.0
+VALENCE = {
     "H":1,"He":2,"Li":1,"Be":2,"B":3,"C":4,"N":5,"O":6,"F":7,
     "Ne":8,"Na":1,"Mg":2,"Al":3,"Si":4,"P":5,"S":6,"Cl":7,"Ar":8,
     "K":1,"Ca":2,"Sc":3,"Ti":4,"V":5,"Cr":6,"Mn":7,"Fe":8,"Co":9,
@@ -57,7 +34,7 @@ VALENCE = {  # valence electron count per element, from SMACT 4.0.0
 }
 
 
-ATOMIC_MASS = {  # u; only what MP-20 needs, filled from standard values
+ATOMIC_MASS = {
     "H":1.008,"He":4.003,"Li":6.94,"Be":9.012,"B":10.81,"C":12.011,"N":14.007,"O":15.999,
     "F":18.998,"Ne":20.180,"Na":22.990,"Mg":24.305,"Al":26.982,"Si":28.085,"P":30.974,
     "S":32.06,"Cl":35.45,"Ar":39.948,"K":39.098,"Ca":40.078,"Sc":44.956,"Ti":47.867,
@@ -138,47 +115,17 @@ def load_split(split: str, limit: int | None = None) -> list[Crystal]:
     return out
 
 
-# ---------------------------------------------------------------- tokenization
-
 def _bucket(x: float, lo: float, hi: float, n: int) -> int:
-    """Uniform bucket index, clamped to range."""
     if not np.isfinite(x):
         return 0
     return int(np.clip((x - lo) / (hi - lo) * n, 0, n - 1))
 
 
 class CrystalVocab:
-    """B1ref token order: composition first, then cell, then a length marker.
+    """B1ref token order: composition first, then cell, then a length marker."""
 
-    Composition-first is the ordering the reference implementation uses and the one
-    WS-2 measured: it is what makes the density constraint determinable early enough
-    for a per-step projection to act on it.
-    """
-
-    # Resolution chosen by measurement, not convention. The density dial is the
-    # quantity the projection steers, so discretization error must sit well below
-    # the steering effects being resolved. Median relative error on MP-20 train:
-    # 64/32 -> 4.4%, 128/64 -> 2.4%, 256/128 -> 1.1%, 512/256 -> 0.6%. At 256/128
-    # the vocabulary is 500 tokens and the error is small enough not to confound;
-    # doubling again buys 0.5 points for a 77% larger vocabulary.
-    # Resolution is set WITH the range, not independently of it. Widening the
-    # ranges to cover the data spreads the same bucket count over more span, which
-    # raised overall median error from 1.17% to 1.67% at 256/128. At 512/256 over
-    # the corrected ranges the error is 0.84% overall and 1.44% in the high-density
-    # tail -- better than the original narrow-range setting on both, for an 884-token
-    # vocabulary against 500.
     N_LEN, N_ANG, N_CNT = 512, 256, 16
 
-    # Bucket ranges must COVER the data, not merely span its typical values.
-    # MP-20 cell angles run [7.01, 170.18] degrees. An earlier range of [20, 160]
-    # clamped 0.8% of angles at the floor and 0.4% at the ceiling, which inflates the
-    # decoded cell volume and understates density. The effect is negligible in the
-    # bulk (1.7% of structures below 10 g/cm^3) but reaches 21.4% of structures in
-    # the [20, 25) band -- precisely where the extreme steering targets sit. Widened
-    # to [5, 175] so no real angle is clamped.
-    # Same defect on lengths, found by the coverage test rather than by inspection:
-    # MP-20 lengths run [2.44, 44.49] A, and a ceiling of 30 clamped 205 of them,
-    # understating the cell volume and OVERSTATING density on 0.7% of structures.
     ANG_LO, ANG_HI = 5.0, 175.0
     LEN_LO, LEN_HI = 2.0, 46.0
 
@@ -198,20 +145,7 @@ class CrystalVocab:
         return len(self.tokens)
 
     def encode(self, c: Crystal) -> list[int]:
-        """Serialize. `order` selects composition-first (B1ref) or cell-first.
-
-        Cell-first is not a cosmetic choice. Density is mass/volume, a RATIO, so a
-        target density fixes a TOTAL MASS budget only once the volume is known. Under
-        composition-first the volume is still undetermined while the element tokens
-        are being emitted, so no linear per-step expectation over the mass channel can
-        express the density constraint — targeting a fixed mass per token instead
-        drives the composition toward the lightest elements, which is what the first
-        crystal projected run did.
-
-        Under cell-first the volume closes before any element token, so the running
-        budget rho*V/1.6605 minus mass-so-far is determined and the constraint takes
-        exactly the form the synthetic task validated.
-        """
+        """Serialize. `order` selects composition-first (B1ref) or cell-first."""
         comp = []
         for e, n in sorted(c.formula.items()):
             comp += [f"el:{e}", f"cnt:{min(n, self.N_CNT)}"]
@@ -238,11 +172,7 @@ class CrystalVocab:
         return float(a * b * cc * np.sqrt(v2))
 
     def decode_density(self, ids: list[int]) -> float | None:
-        """Density implied by a token sequence, or None if it is incomplete.
-
-        Uses bucket centres, so this is the density the model can actually target
-        given the discretization — not the exact value of the source structure.
-        """
+        """Density implied by a token sequence, or None if it is incomplete."""
         formula, lens, angs, cur_el = {}, [], [], None
         for i in ids:
             tok = self.tokens[i]
@@ -259,7 +189,6 @@ class CrystalVocab:
             return None
         a, b, cc = lens
         al, be, ga = np.radians(angs)
-        # Triclinic cell volume.
         v2 = (1 - np.cos(al) ** 2 - np.cos(be) ** 2 - np.cos(ga) ** 2
               + 2 * np.cos(al) * np.cos(be) * np.cos(ga))
         if v2 <= 0:
@@ -270,14 +199,7 @@ class CrystalVocab:
 
     def decode_weighted_density(self, ids: list[int],
                                 table: dict[str, float]) -> float | None:
-        """Density of any additive per-element quantity, in units of table-value per A^3.
-
-        Shares `decode_density`'s parsing and volume so the two quantities are read off
-        exactly the same decoded cell. A second parser would be free to disagree about
-        bucket centres or cell validity, and then the two dials would be measured on
-        different structures. No unit conversion is applied: for a count-valued table the
-        result is already per cubic angstrom.
-        """
+        """Density of any additive per-element quantity, in units of table-value per A^3."""
         formula, lens, angs, cur_el = {}, [], [], None
         for i in ids:
             tok = self.tokens[i]

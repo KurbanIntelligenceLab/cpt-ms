@@ -1,40 +1,4 @@
-"""CIF grammar as a per-character mask emitter (WS-2).
-
-Regime S for the B1 backbone. At every decoding step the emitter returns the set
-of characters that keep the prefix extendable to a syntactically valid CIF. A
-decoder restricted to that set cannot emit an unparseable file — the syntactic
-failure mode is removed by construction rather than reduced.
-
-The grammar is a deterministic finite-state machine over a skeleton CIF:
-
-    data_<formula>
-    _cell_length_a <num>      ... b, c
-    _cell_angle_alpha <num>   ... beta, gamma
-    _symmetry_space_group_name_H-M P 1
-    loop_
-    _atom_site_type_symbol
-    _atom_site_fract_x
-    _atom_site_fract_y
-    _atom_site_fract_z
-    <El> <num> <num> <num>    (one or more)
-
-Two properties matter and both are testable rather than asserted:
-
-  SOUNDNESS   every string the emitter allows to completion parses under an
-              independent third-party parser. Tested against pymatgen's
-              CifParser, which shares no code with this module. If a masked
-              sample fails to parse, the grammar is incomplete and that is a
-              finding about this emitter, not about the method.
-
-  NON-TRIVIALITY  the mask must not collapse to a single legal character at
-              every step, or "valid by construction" would mean "one possible
-              output" and the comparison against unconstrained decoding would be
-              vacuous. Branching factor is measured and reported.
-
-The skeleton is deliberately narrow. It covers the subset a generative model must
-emit to be evaluable, not the full CIF dictionary, and the reported claim is
-scoped to that subset.
-"""
+"""CIF grammar as a per-character mask emitter."""
 
 from __future__ import annotations
 
@@ -44,18 +8,12 @@ DIGITS = "0123456789"
 UPPER = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 LOWER = "abcdefghijklmnopqrstuvwxyz"
 
-# Elements the grammar admits. Two-letter symbols make the element field a real
-# branching decision rather than a single character.
 ELEMENTS = ("H", "C", "N", "O", "F", "Na", "Mg", "Al", "Si", "P", "S", "Cl",
             "K", "Ca", "Ti", "Fe", "Co", "Ni", "Cu", "Zn")
 
 _CELL_TAGS = ("_cell_length_a", "_cell_length_b", "_cell_length_c",
               "_cell_angle_alpha", "_cell_angle_beta", "_cell_angle_gamma")
 _SYM_TAG = "_symmetry_space_group_name_H-M"
-# `_atom_site_label` is not decoration: pymatgen's CifParser raises KeyError
-# without it. Discovered by running the emitter's own output through the
-# independent parser rather than by reading the CIF specification, which is the
-# reason the soundness check uses a third-party oracle.
 _LOOP_HEAD = ("loop_", "_atom_site_label", "_atom_site_type_symbol",
               "_atom_site_fract_x", "_atom_site_fract_y", "_atom_site_fract_z")
 
@@ -64,15 +22,15 @@ _LOOP_HEAD = ("loop_", "_atom_site_label", "_atom_site_type_symbol",
 class GrammarState:
     """Position in the CIF skeleton, as a function of the prefix only."""
 
-    phase: str = "data_tag"        # which literal or field is being emitted
-    idx: int = 0                   # offset within the current literal
-    field_len: int = 0             # characters emitted in the current free field
-    seen_dot: bool = False         # numeric field has consumed its decimal point
-    cell_i: int = 0                # which of the six cell parameters
-    head_i: int = 0                # which loop-header line
-    site_col: int = 0             # column within an atom-site row
-    n_sites: int = 0               # completed atom-site rows
-    elem_prefix: str = ""          # partial element symbol
+    phase: str = "data_tag"
+    idx: int = 0
+    field_len: int = 0
+    seen_dot: bool = False
+    cell_i: int = 0
+    head_i: int = 0
+    site_col: int = 0
+    n_sites: int = 0
+    elem_prefix: str = ""
 
     def copy(self) -> "GrammarState":
         return GrammarState(**self.__dict__)
@@ -85,12 +43,6 @@ INT_DIGITS, FRAC_DIGITS = 1, 4
 
 
 def _num_allowed(s: GrammarState, *, allow_terminator: str) -> str:
-    """Characters legal inside a fixed-format number `d.dddd`.
-
-    Numbers are emitted as one integer digit, a point, then exactly four
-    fractional digits. Fixing the format keeps the FSM deterministic without
-    making the field a single choice: each digit position is a free decision.
-    """
     if not s.seen_dot:
         if s.field_len == 0:
             return DIGITS
@@ -137,7 +89,6 @@ def allowed(state: GrammarState) -> str:
         return lit[s.idx] if s.idx < len(lit) else "\n"
 
     if p == "site_element":
-        # Either continue a two-letter symbol or terminate a complete one.
         out = ""
         cands = [e for e in ELEMENTS if e.startswith(s.elem_prefix)]
         for e in cands:
@@ -148,14 +99,11 @@ def allowed(state: GrammarState) -> str:
         return "".join(dict.fromkeys(out))
 
     if p == "site_label":
-        # A per-row label. Digits only, so it is unambiguous and cannot collide
-        # with the element column that follows.
         if s.field_len == 0:
             return DIGITS
         return DIGITS + " " if s.field_len < 2 else " "
 
     if p == "site_number":
-        # Three coordinate columns; the third ends the row.
         return _num_allowed(s, allow_terminator=" " if s.site_col < 3 else "\n")
 
     if p == "row_boundary":
@@ -163,7 +111,7 @@ def allowed(state: GrammarState) -> str:
         if s.n_sites < MAX_SITES:
             out += DIGITS
         if s.n_sites >= MIN_SITES:
-            out += "\x03"          # end-of-file marker
+            out += "\x03"
         return out
 
     if p == "done":

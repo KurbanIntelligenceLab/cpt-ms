@@ -1,11 +1,4 @@
-"""Tests for the second constraint family on real crystals.
-
-Two claims are pinned here. First, that generalizing the mass channel over its weight
-table did not change the density code path -- every published density artifact depends on
-it. Second, that charge neutrality is genuinely outside the expressible class rather than
-merely unimplemented, and that the second family chosen instead is not a restatement of
-density.
-"""
+"""Tests for the second constraint family on real crystals."""
 from __future__ import annotations
 
 import json
@@ -51,12 +44,7 @@ def _prefix_ids(n: int = 24):
 
 
 def test_generalized_channel_reproduces_mass_channel_exactly():
-    """weight_channel(ATOMIC_MASS) must equal mass_channel bit for bit.
-
-    Every published density result runs through mass_channel. If the generalization
-    changed its output by any amount, those artifacts would no longer describe the code
-    that produced them.
-    """
+    """weight_channel(ATOMIC_MASS) must equal mass_channel bit for bit."""
     V, ids = _prefix_ids()
     for cut in (3, 7, 11, 15, ids.shape[1]):
         a = mass_channel(ids[:, :cut], V)
@@ -66,13 +54,7 @@ def test_generalized_channel_reproduces_mass_channel_exactly():
 
 
 def test_channels_are_nonzero_on_the_next_token_support():
-    """A channel that is identically zero on the allowed support is a vacuous constraint.
-
-    The mask returned by masks_for at index -1 belongs to the token already emitted, so
-    reading it directly yields a support on which the mass channel is all zeros -- an
-    attainable range of {0} that reads as ill-conditioning rather than as a wrong
-    position. This test pins the padded-mask convention that avoids it.
-    """
+    """A channel that is identically zero on the allowed support is a vacuous constraint."""
     V, ids = _prefix_ids(8)
     gm = GrammarMask(V, order="cell_first")
     found_nonzero = False
@@ -97,13 +79,7 @@ def test_channels_are_nonzero_on_the_next_token_support():
 
 
 def test_count_positions_are_exactly_collinear():
-    """At a count position the two channels are one constraint written twice.
-
-    With pending element E the tokens are cnt:k, so mass contributes MASS[E]*k and
-    valence VALENCE[E]*k -- both proportional to k. Joint steering is impossible there
-    for a structural reason, and the code must not treat such a position as a rank-2
-    test case.
-    """
+    """At a count position the two channels are one constraint written twice."""
     V, ids = _prefix_ids(12)
     gm = GrammarMask(V, order="cell_first")
     VE = {k: float(v) for k, v in valence_table().items()}
@@ -170,11 +146,7 @@ def test_joint_solve_on_real_prefixes_is_exact_and_conditioned():
 
 
 def test_charge_neutrality_is_not_linear():
-    """The scope claim must rest on a measurement, not an assertion.
-
-    If a linear proxy were adequate the paper should use it; the measurement is what
-    licenses excluding charge neutrality from the expressible class.
-    """
+    """The scope claim must rest on a measurement, not an assertion."""
     ev = charge_linearity_evidence(n_structures=300)
     assert ev["n_multivalent_elements"] > 0.5 * ev["n_elements_with_states"], (
         "most elements should be multivalent, which is what makes the screen existential"
@@ -187,12 +159,7 @@ def test_charge_neutrality_is_not_linear():
 
 
 def test_second_family_is_not_a_restatement_of_density():
-    """Two nearly collinear constraints make the joint solve ill-posed by construction.
-
-    The pair has to be correlated enough to be a real test of composition and far enough
-    from collinear to stay conditioned, so the correlation is asserted inside a band
-    rather than merely reported.
-    """
+    """Two nearly collinear constraints make the joint solve ill-posed by construction."""
     art = RESULTS / "second_channel.json"
     if not art.exists():
         pytest.skip("second-channel artifact absent; run scripts.crystal.second_channel")

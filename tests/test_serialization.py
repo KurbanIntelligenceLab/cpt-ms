@@ -1,10 +1,4 @@
-"""The expressible class is coupled to the token ordering, and that must stay measured.
-
-This result replaced a requested experiment with an argument for why the experiment cannot be
-run, which is exactly the shape of claim a reader should distrust unless it is measured. So
-the measurement is recomputed here from the vocabulary and the trainer's own budget function
-rather than read from the artifact, and the prose is checked against it.
-"""
+"""The expressible class is coupled to the token ordering, and that must stay measured."""
 from __future__ import annotations
 
 import json
@@ -32,11 +26,7 @@ def _p() -> dict:
 
 
 def test_budget_determinability_recomputes_from_the_code():
-    """Recompute on a small sample using the trainer's own budget function.
-
-    If a future change made the budget determinable under composition-first, this test would
-    fail and the paper's claim would have to change with it -- which is the point.
-    """
+    """Recompute on a small sample using the trainer's own budget function."""
     from scripts.crystal.mp20 import ATOMIC_MASS, ELEMENTS, CrystalVocab, load_split
     from scripts.train.train_crystal import CrystalTrainConfig, _additive_budget
 
@@ -77,11 +67,7 @@ def test_artifact_agrees_with_the_recomputation():
 
 
 def test_the_second_family_inherits_the_dependence():
-    """Both constraint families are per-volume densities, so the coupling must be identical.
-
-    Asserting this separately matters: if the two diverged, the mechanism explanation (the
-    volume closing) would be wrong even if the density numbers looked right.
-    """
+    """Both constraint families are per-volume densities, so the coupling must be identical."""
     p = _p()
     for r in p["rows"]:
         assert abs(r["determined_fraction"] - r["valence_determined_fraction"]) < 1e-9, (
@@ -114,8 +100,6 @@ def test_verdict_matches_the_measured_split():
     if rows["comp_first"]["determined_fraction"] <= 1e-9:
         cons = p["consequence_for_the_requested_experiment"]
         assert cons, "a zero determinability rate must carry a stated consequence"
-        # Check the substance rather than a phrase: the consequence must say the arm would
-        # have no actionable positions, and must name the coupling as the finding.
         assert "zero actionable positions" in cons
         assert "COUPLED" in cons or "coupled" in cons
         assert "measure the unconstrained model" in cons
