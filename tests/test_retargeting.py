@@ -30,7 +30,7 @@ RESULTS = Path(__file__).resolve().parents[1] / "results"
 
 def _fake_checkpoint(tmp_path: Path, trained_at: float = 5.0, order: str = "cell_first"):
     """A checkpoint written the same way the trainer writes one, at tiny scale."""
-    cfg = CrystalTrainConfig(arm="A3", d_model=32, n_layer=1, n_head=2,
+    cfg = CrystalTrainConfig(arm="projected", d_model=32, n_layer=1, n_head=2,
                              density_target=trained_at, order=order)
     V = CrystalVocab(ELEMENTS, order=order)
     max_len = 26

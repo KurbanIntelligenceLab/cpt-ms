@@ -21,12 +21,12 @@ TRAINING_CALL_SITES = {
     "train_crystal.py:801": ("scripts/train/train_crystal.py", 801),
     "train_crystal.py:802": ("scripts/train/train_crystal.py", 802),
     "train_crystal.py:826": ("scripts/train/train_crystal.py", 826),
-    "train_a2.py:332": ("scripts/train/train_a2.py", 332),
+    "train_synthetic.py:332": ("scripts/train/train_synthetic.py", 332),
 }
 
 INFERENCE_ONLY_CALL_SITES = {
     "train_crystal.py:458": ("scripts/train/train_crystal.py", 458),
-    "train_a2.py:161": ("scripts/train/train_a2.py", 161),
+    "train_synthetic.py:161": ("scripts/train/train_synthetic.py", 161),
 }
 
 

@@ -15,7 +15,7 @@ that rejection is cheap in the bulk.
 
 The rejection arm here is deliberately generous: it draws from the EMPIRICAL data
 rather than from a trained generator, i.e. it assumes a model that reproduces the data
-distribution perfectly. A2 approximates that but does not achieve it, so a difference
+distribution perfectly. mask-only approximates that but does not achieve it, so a difference
 measured against this arm understates the difference against any real baseline.
 """
 
@@ -122,7 +122,7 @@ def main(targets: list[float], tol: float = 0.5, smoke: bool = False) -> Path:
             "max_expected_draws": float(max(draws)) if draws else None,
             "note": (
                 "The rejection arm draws from the EMPIRICAL data, i.e. it assumes a "
-                "generator reproducing the data distribution perfectly. A2 does not "
+                "generator reproducing the data distribution perfectly. mask-only does not "
                 "achieve that, so any difference measured here understates the "
                 "difference against a real baseline. Steered-sample profiles are "
                 "filled in from the frontier runs; this artifact establishes what "

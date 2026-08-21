@@ -7,6 +7,8 @@ from pathlib import Path
 
 import numpy as np
 
+from scripts.common.arms import resolve
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from scripts.common.artifacts import emit
@@ -95,7 +97,7 @@ def _tokenizer() -> dict:
         "crystal": {
             "level": "line-level pseudo-token stream (not per-character); the grammar mask itself operates per-character over a CIF skeleton (scripts/crystal/cif_grammar.py) but the trained model's vocabulary is the coarser CrystalVocab token set",
             "vocab_size_default": 500,
-            "vocab_size_A4_smoke_variant": 884,
+            "vocab_size_conditional_smoke_variant": 884,
             "vocab_composition": {
                 "special": ["<BOS>", "<COMP>", "<END_COMP>", "<CELL>", "<END_CELL>", "<EOS>"],
                 "elements": "one token per element in ELEMENTS (94 elements, H through Pu)",
@@ -139,47 +141,47 @@ def _tokenizer() -> dict:
 
 
 def main() -> Path:
-    crystal_arms = {arm: _crystal_arm(arm) for arm in ("A1", "A2", "A3")}
-    crystal_a3_f2 = _load("crystal_A3_f2_seed0")
-    crystal_a4_smoke = _load("crystal_A4_smoke")
+    crystal_arms = {arm: _crystal_arm(arm) for arm in ("unconstrained", "mask_only", "projected")}
+    crystal_a3_f2 = _load("crystal_projected_cell_first_seed0")
+    crystal_a4_smoke = _load("crystal_conditional_smoke")
 
-    synthetic_arms = {arm: _synthetic_arm(arm) for arm in ("A1", "A2", "A3")}
+    synthetic_arms = {arm: _synthetic_arm(arm) for arm in ("unconstrained", "mask_only", "projected")}
     synthetic_summary = _load("training_summary")
 
     cb = _load("conditional_baseline")
-    a3_walls = [v["wall"] for v in cb["runs"].values() if v["arm"] == "A3"]
-    a4_walls = [v["wall"] for v in cb["runs"].values() if v["arm"] == "A4"]
+    a3_walls = [v["wall"] for v in cb["runs"].values() if resolve(v["arm"]) == "projected"]
+    a4_walls = [v["wall"] for v in cb["runs"].values() if resolve(v["arm"]) == "conditional"]
 
     overhead = _load("overhead_benchmark")
 
     ratio_crystal_a3_over_a2_single_ckpt = (
-        crystal_arms["A3"]["wall_clock_s_mean"] / crystal_arms["A2"]["wall_clock_s_mean"]
+        crystal_arms["projected"]["wall_clock_s_mean"] / crystal_arms["mask_only"]["wall_clock_s_mean"]
     )
     ratio_crystal_a3_over_a1_single_ckpt = (
-        crystal_arms["A3"]["wall_clock_s_mean"] / crystal_arms["A1"]["wall_clock_s_mean"]
+        crystal_arms["projected"]["wall_clock_s_mean"] / crystal_arms["unconstrained"]["wall_clock_s_mean"]
     )
     ratio_synthetic_a3_over_a2 = (
-        synthetic_arms["A3"]["wall_clock_s_mean"] / synthetic_arms["A2"]["wall_clock_s_mean"]
+        synthetic_arms["projected"]["wall_clock_s_mean"] / synthetic_arms["mask_only"]["wall_clock_s_mean"]
     )
 
     payload = {
         "crystal_arms": crystal_arms,
         "crystal_variant_runs": {
-            "A3_f2_cell_first_static_channel": {
+            "projected_cell_first_static_channel": {
                 "train_config": crystal_a3_f2["train_config"],
                 "device": crystal_a3_f2["device"], "gpu": crystal_a3_f2["gpu"],
                 "n_parameters": crystal_a3_f2["n_parameters"], "vocab_size": crystal_a3_f2["vocab_size"],
                 "wall_clock_s": crystal_a3_f2["wall_clock_s"],
-                "note": "same architecture and vocab as the main A3 arm; wall clock differs because this run includes the joint two-constraint solve path",
-                "source_artifact": "results/crystal_A3_f2_seed0.json",
+                "note": "same architecture and vocab as the main projected arm; wall clock differs because this run includes the joint two-constraint solve path",
+                "source_artifact": "results/crystal_projected_cell_first_seed0.json",
             },
-            "A4_smoke": {
+            "conditional_smoke": {
                 "train_config": crystal_a4_smoke["train_config"],
                 "device": crystal_a4_smoke["device"], "gpu": crystal_a4_smoke["gpu"],
                 "n_parameters": crystal_a4_smoke["n_parameters"], "vocab_size": crystal_a4_smoke["vocab_size"],
                 "wall_clock_s": crystal_a4_smoke["wall_clock_s"],
                 "note": "884-token vocab, CPU device, 300 steps, filter_tol 0.5 -- a smoke-test configuration, not a reported result",
-                "source_artifact": "results/crystal_A4_smoke.json",
+                "source_artifact": "results/crystal_conditional_smoke.json",
             },
         },
         "synthetic_arms": synthetic_arms,
@@ -197,12 +199,12 @@ def main() -> Path:
             "per_target": cb["per_target"],
             "summary": cb["summary"],
             "wall_clock_s": {
-                "A3_per_run": a3_walls,
-                "A3_mean": float(np.mean(a3_walls)),
-                "A3_total_8_runs": float(np.sum(a3_walls)),
-                "A4_per_run": a4_walls,
-                "A4_mean": float(np.mean(a4_walls)),
-                "A4_total_8_runs": float(np.sum(a4_walls)),
+                "projected_per_run": a3_walls,
+                "projected_mean": float(np.mean(a3_walls)),
+                "projected_total_8_runs": float(np.sum(a3_walls)),
+                "conditional_per_run": a4_walls,
+                "conditional_mean": float(np.mean(a4_walls)),
+                "conditional_total_8_runs": float(np.sum(a4_walls)),
                 "hardware_note": (
                     "the conditional_baseline.json record itself was written on a "
                     "macOS/arm64 host (record platform field), which is inconsistent with the "
@@ -226,39 +228,39 @@ def main() -> Path:
         },
         "compute_normalized_comparison": {
             "what_is_matched": (
-                "The crystal A1/A2/A3 single-checkpoint runs (results/crystal_{A1,A2,A3}_seed{0,1,2}.json) "
+                "The crystal unconstrained/mask-only/projected single-checkpoint runs (results/crystal_{unconstrained,mask-only,projected}_seed{0,1,2}.json) "
                 "share architecture (d_model=256, 6 layers, 8 heads, 5,002,228 parameters), vocabulary "
                 "(500 tokens), step count (6000), batch size (128), optimizer, schedule, training data "
                 "(26,910 structures) and hardware (cuda, NVIDIA GeForce RTX 5090); they differ only in "
-                "whether the mask (A2) or mask-plus-trained-through-projection (A3) is applied, so the "
-                "A3/A2 wall-clock ratio computed from these runs isolates the projection layer's marginal "
+                "whether the mask (mask-only) or mask-plus-trained-through-projection (projected) is applied, so the "
+                "projected/mask-only wall-clock ratio computed from these runs isolates the projection layer's marginal "
                 "training cost on identical hardware and identical step count."
             ),
             "what_is_not_matched": (
-                "The results/conditional_baseline.json sweep (A3 vs A4, 8 runs each across 4 targets x "
+                "The results/conditional_baseline.json sweep (projected vs conditional, 8 runs each across 4 targets x "
                 "2 seeds) is NOT matched to the single-checkpoint runs on hardware: its stored JSON record "
                 "carries platform='macOS-26.5.2-arm64-arm-64bit', while every crystal_A*_seed*.json run "
                 "explicitly stamps device='cuda', gpu='NVIDIA GeForce RTX 5090'. Step count is also not "
-                "confirmed identical between A3 and A4 inside that sweep from the stored payload (train_config "
-                "per run is not recorded in the runs dict, only loss/wall/target/seed/n_train), so the A3/A4 "
+                "confirmed identical between projected and conditional inside that sweep from the stored payload (train_config "
+                "per run is not recorded in the runs dict, only loss/wall/target/seed/n_train), so the projected/conditional "
                 "wall-clock ratio from conditional_baseline.json is NOT presented as a controlled overhead "
                 "measurement -- it is reported as the raw cost of the two training regimes as actually run, "
                 "with the hardware caveat stated explicitly wherever it is used."
             ),
             "single_checkpoint_vs_mask_only": {
-                "crystal_A3_over_A2_wall_clock_ratio": ratio_crystal_a3_over_a2_single_ckpt,
-                "crystal_A3_over_A1_wall_clock_ratio": ratio_crystal_a3_over_a1_single_ckpt,
-                "synthetic_A3_over_A2_wall_clock_ratio_published": synthetic_summary["wall_clock_ratio_A3_over_A2"],
+                "crystal_projected_over_mask_only_wall_clock_ratio": ratio_crystal_a3_over_a2_single_ckpt,
+                "crystal_projected_over_unconstrained_wall_clock_ratio": ratio_crystal_a3_over_a1_single_ckpt,
+                "synthetic_projected_over_mask_only_wall_clock_ratio_published": synthetic_summary["wall_clock_ratio_A3_over_A2"],
                 "note": "crystal ratio is smaller than the synthetic 6.0x figure reported in si:overhead because the crystal backbone (5.0M params, 6000 steps) is far larger than the per-step projection overhead relative to its own forward/backward cost, whereas the synthetic backbone (0.8M params, 4000 steps) is small enough that the projection solve dominates a larger fraction of each step",
             },
             "cost_structure_headline": {
-                "claim": "one projection-trained checkpoint (A3), deployed at inference time across a family of targets with no retraining, versus one conditionally-trained checkpoint (A4) PER target",
-                "single_checkpoint_training_wall_clock_s": crystal_arms["A3"]["wall_clock_s_mean"],
+                "claim": "one projection-trained checkpoint (projected), deployed at inference time across a family of targets with no retraining, versus one conditionally-trained checkpoint (conditional) PER target",
+                "single_checkpoint_training_wall_clock_s": crystal_arms["projected"]["wall_clock_s_mean"],
                 "n_conditional_checkpoints_for_a_7_target_family": 7,
                 "conditional_baseline_mean_wall_clock_s_per_checkpoint": float(np.mean(a4_walls)),
                 "conditional_baseline_total_wall_clock_s_for_7_checkpoints_at_measured_mean": 7 * float(np.mean(a4_walls)),
                 "ratio_conditional_7x_over_single_projection_checkpoint": (
-                    7 * float(np.mean(a4_walls)) / crystal_arms["A3"]["wall_clock_s_mean"]
+                    7 * float(np.mean(a4_walls)) / crystal_arms["projected"]["wall_clock_s_mean"]
                 ),
                 "retargeting_inference_overhead_s": {
                     "three_checkpoints_x_ten_targets_total_s": 241,
@@ -266,9 +268,9 @@ def main() -> Path:
                     "source": "reports/retargeting_notes.md; results/zero_shot_retargeting.json (per-checkpoint wall_clock_s)",
                 },
                 "caveat": (
-                    "the A4 mean wall clock above (216.45 s) is read from conditional_baseline.json, whose "
+                    "the conditional mean wall clock above (216.45 s) is read from conditional_baseline.json, whose "
                     "record is stamped with a different platform than the RTX-5090 single-checkpoint runs (see "
-                    "what_is_not_matched); it is used here only because it is the sole measured A4 training cost "
+                    "what_is_not_matched); it is used here only because it is the sole measured conditional training cost "
                     "in the repository, and the ratio is reported as an as-measured cost-structure figure, not a "
                     "hardware-controlled benchmark"
                 ),

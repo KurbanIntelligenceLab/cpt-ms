@@ -92,7 +92,7 @@ def run_density_arm(mode: str, cfg, train, V, gm, max_len, data, dev,
 
 
 def main() -> Path:
-    cfg = CrystalTrainConfig(arm="A3", steps=600, batch=128, n_eval_samples=512,
+    cfg = CrystalTrainConfig(arm="projected", steps=600, batch=128, n_eval_samples=512,
                              train_limit=3000, density_target=5.0, order="cell_first")
     dev = torch.device("cpu")
 

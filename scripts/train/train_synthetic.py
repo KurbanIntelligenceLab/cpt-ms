@@ -1,8 +1,8 @@
-"""A2: masked-softmax baseline trained on the synthetic constrained-sequence task.
+"""Synthetic task: the unconstrained, mask-only and projected arms trained on the synthetic constrained-sequence task.
 
-A2 is the Regime-S arm — a decoder whose per-step distribution is restricted to the
+mask-only is the Regime-S arm — a decoder whose per-step distribution is restricted to the
 mask's legal set, with no Regime-E projection. It is the baseline every later claim
-is measured against, and it is what CP0's converged-stage reading, the A1-vs-A2
+is measured against, and it is what CP0's converged-stage reading, the unconstrained-vs-mask-only
 delta, and the CP2 benchmark all wait on.
 
 Trained on the synthetic task rather than crystals deliberately: the synthetic task
@@ -13,9 +13,9 @@ approximation.
 
 Three arms, so the comparison the project needs is available at the end:
 
-  A1  unconstrained decoder, no mask         — the "does masking help" control
-  A2  masked decoder, Regime S only          — the baseline
-  A3  masked decoder + per-step projection   — the method, at one active constraint,
+  unconstrained  unconstrained decoder, no mask         — the "does masking help" control
+  mask-only  masked decoder, Regime S only          — the baseline
+  projected  masked decoder + per-step projection   — the method, at one active constraint,
                                                which the CP2 benchmark found to be
                                                the affordable configuration
 
@@ -37,17 +37,18 @@ import torch.nn as nn
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
+from scripts.common.arms import resolve
 from scripts.common.artifacts import emit
 from scripts.layer.projection import project
 from scripts.synthetic.targets import kl, tilting_target
 from scripts.synthetic.task import TaskConfig, enumerate_task
 
-SCRIPT = "scripts/train/train_a2.py"
+SCRIPT = "scripts/train/train_synthetic.py"
 
 
 @dataclass
 class TrainConfig:
-    arm: str = "A2"
+    arm: str = "mask_only"
     d_model: int = 128
     n_layer: int = 4
     n_head: int = 4
@@ -98,7 +99,7 @@ def prefix_masks(task, seqs: np.ndarray, cfg: TaskConfig) -> np.ndarray:
     """Legal-token mask at every position, computed from the prefix alone.
 
     Regime S is a per-symbol multiplicity budget, which is prefix-closed, so no
-    lookahead is needed. That is what makes A2 trainable without a straight-through
+    lookahead is needed. That is what makes mask-only trainable without a straight-through
     estimator.
     """
     n, L = seqs.shape
@@ -127,13 +128,13 @@ def induced_distribution_from_model(
     conflating them is the easy mistake here:
 
       False — what the BACKBONE INTERNALIZED. The model is read with the mask only.
-              For A3 this answers "did training through the projection teach the
+              For projected this answers "did training through the projection teach the
               network the constraint", which is the interesting scientific question
               but is NOT the system anyone would deploy.
       True  — the DEPLOYED SYSTEM: model plus the same projection it trained with,
-              applied at generation time. This is what an A3 user would actually run.
+              applied at generation time. This is what an projected user would actually run.
 
-    Both are reported for A3. Reporting only the first would understate the system;
+    Both are reported for projected. Reporting only the first would understate the system;
     reporting only the second would hide whether the network learned anything.
     """
     model.eval()
@@ -143,7 +144,7 @@ def induced_distribution_from_model(
                      seqs[:, :-1]], dim=1)
     logits = model(inp)
     mk = None
-    if tcfg.arm != "A1":
+    if tcfg.arm != "unconstrained":
         mk = torch.from_numpy(prefix_masks(task, task.sequences, cfg)).to(device)
         logits = logits.masked_fill(~mk, float("-inf"))
 
@@ -204,7 +205,7 @@ def _metrics(q, task, tcfg, base, tilt) -> dict:
         "charge_error": mean - tcfg.charge_target,
         "charge_variance": float(q @ (phi - mean) ** 2),
         # The Regime-S claim in one number: a masked model puts NO mass outside
-        # the feasible set. For A1 this is the control that should be non-zero.
+        # the feasible set. For unconstrained this is the control that should be non-zero.
         "infeasible_mass": float(q[~task.feasible_S].sum()),
         "kl_from_data": kl(q, base),
         "kl_from_tilt": kl(q, tilt),
@@ -245,10 +246,10 @@ def _sampled_detectability(q_exact, q_fast, task, tcfg, *, n_samples, seed) -> d
 
 
 def evaluate(model, task, cfg, tcfg, device, base, tilt) -> dict:
-    """Backbone reading always; deployed reading additionally for A3."""
+    """Backbone reading always; deployed reading additionally for projected."""
     m = _metrics(induced_distribution_from_model(model, task, cfg, tcfg, device),
                  task, tcfg, base, tilt)
-    if tcfg.arm == "A3":
+    if tcfg.arm == "projected":
         qd = induced_distribution_from_model(model, task, cfg, tcfg, device,
                                              project_at_inference=True)
         m["deployed"] = _metrics(qd, task, tcfg, base, tilt)
@@ -287,7 +288,7 @@ def evaluate(model, task, cfg, tcfg, device, base, tilt) -> dict:
     return m
 
 
-def main(smoke: bool = False, arm: str = "A2", steps: int | None = None) -> Path:
+def main(smoke: bool = False, arm: str = "mask_only", steps: int | None = None) -> Path:
     dev = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     tcfg = TrainConfig(arm=arm, steps=steps or (200 if smoke else 4000))
     if smoke:
@@ -318,11 +319,11 @@ def main(smoke: bool = False, arm: str = "A2", steps: int | None = None) -> Path
         logits = model(inp)
 
         mk = None
-        if tcfg.arm != "A1":
+        if tcfg.arm != "unconstrained":
             mk = torch.from_numpy(prefix_masks(task, seqs, cfg)).to(dev)
             logits = logits.masked_fill(~mk, float("-inf"))
 
-        if tcfg.arm == "A3":
+        if tcfg.arm == "projected":
             B, L, V = logits.shape
             flat = logits.reshape(B * L, V)
             A = phi_t.view(1, 1, V).expand(B * L, 1, V).contiguous()
@@ -378,7 +379,8 @@ def main(smoke: bool = False, arm: str = "A2", steps: int | None = None) -> Path
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--smoke", action="store_true")
-    ap.add_argument("--arm", default="A2", choices=["A1", "A2", "A3"])
+    ap.add_argument("--arm", default="mask_only", type=resolve,
+                    choices=["unconstrained", "mask_only", "projected"])
     ap.add_argument("--steps", type=int, default=None)
     a = ap.parse_args()
     print(main(smoke=a.smoke, arm=a.arm, steps=a.steps))

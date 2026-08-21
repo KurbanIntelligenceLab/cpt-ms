@@ -28,7 +28,7 @@ from scripts.train.train_crystal import (
 
 @pytest.fixture(scope="module")
 def data():
-    cfg = CrystalTrainConfig(arm="A3")
+    cfg = CrystalTrainConfig(arm="projected")
     tr = load_split("train", limit=400)
     V = CrystalVocab(ELEMENTS, order=cfg.order)
     gm = GrammarMask(V, order=cfg.order)

@@ -37,7 +37,7 @@ def test_budget_determinability_recomputes_from_the_code():
     from scripts.train.train_crystal import CrystalTrainConfig, _additive_budget
 
     train = load_split("train", limit=60)
-    cfg = CrystalTrainConfig(arm="A3", density_target=5.0)
+    cfg = CrystalTrainConfig(arm="projected", density_target=5.0)
     frac = {}
     for order in ("cell_first", "comp_first"):
         V = CrystalVocab(ELEMENTS, order=order)

@@ -1,7 +1,7 @@
 """WS7 charge marginals must agree with the published multi-seed summaries and must
 exhibit the paper's anti-concentration ordering.
 
-results/charge_marginals.json retrains A2, A3, and A6 at a single seed to recover
+results/charge_marginals.json retrains mask-only, projected, and comparator at a single seed to recover
 exact per-charge-value marginals that were never stored (only scalar summaries were,
 in results/training_summary.json and results/a6_tilt_comparator.json). This file
 checks that the single-seed marginals' derived scalars are consistent with those
@@ -16,6 +16,8 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+
+from scripts.common.arms import normalize, pick
 
 ROOT = Path(__file__).resolve().parents[1]
 ARTIFACT = ROOT / "results" / "charge_marginals.json"
@@ -52,27 +54,27 @@ def test_agreement_check_matches_published_artifacts_directly():
     """Independently recompute the same comparison from the published summary
     artifacts, rather than trusting the recorded check alone."""
     p = _payload(ARTIFACT)
-    a2 = _payload(A2_SUMMARY)["arms"]
+    a2 = normalize(_payload(A2_SUMMARY)["arms"])
     a6 = _payload(A6_SUMMARY)
 
-    dist = p["distributions"]
+    dist = normalize(p["distributions"])
 
     def within(single, mean, sd, k=4.0):
         if sd == 0.0:
             return abs(single - mean) < 0.5
         return abs(single - mean) <= k * sd
 
-    assert within(dist["mask_only"]["mean_charge"],
-                  a2["masked"]["mean_charge"][0], a2["masked"]["mean_charge"][1])
-    assert within(dist["mask_only"]["charge_variance"],
-                  a2["masked"]["charge_variance"][0], a2["masked"]["charge_variance"][1])
-    assert within(dist["A3_deployed"]["mean_charge"],
-                  a2["A3_deployed"]["mean_charge"][0], a2["A3_deployed"]["mean_charge"][1])
-    assert within(dist["A3_deployed"]["charge_variance"],
-                  a2["A3_deployed"]["charge_variance"][0], a2["A3_deployed"]["charge_variance"][1])
-    assert within(dist["A6"]["mean_charge"],
+    assert within(pick(dist, "mask_only")["mean_charge"],
+                  pick(a2, "mask_only")["mean_charge"][0], pick(a2, "mask_only")["mean_charge"][1])
+    assert within(pick(dist, "mask_only")["charge_variance"],
+                  pick(a2, "mask_only")["charge_variance"][0], pick(a2, "mask_only")["charge_variance"][1])
+    assert within(dist["projected"]["mean_charge"],
+                  a2["projected"]["mean_charge"][0], a2["projected"]["mean_charge"][1])
+    assert within(dist["projected"]["charge_variance"],
+                  a2["projected"]["charge_variance"][0], a2["projected"]["charge_variance"][1])
+    assert within(dist["comparator"]["mean_charge"],
                   a6["summary"]["mean_charge"]["mean"], a6["summary"]["mean_charge"]["sd"])
-    assert within(dist["A6"]["charge_variance"],
+    assert within(dist["comparator"]["charge_variance"],
                   a6["summary"]["charge_variance"]["mean"], a6["summary"]["charge_variance"]["sd"])
     # Exact (no-seed) objects must match to machine precision.
     assert dist["tilt"]["charge_variance"] == pytest.approx(
@@ -83,25 +85,25 @@ def test_agreement_check_matches_published_artifacts_directly():
 
 def test_anti_concentration_ordering_holds():
     """The paper's headline mechanism: projection concentrates below the data's own
-    spread, while the sequence-level tilt (and A6, which targets it) spread wider
+    spread, while the sequence-level tilt (and comparator, which targets it) spread wider
     than the data to buy a mean of zero."""
     p = _payload(ARTIFACT)
-    dist = p["distributions"]
-    var_proj = dist["A3_deployed"]["charge_variance"]
+    dist = normalize(p["distributions"])
+    var_proj = dist["projected"]["charge_variance"]
     var_data = dist["data_S_conditioned"]["charge_variance"]
     var_tilt = dist["tilt"]["charge_variance"]
-    var_a6 = dist["A6"]["charge_variance"]
+    var_a6 = dist["comparator"]["charge_variance"]
 
     assert var_proj < var_data, "projection should concentrate BELOW the data's own spread"
     assert var_data < var_tilt, "the exact tilt should spread WIDER than the data"
-    assert var_a6 > var_data, "A6, trained toward the tilt, should also spread wider than the data"
+    assert var_a6 > var_data, "the comparator, trained toward the tilt, should also spread wider than the data"
 
 
 def test_a3_deployed_mean_charge_near_target():
-    """A3-deployed should land close to the charge_target=0 constraint."""
+    """The projected arm should land close to the charge_target=0 constraint."""
     p = _payload(ARTIFACT)
-    mean = p["distributions"]["A3_deployed"]["mean_charge"]
-    assert abs(mean) < 0.1, f"A3-deployed mean charge {mean} is far from the target 0.0"
+    mean = normalize(p["distributions"])["projected"]["mean_charge"]
+    assert abs(mean) < 0.1, f"projected mean charge {mean} is far from the target 0.0"
 
 
 def test_single_seed_caveat_is_disclosed():

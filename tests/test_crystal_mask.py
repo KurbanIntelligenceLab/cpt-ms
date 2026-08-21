@@ -49,7 +49,7 @@ def test_mask_is_strictly_narrower_than_the_vocabulary(setup):
 def test_masked_generation_is_structurally_valid_even_untrained(setup):
     """Validity comes from the mask, not from training. An untrained model proves it."""
     tr, V, gm = setup
-    cfg = CrystalTrainConfig(arm="A2")
+    cfg = CrystalTrainConfig(arm="mask_only")
     ml = max(len(V.encode(c)) for c in tr)
     torch.manual_seed(0)
     model = CrystalDecoder(len(V), ml + 2, cfg)
@@ -66,7 +66,7 @@ def test_masked_generation_is_structurally_valid_even_untrained(setup):
 def test_sampler_does_not_duplicate_tokens(setup):
     """Pins the second off-by-one: an emitted token must not be re-emitted."""
     tr, V, gm = setup
-    cfg = CrystalTrainConfig(arm="A2")
+    cfg = CrystalTrainConfig(arm="mask_only")
     ml = max(len(V.encode(c)) for c in tr)
     torch.manual_seed(0)
     model = CrystalDecoder(len(V), ml + 2, cfg)
@@ -82,9 +82,9 @@ def test_sampler_does_not_duplicate_tokens(setup):
 
 
 def test_unmasked_generation_is_not_valid_by_accident(setup):
-    """The comparison arm must actually fail, or the A1-vs-A2 delta is empty."""
+    """The comparison arm must actually fail, or the unconstrained-vs-mask-only delta is empty."""
     tr, V, gm = setup
-    cfg = CrystalTrainConfig(arm="A1")
+    cfg = CrystalTrainConfig(arm="unconstrained")
     ml = max(len(V.encode(c)) for c in tr)
     torch.manual_seed(0)
     model = CrystalDecoder(len(V), ml + 2, cfg)

@@ -1,17 +1,17 @@
 """Exact per-charge-value marginals recovered by RETRAINING the missing arms (WS7 fix).
 
 compute_fig1_charge_distributions.py could only plot 3 objects because two required
-arms -- A3's trained-and-deployed system and A6's trained model -- were never saved as
+arms -- projected's trained-and-deployed system and comparator's trained model -- were never saved as
 checkpoints; only their scalar summaries (results/training_summary.json,
 results/a6_tilt_comparator.json) survive. This script closes that gap honestly by
 RETRAINING those arms at a single seed (seed 0), using the identical hyperparameters,
-architecture and training loop as the published multi-seed runs (scripts/train/train_a2.py,
-scripts/synthetic/train_a6.py), and then computing each arm's EXACT induced distribution
+architecture and training loop as the published multi-seed runs (scripts/train/train_synthetic.py,
+scripts/synthetic/train_comparator.py), and then computing each arm's EXACT induced distribution
 over all 65,536 enumerable sequences (`induced_distribution_from_model`), marginalized onto
 the integer total-charge statistic.
 
-Single seed, not the published 3 -- retraining 3 seeds of A3 alone costs ~30 minutes of the
-~35 s/1000-step A3 wall clock reported in training_summary.json. The scalar summaries
+Single seed, not the published 3 -- retraining 3 seeds of projected alone costs ~30 minutes of the
+~35 s/1000-step projected wall clock reported in training_summary.json. The scalar summaries
 derived from this single seed's marginal are checked against the published multi-seed
 mean +/- sd below; if a value falls outside a plausible seed spread that is reported rather
 than silently shipped.
@@ -24,8 +24,8 @@ Arms produced here:
                 network internalized on its own)
   A3_deployed   trained projection-decoder, read WITH the same projection it trained
                 with (the system a user would actually run)
-  A6            decoder trained by MLE on exact tilt samples (train_a6.py's rule),
-                backbone reading -- A6 has no decode-time projection by construction
+  comparator            decoder trained by MLE on exact tilt samples (train_comparator.py's rule),
+                backbone reading -- comparator has no decode-time projection by construction
 """
 from __future__ import annotations
 
@@ -36,6 +36,8 @@ from dataclasses import asdict
 from pathlib import Path
 
 import numpy as np
+
+from scripts.common.arms import normalize
 import torch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
@@ -43,7 +45,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from scripts.common.artifacts import emit
 from scripts.synthetic.targets import tilting_target
 from scripts.synthetic.task import TaskConfig, enumerate_task
-from scripts.train.train_a2 import (
+from scripts.train.train_synthetic import (
     TinyDecoder, TrainConfig, induced_distribution_from_model,
     prefix_masks, sample_data,
 )
@@ -74,7 +76,7 @@ def scalar_stats(charge: np.ndarray, q: np.ndarray, target: float = 0.0) -> dict
 
 def train_arm(arm: str, task, cfg: TaskConfig, dev, seed: int = SEED,
               steps: int = STEPS):
-    """Reproduce train_a2.main()'s training loop exactly, for arm in {A1, A2, A3}.
+    """Reproduce train_synthetic.main()'s training loop exactly, for arm in {unconstrained, mask-only, projected}.
 
     Identical model init, data order, optimizer schedule and step count as the
     published run at this seed -- the only published run this script's seed=0
@@ -98,10 +100,10 @@ def train_arm(arm: str, task, cfg: TaskConfig, dev, seed: int = SEED,
                                      dtype=torch.long), x[:, :-1]], dim=1)
         logits = model(inp)
         mk = None
-        if tcfg.arm != "A1":
+        if tcfg.arm != "unconstrained":
             mk = torch.from_numpy(prefix_masks(task, seqs, cfg)).to(dev)
             logits = logits.masked_fill(~mk, float("-inf"))
-        if tcfg.arm == "A3":
+        if tcfg.arm == "projected":
             B, L, V = logits.shape
             flat = logits.reshape(B * L, V)
             A = phi_t.view(1, 1, V).expand(B * L, 1, V).contiguous()
@@ -121,11 +123,11 @@ def train_arm(arm: str, task, cfg: TaskConfig, dev, seed: int = SEED,
     return model, tcfg, round(time.time() - t0, 1)
 
 
-def train_a6_arm(task, cfg: TaskConfig, tilt: np.ndarray, dev, seed: int = SEED,
+def train_comparator_arm(task, cfg: TaskConfig, tilt: np.ndarray, dev, seed: int = SEED,
                   steps: int = STEPS):
-    """Reproduce train_a6.main()'s single-seed training rule exactly: MLE on exact
+    """Reproduce train_comparator.main()'s single-seed training rule exactly: MLE on exact
     tilt samples, mask active, no decode-time projection."""
-    tcfg = TrainConfig(arm="A2", steps=steps, seed=seed)  # A6 uses the A2 arch/mask
+    tcfg = TrainConfig(arm="mask_only", steps=steps, seed=seed)  # comparator uses the mask-only arch/mask
     torch.manual_seed(seed)
     rng = np.random.default_rng(seed)
     model = TinyDecoder(cfg.vocab_size, cfg.length, tcfg).to(dev)
@@ -175,20 +177,20 @@ def main(smoke: bool = False) -> Path:
     base_S = base_S / base_S.sum()
     tilt, lam = tilting_target(task, apply_S=True)
 
-    # --- A2: mask-only decoder, backbone reading ---
-    model_a2, tcfg_a2, wall_a2 = train_arm("A2", task, cfg, dev, steps=steps)
+    # --- mask-only: mask-only decoder, backbone reading ---
+    model_a2, tcfg_a2, wall_a2 = train_arm("mask_only", task, cfg, dev, steps=steps)
     q_a2 = induced_distribution_from_model(model_a2, task, cfg, tcfg_a2, dev,
                                             project_at_inference=False)
 
-    # --- A3: mask + projection decoder, backbone AND deployed readings ---
-    model_a3, tcfg_a3, wall_a3 = train_arm("A3", task, cfg, dev, steps=steps)
+    # --- projected: mask + projection decoder, backbone AND deployed readings ---
+    model_a3, tcfg_a3, wall_a3 = train_arm("projected", task, cfg, dev, steps=steps)
     q_a3_backbone = induced_distribution_from_model(model_a3, task, cfg, tcfg_a3, dev,
                                                       project_at_inference=False)
     q_a3_deployed = induced_distribution_from_model(model_a3, task, cfg, tcfg_a3, dev,
                                                        project_at_inference=True)
 
-    # --- A6: MLE on exact tilt samples, no decode-time projection ---
-    model_a6, tcfg_a6, wall_a6 = train_a6_arm(task, cfg, tilt, dev, steps=steps)
+    # --- comparator: MLE on exact tilt samples, no decode-time projection ---
+    model_a6, tcfg_a6, wall_a6 = train_comparator_arm(task, cfg, tilt, dev, steps=steps)
     q_a6 = induced_distribution_from_model(model_a6, task, cfg, tcfg_a6, dev,
                                             project_at_inference=False)
 
@@ -199,16 +201,16 @@ def main(smoke: bool = False) -> Path:
                   "label": "exact sequence-level KL-optimal tilt (no training)",
                   "multiplier": float(lam)},
         "mask_only": {**marginalize(charge, q_a2), **scalar_stats(charge, q_a2),
-                          "label": "trained A2 (mask only), backbone reading",
+                          "label": "trained mask-only (mask only), backbone reading",
                           "seed": SEED, "steps": tcfg_a2.steps, "wall_clock_s": wall_a2},
-        "A3_backbone": {**marginalize(charge, q_a3_backbone), **scalar_stats(charge, q_a3_backbone),
-                         "label": "trained A3, read WITHOUT projection (what the network internalized)",
+        "projected_backbone": {**marginalize(charge, q_a3_backbone), **scalar_stats(charge, q_a3_backbone),
+                         "label": "trained projected, read WITHOUT projection (what the network internalized)",
                          "seed": SEED, "steps": tcfg_a3.steps, "wall_clock_s": wall_a3},
-        "A3_deployed": {**marginalize(charge, q_a3_deployed), **scalar_stats(charge, q_a3_deployed),
-                         "label": "trained A3, read WITH the projection it trained with (deployed system)",
+        "projected": {**marginalize(charge, q_a3_deployed), **scalar_stats(charge, q_a3_deployed),
+                         "label": "trained projected, read WITH the projection it trained with (deployed system)",
                          "seed": SEED, "steps": tcfg_a3.steps, "wall_clock_s": wall_a3},
-        "A6": {**marginalize(charge, q_a6), **scalar_stats(charge, q_a6),
-               "label": "trained by MLE on exact tilt samples (train_a6.py's rule), backbone reading",
+        "comparator": {**marginalize(charge, q_a6), **scalar_stats(charge, q_a6),
+               "label": "trained by MLE on exact tilt samples (train_comparator.py's rule), backbone reading",
                "seed": SEED, "steps": tcfg_a6.steps, "wall_clock_s": wall_a6},
     }
 
@@ -216,7 +218,7 @@ def main(smoke: bool = False) -> Path:
     import json as _json
     agreement = []
     if not smoke:
-        a2_summary = _json.loads(Path(_A2_SUMMARY).read_text())["payload"]["arms"]
+        a2_summary = normalize(_json.loads(Path(_A2_SUMMARY).read_text())["payload"]["arms"])
         a6_summary = _json.loads(Path(_A6_SUMMARY).read_text())["payload"]
 
         checks = [
@@ -224,13 +226,13 @@ def main(smoke: bool = False) -> Path:
              a2_summary["masked"]["mean_charge"][0], a2_summary["masked"]["mean_charge"][1]),
             ("mask_only", "charge_variance", distributions["mask_only"]["charge_variance"],
              a2_summary["masked"]["charge_variance"][0], a2_summary["masked"]["charge_variance"][1]),
-            ("A3_deployed", "mean_charge", distributions["A3_deployed"]["mean_charge"],
-             a2_summary["A3_deployed"]["mean_charge"][0], a2_summary["A3_deployed"]["mean_charge"][1]),
-            ("A3_deployed", "charge_variance", distributions["A3_deployed"]["charge_variance"],
-             a2_summary["A3_deployed"]["charge_variance"][0], a2_summary["A3_deployed"]["charge_variance"][1]),
-            ("A6", "mean_charge", distributions["A6"]["mean_charge"],
+            ("projected", "mean_charge", distributions["projected"]["mean_charge"],
+             a2_summary["projected"]["mean_charge"][0], a2_summary["projected"]["mean_charge"][1]),
+            ("projected", "charge_variance", distributions["projected"]["charge_variance"],
+             a2_summary["projected"]["charge_variance"][0], a2_summary["projected"]["charge_variance"][1]),
+            ("comparator", "mean_charge", distributions["comparator"]["mean_charge"],
              a6_summary["summary"]["mean_charge"]["mean"], a6_summary["summary"]["mean_charge"]["sd"]),
-            ("A6", "charge_variance", distributions["A6"]["charge_variance"],
+            ("comparator", "charge_variance", distributions["comparator"]["charge_variance"],
              a6_summary["summary"]["charge_variance"]["mean"], a6_summary["summary"]["charge_variance"]["sd"]),
             ("tilt", "charge_variance", distributions["tilt"]["charge_variance"],
              a6_summary["reference"]["tilt"]["charge_variance"], 0.0),
@@ -247,7 +249,7 @@ def main(smoke: bool = False) -> Path:
 
     payload = {
         "note": (
-            "Retrained A2, A3 and A6 at a SINGLE seed (seed 0), identical hyperparameters "
+            "Retrained mask-only, projected and comparator at a SINGLE seed (seed 0), identical hyperparameters "
             "and training loop to the published multi-seed runs, to recover exact per-charge "
             "marginals that were never stored (only scalar summaries were). All marginals are "
             "computed by exact enumeration over all 4**8=65536 sequences, not sampled."

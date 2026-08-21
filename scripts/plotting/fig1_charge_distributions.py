@@ -4,7 +4,7 @@ exact tilt, data.
 Reads results/charge_marginals.json (emitted by
 scripts/synthetic/charge_marginals.py) exclusively. No number in this script is
 typed by hand. Every plotted series comes from a model or exact target computed
-by that script; A2/A3-deployed/A6 are single-seed (seed 0) retrains whose derived
+by that script; mask-only/projected-deployed/comparator are single-seed (seed 0) retrains whose derived
 scalars are checked against the published multi-seed summaries in that artifact's
 own `agreement_check_vs_published` field.
 
@@ -23,6 +23,8 @@ from pathlib import Path
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
+
+from scripts.common.arms import pick
 from matplotlib import font_manager as fm
 import glob
 
@@ -35,7 +37,7 @@ apply_figure_style(font='Montserrat')
 
 INK, VIOLET, LILAC, SLATE, LINE = '#0D1526', '#6C5CF6', '#B49BFB', '#5C6C87', '#E3DFF8'
 TILT_COLOR = '#C0392B'   # alarm/comparator hue, distinct from the violet family
-A6_COLOR = '#E08214'     # amber -- the trained approximation of the tilt
+COMPARATOR_COLOR = '#E08214'     # amber -- the trained approximation of the tilt
 DATA_COLOR = '#9AA5B8'   # light neutral -- background reference, not a claim series
 
 with open(REPO / "results" / "charge_marginals.json") as fh:
@@ -46,26 +48,26 @@ dist = payload["distributions"]
 data = dist["data_S_conditioned"]
 tilt = dist["tilt"]
 a2 = dist["mask_only"]
-a3d = dist["A3_deployed"]
-a6 = dist["A6"]
+a3d = pick(dist, "projected")
+a6 = pick(dist, "comparator")
 
 fig, ax = plt.subplots(figsize=(3.4, 3.05))
 
-# "data" is dropped as a SEPARATE curve -- it is near-coincident with trained A2,
+# "data" is dropped as a SEPARATE curve -- it is near-coincident with trained mask-only,
 # and five series crowds the panel. Its variance (8.564) is instead named directly
-# in A2's legend entry, since the anti-concentration claim (tilt 10.452 ABOVE the
+# in mask-only's legend entry, since the anti-concentration claim (tilt 10.452 ABOVE the
 # data's 8.564) needs that number visible somewhere in the figure.
 #
-# tilt and A6 are also near-coincident BY DESIGN (A6 was trained toward the tilt
+# tilt and comparator are also near-coincident BY DESIGN (comparator was trained toward the tilt
 # and reaches it) -- drawn as a thick light line (tilt) with a dashed line of the
-# same hue on top (A6), so the near-overlap reads as "A6 hit its target" rather
+# same hue on top (comparator), so the near-overlap reads as "the comparator hit its target" rather
 # than as a missing curve.
 series = [
     ("mask_only", a2, SLATE,
-     "A2: mask only, trained (var 8.82; unconstrained data var 8.56)", 0.95, '-', 1.6, 2),
+     "mask-only, trained (var 8.82; unconstrained data var 8.56)", 0.95, '-', 1.6, 2),
     ("tilt", tilt, TILT_COLOR, "exact tilt: sequence-optimal (var 10.45)", 0.55, '-', 3.2, 3),
-    ("A6", a6, A6_COLOR, "A6: trained toward the tilt (var 10.50)", 1.0, '--', 1.4, 4),
-    ("A3_deployed", a3d, VIOLET, "A3 deployed: per-step projection (var 1.56)", 1.0, '-', 2.2, 5),
+    ("comparator", a6, COMPARATOR_COLOR, "comparator: trained toward the tilt (var 10.50)", 1.0, '--', 1.4, 4),
+    ("projected", a3d, VIOLET, "projected: per-step projection (var 1.56)", 1.0, '-', 2.2, 5),
 ]
 
 for key, d, color, label, alpha, ls, lw, z in series:
@@ -85,14 +87,14 @@ ax.margins(y=0.0)
 
 # Annotation placed BELOW the x-axis line, away from every curve (all curves
 # have decayed to ~0 mass by charge=+-9, so the low-mass tail at x=+9 is clear
-# of the A3 peak and the rising edges of every series).
+# of the projected peak and the rising edges of every series).
 ax.annotate("constraint\ntarget (0)", xy=(0.0, 0.30), xytext=(6.0, 0.30),
             fontsize=6.0, color=SLATE, ha='left', va='center',
             arrowprops=dict(arrowstyle='->', color=SLATE, lw=0.8,
                             shrinkA=2, shrinkB=2))
 
 # Legend BELOW the axes (horizontal-ish, wrapped by ncol) so nothing occludes the
-# A3-deployed peak, the figure's tallest and most important feature.
+# projected-deployed peak, the figure's tallest and most important feature.
 ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.24), fontsize=5.6,
           handlelength=1.6, frameon=False, ncol=1)
 
@@ -111,7 +113,7 @@ for key, d, color, label, alpha, ls, lw, z in series:
     assert np.allclose(ys, np.array(d["masses"], dtype=float)), f"{key} y mismatch"
     verified += 1
 
-# --- Anti-concentration ordering check: projection < data < tilt/A6 on variance
+# --- Anti-concentration ordering check: projection < data < tilt/comparator on variance
 var_proj = a3d["charge_variance"]
 var_data = data["charge_variance"]
 var_tilt = tilt["charge_variance"]
@@ -119,8 +121,8 @@ var_a6 = a6["charge_variance"]
 assert var_proj < var_data < var_tilt, (
     f"anti-concentration ordering violated: proj={var_proj} data={var_data} tilt={var_tilt}"
 )
-assert var_a6 > var_data, f"A6 should also spread beyond data variance: A6={var_a6} data={var_data}"
+assert var_a6 > var_data, f"the comparator should also spread beyond data variance: comparator={var_a6} data={var_data}"
 
 print(f"fig1: {verified}/{len(series)} series verified against results/charge_marginals.json")
 print(f"anti-concentration ordering holds: projection ({var_proj:.3f}) < data ({var_data:.3f}) "
-      f"< tilt ({var_tilt:.3f}); A6 ({var_a6:.3f}) tracks the tilt")
+      f"< tilt ({var_tilt:.3f}); comparator ({var_a6:.3f}) tracks the tilt")

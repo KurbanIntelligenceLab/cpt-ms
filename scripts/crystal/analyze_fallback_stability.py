@@ -64,7 +64,7 @@ def training_dynamics_relation() -> dict:
     return {
         "crystal_arm": {
             "source_artifact": "results/stability_regrun.json",
-            "note": "crystal A3 re-runs at fixed density targets converge to near-zero "
+            "note": "crystal projected re-runs at fixed density targets converge to near-zero "
                     "training-time infeasibility once trained at that target; the ceiling "
                     "regime is only visible in the frontier's deployed (zero-shot) reading, "
                     "not in matched-target training curves",

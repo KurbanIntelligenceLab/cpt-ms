@@ -1,6 +1,6 @@
-"""A3's induced sequence distribution against the exponential tilt.
+"""The projected arm's induced sequence distribution against the exponential tilt.
 
-The properties asserted here are the ones the A3-vs-A6 comparison rests on, and
+The properties asserted here are the ones the projected-vs-comparator comparison rests on, and
 each is checked against an independent characterization rather than against the
 implementation's own output.
 """

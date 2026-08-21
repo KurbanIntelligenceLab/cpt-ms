@@ -6,7 +6,7 @@ model's distribution conditioned on the constraints (GAD's target). Enumerating
 the task makes both exact.
 
 Computing them surfaces a third object that the plan's two-target framing does
-not name, and that matters for the A3-vs-A6 comparison:
+not name, and that matters for the projected-vs-comparator comparison:
 
   conditioning target   q(x) proportional to p(x) * 1[phi(x) == c]
                         the HARD constraint. Every sample satisfies it.
@@ -15,7 +15,7 @@ not name, and that matters for the A3-vs-A6 comparison:
                         lambda chosen so E_q[phi] = c
                         the EXPECTATION constraint. This is the KL-optimal
                         distribution satisfying the constraint in expectation,
-                        i.e. GDC's EBM target and what A6 fine-tunes toward.
+                        i.e. GDC's EBM target and what comparator fine-tunes toward.
 
 These are different distributions and they are not close. Regime E is an
 expectation constraint, so the tilting target is its sequence-level ideal; the
@@ -123,7 +123,7 @@ def tilting_target(
     """KL-optimal distribution satisfying the expectation constraint.
 
     Returns the distribution and the multiplier that produces it. This is the
-    sequence-level ideal for Regime E and the target A6 approximates.
+    sequence-level ideal for Regime E and the target comparator approximates.
     """
     lam = solve_tilt(
         task, log_base=log_base, apply_S=apply_S, charge_target=charge_target

@@ -13,7 +13,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from scripts.common.artifacts import emit
 from scripts.layer.projection import project
 from scripts.synthetic.task import TaskConfig, enumerate_task
-from scripts.train.train_a2 import TinyDecoder, TrainConfig, prefix_masks, sample_data
+from scripts.train.train_synthetic import TinyDecoder, TrainConfig, prefix_masks, sample_data
 
 SCRIPT = "scripts/synthetic/measure_fallback_stability.py"
 
@@ -25,7 +25,7 @@ def run(steps: int, charge_targets: list[float], seed: int) -> dict:
     per_target = {}
 
     for charge_target in charge_targets:
-        tcfg = TrainConfig(arm="A3", steps=steps, seed=seed, charge_target=charge_target)
+        tcfg = TrainConfig(arm="projected", steps=steps, seed=seed, charge_target=charge_target)
         torch.manual_seed(tcfg.seed)
         rng = np.random.default_rng(tcfg.seed)
         model = TinyDecoder(cfg.vocab_size, cfg.length, tcfg).to(dev)

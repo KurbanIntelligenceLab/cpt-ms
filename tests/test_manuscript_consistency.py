@@ -15,6 +15,8 @@ from pathlib import Path
 
 import pytest
 
+from scripts.common.arms import normalize
+
 from _devtree import ROOT, requires_dev_tree
 
 TEX = ROOT / "development" / "docs" / "template" / "main.tex"
@@ -69,14 +71,14 @@ def _main_text() -> str:
 
 def test_concentration_numbers_match_their_artifacts():
     """The paper's central claim, recomputed from the two artifacts that hold it."""
-    a2 = _p("training_summary.json")["arms"]
+    a2 = normalize(_p("training_summary.json")["arms"])
     a6 = _p("a6_tilt_comparator.json")
     src = _src()
 
     # These arrays are [mean, sd] pairs, NOT per-seed lists. Averaging them yields a
     # number that is not any real quantity -- a mistake made once already.
-    a3_var = a2["A3_deployed"]["charge_variance"][0]
-    a3_viol = a2["A3_deployed"]["violation_rate"][0]
+    a3_var = a2["projected"]["charge_variance"][0]
+    a3_viol = a2["projected"]["violation_rate"][0]
     tilt_var = a6["reference"]["tilt"]["charge_variance"]
     tilt_viol = a6["reference"]["tilt"]["hard_violation_rate"]
     data_var = a6["reference"]["base_S_conditioned"]["charge_variance"]

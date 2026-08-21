@@ -13,7 +13,7 @@ axis and the comparison is a curve against a point: the question is what n the u
 needs to match one steered sample, and whether that n is affordable at the targets that matter.
 Reporting the accuracy alone would flatter whichever arm the axis was chosen to favour.
 
-SELECTION IS FROM THE SAME POOL. Best-of-n draws from the A3 checkpoint's BACKBONE reading
+SELECTION IS FROM THE SAME POOL. Best-of-n draws from the projected checkpoint's BACKBONE reading
 (mask on, projection off), not from a separately trained model, so the comparison isolates
 selection-at-inference against projection-at-training with the weights held fixed.
 """

@@ -1,8 +1,8 @@
 """Data-constraint alignment sweep: a controlled probe of multiplier decay (Risk 1).
 
 The research plan (v2) states the mechanism in risk-register item 1 — constraints
-internalized at convergence turn the projection into an identity, so A3's
-endpoint equals A2's — and states the expectation in its "Abstract register"
+internalized at convergence turn the projection into an identity, so projected's
+endpoint equals mask-only's — and states the expectation in its "Abstract register"
 section: multiplier decay is the modal outcome rather than a tail risk, because
 training data is real materials and so satisfies the constraints, and any
 constraint the data satisfies will see multipliers shrink as the model learns.
@@ -18,7 +18,7 @@ What is measured at each alignment level, all in closed form:
   lambda*        the exact multiplier the sequence-level tilt requires. This is
                  the quantity that decays. At perfect alignment it is zero and
                  the constrained target equals the base — the degenerate case in
-                 which A3's endpoint provably equals A2's.
+                 which projected's endpoint provably equals mask-only's.
 
   KL(tilt||base) the work the constraint does. Decays quadratically in the mean
                  gap near alignment, so it vanishes faster than the gap itself.
@@ -170,7 +170,7 @@ def main(smoke: bool = False) -> Path:
         "decay_interpretation": {
             "note": (
                 "At zero mean gap the multiplier is zero and the constrained target "
-                "equals the base: A3's converged endpoint provably equals A2's. The "
+                "equals the base: projected's converged endpoint provably equals mask-only's. The "
                 "measured scaling exponents say how fast that degeneracy is approached "
                 "as data-constraint alignment improves."
             )

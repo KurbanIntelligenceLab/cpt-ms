@@ -9,7 +9,7 @@ Design mirrors the crystal setting in miniature:
   Regime S (support restriction)   a running multiplicity budget — each symbol
                                    may appear at most `max_count` times. Prefix-
                                    closed, so it is exactly a per-step mask,
-                                   which is what makes A2 representable.
+                                   which is what makes mask-only representable.
 
   Regime E (expectation constraint) a charge-balance analogue — each symbol
                                    carries an integer charge and the constraint
@@ -135,7 +135,7 @@ def prefix_allowed_mask(config: TaskConfig, prefix: tuple[int, ...]) -> np.ndarr
 
     Prefix-closed by construction — a prefix that has already spent a symbol's
     budget can never recover it — which is exactly the property that makes the
-    mask emitter well-defined and A2 trainable without straight-through.
+    mask emitter well-defined and mask-only trainable without straight-through.
     """
     V = config.vocab_size
     counts = np.zeros(V, dtype=np.int64)

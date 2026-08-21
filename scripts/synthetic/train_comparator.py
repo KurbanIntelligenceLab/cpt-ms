@@ -1,4 +1,4 @@
-"""A6: fine-tune toward the sequence-level tilt directly, the GDC/DPG comparator.
+"""Comparator: fine-tune toward the sequence-level tilt directly, the GDC/DPG comparator.
 
 WHAT THIS COMPARES AND WHY IT IS THE RIGHT COMPARISON. Khalifa, Elsahar and Dymetman
 (ICLR 2021) pose controlled generation as moment constraints and derive the same KL-minimal
@@ -14,15 +14,15 @@ arms' induced distributions are computed rather than sampled and every divergenc
 exact. On crystals the same comparison would rest on sampled estimates of a distribution over
 an astronomically large space, which is a weaker measurement of the same thing.
 
-HOW A6 IS TRAINED. The tilt is available in closed form here, so A6 does maximum likelihood on
+HOW comparator IS TRAINED. The tilt is available in closed form here, so comparator does maximum likelihood on
 samples drawn from it. That is the fixed point DPG converges to when its proposal matches the
 target: DPG's gradient is an importance-weighted likelihood gradient, and with exact samples
-the weights are one. Training on exact tilt samples therefore gives A6 the BEST case of the
+the weights are one. Training on exact tilt samples therefore gives comparator the BEST case of the
 method it stands for, rather than a reimplementation whose gradient estimator could be blamed
-for the result. A6 gets the mask (Regime S) like every other arm; the difference from A3 is
-that A6 has no decode-time projection and A3 has no tilt supervision.
+for the result. comparator gets the mask (Regime S) like every other arm; the difference from projected is
+that comparator has no decode-time projection and projected has no tilt supervision.
 
-WHAT WOULD FALSIFY THE PAPER'S FRAMING. If A6 reached the tilt closely AND matched A3 on
+WHAT WOULD FALSIFY THE PAPER'S FRAMING. If comparator reached the tilt closely AND matched projected on
 constraint satisfaction, the projection would be a worse route to the same place and the
 contribution would be the cost structure alone. That is the outcome this script is set up to
 detect, not to avoid.
@@ -43,7 +43,7 @@ from scripts.common.artifacts import emit
 from scripts.synthetic.targets import kl, tilting_target, tv
 from scripts.synthetic.task import TaskConfig, enumerate_task
 
-SCRIPT = "scripts/synthetic/train_a6.py"
+SCRIPT = "scripts/synthetic/train_comparator.py"
 
 
 def sample_from(p: np.ndarray, task, n: int, rng) -> np.ndarray:
@@ -51,7 +51,7 @@ def sample_from(p: np.ndarray, task, n: int, rng) -> np.ndarray:
 
 
 def main(steps: int | None = None, seeds=None, smoke: bool = False) -> Path:
-    from scripts.train.train_a2 import (TinyDecoder, TrainConfig,
+    from scripts.train.train_synthetic import (TinyDecoder, TrainConfig,
                                         induced_distribution_from_model, prefix_masks)
 
     seeds = seeds or ([0] if smoke else [0, 1, 2])
@@ -88,7 +88,7 @@ def main(steps: int | None = None, seeds=None, smoke: bool = False) -> Path:
     for seed in seeds:
         torch.manual_seed(seed)
         rng = np.random.default_rng(seed)
-        tcfg = TrainConfig(arm="A2", steps=steps or (200 if smoke else 4000))
+        tcfg = TrainConfig(arm="mask_only", steps=steps or (200 if smoke else 4000))
         model = TinyDecoder(cfg.vocab_size, cfg.length, tcfg).to(dev)
         opt = torch.optim.AdamW(model.parameters(), lr=tcfg.lr)
         sched = torch.optim.lr_scheduler.LambdaLR(
@@ -124,10 +124,10 @@ def main(steps: int | None = None, seeds=None, smoke: bool = False) -> Path:
               "kl_from_base", "mass_outside_S", "hard_violation_rate"]
 
     payload = {
-        "arm": "A6: MLE on exact samples from the sequence-level tilt, mask active",
+        "arm": "comparator: MLE on exact samples from the sequence-level tilt, mask active",
         "why_this_training_rule": (
             "the tilt is closed-form here, so MLE on its exact samples is DPG's fixed point "
-            "with unit importance weights -- A6 therefore gets the best case of the method it "
+            "with unit importance weights -- comparator therefore gets the best case of the method it "
             "stands for, and no gradient-estimator artefact can be blamed for the result"),
         "steps": steps or (200 if smoke else 4000),
         "seeds": list(seeds),
@@ -144,7 +144,7 @@ def main(steps: int | None = None, seeds=None, smoke: bool = False) -> Path:
     }
     return emit("a6_tilt_comparator" + ("_smoke" if smoke else ""), payload,
                 config={"steps": payload["steps"], "seeds": list(seeds),
-                        "arm": "A6", "training_rule": "MLE on exact tilt samples"},
+                        "arm": "comparator", "training_rule": "MLE on exact tilt samples"},
                 seeds=list(seeds), script=SCRIPT)
 
 

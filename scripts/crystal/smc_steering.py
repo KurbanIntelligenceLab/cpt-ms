@@ -219,7 +219,7 @@ def main(ckpt: str, targets=None, k_values=None, runs: int = 32,
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("--ckpt", default="ckpt/A3_d5.0.pt")
+    ap.add_argument("--ckpt", default="development/ckpt/projected_d5.0.pt")
     ap.add_argument("--runs", type=int, default=32)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--smoke", action="store_true")

@@ -11,11 +11,11 @@ Sources:
                                           error = mean_best_error, diversity =
                                           unique_formula_fraction, each
                                           averaged over sub-ceiling targets.
-  results/conditional_baseline.json -- the A3 (projection) point: this
+  results/conditional_baseline.json -- the projected (projection) point: this
                                           artifact's four targets (3.0, 5.0,
                                           8.0, 10.0) are already inside the
                                           sub-ceiling range, and are its own
-                                          per_target.<t>.A3 rows (err, unq),
+                                          per_target.<t>.projected rows (err, unq),
                                           averaged.
 
 GAP: results/smc_steering.json carries no diversity / unique-formula
@@ -31,6 +31,8 @@ import sys
 from pathlib import Path
 
 import numpy as np
+
+from scripts.common.arms import pick
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
@@ -72,8 +74,8 @@ def main() -> Path:
 
     key_by_float = {float(k): k for k in cb["per_target"].keys()}
     cb_sub = [t for t in key_by_float if t <= ceiling + 1e-9]
-    a3_err = np.mean([cb["per_target"][key_by_float[t]]["A3"]["err"] for t in cb_sub])
-    a3_unq = np.mean([cb["per_target"][key_by_float[t]]["A3"]["unq"] for t in cb_sub])
+    a3_err = np.mean([pick(cb["per_target"][key_by_float[t]], "projected")["err"] for t in cb_sub])
+    a3_unq = np.mean([pick(cb["per_target"][key_by_float[t]], "projected")["unq"] for t in cb_sub])
 
     hyb_sub_targets = sorted({r["target"] for r in hyb["rows"] if r["target"] <= ceiling + 1e-9})
     hybrid_curve = []
@@ -108,7 +110,7 @@ def main() -> Path:
             "mean_error": float(a3_err),
             "mean_unique_fraction": float(a3_unq),
             "targets_averaged": cb_sub,
-            "source": "results/conditional_baseline.json per_target.<t>.A3",
+            "source": "results/conditional_baseline.json per_target.<t>.projected",
             "why_excluded": (
                 "conditional_baseline's err is |mean density - target|, the error OF THE "
                 "MEAN, whereas best_of_n_curve, hybrid_curve and smc_tuned_point all report "
@@ -123,7 +125,7 @@ def main() -> Path:
         "hybrid_curve": hybrid_curve,
         "hybrid_curve_note": (
             "results/hybrid_selection.json: n steered samples drawn per target from "
-            "the projection-deployed A3 checkpoint, keep the closest on density. n=1 is "
+            "the projection-deployed projected checkpoint, keep the closest on density. n=1 is "
             "projection-alone; n>1 adds best-of-n selection on top of the steered pool."
         ),
         "smc_tuned_point": smc_tuned_point,

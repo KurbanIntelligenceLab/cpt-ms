@@ -1,4 +1,4 @@
-"""Tests for the A7 two-constraint grid and its analysis.
+"""Tests for the joint two-constraint grid and its analysis.
 
 The WS-5 conclusion is a NEGATIVE result, which makes it exactly the kind of claim that
 rots quietly: if a later change makes the second dial steer, the report must stop saying it
@@ -53,7 +53,7 @@ def test_density_comparison_uses_matched_targets_only():
     """Averaging arms over different target sets would manufacture an advantage.
 
     The d=8.0 control sits above the reachable ceiling and carries a large error, so an
-    unmatched mean would credit A7 with the absence of that cell rather than with anything
+    unmatched mean would credit joint with the absence of that cell rather than with anything
     the second constraint did.
     """
     p = _payload()
@@ -64,7 +64,7 @@ def test_density_comparison_uses_matched_targets_only():
     ctrl_targets = {float(k) for k, v in p["controls"].items()
                     if v["deployed_density"] is not None}
     assert matched == a7_targets & ctrl_targets, (
-        f"matched set {matched} is not the intersection of A7 {a7_targets} and controls "
+        f"matched set {matched} is not the intersection of joint {a7_targets} and controls "
         f"{ctrl_targets}"
     )
     assert "density_mae_A7" not in s, (

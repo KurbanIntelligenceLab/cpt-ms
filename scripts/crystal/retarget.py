@@ -2,7 +2,7 @@
 
 THE CLAIM THIS TESTS. The constraint target is an ARGUMENT to the dual solve, not a
 training-time label, so one training run should cover a family of targets at inference.
-The conditional baseline A4 needs one training run per target. If a checkpoint trained
+The conditional baseline conditional needs one training run per target. If a checkpoint trained
 at 5.0 g/cm^3 can be deployed at 1.5 or 10.0 without retraining, the method buys
 amortized multi-target control, which is an axis no baseline here competes on.
 

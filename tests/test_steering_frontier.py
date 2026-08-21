@@ -60,7 +60,7 @@ def test_rejection_baseline_cost_is_the_reciprocal_acceptance(task, base):
 
 
 def test_projection_enriches_the_target_set(task):
-    """The capability claim: A3 concentrates mass where the base does not.
+    """The capability claim: projected concentrates mass where the base does not.
 
     Enrichment below 1 would mean the projection moved mass AWAY from the target,
     which would invalidate the whole steering framing.

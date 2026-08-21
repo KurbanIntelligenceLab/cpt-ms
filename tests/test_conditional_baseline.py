@@ -1,12 +1,12 @@
 """The conditional-training baseline must be fair, and coverage must be measured.
 
-A4 trains on the subset of MP-20 near the target and applies no decode-time
+conditional trains on the subset of MP-20 near the target and applies no decode-time
 constraint. It is the "just retrain on filtered data" objection, so the comparison
 has to be constructed so it cannot be won by an accounting choice:
 
-  - A4 is scored against the FULL data's chemistry, never its own filtered subset,
+  - conditional is scored against the FULL data's chemistry, never its own filtered subset,
     since scoring it against the slice it trained on would flatter it.
-  - A4 gets the same step budget as A2/A3, which is generous to the baseline: its
+  - conditional gets the same step budget as mask-only/projected, which is generous to the baseline: its
     training set is smaller, so it sees each structure more often.
   - Accuracy alone cannot separate the arms, so coverage is measured too.
 """
@@ -21,15 +21,15 @@ from scripts.train.train_crystal import CrystalTrainConfig, _coverage
 
 
 def test_filter_retains_a_trainable_subset_at_every_swept_target():
-    """A4 must be runnable wherever it is compared, or the comparison has a hole."""
+    """The conditional baseline must be runnable wherever it is compared, or the comparison has a hole."""
     d = np.array([c.density for c in load_split("train")])
     for t in (1.5, 3.0, 5.0, 8.0, 10.0):
         n = int((np.abs(d - t) <= 0.5).sum())
-        assert n >= 100, f"target {t} leaves only {n} structures for A4"
+        assert n >= 100, f"target {t} leaves only {n} structures for conditional"
 
 
 def test_extreme_targets_starve_the_conditional_baseline():
-    """Pins WHY A4 cannot simply be run everywhere: the filter empties out.
+    """Pins WHY conditional cannot simply be run everywhere: the filter empties out.
 
     At the extreme targets the filtered training set is too small to train on, which
     is itself the argument — a conditional baseline needs data at the target and a
@@ -72,7 +72,7 @@ def test_novelty_is_relative_to_what_the_arm_trained_on():
 
 def test_a4_step_budget_is_not_reduced():
     """The baseline must not be handicapped by a smaller budget."""
-    a2, a4 = CrystalTrainConfig(arm="A2"), CrystalTrainConfig(arm="A4")
+    a2, a4 = CrystalTrainConfig(arm="mask_only"), CrystalTrainConfig(arm="conditional")
     assert a4.steps == a2.steps and a4.batch == a2.batch and a4.lr == a2.lr
 
 
@@ -131,7 +131,7 @@ def test_conditional_arm_tv_matches_its_own_slice():
 
 
 def test_sparse_regime_claim_is_coverage_not_accuracy():
-    """A4's sparse-target weakness is coverage; claiming it loses accuracy is false.
+    """The conditional baseline's sparse-target weakness is coverage; claiming it loses accuracy is false.
 
     An earlier draft asserted the conditional baseline "starves" at extreme targets.
     Running it showed the opposite on the target metric: error 0.031 at target 13.0
@@ -149,7 +149,7 @@ def test_sparse_regime_claim_is_coverage_not_accuracy():
         rows = p["rows"][t]
         err = abs(float(np.mean([r["density"] for r in rows])) - tgt)
         assert err < 0.2, (
-            f"target {t}: A4 error {err:.3f}; the sparse regime's finding is that "
+            f"target {t}: conditional error {err:.3f}; the sparse regime's finding is that "
             "accuracy HOLDS here, so a large error would invalidate the claim"
         )
         assert all(r["valid"] == 1.0 for r in rows), f"target {t}: validity below ceiling"

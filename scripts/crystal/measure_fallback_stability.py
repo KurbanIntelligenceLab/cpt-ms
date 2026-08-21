@@ -31,7 +31,7 @@ def run(steps: int, targets: list[float], seed: int, train_limit: int) -> dict:
     per_target = {}
 
     for density_target in targets:
-        cfg = CrystalTrainConfig(arm="A3", steps=steps, seed=seed,
+        cfg = CrystalTrainConfig(arm="projected", steps=steps, seed=seed,
                                   train_limit=train_limit, density_target=density_target)
         train = load_split("train", limit=cfg.train_limit)
         V = CrystalVocab(ELEMENTS, order=cfg.order)

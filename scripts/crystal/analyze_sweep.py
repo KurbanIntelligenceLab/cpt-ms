@@ -71,7 +71,7 @@ def rejection_cost(target: float, tol: float = 0.5) -> dict:
     rate, and its reciprocal is the expected number of draws per accepted sample.
 
     It is deliberately generous to the baseline — it assumes a generator that
-    reproduces the data distribution perfectly, which A2 approximates but does not
+    reproduces the data distribution perfectly, which mask-only approximates but does not
     achieve. A projection that beats THIS is beating an idealized filter.
     """
     from scripts.crystal.mp20 import load_split

@@ -1,8 +1,8 @@
-"""Analyze the A7 two-constraint grid: does a second additive constraint steer?
+"""Analyze the joint two-constraint grid: does a second additive constraint steer?
 
-WHAT THIS TESTS. A7 trains through a JOINT projection of mass density and valence
+WHAT THIS TESTS. joint trains through a JOINT projection of mass density and valence
 electron density. The grid crosses three density targets with three valence targets, and
-each row is accompanied by a single-constraint A3 control at the same density target, so
+each row is accompanied by a single-constraint projected control at the same density target, so
 any difference is attributable to the second constraint rather than to training noise.
 
 THE DECISIVE QUANTITY IS PASS-THROUGH, NOT ERROR. A dial that reports a plausible value
@@ -56,7 +56,7 @@ def load(results_dir: Path) -> tuple[list[dict], dict]:
             "source": Path(p).name,
         })
     controls = {}
-    for p in sorted(glob.glob(str(results_dir / "volume_grid_control_A3_d*.json"))):
+    for p in sorted(glob.glob(str(results_dir / "volume_grid_control_projected_d*.json"))):
         j = json.load(open(p))["payload"]
         f = j["final"]
         d = f.get("deployed") or {}
@@ -124,13 +124,13 @@ def main(results_dir: str | Path = "results", smoke: bool = False) -> Path:
     rd = Path(results_dir)
     cells, controls = load(rd)
     if not cells:
-        raise SystemExit("no A7 grid cells found in %s" % rd)
+        raise SystemExit("no joint grid cells found in %s" % rd)
     rows = per_row(cells, controls)
     complete = [r for r in rows if r.get("complete")]
 
-    # MATCHED TARGETS ONLY. Averaging A7 over the density targets it reached against
+    # MATCHED TARGETS ONLY. Averaging joint over the density targets it reached against
     # controls over all three is confounded: the d=8.0 control sits above the reachable
-    # ceiling and carries an error of 1.26, so an unmatched comparison would credit A7
+    # ceiling and carries an error of 1.26, so an unmatched comparison would credit joint
     # with an advantage that is really the absence of that cell. Only density targets
     # present in BOTH arms are compared.
     have_a7 = {c["density_target"] for c in cells if c["deployed_density"] is not None}

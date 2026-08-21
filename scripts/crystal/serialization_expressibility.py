@@ -44,7 +44,7 @@ def main(n_structures: int = 400, smoke: bool = False) -> Path:
     from scripts.train.train_crystal import CrystalTrainConfig, _additive_budget
 
     train = load_split("train", limit=200 if smoke else n_structures)
-    cfg = CrystalTrainConfig(arm="A3", density_target=5.0)
+    cfg = CrystalTrainConfig(arm="projected", density_target=5.0)
 
     rows = []
     for order in ORDERS:

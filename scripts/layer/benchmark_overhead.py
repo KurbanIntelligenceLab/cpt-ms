@@ -1,14 +1,14 @@
-"""CP2 overhead benchmark: projection layer vs the A2 masked-softmax baseline.
+"""CP2 overhead benchmark: projection layer vs the mask-only masked-softmax baseline.
 
 Measures the pre-registered quantity in `preregistration/overhead_budget.md`:
-per-token wall-clock overhead of the Regime-E projection against the identical A2
+per-token wall-clock overhead of the Regime-E projection against the identical mask-only
 masked-softmax forward pass, reported per active-constraint count, with a 30%
 ceiling.
 
 Design decisions that matter for the number being meaningful:
 
-  SAME PASS, NOT A MICROBENCHMARK. The A2 arm is the identical masked-softmax
-  forward the A3 arm performs before projecting, so the comparison isolates the
+  SAME PASS, NOT A MICROBENCHMARK. The mask-only arm is the identical masked-softmax
+  forward the projected arm performs before projecting, so the comparison isolates the
   projection's marginal cost rather than comparing two unrelated kernels.
 
   FLOAT64 INTERNAL SOLVE. The projection solves in float64 regardless of input
@@ -50,7 +50,7 @@ SCRIPT = "scripts/layer/benchmark_overhead.py"
 
 
 def _masked_softmax(logits: torch.Tensor, mask: torch.Tensor) -> torch.Tensor:
-    """The A2 baseline: exactly the pass A3 performs before projecting."""
+    """The mask-only baseline: exactly the pass projected performs before projecting."""
     z = logits.masked_fill(~mask, float("-inf"))
     return torch.softmax(z, dim=-1)
 

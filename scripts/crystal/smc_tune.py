@@ -118,7 +118,7 @@ def main(ckpt: str, targets=None, K: int = K_FIXED, sigmas=None, runs: int = 16,
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("--ckpt", default="ckpt/A3_d5.0.pt")
+    ap.add_argument("--ckpt", default="development/ckpt/projected_d5.0.pt")
     ap.add_argument("--K", type=int, default=K_FIXED)
     ap.add_argument("--runs", type=int, default=16)
     ap.add_argument("--seed", type=int, default=0)

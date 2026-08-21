@@ -206,7 +206,7 @@ class CrystalVocab:
         are being emitted, so no linear per-step expectation over the mass channel can
         express the density constraint — targeting a fixed mass per token instead
         drives the composition toward the lightest elements, which is what the first
-        crystal A3 run did.
+        crystal projected run did.
 
         Under cell-first the volume closes before any element token, so the running
         budget rho*V/1.6605 minus mass-so-far is determined and the constraint takes

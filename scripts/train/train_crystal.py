@@ -1,11 +1,11 @@
-"""Crystal A2: the three arms on MP-20 with a real backbone (WS-3).
+"""Crystal mask-only: the three arms on MP-20 with a real backbone (WS-3).
 
 The synthetic task established the mechanism against exact enumerable targets. This
 carries it to MP-20, where the targets are approximate and the backbone is a real
 model trained on real structures. Two conventions carry over unchanged, per the
 review:
 
-  TWO READINGS FOR A3. The backbone reading applies the mask only and reports what
+  TWO READINGS FOR projected. The backbone reading applies the mask only and reports what
   the network internalized; the deployed reading applies the same projection the
   model trained with and is the system anyone would run. Reporting either alone
   misleads in opposite directions, and the gap between them IS the internalization
@@ -39,6 +39,7 @@ import torch.nn as nn
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
+from scripts.common.arms import resolve
 from scripts.common.artifacts import emit
 from scripts.crystal.mp20 import (ATOMIC_MASS, ELEMENTS, VALENCE, CrystalVocab,
                                   load_split)
@@ -49,7 +50,7 @@ SCRIPT = "scripts/train/train_crystal.py"
 
 @dataclass
 class CrystalTrainConfig:
-    arm: str = "A2"
+    arm: str = "mask_only"
     d_model: int = 256
     n_layer: int = 6
     n_head: int = 8
@@ -65,14 +66,14 @@ class CrystalTrainConfig:
     order: str = "cell_first"      # density needs the volume before the composition
     expected_atoms: float = 10.4    # mean atoms per MP-20 structure
     channel: str = "static"   # "static" = formulation 2; "prefix" = formulation 3
-    # A4: conditional-training baseline. Train the masked model on the SUBSET of MP-20
+    # conditional: conditional-training baseline. Train the masked model on the SUBSET of MP-20
     # within `filter_tol` of the target instead of applying any constraint at decode
     # time. This is the "just retrain on filtered data" objection, and it is the
-    # baseline a reviewer reaches for first, so it gets the same budget as A2/A3 and
+    # baseline a reviewer reaches for first, so it gets the same budget as mask-only/projected and
     # its own arm rather than a footnote. Steps are held equal, which is deliberately
-    # generous: the filtered set is smaller, so A4 sees each structure more often.
+    # generous: the filtered set is smaller, so conditional sees each structure more often.
     filter_tol: float = 0.5
-    # A7: TWO simultaneous Regime E constraints, density and valence electron density.
+    # joint: TWO simultaneous Regime E constraints, density and valence electron density.
     # The second target is per cubic angstrom, so its unit factor is 1 while mass needs
     # the amu/A^3 -> g/cm^3 conversion. CP-7 measured that the two channels are linearly
     # independent only at ELEMENT positions -- at a count position both are proportional
@@ -616,7 +617,7 @@ def _coverage(el_counter, formulas, train_formulas, full_element_freq) -> dict:
     }
 
 
-def main(smoke: bool = False, arm: str = "A2", steps: int | None = None,
+def main(smoke: bool = False, arm: str = "mask_only", steps: int | None = None,
          density_target: float | None = None, seed: int | None = None,
          ckpt: str | Path | None = None, valence_target: float | None = None) -> Path:
     dev = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -633,23 +634,23 @@ def main(smoke: bool = False, arm: str = "A2", steps: int | None = None,
         cfg.eval_every, cfg.n_eval_samples, cfg.train_limit = 150, 512, 2000
 
     train = load_split("train", limit=cfg.train_limit)
-    # A4 conditional training: restrict the TRAINING SET to structures near the target
+    # conditional conditional training: restrict the TRAINING SET to structures near the target
     # and apply no decode-time constraint. The full-data density statistics are kept
     # separately, because every arm must be scored against the same reference — scoring
-    # A4 against its own filtered mean would flatter it by construction.
+    # conditional against its own filtered mean would flatter it by construction.
     full_train = list(train)
     full_density = np.array([c.density for c in train])
     n_full = len(train)
-    if cfg.arm == "A4":
+    if cfg.arm == "conditional":
         train = [c for c in train
                  if abs(c.density - cfg.density_target) <= cfg.filter_tol]
         # Floor of 20, not 100. An earlier floor of 100 was a guess, and it was about
-        # to carry a claim that A4 "starves" at sparse targets -- asserting a failure
+        # to carry a claim that conditional "starves" at sparse targets -- asserting a failure
         # without running it. The sparse regime is now measured; below 20 structures
         # there is genuinely nothing to train on and the refusal is itself the result.
         if len(train) < 20:
             raise ValueError(
-                f"A4 filter at target {cfg.density_target} +/- {cfg.filter_tol} left "
+                f"conditional filter at target {cfg.density_target} +/- {cfg.filter_tol} left "
                 f"{len(train)} structures of {n_full}; too few to train on"
             )
     V = CrystalVocab(ELEMENTS, order=cfg.order)
@@ -658,8 +659,8 @@ def main(smoke: bool = False, arm: str = "A2", steps: int | None = None,
     max_len = max(len(e) for e in enc)
     data = pad_batch(enc, V.index["<EOS>"])
     # Scoring reference is ALWAYS the full data, never the arm's own training subset:
-    # A4 trains on a filtered slice, and scoring it against that slice's mean would
-    # flatter it by construction. For A1/A2/A3 the two are identical.
+    # conditional trains on a filtered slice, and scoring it against that slice's mean would
+    # flatter it by construction. For unconstrained/mask-only/projected the two are identical.
     data_density = full_density
     # Reference chemistry for coverage metrics: element frequencies over the FULL split
     # so every arm is compared against the same distribution, and the formula set of
@@ -681,12 +682,12 @@ def main(smoke: bool = False, arm: str = "A2", steps: int | None = None,
     mass_t = torch.tensor([ATOMIC_MASS.get(t[3:], 0.0) if t.startswith("el:") else 0.0
                            for t in V.tokens], device=dev, dtype=torch.float32)
 
-    # Initialization baseline for the A3 arm. The decisive quantity is whether the
+    # Initialization baseline for the projected arm. The decisive quantity is whether the
     # probability-weighted infeasible-step fraction FALLS through training, as it did
     # 19.9x on the synthetic task. Measuring it only at convergence cannot answer
     # that, so it is measured at step 0 against the identical untrained weights.
     init_ref = None
-    if cfg.arm in ("A3", "A7"):
+    if cfg.arm in ("projected", "joint"):
         s0, d0 = sample(model, V, gm, cfg, dev, cfg.n_eval_samples, use_mask=True,
                         project_at_inference=True, max_len=max_len + 2, rng=rng)
         init_ref = structural_metrics(s0, V, gm, cfg, **COV) | d0 | {"step": 0}
@@ -702,11 +703,11 @@ def main(smoke: bool = False, arm: str = "A2", steps: int | None = None,
         inp, tgt = x[:, :-1], x[:, 1:]
         logits = model(inp)
 
-        if cfg.arm != "A1":
+        if cfg.arm != "unconstrained":
             mk = torch.from_numpy(gm.masks_for(x.cpu().numpy())[:, 1:, :]).to(dev)
             logits = logits.masked_fill(~mk, float("-inf"))
 
-        if cfg.arm in ("A3", "A7"):
+        if cfg.arm in ("projected", "joint"):
             B, L, Vs = logits.shape
             flat = logits.reshape(B * L, Vs)
             mkf = mk.reshape(B * L, Vs)
@@ -737,7 +738,7 @@ def main(smoke: bool = False, arm: str = "A2", steps: int | None = None,
             act = (st > 0) & torch.isfinite(bt) & ept
             b = torch.where(act, bt / st.clamp_min(1), lo).clamp(min=lo, max=hi).unsqueeze(-1)
 
-            if cfg.arm == "A7":
+            if cfg.arm == "joint":
                 # Second constraint, assembled identically so the two are solved as one
                 # joint problem rather than sequentially. Sequential projection would
                 # satisfy whichever constraint was applied last, which is not the KL
@@ -805,7 +806,7 @@ def main(smoke: bool = False, arm: str = "A2", steps: int | None = None,
                 # Per-row choice: the joint solution where it converged, otherwise the
                 # single-constraint projection where THAT converged, otherwise the masked
                 # softmax. The ordering matters -- discarding a good density projection
-                # because the joint solve failed would make A7 worse than A3 at positions
+                # because the joint solve failed would make joint worse than projected at positions
                 # where the second target simply was not jointly attainable.
                 q = torch.where(joint.unsqueeze(-1), res_j.q,
                                 torch.where((res_1.converged & act).unsqueeze(-1),
@@ -839,12 +840,12 @@ def main(smoke: bool = False, arm: str = "A2", steps: int | None = None,
 
         if step % cfg.eval_every == 0 or step == cfg.steps:
             seqs, diag = sample(model, V, gm, cfg, dev, cfg.n_eval_samples,
-                                use_mask=(cfg.arm != "A1"), project_at_inference=False,
+                                use_mask=(cfg.arm != "unconstrained"), project_at_inference=False,
                                 max_len=max_len + 2, rng=rng)
             m = structural_metrics(seqs, V, gm, cfg, **COV)
             m |= {"step": step, "loss": float(loss.item()),
                   "elapsed_s": round(time.time() - t0, 1)} | diag
-            if cfg.arm in ("A3", "A7"):
+            if cfg.arm in ("projected", "joint"):
                 sd, dg = sample(model, V, gm, cfg, dev, cfg.n_eval_samples,
                                 use_mask=True, project_at_inference=True,
                                 max_len=max_len + 2, rng=rng)
@@ -873,8 +874,8 @@ def main(smoke: bool = False, arm: str = "A2", steps: int | None = None,
         "training_set": {
             "n_structures": len(train), "n_full_split": n_full,
             "fraction_of_split": len(train) / n_full,
-            "filtered": cfg.arm == "A4",
-            "filter_tol": (cfg.filter_tol if cfg.arm == "A4" else None),
+            "filtered": cfg.arm == "conditional",
+            "filter_tol": (cfg.filter_tol if cfg.arm == "conditional" else None),
             "train_density_mean": float(np.mean([c.density for c in train])),
         },
         "data_density": {
@@ -885,7 +886,7 @@ def main(smoke: bool = False, arm: str = "A2", steps: int | None = None,
         "final": history[-1],
         "init_reference": init_ref,
         "joint_projection": joint_stats,
-        "valence_target": (cfg.valence_target if cfg.arm == "A7" else None),
+        "valence_target": (cfg.valence_target if cfg.arm == "joint" else None),
         "wall_clock_s": round(time.time() - t0, 1),
     }
     # WEIGHT PERSISTENCE. Every run before this one trained, evaluated in-process and
@@ -930,7 +931,10 @@ def main(smoke: bool = False, arm: str = "A2", steps: int | None = None,
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--smoke", action="store_true")
-    ap.add_argument("--arm", default="A2", choices=["A1", "A2", "A3", "A4", "A7"])
+    # Canonical names; the old A-codes still resolve so command lines in old run
+    # notes keep working. scripts/common/arms.py is the vocabulary.
+    ap.add_argument("--arm", default="mask_only", type=resolve,
+                    choices=["unconstrained", "mask_only", "projected", "conditional", "joint"])
     ap.add_argument("--steps", type=int, default=None)
     ap.add_argument("--density-target", type=float, default=None)
     ap.add_argument("--valence-target", type=float, default=None)

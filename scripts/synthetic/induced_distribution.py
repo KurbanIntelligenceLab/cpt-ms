@@ -1,15 +1,15 @@
-"""A3's induced sequence distribution vs the exponential tilt (WS-1/WS-2).
+"""The projected arm's induced sequence distribution vs the exponential tilt (WS-1/WS-2).
 
-The central question the plan's A3-vs-A6 contrast rests on, and the only setting
+The central question the plan's projected-vs-comparator contrast rests on, and the only setting
 where it can be answered exactly rather than estimated.
 
-A3 applies the projection at every step: at each position it takes the model's
+projected applies the projection at every step: at each position it takes the model's
 next-token distribution and projects it onto a PER-STEP expectation constraint.
-A6 targets the sequence-level exponential tilt directly. These are different
+comparator targets the sequence-level exponential tilt directly. These are different
 objects and the plan treats the comparison as open. Here it is closed by
 enumeration.
 
-The per-step constraint A3 enforces cannot be the sequence constraint itself —
+The per-step constraint projected enforces cannot be the sequence constraint itself —
 that is not a function of one step. The natural per-step surrogate, and the one
 the layer implements, is a running budget: at each position, constrain the
 expected increment so that the expected total lands on target given what the
@@ -26,7 +26,7 @@ Three distributions, all computed exactly over the 65,536 enumerable sequences:
 
   base       the data/model distribution, unconstrained
   tilt       the sequence-level KL-optimal distribution satisfying E[phi] = c
-  induced    the distribution A3's greedy per-step projection actually produces
+  induced    the distribution projected's greedy per-step projection actually produces
 
 The result of interest is not whether induced == tilt (it will not be) but the
 DIRECTION and SIZE of the gap, and whether induced satisfies the sequence

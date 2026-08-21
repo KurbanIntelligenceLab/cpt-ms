@@ -17,7 +17,7 @@ from scripts.crystal.plausibility_screen import _smact_screens
 from scripts.train.train_crystal import CrystalDecoder, CrystalTrainConfig, GrammarMask, sample
 
 SCRIPT = "scripts/crystal/generated_plausibility.py"
-CKPT_PATH = Path(__file__).resolve().parents[2] / "ckpt" / "A3_d5.0.pt"
+CKPT_PATH = Path(__file__).resolve().parents[2] / "development" / "ckpt" / "projected_d5.0.pt"
 
 
 def sequences_to_items(seqs, V):
@@ -158,7 +158,7 @@ def main(n_samples: int = 2048, smoke: bool = False) -> Path:
             "compositions and cells that parsed and built."
         ),
         "scope_note": (
-            "This funnel scores the actual crystal-generation model (A3, "
+            "This funnel scores the actual crystal-generation model (projected, "
             "scripts/train/train_crystal.py, CrystalVocab), whose token vocabulary "
             "has no atomic-position tokens at all. It is a different serialization "
             "from the standalone character-level CIF grammar in "

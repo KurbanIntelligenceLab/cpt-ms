@@ -10,18 +10,18 @@ Three legs, all exact by enumeration:
   (a) EFFICIENCY. Rejection sampling is the exactness baseline: draw from the base
       model, keep only sequences with the exact target statistic. Its expected
       cost is 1 / P_base(phi == c) draws per accepted sample, and it is exact by
-      construction. A3 pays a fixed per-step cost instead. The efficiency ratio is
-      how many base draws rejection sampling needs for one sample that A3 produces
+      construction. projected pays a fixed per-step cost instead. The efficiency ratio is
+      how many base draws rejection sampling needs for one sample that projected produces
       per sequence.
 
-  (b) DIVERGENCE COST. What A3 pays for that speed, measured against the
+  (b) DIVERGENCE COST. What projected pays for that speed, measured against the
       sequence-level tilt, which is the KL-optimal distribution meeting the same
       expectation constraint. This belongs in the result, not filed as a
       limitation: it IS the price in the trade.
 
-  (c) QUALITY AT TARGET. The fraction of A3's own mass landing exactly on the
+  (c) QUALITY AT TARGET. The fraction of projected's own mass landing exactly on the
       target statistic, and its Regime-S compliance. Rejection sampling scores 1.0
-      on the first by construction; A3 does not, and the gap is the honest cost of
+      on the first by construction; projected does not, and the gap is the honest cost of
       an expectation constraint versus a hard one.
 
 Steering strength is the distance from the target to the base model's own mean, so
@@ -72,7 +72,7 @@ def frontier(task, targets: list[int]) -> list[dict]:
             "target_reachable_by_rejection": accept > 0,
         }
 
-        # (b) and (c): the tilt is the optimum for this target; induced is what A3
+        # (b) and (c): the tilt is the optimum for this target; induced is what projected
         # actually produces.
         try:
             tilt, lam = tilting_target(task, apply_S=True, charge_target=float(c))
@@ -95,7 +95,7 @@ def frontier(task, targets: list[int]) -> list[dict]:
             "tilt_mass_exactly_on_target": (float(tilt[exact_set].sum()) if tilt_ok else None),
             "base_mass_exactly_on_target": accept,
             "induced_regime_S_mass": float(induced[task.feasible_S].sum()),
-            # efficiency: how many base draws rejection needs per A3 sequence
+            # efficiency: how many base draws rejection needs per projected sequence
             "efficiency_ratio_vs_rejection": (1.0 / accept) if accept > 0 else None,
             # concentration achieved relative to the base, on the exact-target set
             "target_mass_enrichment": (
@@ -147,7 +147,7 @@ def frontier(task, targets: list[int]) -> list[dict]:
             "tilt_at_achieved_kl_from_base_nats": k_ach,
             "tilt_at_achieved_multiplier": (float(lam_ach) if ach_ok else None),
             "excess_kl_over_tilt_at_achieved_nats": (k_ind - k_ach) if ach_ok else None,
-            # What FRACTION of A3's divergence is wasted on the per-step surrogate
+            # What FRACTION of projected's divergence is wasted on the per-step surrogate
             # rather than spent on the constraint. Excess is roughly a fixed
             # overhead while the necessary divergence scales with steering
             # strength, so the waste fraction falls as steering strengthens.
@@ -217,7 +217,7 @@ def main(smoke: bool = False) -> Path:
     }
 
     # The headline: excess divergence is roughly a fixed overhead while the
-    # NECESSARY divergence scales with steering strength, so the fraction of A3's
+    # NECESSARY divergence scales with steering strength, so the fraction of projected's
     # divergence that is wasted collapses as steering strengthens.
     waste = np.array([r["waste_fraction_of_induced_divergence"] for r in with_ach])
     tilt_kls = np.array([r["tilt_at_achieved_kl_from_base_nats"] for r in with_ach])
@@ -274,7 +274,7 @@ def main(smoke: bool = False) -> Path:
             "Rejection sampling from the S-conditioned base, accepting only "
             "sequences whose total charge equals the target exactly. Exact by "
             "construction; expected cost 1/acceptance draws per accepted sample. "
-            "A3 is compared against it on efficiency, divergence, and mass on "
+            "the projected arm is compared against it on efficiency, divergence, and mass on "
             "target — never on efficiency alone."
         ),
     }

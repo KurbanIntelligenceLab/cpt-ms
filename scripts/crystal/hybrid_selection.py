@@ -124,7 +124,7 @@ def main(ckpt: str, targets: list[float] | None = None, pool: int = 512,
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("--ckpt", default="ckpt/A3_d5.0.pt")
+    ap.add_argument("--ckpt", default="development/ckpt/projected_d5.0.pt")
     ap.add_argument("--pool", type=int, default=512)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--smoke", action="store_true")

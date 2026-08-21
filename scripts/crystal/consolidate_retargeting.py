@@ -58,7 +58,7 @@ payload = {
     'question': 'Does the reachable density ceiling belong to the method or to the '
                 'particular checkpoint, and does one checkpoint match per-target '
                 'training across a target family?',
-    'checkpoints': 'A3, density target 10.0, seeds 0/1/2, 6000 steps each',
+    'checkpoints': 'projected, density target 10.0, seeds 0/1/2, 6000 steps each',
     'per_seed': per_seed,
     'paired_vs_frontier': paired,
     'summary': {
@@ -94,5 +94,5 @@ payload = {
     ),
 }
 print(emit('retargeting_seed_replication', payload,
-           config={'seeds': [0, 1, 2], 'targets': SUB, 'arm': 'A3', 'trained_at': 10.0},
+           config={'seeds': [0, 1, 2], 'targets': SUB, 'arm': 'projected', 'trained_at': 10.0},
            seeds=[0, 1, 2], script='scripts/crystal/consolidate_retargeting.py'))
