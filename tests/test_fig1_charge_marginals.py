@@ -3,7 +3,7 @@ exhibit the paper's anti-concentration ordering.
 
 results/charge_marginals.json retrains mask-only, projected, and comparator at a single seed to recover
 exact per-charge-value marginals that were never stored (only scalar summaries were,
-in results/training_summary.json and results/a6_tilt_comparator.json). This file
+in results/training_summary.json and results/tilt_comparator.json). This file
 checks that the single-seed marginals' derived scalars are consistent with those
 published multi-seed summaries, and that the headline mechanism -- the per-step
 projection CONCENTRATES mass near the constraint target while the sequence-level tilt
@@ -22,7 +22,7 @@ from scripts.common.arms import normalize, pick
 ROOT = Path(__file__).resolve().parents[1]
 ARTIFACT = ROOT / "results" / "charge_marginals.json"
 A2_SUMMARY = ROOT / "results" / "training_summary.json"
-A6_SUMMARY = ROOT / "results" / "a6_tilt_comparator.json"
+A6_SUMMARY = ROOT / "results" / "tilt_comparator.json"
 
 
 def _payload(path: Path) -> dict:

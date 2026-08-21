@@ -3,7 +3,7 @@
 compute_fig1_charge_distributions.py could only plot 3 objects because two required
 arms -- projected's trained-and-deployed system and comparator's trained model -- were never saved as
 checkpoints; only their scalar summaries (results/training_summary.json,
-results/a6_tilt_comparator.json) survive. This script closes that gap honestly by
+results/tilt_comparator.json) survive. This script closes that gap honestly by
 RETRAINING those arms at a single seed (seed 0), using the identical hyperparameters,
 architecture and training loop as the published multi-seed runs (scripts/train/train_synthetic.py,
 scripts/synthetic/train_comparator.py), and then computing each arm's EXACT induced distribution
@@ -57,7 +57,7 @@ STEPS = 4000
 
 # Published multi-seed reference values, read from stored artifacts (not hand-typed).
 _A2_SUMMARY = "results/training_summary.json"
-_A6_SUMMARY = "results/a6_tilt_comparator.json"
+_A6_SUMMARY = "results/tilt_comparator.json"
 
 
 def marginalize(charge: np.ndarray, p: np.ndarray) -> dict:

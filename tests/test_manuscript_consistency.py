@@ -72,7 +72,7 @@ def _main_text() -> str:
 def test_concentration_numbers_match_their_artifacts():
     """The paper's central claim, recomputed from the two artifacts that hold it."""
     a2 = normalize(_p("training_summary.json")["arms"])
-    a6 = _p("a6_tilt_comparator.json")
+    a6 = _p("tilt_comparator.json")
     src = _src()
 
     # These arrays are [mean, sd] pairs, NOT per-seed lists. Averaging them yields a

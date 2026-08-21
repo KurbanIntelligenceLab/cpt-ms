@@ -27,7 +27,7 @@ this way with NO model training:
            not saved (only the crystal checkpoint ckpt/A3_d5.0.pt exists).
 
 comparator's own trained charge marginal, and the true projected-deployed charge marginal,
-are NOT reproducible from stored artifacts (results/a6_tilt_comparator.json
+are NOT reproducible from stored artifacts (results/tilt_comparator.json
 and results/train_projected_seed*.json store only scalar summary statistics --
 mean, variance, KL, violation rate -- never a per-charge-value histogram or
 the model weights needed to derive one). Retraining was out of scope for this
@@ -102,7 +102,7 @@ def main(smoke: bool = False) -> Path:
         },
         "gap": {
             "a6_trained_marginal_unavailable": (
-                "results/a6_tilt_comparator.json stores only scalar summary "
+                "results/tilt_comparator.json stores only scalar summary "
                 "statistics (mean_charge, kl_from_tilt, tv_vs_tilt, ...) for comparator's "
                 "3 seeds -- no per-charge-value histogram, and no saved model "
                 "weights for the synthetic task exist to re-derive one without "
