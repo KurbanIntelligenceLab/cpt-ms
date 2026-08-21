@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "A differentiable constraint projection layer for autoregressive models"
 readme = "README.md"
 requires-python = ">=3.11"
-license = { text = "MIT" }
+license = { file = "LICENSE" }
 dependencies = [
     "torch>=2.13",
     "numpy>=2.4",
@@ -26,6 +26,13 @@ baselines = [
 ]
 dev = [
     "pytest>=9.1",
+]
+
+authors = [
+    { name = "Can Polat" },
+    { name = "Mustafa Kurban" },
+    { name = "Erchin Serpedin" },
+    { name = "Hasan Kurban" },
 ]
 
 [project.urls]
