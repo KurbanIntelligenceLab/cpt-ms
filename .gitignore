@@ -20,6 +20,11 @@ development/
 results/*_smoke.json
 results/preflight_report.json
 
+# ...except this one. It is not a pre-flight shard: it is the only artifact built
+# with the corrected tokenizer, the SI cites it by name, and implementation_details
+# records it as a source. Evidence the manuscript points at has to ship.
+!results/crystal_conditional_smoke.json
+
 # The run ledger is append-only and machine-local: two machines appending to the
 # same file produce conflicts on every push for no benefit. Runs that matter are
 # traceable through the artifacts they name.
