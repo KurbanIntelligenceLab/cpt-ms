@@ -17,18 +17,20 @@ fundamentally different route than the sequence-level optimum.
 """
 from __future__ import annotations
 
+import glob
 import json
+import sys
 from pathlib import Path
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
-
-from scripts.common.arms import pick
 from matplotlib import font_manager as fm
-import glob
 
-REPO = Path(__file__).resolve().parents[2] if "__file__" in dir() else Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(REPO))
+
+from scripts.common.arms import pick  # noqa: E402
 
 for f in glob.glob('/usr/local/texlive/2026/texmf-dist/fonts/opentype/public/montserrat/Montserrat-*.otf'):
     fm.fontManager.addfont(f)

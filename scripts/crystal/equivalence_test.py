@@ -38,7 +38,7 @@ from scripts.common.artifacts import emit
 
 SCRIPT = "scripts/crystal/equivalence_test.py"
 
-PREREG = (Path(__file__).resolve().parents[2] / "preregistration"
+PREREG = (Path(__file__).resolve().parents[2] / "development" / "preregistration"
           / "equivalence_margin.md")
 
 

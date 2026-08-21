@@ -42,7 +42,7 @@ from pathlib import Path
 
 import numpy as np
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from scripts.common.artifacts import emit
 from scripts.synthetic.induced_distribution import induced_distribution
@@ -120,7 +120,7 @@ def main(smoke: bool = False) -> Path:
                 "results/training_summary.json)."
             ),
         },
-        "cross_check_against_WS1": (
+        "cross_check_against_induced_vs_tilt": (
             "base_S mean/var and induced mean/var reproduce results/"
             "induced_vs_tilt.json payload.distributions.base_S and .induced "
             "to machine precision; tilt mean/var reproduce payload.distributions.tilt."

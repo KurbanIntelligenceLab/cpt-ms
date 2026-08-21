@@ -21,12 +21,12 @@ from pathlib import Path
 
 import numpy as np
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from scripts.common.artifacts import emit
 
 SCRIPT = "scripts/crystal/compute_fig2_steering_frontier.py"
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[3]
 
 
 def main() -> Path:
@@ -51,7 +51,7 @@ def main() -> Path:
     ceiling_row = max(agg, key=lambda r: r["target"])
 
     payload = {
-        "aggregation": "seed-averaged per target (matches reports/steering_frontier_crystal_notes.md 'The frontier' table)",
+        "aggregation": "seed-averaged per target",
         "source_artifact": "results/steering_frontier_rows.json",
         "n_source_runs": len(rows),
         "frontier": agg,

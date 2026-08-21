@@ -79,7 +79,7 @@ def test_best_of_n_result_is_reported_as_competitive_not_dismissed():
     """A reviewer will run this baseline. The report must say it wins on accuracy."""
     note = ROOT / "development" / "reports" / "external_baselines_notes.md"
     if not note.exists():
-        pytest.skip("WS-6 note absent")
+        pytest.skip("external-baselines note absent; it lives in the development tree")
     txt = re.sub(r"\s+", " ", note.read_text())
     assert "beats the projection" in txt or "reaches the projection" in txt, (
         "the note must state that best-of-n is competitive on accuracy"

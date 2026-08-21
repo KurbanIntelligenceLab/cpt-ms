@@ -15,7 +15,7 @@ import numpy as np
 from matplotlib import font_manager as fm
 import glob
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[3]
 
 for f in glob.glob('/usr/local/texlive/2026/texmf-dist/fonts/opentype/public/montserrat/Montserrat-*.otf'):
     fm.fontManager.addfont(f)

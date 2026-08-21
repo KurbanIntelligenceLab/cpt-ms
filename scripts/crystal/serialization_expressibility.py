@@ -116,7 +116,7 @@ def main(n_structures: int = 400, smoke: bool = False) -> Path:
             f"was skipped: the constraint class and the serialization are COUPLED, and the "
             f"coupling is the finding. A serialization comparison for this method requires "
             f"two orderings that both determine the budget before the constrained tokens -- "
-            f"a different axis of variation than the one WS-2's determinability study used.")
+            f"a different axis of variation than the one the determinability study used.")
     else:
         payload["verdict"] = (
             "Both orderings determine the budget at similar rates, so a serialization "

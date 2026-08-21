@@ -24,7 +24,7 @@ NOTES = Path(__file__).resolve().parents[1] / "reports" / "two_constraint_grid_n
 
 def _payload():
     if not ART.exists():
-        pytest.skip("WS5 grid artifact absent; run scripts.crystal.analyze_a7_grid")
+        pytest.skip("joint-grid artifact absent; run scripts.crystal.analyze_volume_grid")
     return json.loads(ART.read_text())["payload"]
 
 
@@ -160,7 +160,7 @@ def test_pass_through_is_computed_from_the_cells():
 def test_notes_do_not_overclaim_the_incomplete_grid():
     """One row is complete; the notes must not read as if the grid were finished."""
     if not NOTES.exists():
-        pytest.skip("WS5 notes absent")
+        pytest.skip("joint-grid note absent; it lives in the development tree")
     txt = NOTES.read_text()
     p = _payload()
     n_complete = sum(1 for r in p["rows"] if r.get("complete"))

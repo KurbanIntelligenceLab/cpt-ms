@@ -20,12 +20,12 @@ from pathlib import Path
 
 import numpy as np
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from scripts.common.artifacts import emit
 
 SCRIPT = "scripts/crystal/compute_fig4_infeasibility.py"
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[3]
 
 
 def main() -> Path:
@@ -51,7 +51,7 @@ def main() -> Path:
         })
 
     payload = {
-        "repair_factor_convention": "ratio of seed-averaged means per target (matches reports/steering_frontier_crystal_notes.md: 29.2x at target 1.5, 0.97x at 20.0)",
+        "repair_factor_convention": "ratio of seed-averaged means per target",
         "per_target": per_target,
         "weakest_steering_repair_factor": per_target[0]["repair_factor_ratio_of_means"],
         "strongest_steering_repair_factor": per_target[-1]["repair_factor_ratio_of_means"],

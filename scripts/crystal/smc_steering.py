@@ -219,7 +219,9 @@ def main(ckpt: str, targets=None, k_values=None, runs: int = 32,
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("--ckpt", default="development/ckpt/projected_d5.0.pt")
+    ap.add_argument("--ckpt", required=True,
+                    help="path to a trained checkpoint; produce one with "
+                         "python -m scripts.train.train_crystal --arm projected --ckpt <path>")
     ap.add_argument("--runs", type=int, default=32)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--smoke", action="store_true")

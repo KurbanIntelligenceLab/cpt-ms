@@ -126,11 +126,11 @@ scripts/synthetic/   synthetic constrained-sequence task with exact enumerable t
 scripts/crystal/     serialization, incremental constraint parser, per-step determinability
 scripts/layer/       the batched KL projection layer and its gradient verification
 scripts/train/       training entry points for the crystal and synthetic tracks
-scripts/plotting/    figure renderers, one per figure
 tests/               the verification suite
 results/             emitted artifacts, provenance-stamped JSON
-development/         not distributed: manuscript sources, run notes, preregistration,
-                     checkpoints, logs. Nothing here is needed to install or verify.
+development/         not distributed: manuscript sources and the scripts that build its
+                     figures, run notes, preregistration, checkpoints, logs. Nothing here
+                     is needed to install or verify.
 ```
 
 ## Conventions

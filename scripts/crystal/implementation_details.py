@@ -265,7 +265,7 @@ def main() -> Path:
                 "retargeting_inference_overhead_s": {
                     "three_checkpoints_x_ten_targets_total_s": 241,
                     "one_training_run_s_approx": 1660,
-                    "source": "reports/retargeting_notes.md; results/zero_shot_retargeting.json (per-checkpoint wall_clock_s)",
+                    "source": "results/zero_shot_retargeting.json (per-checkpoint wall_clock_s)",
                 },
                 "caveat": (
                     "the conditional mean wall clock above (216.45 s) is read from conditional_baseline.json, whose "

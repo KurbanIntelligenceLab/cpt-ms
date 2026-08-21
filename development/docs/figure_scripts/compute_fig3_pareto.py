@@ -34,12 +34,12 @@ import numpy as np
 
 from scripts.common.arms import pick
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from scripts.common.artifacts import emit
 
 SCRIPT = "scripts/crystal/compute_fig3_pareto.py"
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[3]
 
 
 def main() -> Path:

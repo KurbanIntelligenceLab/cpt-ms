@@ -89,7 +89,9 @@ def main(ckpt: str, K: int, sigma: float, targets: list[float], trials: int = 10
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("--ckpt", default="ckpt/A3_d5.0.pt")
+    ap.add_argument("--ckpt", required=True,
+                    help="path to a trained checkpoint; produce one with "
+                         "python -m scripts.train.train_crystal --arm projected --ckpt <path>")
     ap.add_argument("--K", type=int, default=16)
     ap.add_argument("--sigma", type=float, default=0.5)
     ap.add_argument("--targets", default="1.5,2.0,3.0,5.0,6.317,8.0,10.0")

@@ -123,7 +123,7 @@ def main() -> Path:
     payload = {
         "property": "mass_density",
         "note": (
-            "matched-budget additive-property control for CPR8: same steps, batch, "
+            "matched-budget additive-property control: same steps, batch, "
             "train_limit, n_eval_samples and vocabulary as the electronegativity arms, "
             "but with the fixed per-element mass weight table (the mechanism used for "
             "the main-text density results) rather than a learned phi"
