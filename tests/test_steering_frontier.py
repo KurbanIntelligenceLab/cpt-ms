@@ -2,18 +2,15 @@
 
 from __future__ import annotations
 
-import sys
-from pathlib import Path
+import itertools
 
 import numpy as np
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-
-from scripts.synthetic.induced_distribution import induced_distribution
-from scripts.synthetic.steering_frontier import frontier
-from scripts.synthetic.targets import kl, tilting_target
-from scripts.synthetic.task import TaskConfig, enumerate_task
+from cpt.synthetic.induced_distribution import induced_distribution
+from cpt.synthetic.steering_frontier import frontier
+from cpt.synthetic.targets import kl, tilting_target
+from cpt.synthetic.task import TaskConfig, enumerate_task
 
 SMALL = TaskConfig(length=5, max_count=2)
 
@@ -91,7 +88,7 @@ def test_waste_fraction_falls_as_steering_strengthens(task):
             continue
         side.sort(key=lambda r: abs(r["signed_steering_strength"]))
         w = [r["waste_fraction_of_induced_divergence"] for r in side]
-        assert all(b <= a + 1e-9 for a, b in zip(w, w[1:])), f"sign {sign}: {w}"
+        assert all(b <= a + 1e-9 for a, b in itertools.pairwise(w)), f"sign {sign}: {w}"
 
 
 def test_fallback_policies_trade_accuracy_against_divergence(task, base):

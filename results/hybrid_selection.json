@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "artifact_name": "hybrid_selection",
-  "script": "scripts/crystal/hybrid_selection.py",
+  "script": "src/cpt/crystal/hybrid_selection.py",
   "git_commit": "5e963cc6b84d7045ace5e3139800ffd7cb12c972-dirty",
   "config": {
     "pool": 512,

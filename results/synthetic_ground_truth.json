@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "artifact_name": "synthetic_ground_truth",
-  "script": "scripts/synthetic/compute_ground_truth.py",
+  "script": "src/cpt/synthetic/compute_ground_truth.py",
   "git_commit": "07ac3429d848cda09d8c1af4953a7b7baa0c5a53",
   "config": {
     "symbols": [

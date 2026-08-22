@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "artifact_name": "conditional_sparse",
-  "script": "scripts/train/train_crystal.py",
+  "script": "src/cpt/train/train_crystal.py",
   "git_commit": "be47243ef1b72035f858f85c16b5087aa02b218a",
   "config": {
     "targets": [

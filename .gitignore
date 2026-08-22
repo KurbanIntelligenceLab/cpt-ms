@@ -21,12 +21,16 @@ data/
 # Checkpoints are build products of a training command, not evidence
 *.pt
 
-# Regenerable pre-flight shards, scratch, and the machine-local run ledger
+# Regenerable pre-flight shards and scratch
 results/*_smoke.json
 results/preflight_report.json
 results/_*.json
-results/run_ledger.jsonl
 
-# ...but this one is cited by the SI and by implementation_details.json,
-# so it has to ship
-!results/crystal_conditional_smoke.json
+# LaTeX build intermediates
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.out
+*.synctex.gz

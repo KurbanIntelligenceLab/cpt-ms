@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "artifact_name": "infeasibility_correlation",
-  "script": "scripts/crystal/compute_infeasibility_correlation.py",
+  "script": "src/cpt/crystal/compute_infeasibility_correlation.py",
   "git_commit": "999dee783e89a156636a3ecff3f0e43f07aedc8a",
   "config": {
     "source": [

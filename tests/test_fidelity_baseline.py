@@ -5,10 +5,9 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from scripts.crystal.fidelity_baseline import _composition_profile, _tv, rejection_arm
-from scripts.crystal.mp20 import load_split
-
 from _devtree import requires_mp20
+from cpt.crystal.fidelity_baseline import _composition_profile, _tv, rejection_arm
+from cpt.crystal.mp20 import load_split
 
 pytestmark = requires_mp20
 

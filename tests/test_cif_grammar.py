@@ -2,22 +2,17 @@
 
 from __future__ import annotations
 
-import sys
-from pathlib import Path
-
 import numpy as np
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-
-from scripts.crystal.cif_grammar import (
+from _devtree import requires
+from cpt.crystal.cif_grammar import (
     GrammarState,
     allowed,
     full_vocabulary,
-    render,
     step,
 )
-from scripts.crystal.parse_validity import (
+from cpt.crystal.parse_validity import (
     builds_structure,
     parses,
     sample_masked,
@@ -28,6 +23,7 @@ def _sample(seed: int) -> str:
     return sample_masked(np.random.default_rng(seed))[0]
 
 
+@requires("pymatgen")
 @pytest.mark.parametrize("seed", range(12))
 def test_every_masked_sample_is_syntactically_valid(seed):
     """Soundness: the mask must make syntactic invalidity impossible."""
@@ -77,6 +73,7 @@ def test_mask_is_strictly_narrower_than_the_vocabulary():
     assert s.phase == "done"
 
 
+@requires("pymatgen")
 def test_required_label_column_is_present():
     """Regression: pymatgen raises KeyError without `_atom_site_label`."""
     text = _sample(0)
@@ -85,6 +82,7 @@ def test_required_label_column_is_present():
     assert ok, kind
 
 
+@requires("pymatgen")
 def test_syntactic_and_semantic_validity_are_measured_separately():
     """The scope boundary, asserted rather than described."""
     syn = sem = 0
@@ -101,6 +99,7 @@ def test_syntactic_and_semantic_validity_are_measured_separately():
     )
 
 
+@requires("pymatgen")
 def test_absurd_angles_are_a_semantic_not_syntactic_failure():
     """Pin the specific mechanism behind the syntactic/semantic gap."""
     import re

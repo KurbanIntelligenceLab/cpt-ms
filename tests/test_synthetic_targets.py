@@ -2,22 +2,17 @@
 
 from __future__ import annotations
 
-import sys
-from pathlib import Path
-
 import numpy as np
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-
-from scripts.synthetic.task import TaskConfig, enumerate_task, prefix_allowed_mask
-from scripts.synthetic.targets import (
+from cpt.synthetic.targets import (
     conditioning_target,
     kl,
     solve_tilt,
     tilting_target,
     violation_rate,
 )
+from cpt.synthetic.task import TaskConfig, enumerate_task, prefix_allowed_mask
 
 SMALL = TaskConfig(length=5, max_count=2)
 
@@ -61,7 +56,7 @@ def test_regime_S_mask_matches_brute_force(task):
         prefix = tuple(int(x) for x in seq[:t])
         mask = prefix_allowed_mask(SMALL, prefix)
         for v in range(SMALL.vocab_size):
-            counts = np.bincount(np.array(prefix + (v,)), minlength=SMALL.vocab_size)
+            counts = np.bincount(np.array((*prefix, v)), minlength=SMALL.vocab_size)
             extendable = bool((counts <= SMALL.max_count).all())
             assert bool(mask[v]) == extendable
 
@@ -69,7 +64,7 @@ def test_regime_S_mask_matches_brute_force(task):
 def test_tilt_satisfies_expectation_constraint(task):
     """The solved multiplier reproduces the target mean to machine precision."""
     for target in (-2.0, 0.0, 1.5):
-        q, lam = tilting_target(task, apply_S=True, charge_target=target)
+        q, _lam = tilting_target(task, apply_S=True, charge_target=target)
         assert np.isclose(q.sum(), 1.0, atol=1e-12)
         assert np.isclose(q @ task.total_charge, target, atol=1e-9)
 

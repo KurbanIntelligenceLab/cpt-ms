@@ -1,30 +1,23 @@
 """Tests for the joint two-constraint grid and its analysis."""
 from __future__ import annotations
 
-import json
+import itertools
 import re
-import sys
 from pathlib import Path
 
 import numpy as np
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from _artifacts import payload
 
 RESULTS = Path(__file__).resolve().parents[1] / "results"
 ART = RESULTS / "two_constraint_grid.json"
 NOTES = Path(__file__).resolve().parents[1] / "reports" / "two_constraint_grid_notes.md"
 
 
-def _payload():
-    if not ART.exists():
-        pytest.skip("joint-grid artifact absent; run scripts.crystal.analyze_volume_grid")
-    return json.loads(ART.read_text())["payload"]
-
-
 def test_verdict_follows_from_the_measurements():
     """The verdict text must match what pass-through and monotonicity actually show."""
-    p = _payload()
+    p = payload("two_constraint_grid")
     s = p["summary"]
     complete = [r for r in p["rows"] if r.get("complete")]
     if not complete:
@@ -41,7 +34,7 @@ def test_verdict_follows_from_the_measurements():
 
 def test_density_comparison_uses_matched_targets_only():
     """Averaging arms over different target sets would manufacture an advantage."""
-    p = _payload()
+    p = payload("two_constraint_grid")
     s = p["summary"]
     matched = set(s["matched_density_targets"])
     joint_targets = {c["density_target"] for c in p["cells"]
@@ -59,7 +52,7 @@ def test_density_comparison_uses_matched_targets_only():
 
 def test_regime_s_survives_a_second_regime_e_constraint():
     """Validity must stay exactly 1.0 in every cell and control."""
-    p = _payload()
+    p = payload("two_constraint_grid")
     vals = {c["validity"] for c in p["cells"]} | {
         v["validity"] for v in p["controls"].values()}
     assert vals == {1.0}, f"structural validity is not exactly 1.0 everywhere: {vals}"
@@ -67,12 +60,12 @@ def test_regime_s_survives_a_second_regime_e_constraint():
 
 def test_fallback_rate_rises_with_the_second_target():
     """The competition mechanism, not just the outcome."""
-    p = _payload()
+    p = payload("two_constraint_grid")
     for r in p["rows"]:
         if not r.get("complete"):
             continue
         fb = r["fallback_rates"]
-        assert all(b >= a - 1e-9 for a, b in zip(fb, fb[1:])), (
+        assert all(b >= a - 1e-9 for a, b in itertools.pairwise(fb)), (
             f"fallback rate is not monotone in the valence target at density "
             f"{r['density_target']}: {fb}"
         )
@@ -81,7 +74,7 @@ def test_fallback_rate_rises_with_the_second_target():
 
 def test_joint_position_direction_tracks_target_compatibility():
     """The finding the second row produced, pinned so it cannot be flattened back."""
-    p = _payload()
+    p = payload("two_constraint_grid")
     rows = {r["density_target"]: r for r in p["rows"] if r.get("complete")}
     if len(rows) < 2:
         pytest.skip("fewer than two complete rows")
@@ -112,7 +105,7 @@ def test_joint_position_direction_tracks_target_compatibility():
 
 def test_pass_through_is_computed_from_the_cells():
     """Recompute the headline quantity rather than trusting the stored field."""
-    p = _payload()
+    p = payload("two_constraint_grid")
     for r in p["rows"]:
         if not r.get("complete"):
             continue
@@ -129,7 +122,7 @@ def test_notes_do_not_overclaim_the_incomplete_grid():
     if not NOTES.exists():
         pytest.skip("joint-grid note absent; it lives in the development tree")
     txt = NOTES.read_text()
-    p = _payload()
+    p = payload("two_constraint_grid")
     n_complete = sum(1 for r in p["rows"] if r.get("complete"))
     n_rows_planned = 3
     if n_complete < n_rows_planned:
@@ -159,11 +152,11 @@ def test_notes_do_not_overclaim_the_incomplete_grid():
 
 def test_valence_reference_matches_cp7():
     """The data mean and sd quoted here must be CP-7's measured values."""
-    p = _payload()
+    p = payload("two_constraint_grid")
     cp7 = RESULTS / "second_channel.json"
     if not cp7.exists():
         pytest.skip("CP-7 artifact absent")
-    st = json.loads(cp7.read_text())["payload"]["channel_statistics"]
+    st = payload(cp7.name)["channel_statistics"]
     assert abs(p["data_reference"]["valence_sd"]
                - st["valence_electron_density"]["sd"]) < 5e-4
     assert abs(p["data_reference"]["valence_mean"]
@@ -172,7 +165,7 @@ def test_valence_reference_matches_cp7():
 
 def test_fixed_valence_columns_use_partial_rows_correctly():
     """A partial row is valid for the direction analysis and invalid for pass-through."""
-    p = _payload()
+    p = payload("two_constraint_grid")
     cols = p["summary"].get("fixed_valence_columns")
     if not cols:
         pytest.skip("no fixed-valence columns")
@@ -192,7 +185,7 @@ def test_fixed_valence_columns_use_partial_rows_correctly():
 
 def test_direction_is_measured_against_each_cells_own_control():
     """Deviation must be from the matching single-constraint control, not a global mean."""
-    p = _payload()
+    p = payload("two_constraint_grid")
     cols = p["summary"].get("fixed_valence_columns") or []
     if not cols:
         pytest.skip("no fixed-valence columns")
@@ -212,7 +205,7 @@ def test_direction_is_measured_against_each_cells_own_control():
 
 def test_the_directional_asymmetry_is_reported_if_present():
     """Lowering the quantity is always affordable; raising it is not once the budget is spent."""
-    p = _payload()
+    p = payload("two_constraint_grid")
     cols = p["summary"].get("fixed_valence_columns") or []
     if not cols:
         pytest.skip("no fixed-valence columns")

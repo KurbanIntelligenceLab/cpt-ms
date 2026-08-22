@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "artifact_name": "automaton_size",
-  "script": "scripts/crystal/automaton_size.py",
+  "script": "src/cpt/crystal/automaton_size.py",
   "git_commit": "cf70977b8b6f981bd30bd41f444e91444ee2df63-dirty",
   "config": {
     "tolerances": [

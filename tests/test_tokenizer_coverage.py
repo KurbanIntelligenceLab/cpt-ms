@@ -5,9 +5,8 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from scripts.crystal.mp20 import CrystalVocab, ELEMENTS, load_split
-
 from _devtree import requires_mp20
+from cpt.crystal.mp20 import ELEMENTS, CrystalVocab, load_split
 
 pytestmark = requires_mp20
 

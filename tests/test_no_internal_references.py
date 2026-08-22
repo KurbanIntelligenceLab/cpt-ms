@@ -18,9 +18,9 @@ PATTERNS = {
     "internal planning doc": re.compile(r"\bresearch plan\b|\bstanding note\b"),
 }
 
-# scripts/common/arms.py is the sanctioned place for the historical arm codes: it exists
+# src/cpt/common/arms.py is the sanctioned place for the historical arm codes: it exists
 # precisely so artifacts stamped with them stay readable. This test is the other one.
-ALLOWED_FILES = {"scripts/common/arms.py", "tests/test_no_internal_references.py"}
+ALLOWED_FILES = {"src/cpt/common/arms.py", "tests/test_no_internal_references.py"}
 
 # README.md documents the legacy codes on purpose, in the same spirit as arms.py: a reader
 # opening an older artifact needs somewhere that says what A1..A7 meant.
@@ -28,10 +28,9 @@ ALLOWED_PATTERNS_BY_FILE = {"README.md": {"arm code"}}
 
 # Payload values inside already-emitted artifacts are covered by payload_sha256 and cannot
 # be re-stamped without the checkpoints that produced them, which are not distributed.
-# equivalence.json records where its pre-registered margin was read from, which is a
-# factual provenance record rather than a leak.
-ALLOWED_ARTIFACTS = {"equivalence.json", "additive_control.json",
-                     "serialization_expressibility.json", "training_summary.json"}
+# equivalence.json and additive_control.json have since been re-stamped from a clean tree
+# and no longer need an exemption; these two still do.
+ALLOWED_ARTIFACTS = {"serialization_expressibility.json", "training_summary.json"}
 
 
 def _tracked(prefix: str) -> list[Path]:
@@ -41,7 +40,7 @@ def _tracked(prefix: str) -> list[Path]:
 
 
 def _sources() -> list[Path]:
-    files = _tracked("scripts") + _tracked("tests") + [ROOT / "README.md"]
+    files = _tracked("src") + _tracked("tests") + [ROOT / "README.md"]
     return [f for f in files if f.suffix in {".py", ".md"}
             and str(f.relative_to(ROOT)) not in ALLOWED_FILES]
 

@@ -1,7 +1,7 @@
 {
  "schema_version": "1.0",
  "artifact_name": "smc_steering",
- "script": "scripts/crystal/smc_steering.py",
+ "script": "src/cpt/crystal/smc_steering.py",
  "git_commit": "844a07f16b8f97824940532080b83e9c0ea08cde",
  "config": {
   "k_values": [

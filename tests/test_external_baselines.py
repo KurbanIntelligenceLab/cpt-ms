@@ -1,11 +1,13 @@
 """Tests for the external comparisons: best-of-n, the automaton argument, the margin."""
 from __future__ import annotations
 
-import json
+import itertools
 import re
 from pathlib import Path
 
 import pytest
+
+from _artifacts import payload
 
 ROOT = Path(__file__).resolve().parents[1]
 DEV = ROOT / "development"
@@ -17,16 +19,9 @@ RES = ROOT / "results"
 PREREG = ROOT / "development" / "preregistration" / "equivalence_margin.md"
 
 
-def _load(name: str) -> dict:
-    p = RES / name
-    if not p.exists():
-        pytest.skip(f"{name} absent")
-    return json.loads(p.read_text())["payload"]
-
-
 def test_best_of_n_estimates_expectation_not_the_pool_best():
     """Reporting the single best draw in a large pool would overstate best-of-n."""
-    p = _load("best_of_n.json")
+    p = payload("best_of_n.json")
     for r in p["rows"]:
         assert r["trials"] > 1, "best-of-n must be estimated over repeated draws"
     n1 = [r["mean_best_error"] for r in p["rows"] if r["n"] == 1]
@@ -38,22 +33,22 @@ def test_best_of_n_estimates_expectation_not_the_pool_best():
 
 def test_best_of_n_error_falls_monotonically_with_n():
     """A selection baseline that did not improve with n would indicate a bug, not a result."""
-    p = _load("best_of_n.json")
+    p = payload("best_of_n.json")
     by: dict[float, dict[int, float]] = {}
     for r in p["rows"]:
         by.setdefault(r["target"], {})[r["n"]] = r["mean_best_error"]
     for t, row in by.items():
         ns = sorted(row)
         errs = [row[n] for n in ns]
-        assert all(b <= a + 1e-9 for a, b in zip(errs, errs[1:])), (
+        assert all(b <= a + 1e-9 for a, b in itertools.pairwise(errs)), (
             f"best-of-n error is not monotone in n at target {t}: {errs}"
         )
 
 
 def test_the_diversity_cost_of_selection_is_recorded():
     """An accuracy-only comparison flatters selection, so the diversity cost must be recorded."""
-    p = _load("best_of_n.json")
-    assert "diversity" in p and p["diversity"], "diversity measurement missing"
+    p = payload("best_of_n.json")
+    assert p.get("diversity"), "diversity measurement missing"
     by: dict[float, dict[int, float]] = {}
     for r in p["diversity"]:
         by.setdefault(r["target"], {})[r["n"]] = r["unique_formula_fraction"]
@@ -79,7 +74,7 @@ def test_best_of_n_result_is_reported_as_competitive_not_dismissed():
 
 def test_automaton_size_argument_reports_its_own_refutation():
     """The size objection was computed and did not hold. That outcome must stay visible."""
-    p = _load("automaton_size.json")
+    p = payload("automaton_size.json")
     assert p["size_argument_verdict"].startswith("REFUTED"), (
         "the automaton size argument was refuted by its own computation; a verdict "
         "claiming otherwise means the computation or the framing changed"
@@ -94,7 +89,7 @@ def test_automaton_size_argument_reports_its_own_refutation():
 
 def test_automaton_tolerances_below_the_serialization_floor_are_flagged():
     """Demanding a tolerance the serialization cannot express would inflate the state count."""
-    p = _load("automaton_size.json")
+    p = payload("automaton_size.json")
     floor = p["vocabulary"]["discretization_floor_relative"]
     for r in p["rows"]:
         assert r["at_or_below_task_floor"] == (r["relative_tolerance"] < floor), (
@@ -107,17 +102,17 @@ def test_margin_lives_in_the_preregistration_not_the_script():
     assert PREREG.exists(), "the equivalence margin must be pre-registered"
     m = re.search(r"EQUIVALENCE_MARGIN_G_PER_CM3\s*=\s*([0-9.]+)", PREREG.read_text())
     assert m, "the pre-registration must define the margin as a parseable value"
-    p = _load("equivalence.json")
+    p = payload("equivalence.json")
     assert abs(p["equivalence"]["margin"] - float(m.group(1))) < 1e-9, (
         "the artifact's margin does not match the pre-registered value"
     )
-    src = (ROOT / "scripts" / "crystal" / "equivalence_test.py").read_text()
+    src = (ROOT / "src" / "cpt" / "crystal" / "equivalence_test.py").read_text()
     assert "read_prereg_margin" in src, "the script must read the margin, not define it"
 
 
 def test_wilcoxon_is_reported_with_its_floor():
     """At n=7 the smallest attainable two-sided p is 2/2^7; quoting p alone overstates it."""
-    p = _load("equivalence.json")
+    p = payload("equivalence.json")
     dt = p["difference_tests"]
     n = p["n_paired_targets"]
     assert abs(dt["wilcoxon_min_attainable_two_sided_p"] - 2.0 / (2 ** n)) < 1e-12
@@ -126,7 +121,7 @@ def test_wilcoxon_is_reported_with_its_floor():
 
 
 def test_preregistered_decision_rule_is_two_part_and_satisfied():
-    p = _load("equivalence.json")
+    p = payload("equivalence.json")
     eq = p["equivalence"]
     assert "0.10" in eq["decision_rule"], "the second condition must name the tighter margin"
     if eq["equivalent_at_margin"]:
@@ -138,11 +133,11 @@ def test_preregistered_decision_rule_is_two_part_and_satisfied():
 
 def test_crossing_counts_in_prose_match_the_artifact():
     """The n-to-match counts are easy to hardcode and were once wrong."""
-    bon = _load("best_of_n.json")
+    bon = payload("best_of_n.json")
     front = RES / "steering_frontier_rows.json"
     if not front.exists():
         pytest.skip("frontier artifact absent")
-    rows = json.loads(front.read_text())["payload"]["rows"]
+    rows = payload(front.name)["rows"]
     by_t: dict[float, list[float]] = {}
     for v in rows.values():
         by_t.setdefault(v["target"], []).append(v["deployed_density"])

@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "artifact_name": "generated_plausibility",
-  "script": "scripts/crystal/generated_plausibility.py",
+  "script": "src/cpt/crystal/generated_plausibility.py",
   "git_commit": "5e963cc6b84d7045ace5e3139800ffd7cb12c972-dirty",
   "config": {
     "n_samples": 2048,

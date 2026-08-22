@@ -1,19 +1,19 @@
 """Tests for the joint-constraint solve and the attainability map."""
 from __future__ import annotations
 
-import json
-import sys
 from pathlib import Path
 
 import numpy as np
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from _artifacts import payload
 
 torch = pytest.importorskip("torch")
 
-from scripts.layer.projection import project  # noqa: E402
-from scripts.layer.verify_multiconstraint import (  # noqa: E402
+import itertools
+
+from cpt.layer.projection import project
+from cpt.layer.verify_multiconstraint import (
     _attainable_range,
     attainability_grid,
     joint_solve_case,
@@ -107,18 +107,18 @@ def test_attainability_fraction_is_grid_dependent_and_says_so():
     )
     art = RESULTS / "multiconstraint.json"
     if art.exists():
-        payload = json.loads(art.read_text())["payload"]
-        assert payload["summary"]["fractions_are_grid_dependent"] is True
-        assert "grid" in payload["vocabulary_sweep"]["caveat"].lower()
+        p = payload(art.name)
+        assert p["summary"]["fractions_are_grid_dependent"] is True
+        assert "grid" in p["vocabulary_sweep"]["caveat"].lower()
 
 
 def test_composition_gets_easier_with_vocabulary_size():
     """Joint attainability must be reported as a function of vocabulary, not a scalar."""
     art = RESULTS / "multiconstraint.json"
     if not art.exists():
-        pytest.skip("multiconstraint artifact absent; run scripts.layer.verify_multiconstraint")
-    payload = json.loads(art.read_text())["payload"]
-    rows = payload["vocabulary_sweep"]["rows"]
+        pytest.skip("multiconstraint artifact absent; run cpt.layer.verify_multiconstraint")
+    p = payload(art.name)
+    rows = p["vocabulary_sweep"]["rows"]
     assert len(rows) >= 4, "sweep too short to establish a trend"
     sizes = [r["vocab_size"] for r in rows]
     assert sizes == sorted(sizes), "sweep rows are not ordered by vocabulary size"
@@ -127,6 +127,6 @@ def test_composition_gets_easier_with_vocabulary_size():
         f"joint attainability did not increase with vocabulary: {fracs[0]:.3f} at "
         f"V={sizes[0]} against {fracs[-1]:.3f} at V={sizes[-1]}"
     )
-    assert all(b >= a - 1e-9 for a, b in zip(fracs, fracs[1:])), (
+    assert all(b >= a - 1e-9 for a, b in itertools.pairwise(fracs)), (
         f"joint attainability is not monotone in vocabulary size: {fracs}"
     )

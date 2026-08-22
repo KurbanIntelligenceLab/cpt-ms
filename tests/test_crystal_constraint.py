@@ -5,12 +5,15 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from scripts.crystal.mp20 import ATOMIC_MASS, CrystalVocab, ELEMENTS, load_split
-from scripts.train.train_crystal import (
-    CrystalTrainConfig, GrammarMask, _element_position, _mass_budget, pad_batch,
-)
-
 from _devtree import requires_mp20
+from cpt.crystal.mp20 import ATOMIC_MASS, ELEMENTS, CrystalVocab, load_split
+from cpt.train.train_crystal import (
+    CrystalTrainConfig,
+    GrammarMask,
+    _element_position,
+    _mass_budget,
+    pad_batch,
+)
 
 pytestmark = requires_mp20
 
@@ -75,7 +78,7 @@ def test_budget_is_undefined_until_the_cell_closes(data):
 
 def test_actionable_positions_are_exactly_the_element_positions(data):
     """With a static channel only element positions can move the constraint."""
-    cfg, _, V, gm, ids, mass = data
+    _cfg, _, V, gm, ids, mass = data
     M = gm.masks_for(ids)
     for r in range(8):
         for t in range(1, min(ids.shape[1], len(V.encode(load_split('train', limit=1)[0])) + 6)):

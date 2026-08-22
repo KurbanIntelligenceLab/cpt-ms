@@ -5,10 +5,10 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from scripts.crystal.mp20 import ELEMENTS, CrystalVocab, load_split
-from scripts.train.train_crystal import CrystalTrainConfig, _coverage
-
+from _artifacts import payload
 from _devtree import requires_mp20
+from cpt.crystal.mp20 import load_split
+from cpt.train.train_crystal import CrystalTrainConfig, _coverage
 
 pytestmark = requires_mp20
 
@@ -106,12 +106,11 @@ def test_conditional_arm_tv_matches_its_own_slice():
 
 def test_sparse_regime_claim_is_coverage_not_accuracy():
     """The conditional baseline's sparse-target weakness is coverage, not accuracy."""
-    import json
     from pathlib import Path
     art = Path("results/conditional_sparse.json")
     if not art.exists():
         pytest.skip("sparse artifact absent; run the sparse-target job")
-    p = json.load(open(art))["payload"]
+    p = payload(art.name)
     for t, tgt in (("13.0", 13.0), ("16.0", 16.0)):
         rows = p["rows"][t]
         err = abs(float(np.mean([r["density"] for r in rows])) - tgt)
@@ -130,12 +129,11 @@ def test_sparse_regime_claim_is_coverage_not_accuracy():
 
 def test_only_one_swept_target_actually_starves():
     """The refusal is a single case, and overstating it was the original error."""
-    import json
     from pathlib import Path
     art = Path("results/conditional_sparse.json")
     if not art.exists():
         pytest.skip("sparse artifact absent")
-    ref = json.load(open(art))["payload"]["refusal"]
+    ref = payload(art.name)["refusal"]
     assert ref["target"] == 20.0 and ref["n_structures"] == 6
     d = np.array([c.density for c in load_split("train")])
     starved = [t for t in (1.5, 2.0, 3.0, 5.0, 6.317, 8.0, 10.0, 13.0, 16.0, 20.0)

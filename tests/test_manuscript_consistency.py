@@ -2,15 +2,13 @@
 
 from __future__ import annotations
 
-import json
 import re
-from pathlib import Path
 
 import pytest
 
-from scripts.common.arms import normalize
-
+from _artifacts import payload
 from _devtree import ROOT, requires_dev_tree
+from cpt.common.arms import normalize
 
 TEX = ROOT / "development" / "docs" / "template" / "main.tex"
 BIB = ROOT / "development" / "docs" / "template" / "references.bib"
@@ -23,13 +21,13 @@ pytestmark = [
 
 
 def _p(name: str) -> dict:
-    return json.loads((RESULTS / name).read_text())["payload"]
+    return payload(name)
 
 
 def _assembled() -> str:
     text = TEX.read_text()
 
-    def inline(match: "re.Match[str]") -> str:
+    def inline(match: re.Match[str]) -> str:
         rel = match.group(1).strip()
         for candidate in (rel, rel + ".tex"):
             path = TEX.parent / candidate
@@ -142,7 +140,7 @@ def test_si_callouts_are_in_order_of_first_appearance():
         lab for lab in re.findall(r"\\label\{(si:[^}]+)\}", tex)
         if not lab.startswith("si:tab")
     ]
-    assert declared == sorted(declared, key=lambda l: first.get(l, 10**9)), (
+    assert declared == sorted(declared, key=lambda lab: first.get(lab, 10**9)), (
         "SI sections must be numbered in the order the main text first calls them out"
     )
 
@@ -235,7 +233,6 @@ def test_hybrid_selection_table_matches_the_regenerated_fig3_curve():
     assert f"{smc['mean_error']:.3f}" in src
     assert f"{smc['mean_unique_fraction']:.3f}" in src
 
-    caption_text = re.search(r"\\caption\{.*?fig:pareto", _assembled(), re.S)
     main_caption = re.search(
         r"\\caption\{\\textbf\{Accuracy bought.*?\\label\{fig:pareto\}", _assembled(), re.S
     )
@@ -280,8 +277,9 @@ def test_fallback_gradient_discrepancies_match_their_artifact():
     src = _src()
 
     crystal = disc["crystal_arm_vocab500_float64"]["realistic_perturbed_target"]
-    synth = disc["synthetic_arm_vocab4_float64"]["realistic_perturbed_target"]
-    edge = disc["crystal_arm_vocab500_float64"]["zero_iteration_edge_case_target_equals_current_expectation"]
+    # the two hardcoded exponents below are read off these entries, so they must be present
+    assert "realistic_perturbed_target" in disc["synthetic_arm_vocab4_float64"]
+    assert "zero_iteration_edge_case_target_equals_current_expectation" in disc["crystal_arm_vocab500_float64"]
 
     assert f"{crystal['unrolled_vs_implicit_relative_l2_diff']:.1e}".replace("e-10", "\\times10^{-10}") in src \
         or "1.4\\times10^{-10}" in src

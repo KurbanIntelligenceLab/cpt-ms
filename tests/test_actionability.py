@@ -2,20 +2,15 @@
 
 from __future__ import annotations
 
-import sys
-from pathlib import Path
-
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-
-from scripts.crystal.actionability import _charge, _final_state, profile
-from scripts.crystal.determinability import (
+from cpt.crystal.actionability import _charge, _final_state, profile
+from cpt.crystal.determinability import (
     build_b1,
     build_b1_reference,
     build_b2,
 )
-from scripts.crystal.family_ii import family_i_profile
+from cpt.crystal.family_ii import family_i_profile
 
 
 def test_charge_is_determined_but_frozen_after_composition_closes():
@@ -46,7 +41,7 @@ def test_naive_layout_composition_parses_real_elements():
 ])
 def test_fixtures_use_real_elements_not_placeholders(builder, backbone):
     """Placeholder element symbols silently zero out both statistics."""
-    from scripts.crystal.actionability import CHARGES, MASSES, _density
+    from cpt.crystal.actionability import CHARGES, MASSES, _density
 
     st = _final_state(builder(3, 8), backbone)
     assert st.element_counts, "composition parsed empty"
@@ -82,7 +77,7 @@ def test_actionable_positions_are_never_more_than_the_sequence(backbone, builder
 
 def test_actionable_positions_actually_change_the_statistic():
     """Spot-check the counterfactual rather than trusting the counter."""
-    from scripts.crystal.actionability import _candidates
+    from cpt.crystal.actionability import _candidates
 
     toks = build_b2(3, 8)
     a = profile(toks, "B2", "i_charge")

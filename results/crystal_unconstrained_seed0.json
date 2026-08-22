@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "artifact_name": "crystal_unconstrained_seed0",
-  "script": "scripts/train/train_crystal.py",
+  "script": "src/cpt/train/train_crystal.py",
   "git_commit": "UNVERSIONED",
   "config": {
     "arm": "A1",

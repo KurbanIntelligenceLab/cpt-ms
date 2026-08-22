@@ -1,14 +1,14 @@
 """Tests for the comparator comparator and the claim it supports."""
 from __future__ import annotations
 
-import json
 import re
 from pathlib import Path
 
 import numpy as np
 import pytest
 
-from scripts.common.arms import normalize, pick
+from _artifacts import payload
+from cpt.common.arms import normalize, pick
 
 ROOT = Path(__file__).resolve().parents[1]
 DEV = ROOT / "development"
@@ -21,10 +21,7 @@ NOTES = ROOT / "development" / "reports" / "a6_comparator_notes.md"
 
 
 def _p(name: str) -> dict:
-    f = RES / name
-    if not f.exists():
-        pytest.skip(f"{name} absent")
-    return json.loads(f.read_text())["payload"]
+    return payload(name)
 
 
 def test_comparator_reached_its_target_so_the_comparison_is_fair():

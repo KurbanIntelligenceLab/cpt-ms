@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "artifact_name": "equivalence",
-  "script": "scripts/crystal/equivalence_test.py",
+  "script": "src/cpt/crystal/equivalence_test.py",
   "git_commit": "f85888eaa45939eea10dd99033f0c1fb12002c68",
   "config": {
     "results_dir": "results",

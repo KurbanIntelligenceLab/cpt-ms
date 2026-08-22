@@ -9,6 +9,8 @@ from pathlib import Path
 
 import pytest
 
+from _artifacts import payload
+
 REPO = Path(__file__).resolve().parents[1]
 REPORTS = REPO / "development" / "reports"
 
@@ -97,14 +99,13 @@ def test_multi_file_count_claims_are_current(counts):
 
 def test_token_position_claims_match_the_artifact():
     """Reports must not carry token ranges that contradict their own source."""
-    import json
 
     art = REPO / "results" / "family_determinability.json"
     note = REPORTS / "family_determinability_notes.md"
     if not art.exists() or not note.exists():
         pytest.skip("determinability artifact or note not present")
 
-    rows = json.loads(art.read_text())["payload"]["rows"]
+    rows = payload(art.name)["rows"]
 
     def observed(backbone: str, family: str):
         sel = [r for r in rows if r["backbone"] == backbone and r["family"] == family]

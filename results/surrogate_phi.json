@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "artifact_name": "surrogate_phi",
-  "script": "scripts/crystal/surrogate_phi.py",
+  "script": "src/cpt/crystal/surrogate_phi.py",
   "git_commit": "5e963cc6b84d7045ace5e3139800ffd7cb12c972-dirty",
   "config": {
     "smoke": false

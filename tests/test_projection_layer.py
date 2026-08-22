@@ -2,15 +2,10 @@
 
 from __future__ import annotations
 
-import sys
-from pathlib import Path
-
 import pytest
 import torch
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-
-from scripts.layer.projection import project, project_differentiable
+from cpt.layer.projection import project, project_differentiable
 
 torch.set_default_dtype(torch.float64)
 

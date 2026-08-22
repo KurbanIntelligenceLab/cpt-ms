@@ -6,13 +6,16 @@ import numpy as np
 import pytest
 import torch
 
-from scripts.crystal.mp20 import CrystalVocab, ELEMENTS, load_split
-from scripts.train.train_crystal import (
-    CrystalDecoder, CrystalTrainConfig, GrammarMask, pad_batch, sample,
+from _devtree import requires_mp20
+from cpt.crystal.mp20 import ELEMENTS, CrystalVocab, load_split
+from cpt.train.train_crystal import (
+    CrystalDecoder,
+    CrystalTrainConfig,
+    GrammarMask,
+    pad_batch,
+    sample,
     structural_metrics,
 )
-
-from _devtree import requires_mp20
 
 pytestmark = requires_mp20
 

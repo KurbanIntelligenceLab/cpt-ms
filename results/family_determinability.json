@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "artifact_name": "family_determinability",
-  "script": "scripts/crystal/determinability.py",
+  "script": "src/cpt/crystal/determinability.py",
   "git_commit": "3d4a1ff74ef5be3c5dbfd5c6602040f9dc0a7349",
   "config": {
     "cases": [

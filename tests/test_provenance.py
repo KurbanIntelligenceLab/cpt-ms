@@ -3,14 +3,11 @@
 from __future__ import annotations
 
 import subprocess
-import sys
 from pathlib import Path
 
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-
-from scripts.common.artifacts import _git_commit
+from cpt.common.artifacts import _git_commit
 
 
 def _git(repo: Path, *args: str) -> subprocess.CompletedProcess:
@@ -27,16 +24,16 @@ def _git(repo: Path, *args: str) -> subprocess.CompletedProcess:
 def repo(tmp_path, monkeypatch):
     """A minimal repo laid out like this project, or skip if git is unusable."""
     r = tmp_path / "proj"
-    (r / "scripts").mkdir(parents=True)
+    (r / "src" / "cpt").mkdir(parents=True)
     (r / "results").mkdir()
-    (r / "scripts" / "mod.py").write_text("x = 1\n")
+    (r / "src" / "cpt" / "mod.py").write_text("x = 1\n")
     if _git(r, "init", "-q").returncode != 0:
         pytest.skip("git init unavailable in this environment")
     _git(r, "add", "-A")
     if _git(r, "commit", "-q", "-m", "initial").returncode != 0:
         pytest.skip("git commit unavailable in this environment")
 
-    import scripts.common.artifacts as art
+    import cpt.common.artifacts as art
     monkeypatch.setattr(art, "REPO_ROOT", r)
     return r
 
@@ -56,12 +53,12 @@ def test_untracked_results_do_not_dirty_provenance(repo):
 
 def test_modified_source_does_dirty_provenance(repo):
     """The scoping must not be so loose that real source drift goes unrecorded."""
-    (repo / "scripts" / "mod.py").write_text("x = 2\n")
+    (repo / "src" / "cpt" / "mod.py").write_text("x = 2\n")
     assert _git_commit().endswith("-dirty")
 
 
 def test_new_untracked_source_dirties_provenance(repo):
-    (repo / "scripts" / "extra.py").write_text("y = 3\n")
+    (repo / "src" / "cpt" / "extra.py").write_text("y = 3\n")
     assert _git_commit().endswith("-dirty")
 
 
@@ -76,7 +73,7 @@ def test_stale_artifact_is_rejected(tmp_path):
     import os
     import time
 
-    from scripts.common.artifacts import assert_fresh, emit
+    from cpt.common.artifacts import assert_fresh, emit
 
     emit("probe", {"v": 1}, config={}, seeds=[], script="t", results_dir=tmp_path)
     assert_fresh("probe", max_age_s=3600, results_dir=tmp_path)
@@ -88,7 +85,7 @@ def test_stale_artifact_is_rejected(tmp_path):
 
 
 def test_missing_artifact_is_distinguished_from_stale(tmp_path):
-    from scripts.common.artifacts import assert_fresh
+    from cpt.common.artifacts import assert_fresh
 
     with pytest.raises(FileNotFoundError):
         assert_fresh("never_emitted", results_dir=tmp_path)
@@ -96,7 +93,7 @@ def test_missing_artifact_is_distinguished_from_stale(tmp_path):
 
 def test_sentinel_when_not_a_repository(tmp_path, monkeypatch):
     """No git means UNVERSIONED, never a fabricated hash."""
-    import scripts.common.artifacts as art
+    import cpt.common.artifacts as art
     bare = tmp_path / "nogit"
     bare.mkdir()
     monkeypatch.setattr(art, "REPO_ROOT", bare)

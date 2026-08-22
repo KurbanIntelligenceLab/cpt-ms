@@ -2,16 +2,10 @@
 
 from __future__ import annotations
 
-import sys
-from pathlib import Path
-
 import numpy as np
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-
-from scripts.synthetic.task import TaskConfig, enumerate_task
-from scripts.synthetic.targets import (
+from cpt.synthetic.targets import (
     _normalize_log,
     conditioning_target,
     kl,
@@ -19,6 +13,7 @@ from scripts.synthetic.targets import (
     tv,
     violation_rate,
 )
+from cpt.synthetic.task import TaskConfig, enumerate_task
 
 CONFIG = TaskConfig(length=6, max_count=2)
 
@@ -31,7 +26,7 @@ def task():
 def _attainable(task, apply_S=True):
     sel = task.feasible_S if apply_S else np.ones(len(task.total_charge), bool)
     vals, counts = np.unique(task.total_charge[sel], return_counts=True)
-    return [int(v) for v, n in zip(vals, counts) if n >= 2]
+    return [int(v) for v, n in zip(vals, counts, strict=False) if n >= 2]
 
 
 @pytest.mark.parametrize("c", [-2, 0, 2])

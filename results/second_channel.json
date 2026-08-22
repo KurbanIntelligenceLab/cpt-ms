@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "artifact_name": "second_channel",
-  "script": "scripts/crystal/second_channel.py",
+  "script": "src/cpt/crystal/second_channel.py",
   "git_commit": "f976245bb37e6077463875d0d62ef8eb7c13c58f-dirty",
   "config": {
     "smoke": false,

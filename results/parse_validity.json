@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "artifact_name": "parse_validity",
-  "script": "scripts/crystal/parse_validity.py",
+  "script": "src/cpt/crystal/parse_validity.py",
   "git_commit": "361b59a2573f744f82112b42d49040fe86ad34bf",
   "config": {
     "n_samples": 500,

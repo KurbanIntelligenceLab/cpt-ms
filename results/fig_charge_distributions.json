@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "artifact_name": "fig_charge_distributions",
-  "script": "scripts/synthetic/compute_fig1_charge_distributions.py",
+  "script": "development/docs/figure_scripts/compute_fig1_charge_distributions.py",
   "git_commit": "999dee783e89a156636a3ecff3f0e43f07aedc8a",
   "config": {
     "symbols": [

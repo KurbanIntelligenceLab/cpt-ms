@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import re
 from pathlib import Path
 
@@ -30,3 +31,18 @@ def test_referenced_artifacts_exist(artifact: Path) -> None:
     assert not dangling, (
         f"{artifact.name} names artifacts that do not exist: {dangling}. "
         f"Regenerate it by rerunning the script in its 'script' field.")
+
+
+@pytest.mark.parametrize("artifact", _artifacts(), ids=lambda p: p.name)
+def test_script_field_names_a_file_that_exists(artifact: Path) -> None:
+    """The 'script' stamp is a rerun instruction, so it has to still point somewhere."""
+    record = json.loads(artifact.read_text())
+    if "schema_version" not in record:
+        pytest.skip(f"{artifact.name} predates the schema and carries no 'script' field")
+    script = record.get("script")
+    assert script, f"{artifact.name} carries no 'script' provenance field"
+    if script.startswith("development/"):
+        pytest.skip(f"{artifact.name} was emitted from development/, which is not distributed")
+    assert (ROOT / script).exists(), (
+        f"{artifact.name} was emitted by {script}, which no longer exists. Point it at the "
+        f"module that replaced it; a rerun instruction nobody can follow is not provenance.")

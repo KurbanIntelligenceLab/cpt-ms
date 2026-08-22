@@ -5,9 +5,8 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from scripts.crystal.analyze_sweep import _ols
-
 from _devtree import requires_mp20
+from cpt.crystal.analyze_sweep import _ols
 
 pytestmark = requires_mp20
 
@@ -63,8 +62,8 @@ def test_slope_stderr_is_reported_so_near_one_can_be_judged():
 
 def test_rejection_cost_matches_a_direct_count():
     """The efficiency baseline must be the data's own acceptance rate, not a model."""
-    from scripts.crystal.analyze_sweep import rejection_cost
-    from scripts.crystal.mp20 import load_split
+    from cpt.crystal.analyze_sweep import rejection_cost
+    from cpt.crystal.mp20 import load_split
     d = np.array([c.density for c in load_split("train")])
     for t in (3.0, 5.0, 10.0):
         r = rejection_cost(t, tol=0.5)
@@ -75,7 +74,7 @@ def test_rejection_cost_matches_a_direct_count():
 
 def test_bulk_targets_are_cheap_for_rejection():
     """Pins the design gap: inside the data bulk, rejection is not expensive."""
-    from scripts.crystal.analyze_sweep import rejection_cost
+    from cpt.crystal.analyze_sweep import rejection_cost
     for t in (3.0, 5.0, 6.317, 8.0):
         assert rejection_cost(t)["expected_draws"] < 25, (
             f"target {t} was assumed cheap for rejection but is not"

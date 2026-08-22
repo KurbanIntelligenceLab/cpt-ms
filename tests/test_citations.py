@@ -35,7 +35,7 @@ def _split() -> tuple[str, str]:
 
 
 def test_every_reference_is_cited_in_prose():
-    body, refs = _split()
+    body, _refs = _split()
     missing = [k for k in EXPECTED if k not in body]
     assert not missing, (
         f"these works are in the reference list but never pointed at in prose: {missing}"
@@ -43,7 +43,7 @@ def test_every_reference_is_cited_in_prose():
 
 
 def test_every_prose_citation_has_an_entry():
-    body, refs = _split()
+    _body, refs = _split()
     missing = [k for k in EXPECTED if k not in refs]
     assert not missing, f"cited in prose with no reference entry: {missing}"
 

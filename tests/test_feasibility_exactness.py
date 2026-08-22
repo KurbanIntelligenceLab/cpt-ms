@@ -6,8 +6,9 @@ import numpy as np
 import pytest
 import torch
 
-from scripts.layer.projection import project
-from scripts.synthetic.task import TaskConfig, enumerate_task
+from _artifacts import payload
+from cpt.layer.projection import project
+from cpt.synthetic.task import TaskConfig, enumerate_task
 
 
 @pytest.fixture(scope="module")
@@ -91,19 +92,18 @@ def test_a_clamped_scorer_manufactures_a_leak_at_the_clamp_scale(small):
 
 def test_the_clamp_value_is_representable_not_underflow():
     """A representable value cannot be underflow, whatever an artifact says."""
-    assert 1e-30 > np.nextafter(0.0, 1.0)
-    assert 1e-30 > float(np.finfo(np.float64).tiny) / 1e100
+    assert np.nextafter(0.0, 1.0) < 1e-30
+    assert float(np.finfo(np.float64).tiny) / 1e100 < 1e-30
     assert np.float64(1e-30) != 0.0
 
 
 def test_regime_S_exactness_is_measured_not_hardcoded():
     """The exactness claim must read a field the artifact actually carries."""
-    import json
     from pathlib import Path
     art = Path("results/induced_vs_tilt.json")
     if not art.exists():
-        pytest.skip("artifact absent; run scripts.synthetic.induced_distribution")
-    dists = json.load(open(art))["payload"]["distributions"]
+        pytest.skip("artifact absent; run cpt.synthetic.induced_distribution")
+    dists = payload(art.name)["distributions"]
     checked = 0
     for name, d in dists.items():
         if not isinstance(d, dict):

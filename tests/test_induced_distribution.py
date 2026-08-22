@@ -2,17 +2,12 @@
 
 from __future__ import annotations
 
-import sys
-from pathlib import Path
-
 import numpy as np
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-
-from scripts.synthetic.induced_distribution import induced_distribution
-from scripts.synthetic.targets import kl, tilting_target
-from scripts.synthetic.task import TaskConfig, enumerate_task
+from cpt.synthetic.induced_distribution import induced_distribution
+from cpt.synthetic.targets import kl, tilting_target
+from cpt.synthetic.task import TaskConfig, enumerate_task
 
 SMALL = TaskConfig(length=5, max_count=2)
 

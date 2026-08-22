@@ -1,18 +1,16 @@
 """Tests for checkpoint persistence and zero-shot retargeting."""
 from __future__ import annotations
 
-import sys
 from pathlib import Path
 
-import numpy as np
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from _artifacts import payload
 
 torch = pytest.importorskip("torch")
 
-from scripts.crystal.retarget import FRONTIER_TARGETS, load_checkpoint, retarget  # noqa: E402
-from scripts.train.train_crystal import (  # noqa: E402
+from cpt.crystal.retarget import FRONTIER_TARGETS, load_checkpoint
+from cpt.train.train_crystal import (
     ELEMENTS,
     CrystalDecoder,
     CrystalTrainConfig,
@@ -46,14 +44,14 @@ def _fake_checkpoint(tmp_path: Path, trained_at: float = 5.0, order: str = "cell
 def test_checkpoint_records_the_target_it_trained_at(tmp_path):
     """The trained target must survive the round trip."""
     p, _, _, _ = _fake_checkpoint(tmp_path, trained_at=3.0)
-    model, ck = load_checkpoint(p, torch.device("cpu"))
+    _model, ck = load_checkpoint(p, torch.device("cpu"))
     assert ck["trained_density_target"] == 3.0
     assert ck["train_config"]["density_target"] == 3.0
 
 
 def test_checkpoint_rebuild_is_exact(tmp_path):
     """Rebuilt weights must equal saved weights, parameter by parameter."""
-    p, cfg, V, max_len = _fake_checkpoint(tmp_path)
+    p, _cfg, _V, _max_len = _fake_checkpoint(tmp_path)
     model, ck = load_checkpoint(p, torch.device("cpu"))
     saved = ck["state_dict"]
     live = model.state_dict()
@@ -86,7 +84,7 @@ def test_trainer_exposes_target_and_seed_and_ckpt():
     """The retargeting matrix needs several checkpoints differing only in target/seed."""
     import inspect
 
-    from scripts.train.train_crystal import main
+    from cpt.train.train_crystal import main
     params = inspect.signature(main).parameters
     for name in ("density_target", "seed", "ckpt"):
         assert name in params, f"train_crystal.main is missing the {name} argument"
@@ -97,9 +95,8 @@ def test_frontier_targets_match_the_published_frontier():
     rows = RESULTS / "steering_frontier_rows.json"
     if not rows.exists():
         pytest.skip("frontier artifact absent")
-    import json
-    payload = json.loads(rows.read_text())["payload"]["rows"]
-    published = sorted({v["target"] for v in payload.values()})
+    p = payload(rows.name)["rows"]
+    published = sorted({v["target"] for v in p.values()})
     assert published == sorted(FRONTIER_TARGETS), (
         f"retarget targets {sorted(FRONTIER_TARGETS)} disagree with the published "
         f"frontier {published}"
@@ -110,11 +107,10 @@ def test_retargeting_artifact_keeps_train_and_deploy_separate():
     """Every emitted row must carry BOTH targets and an explicit diagonal flag."""
     art = RESULTS / "zero_shot_retargeting.json"
     if not art.exists():
-        pytest.skip("retargeting artifact absent; run scripts.crystal.retarget")
-    import json
-    payload = json.loads(art.read_text())["payload"]
+        pytest.skip("retargeting artifact absent; run cpt.crystal.retarget")
+    p = payload(art.name)
     seen_off_diagonal = False
-    for block in payload["matrix"]:
+    for block in p["matrix"]:
         for row in block["rows"]:
             for field in ("trained_density_target", "deploy_target", "is_diagonal"):
                 assert field in row, f"row missing {field}"
@@ -133,9 +129,8 @@ def test_retargeting_validity_is_exact_everywhere():
     art = RESULTS / "zero_shot_retargeting.json"
     if not art.exists():
         pytest.skip("retargeting artifact absent")
-    import json
-    payload = json.loads(art.read_text())["payload"]
-    for block in payload["matrix"]:
+    p = payload(art.name)
+    for block in p["matrix"]:
         for row in block["rows"]:
             assert row["validity"] == 1.0, (
                 f"validity {row['validity']} at train {row['trained_density_target']} "

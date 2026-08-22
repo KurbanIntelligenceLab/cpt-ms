@@ -2,14 +2,13 @@
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
 
 import pytest
 
-from scripts.crystal.plausibility_screen import _smact_screens, screen_compositions
-
+from _artifacts import payload
 from _devtree import requires
+from cpt.crystal.plausibility_screen import _smact_screens, screen_compositions
 
 _needs_smact = requires("smact")
 
@@ -18,9 +17,7 @@ ART = Path("results/plausibility_reference.json")
 
 @pytest.fixture(scope="module")
 def ref():
-    if not ART.exists():
-        pytest.skip("reference absent; run scripts.crystal.plausibility_screen")
-    return json.load(open(ART))["payload"]
+    return payload("plausibility_reference")
 
 
 def test_the_data_reference_is_measured_not_assumed(ref):

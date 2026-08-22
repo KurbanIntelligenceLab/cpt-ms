@@ -3,16 +3,14 @@
 from __future__ import annotations
 
 import math
-import sys
 from pathlib import Path
 
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-
-from scripts.crystal.determinability import build_b1, build_b2
-from scripts.crystal.family_ii import family_i_profile, family_ii_profile, volume_determined_at
-from scripts.crystal.parser import ConstraintState, IncrementalParser, regime_S_mask
+from _artifacts import payload
+from cpt.crystal.determinability import build_b1, build_b2
+from cpt.crystal.family_ii import family_i_profile, family_ii_profile, volume_determined_at
+from cpt.crystal.parser import ConstraintState, IncrementalParser, regime_S_mask
 
 
 def test_cubic_volume_is_exact():
@@ -86,7 +84,7 @@ def test_b1_charge_is_near_terminal_and_b2_is_not():
 
 def test_reference_ordering_makes_charge_determined_early():
     """The B1 blocker dissolves under the reference model's own field order."""
-    from scripts.crystal.determinability import build_b1_reference
+    from cpt.crystal.determinability import build_b1_reference
 
     for ne, ns in [(2, 4), (3, 8), (5, 20)]:
         naive = family_i_profile(build_b1(ne, ns), "B1")
@@ -97,7 +95,7 @@ def test_reference_ordering_makes_charge_determined_early():
 
 def test_reference_ordering_keeps_density_usable():
     """Moving composition first must not cost family (ii)."""
-    from scripts.crystal.determinability import build_b1_reference
+    from cpt.crystal.determinability import build_b1_reference
 
     for ne, ns in [(2, 4), (3, 8), (5, 20)]:
         toks = build_b1_reference(ne, ns)
@@ -119,19 +117,19 @@ def test_cif_angle_tags_are_parsed():
 def test_composition_marker_requires_a_parsed_composition():
     """A marker alone must not claim a determined charge."""
     p = IncrementalParser("B1ref")
-    st = list(p.run(list("data_\n") + ["<COMP_COMPLETE>"]))[-1]
+    st = list(p.run([*list("data_\n"), "<COMP_COMPLETE>"]))[-1]
     assert st.composition_closed is False
     assert st.n_atoms is None
 
 
 def test_verdicts_are_derived_not_asserted():
     """No narrative field in the artifact may contradict the data beside it."""
-    from scripts.crystal.determinability import main
-    import json
+
+    from cpt.crystal.determinability import main
 
     path = main(smoke=True)
-    payload = json.loads(Path(path).read_text())["payload"]
-    for key, v in payload["verdict"].items():
+    p = payload(Path(path).name)
+    for key, v in p["verdict"].items():
         mean = v["mean_usable_fraction"]
         if v["n_cases_never_determined"]:
             expect = "never determined"
@@ -149,11 +147,11 @@ def test_regime_S_mask_is_prefix_closed():
     """Once a budget is spent it cannot reopen: masks only shrink."""
     vocab = ["el:A:1", "el:B:1", "<EOS>"]
     p = IncrementalParser("B2")
-    s = ConstraintState(region=__import__("scripts.crystal.parser", fromlist=["Field"]).Field.COMPOSITION)
+    s = ConstraintState(region=__import__("cpt.crystal.parser", fromlist=["Field"]).Field.COMPOSITION)
     prev = regime_S_mask(s, vocab, max_count=2)
     for _ in range(3):
         s = p.step(s, "el:A:1")
         cur = regime_S_mask(s, vocab, max_count=2)
-        assert all(c <= q for c, q in zip(cur, prev))
+        assert all(c <= q for c, q in zip(cur, prev, strict=False))
         prev = cur
     assert prev[0] is False

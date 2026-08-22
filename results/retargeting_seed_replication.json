@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "artifact_name": "retargeting_seed_replication",
-  "script": "scripts/crystal/consolidate_retargeting.py",
+  "script": "src/cpt/crystal/consolidate_retargeting.py",
   "git_commit": "7d5b2cca125f27b91380198461a28abb957bcbb3-dirty",
   "config": {
     "seeds": [

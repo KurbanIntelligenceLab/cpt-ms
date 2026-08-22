@@ -1,34 +1,28 @@
 """The expressible class is coupled to the token ordering, and that must stay measured."""
 from __future__ import annotations
 
-import json
 import re
-import sys
 from pathlib import Path
 
 import numpy as np
-import pytest
 
+from _artifacts import payload
 from _devtree import requires_mp20
 
 pytestmark = requires_mp20
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT))
-
 ART = ROOT / "results" / "serialization_expressibility.json"
 
 
 def _p() -> dict:
-    if not ART.exists():
-        pytest.skip("serialization artifact absent")
-    return json.loads(ART.read_text())["payload"]
+    return payload("serialization_expressibility")
 
 
 def test_budget_determinability_recomputes_from_the_code():
     """Recompute on a small sample using the trainer's own budget function."""
-    from scripts.crystal.mp20 import ATOMIC_MASS, ELEMENTS, CrystalVocab, load_split
-    from scripts.train.train_crystal import CrystalTrainConfig, _additive_budget
+    from cpt.crystal.mp20 import ATOMIC_MASS, ELEMENTS, CrystalVocab, load_split
+    from cpt.train.train_crystal import CrystalTrainConfig, _additive_budget
 
     train = load_split("train", limit=60)
     cfg = CrystalTrainConfig(arm="projected", density_target=5.0)
@@ -79,7 +73,7 @@ def test_the_second_family_inherits_the_dependence():
 
 def test_the_limitation_is_stated_as_coupling_not_as_a_gap():
     """The paper must not claim the experiment is merely pending."""
-    p = _p()
+    _p()  # skips when the artifact is absent
     for name in ("paper/results.md", "paper/discussion.md",
                  "paper/method_results_walkthrough.md"):
         f = ROOT / name

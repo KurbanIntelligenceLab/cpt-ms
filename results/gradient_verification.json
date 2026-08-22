@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "artifact_name": "gradient_verification",
-  "script": "scripts/layer/verify_gradients.py",
+  "script": "src/cpt/layer/verify_gradients.py",
   "git_commit": "07ac3429d848cda09d8c1af4953a7b7baa0c5a53",
   "config": {
     "configs": [

@@ -1,12 +1,13 @@
 """Figures must exist, be referenced by artifact marker, and carry captions whose numbers match their artifacts."""
 from __future__ import annotations
 
-import json
 import re
 from pathlib import Path
 
 import numpy as np
 import pytest
+
+from _artifacts import payload
 
 ROOT = Path(__file__).resolve().parents[1]
 FIGS = ROOT / "development" / "figures"
@@ -21,13 +22,6 @@ def _text() -> str:
     if not RESULTS.exists():
         pytest.skip("results.md absent")
     return RESULTS.read_text()
-
-
-def _payload(name: str) -> dict:
-    p = ROOT / "results" / name
-    if not p.exists():
-        pytest.skip(f"{name} absent")
-    return json.loads(p.read_text())["payload"]
 
 
 def test_referenced_figures_exist_on_disk():
@@ -66,7 +60,7 @@ def test_every_embedded_figure_has_a_caption():
 
 
 def test_frontier_caption_numbers_match_the_artifact():
-    rows = _payload("steering_frontier_rows.json")["rows"]
+    rows = payload("steering_frontier_rows.json")["rows"]
     by: dict[float, list[dict]] = {}
     for v in rows.values():
         by.setdefault(v["target"], []).append(v)
@@ -85,7 +79,7 @@ def test_frontier_caption_numbers_match_the_artifact():
 
 
 def test_composition_caption_numbers_match_the_artifact():
-    p = _payload("two_constraint_grid.json")
+    p = payload("two_constraint_grid.json")
     rows = [r for r in p["rows"] if r.get("complete")]
     if not rows:
         pytest.skip("no complete grid row")
@@ -102,7 +96,7 @@ def test_partial_rows_are_labelled_as_partial():
     art = ROOT / "results" / "two_constraint_grid.json"
     if not art.exists():
         pytest.skip("grid artifact absent")
-    rows = json.loads(art.read_text())["payload"]["rows"]
+    rows = payload(art.name)["rows"]
     txt = re.sub(r"\s+", " ", _text())
     for r in rows:
         label = f"density target {r['density_target']}"

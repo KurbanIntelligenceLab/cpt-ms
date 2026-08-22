@@ -1,13 +1,14 @@
 """Tests for the equivalence claim behind amortization."""
 from __future__ import annotations
 
-import json
 import re
 from pathlib import Path
 
 import numpy as np
 import pytest
 from scipy import stats
+
+from _artifacts import payload
 
 ROOT = Path(__file__).resolve().parents[1]
 DEV = ROOT / "development"
@@ -20,15 +21,13 @@ REP = ROOT / "results" / "retargeting_seed_replication.json"
 
 
 def _p():
-    if not ART.exists():
-        pytest.skip("equivalence artifact absent")
-    return json.loads(ART.read_text())["payload"]
+    return payload("equivalence")
 
 
 def test_equivalence_recomputes_from_the_raw_paired_values():
     """Every headline figure must fall out of the replication artifact, not be stored."""
     p = _p()
-    rows = json.loads(REP.read_text())["payload"]["paired_vs_frontier"]
+    rows = payload(REP.name)["paired_vs_frontier"]
     d = np.array([r["retarget_mean_error"] - r["frontier_error"] for r in rows])
     n = len(d)
     se = d.std(ddof=1) / np.sqrt(n)
@@ -43,7 +42,7 @@ def test_equivalence_recomputes_from_the_raw_paired_values():
 def test_margin_is_the_arms_own_seed_spread_not_a_chosen_number():
     """A margin picked after seeing the result is not a pre-specification."""
     p = _p()
-    rows = json.loads(REP.read_text())["payload"]["paired_vs_frontier"]
+    rows = payload(REP.name)["paired_vs_frontier"]
     want = float(np.mean([r["retarget_sd"] for r in rows]))
     got = p["equivalence"]["margin"]
     assert abs(got - want) <= 5e-4, (

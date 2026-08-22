@@ -2,22 +2,19 @@
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
 
-import numpy as np
 import pytest
 
-from scripts.crystal.energy_screen import MIN_OCCURRENCES, fit_references, formation_energy
+from _artifacts import payload
+from cpt.crystal.energy_screen import MIN_OCCURRENCES, fit_references, formation_energy
 
 ART = Path("results/energy_calibration.json")
 
 
 @pytest.fixture(scope="module")
 def cal():
-    if not ART.exists():
-        pytest.skip("calibration artifact absent; run scripts.crystal.energy_screen")
-    return json.load(open(ART))["payload"]
+    return payload(ART.name)
 
 
 def test_artifact_declares_it_is_not_dft(cal):

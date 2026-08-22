@@ -1,26 +1,24 @@
 """Tests for the second constraint family on real crystals."""
 from __future__ import annotations
 
-import json
-import sys
 from pathlib import Path
 
 import numpy as np
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from _artifacts import payload
 
 torch = pytest.importorskip("torch")
 pytest.importorskip("smact")
 
-from scripts.crystal.second_channel import (  # noqa: E402
+from cpt.crystal.mp20 import load_split
+from cpt.crystal.second_channel import (
     _rank_ratio,
     charge_linearity_evidence,
     joint_conditioning,
     valence_table,
 )
-from scripts.crystal.mp20 import load_split  # noqa: E402
-from scripts.train.train_crystal import (  # noqa: E402
+from cpt.train.train_crystal import (
     ATOMIC_MASS,
     ELEMENTS,
     CrystalVocab,
@@ -162,8 +160,8 @@ def test_second_family_is_not_a_restatement_of_density():
     """Two nearly collinear constraints make the joint solve ill-posed by construction."""
     art = RESULTS / "second_channel.json"
     if not art.exists():
-        pytest.skip("second-channel artifact absent; run scripts.crystal.second_channel")
-    p = json.loads(art.read_text())["payload"]
+        pytest.skip("second-channel artifact absent; run cpt.crystal.second_channel")
+    p = payload(art.name)
     corr = p["channel_statistics"]["correlation"]
     assert 0.3 < abs(corr) < 0.95, (
         f"correlation {corr:.3f} between mass density and valence electron density is "
