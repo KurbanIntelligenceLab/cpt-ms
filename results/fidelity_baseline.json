@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "artifact_name": "WS3_fidelity_baseline",
-  "script": "scripts/crystal/fidelity_baseline.py",
+  "artifact_name": "fidelity_baseline",
+  "script": "src/cpt/crystal/fidelity_baseline.py",
   "git_commit": "8afb5954d3d721187529d4743d45d28381375e5d-dirty",
   "config": {
     "targets": [

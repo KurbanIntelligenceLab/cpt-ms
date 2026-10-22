@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "artifact_name": "WS3_conditional_baseline",
-  "script": "scripts/train/train_crystal.py",
+  "artifact_name": "conditional_baseline",
+  "script": "src/cpt/train/train_crystal.py",
   "git_commit": "6d88840627bc249b085af4bbd8c7be934b146f3b-dirty",
   "config": {
     "targets": [

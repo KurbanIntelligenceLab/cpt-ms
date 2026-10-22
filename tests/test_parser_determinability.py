@@ -1,23 +1,16 @@
-"""Verification for the incremental parser and the determinability measurement.
-
-Each test checks a property by a route independent of the implementation: the
-volume against its closed-form value, prefix-purity against recomputation from
-scratch, and determinability positions against brute-force scanning.
-"""
+"""Verification for the incremental parser and the determinability measurement."""
 
 from __future__ import annotations
 
 import math
-import sys
 from pathlib import Path
 
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-
-from scripts.crystal.determinability import build_b1, build_b2
-from scripts.crystal.family_ii import family_i_profile, family_ii_profile, volume_determined_at
-from scripts.crystal.parser import ConstraintState, IncrementalParser, regime_S_mask
+from _artifacts import payload
+from cpt.crystal.determinability import build_b1, build_b2
+from cpt.crystal.family_ii import family_i_profile, family_ii_profile, volume_determined_at
+from cpt.crystal.parser import ConstraintState, IncrementalParser, regime_S_mask
 
 
 def test_cubic_volume_is_exact():
@@ -59,11 +52,7 @@ def test_end_lattice_marker_alone_does_not_determine_volume():
 
 @pytest.mark.parametrize("backbone,builder", [("B1", build_b1), ("B2", build_b2)])
 def test_state_is_a_pure_function_of_the_prefix(backbone, builder):
-    """Stepping to position k equals re-running the first k tokens from scratch.
-
-    This is the property the projection layer depends on: no state may leak
-    information from tokens the model has not emitted yet.
-    """
+    """Stepping to position k equals re-running the first k tokens from scratch."""
     toks = builder(3, 8)
     p = IncrementalParser(backbone)
     states = list(p.run(toks))
@@ -87,27 +76,15 @@ def test_determinability_position_is_the_first_such_position(backbone, builder):
 
 
 def test_b1_charge_is_near_terminal_and_b2_is_not():
-    """The backbone asymmetry the report turns on, asserted as a property.
-
-    On a CIF character stream the composition is spelled out in the atom-site
-    loop at the end, so charge balance is determined only in the final few
-    percent of the sequence. On a structured stream it closes early.
-    """
+    """The backbone asymmetry the report turns on, asserted as a property."""
     t1, t2 = build_b1(3, 8), build_b2(3, 8)
     assert family_i_profile(t1, "B1").usable_fraction < 0.05
     assert family_i_profile(t2, "B2").usable_fraction > 0.5
 
 
 def test_reference_ordering_makes_charge_determined_early():
-    """The B1 blocker dissolves under the reference model's own field order.
-
-    CrystaLLM emits `data_{comp_str}` as the first line, carrying the complete
-    cell composition with counts. Parsing it there determines charge balance at
-    the top of the file instead of in the trailing atom-site loop, which is the
-    difference between a constraint that can carry a steering sweep and one that
-    cannot.
-    """
-    from scripts.crystal.determinability import build_b1_reference
+    """The B1 blocker dissolves under the reference model's own field order."""
+    from cpt.crystal.determinability import build_b1_reference
 
     for ne, ns in [(2, 4), (3, 8), (5, 20)]:
         naive = family_i_profile(build_b1(ne, ns), "B1")
@@ -117,14 +94,8 @@ def test_reference_ordering_makes_charge_determined_early():
 
 
 def test_reference_ordering_keeps_density_usable():
-    """Moving composition first must not cost family (ii).
-
-    Regression for a real defect: the reference fixture used CIF's actual
-    `_cell_angle_*` spelling while the parser matched only `_cell_length_*`, so
-    all three angles were dropped, the lattice never closed, and density read as
-    unusable everywhere.
-    """
-    from scripts.crystal.determinability import build_b1_reference
+    """Moving composition first must not cost family (ii)."""
+    from cpt.crystal.determinability import build_b1_reference
 
     for ne, ns in [(2, 4), (3, 8), (5, 20)]:
         toks = build_b1_reference(ne, ns)
@@ -134,11 +105,7 @@ def test_reference_ordering_keeps_density_usable():
 
 
 def test_cif_angle_tags_are_parsed():
-    """`_cell_angle_alpha` is what real CIF writes; it must be understood.
-
-    Matching only `_cell_length_alpha` parses lengths and silently drops angles,
-    leaving the lattice permanently open. That fails on any actual CIF file.
-    """
+    """`_cell_angle_alpha` is what real CIF writes; it must be understood."""
     p = IncrementalParser("B1")
     cif = ("_cell_length_a 4.0000\n_cell_length_b 5.0000\n_cell_length_c 6.0000\n"
            "_cell_angle_alpha 90.0000\n_cell_angle_beta 90.0000\n_cell_angle_gamma 90.0000\n")
@@ -150,25 +117,19 @@ def test_cif_angle_tags_are_parsed():
 def test_composition_marker_requires_a_parsed_composition():
     """A marker alone must not claim a determined charge."""
     p = IncrementalParser("B1ref")
-    st = list(p.run(list("data_\n") + ["<COMP_COMPLETE>"]))[-1]
+    st = list(p.run([*list("data_\n"), "<COMP_COMPLETE>"]))[-1]
     assert st.composition_closed is False
     assert st.n_atoms is None
 
 
 def test_verdicts_are_derived_not_asserted():
-    """No narrative field in the artifact may contradict the data beside it.
+    """No narrative field in the artifact may contradict the data beside it."""
 
-    A hand-written verdict stored next to its own computation can drift from it
-    silently when the computation changes. This test regenerates the payload and
-    checks every verdict band follows from its own summary figure, so a future
-    change to the parser cannot leave a stale claim in the artifact.
-    """
-    from scripts.crystal.determinability import main
-    import json
+    from cpt.crystal.determinability import main
 
     path = main(smoke=True)
-    payload = json.loads(Path(path).read_text())["payload"]
-    for key, v in payload["verdict"].items():
+    p = payload(Path(path).name)
+    for key, v in p["verdict"].items():
         mean = v["mean_usable_fraction"]
         if v["n_cases_never_determined"]:
             expect = "never determined"
@@ -186,11 +147,11 @@ def test_regime_S_mask_is_prefix_closed():
     """Once a budget is spent it cannot reopen: masks only shrink."""
     vocab = ["el:A:1", "el:B:1", "<EOS>"]
     p = IncrementalParser("B2")
-    s = ConstraintState(region=__import__("scripts.crystal.parser", fromlist=["Field"]).Field.COMPOSITION)
+    s = ConstraintState(region=__import__("cpt.crystal.parser", fromlist=["Field"]).Field.COMPOSITION)
     prev = regime_S_mask(s, vocab, max_count=2)
     for _ in range(3):
         s = p.step(s, "el:A:1")
         cur = regime_S_mask(s, vocab, max_count=2)
-        assert all(c <= q for c, q in zip(cur, prev))
+        assert all(c <= q for c, q in zip(cur, prev, strict=False))
         prev = cur
     assert prev[0] is False

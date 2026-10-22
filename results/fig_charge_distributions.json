@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0",
   "artifact_name": "fig_charge_distributions",
-  "script": "scripts/synthetic/compute_fig1_charge_distributions.py",
-  "git_commit": "4ab085e8d11fa486b3a6f5f6160967d88d457923-dirty",
+  "script": "development/docs/figure_scripts/compute_fig1_charge_distributions.py",
+  "git_commit": "999dee783e89a156636a3ecff3f0e43f07aedc8a",
   "config": {
     "symbols": [
       "A",
@@ -27,10 +27,10 @@
   "seeds": [
     0
   ],
-  "created_utc": "2026-08-21T21:30:49.690573+00:00",
+  "created_utc": "2026-08-21T22:24:24.630080+00:00",
   "python": "3.13.2",
   "platform": "macOS-26.5.2-arm64-arm-64bit-Mach-O",
-  "payload_sha256": "cd1aa85f291f5f7be93ee25f7d405d6dbe268ecc2a31925269097e50a0c28c66",
+  "payload_sha256": "dff0bd09e55c76688a221c874aa6072644527f2032ea997b10a4f8cb240f540d",
   "payload": {
     "distributions": {
       "base_S_mask_only": {
@@ -265,6 +265,6 @@
       "a6_trained_marginal_unavailable": "results/tilt_comparator.json stores only scalar summary statistics (mean_charge, kl_from_tilt, tv_vs_tilt, ...) for comparator's 3 seeds -- no per-charge-value histogram, and no saved model weights for the synthetic task exist to re-derive one without retraining.",
       "a3_deployed_marginal_unavailable": "results/train_projected_seed*.json store only scalar summary statistics for the trained-and-deployed projected system (final.deployed.*) -- no per-charge-value histogram, and ckpt/ contains only the crystal checkpoint (A3_d5.0.pt), not a synthetic-task checkpoint. The 'induced_projection' series here is the exact projection mechanism applied to the UNTRAINED backbone and is a different object from projected-deployed, whose mean charge is measurably closer to zero (+0.0170 vs this series' +0.1028, per results/training_summary.json)."
     },
-    "cross_check_against_WS1": "base_S mean/var and induced mean/var reproduce results/induced_vs_tilt.json payload.distributions.base_S and .induced to machine precision; tilt mean/var reproduce payload.distributions.tilt."
+    "cross_check_against_induced_vs_tilt": "base_S mean/var and induced mean/var reproduce results/induced_vs_tilt.json payload.distributions.base_S and .induced to machine precision; tilt mean/var reproduce payload.distributions.tilt."
   }
 }

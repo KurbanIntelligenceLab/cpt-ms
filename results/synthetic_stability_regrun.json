@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "artifact_name": "CPR1_synthetic_stability_regrun",
-  "script": "scripts/synthetic/measure_fallback_stability.py",
+  "artifact_name": "synthetic_stability_regrun",
+  "script": "src/cpt/synthetic/measure_fallback_stability.py",
   "git_commit": "5e963cc6b84d7045ace5e3139800ffd7cb12c972-dirty",
   "config": {
     "steps": 2000,

@@ -1,21 +1,13 @@
-"""Rejection and steering return different objects, and the baseline must be fair.
-
-The cost argument for the projection weakens wherever rejection happens to be cheap.
-The fidelity argument does not: at any target, rejection returns whatever chemistry
-the data happens to contain there, and near the edges of support it returns almost
-nothing. These tests pin that the comparison is measured rather than asserted, and
-that the baseline arm is the generous one.
-"""
+"""Rejection and steering return different objects, and the baseline must be fair."""
 
 from __future__ import annotations
 
 import numpy as np
 import pytest
 
-from scripts.crystal.fidelity_baseline import _composition_profile, _tv, rejection_arm
-from scripts.crystal.mp20 import load_split
-
 from _devtree import requires_mp20
+from cpt.crystal.fidelity_baseline import _composition_profile, _tv, rejection_arm
+from cpt.crystal.mp20 import load_split
 
 pytestmark = requires_mp20
 

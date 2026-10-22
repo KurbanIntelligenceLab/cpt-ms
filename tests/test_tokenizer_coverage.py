@@ -1,22 +1,12 @@
-"""Discretization ranges must COVER the data, not merely span its typical values.
-
-A bucket range narrower than the data clamps the outliers at its edges. That is
-invisible in aggregate error — it was 1.2% median across MP-20 — while being severe
-exactly where the data is sparse. Cell angles below 20 degrees were clamped to the
-floor, inflating the decoded cell volume and understating density by up to 54% on
-individual structures, and 21.4% of structures in the [20, 25) g/cm^3 band were
-affected. That band is where the extreme steering targets sit, so the defect would
-have corrupted the tail of the steering frontier while leaving the bulk clean.
-"""
+"""Discretization ranges must COVER the data, not merely span its typical values."""
 
 from __future__ import annotations
 
 import numpy as np
 import pytest
 
-from scripts.crystal.mp20 import CrystalVocab, ELEMENTS, load_split
-
 from _devtree import requires_mp20
+from cpt.crystal.mp20 import ELEMENTS, CrystalVocab, load_split
 
 pytestmark = requires_mp20
 
@@ -47,11 +37,7 @@ def test_no_length_is_clamped(data):
 
 
 def test_decode_error_is_bounded_in_the_high_density_tail(data):
-    """Aggregate error hides tail damage, so the tail is checked on its own.
-
-    The steering sweep targets densities up to 20 g/cm^3. If decoding is unreliable
-    there, every steering result in the tail is measuring the tokenizer.
-    """
+    """Aggregate error hides tail damage, so the tail is checked on its own."""
     tr, V = data
     hi = [c for c in tr if c.density > 19.5]
     assert len(hi) >= 10, "too few high-density structures for this check to bind"

@@ -1,37 +1,20 @@
-"""Actionability is not determinability, and CP0 depends on the difference.
-
-A constraint can be computable from the prefix and simultaneously frozen — no
-remaining token can change its value — in which case a per-step projection has
-nothing to act on there. Calibrating an active-multiplier threshold against the
-determinable fraction would fail a correctly functioning layer.
-"""
+"""Actionability is not determinability, and depends on the difference."""
 
 from __future__ import annotations
 
-import sys
-from pathlib import Path
-
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-
-from scripts.crystal.actionability import _charge, _final_state, profile
-from scripts.crystal.determinability import (
+from cpt.crystal.actionability import _charge, _final_state, profile
+from cpt.crystal.determinability import (
     build_b1,
     build_b1_reference,
     build_b2,
 )
-from scripts.crystal.family_ii import family_i_profile
+from cpt.crystal.family_ii import family_i_profile
 
 
 def test_charge_is_determined_but_frozen_after_composition_closes():
-    """The core distinction, asserted directly.
-
-    Under the reference ordering the composition completes early, so charge is
-    determined over most of the sequence — but every position after the data_ tag
-    is frozen for that statistic. Determinable and actionable must therefore be
-    reported separately.
-    """
+    """The core distinction, asserted directly."""
     toks = build_b1_reference(3, 8)
     det = family_i_profile(toks, "B1ref").usable_fraction
     act = profile(toks, "B1ref", "i_charge")
@@ -46,12 +29,7 @@ def test_charge_is_determined_but_frozen_after_composition_closes():
 
 
 def test_naive_layout_composition_parses_real_elements():
-    """Regression: the fixture once emitted placeholder site labels.
-
-    `E0`/`E1` labels parse to an empty composition, so the charge statistic
-    evaluated to a meaningless zero and any measurement of family (i) on that
-    fixture described the fixture rather than the format.
-    """
+    """Regression: the fixture once emitted placeholder site labels."""
     st = _final_state(build_b1(3, 8), "B1")
     assert st.element_counts, "composition parsed empty from the atom-site loop"
     assert sum(st.element_counts.values()) == 8, "one atom per site line"
@@ -62,16 +40,8 @@ def test_naive_layout_composition_parses_real_elements():
     (build_b1, "B1"), (build_b1_reference, "B1ref"), (build_b2, "B2"),
 ])
 def test_fixtures_use_real_elements_not_placeholders(builder, backbone):
-    """Placeholder element symbols silently zero out both statistics.
-
-    Regression for a defect that occurred twice, in the naive B1 fixture and again
-    in B2. Labels like `E0`/`E1` carry no charge and no mass, so the charge
-    statistic evaluates to a meaningless zero and density evaluates to zero
-    regardless of the cell — which made every lattice token read as non-actionable
-    for density and collapsed B2's two families onto an identical figure. The
-    measurement then describes the fixture rather than the format.
-    """
-    from scripts.crystal.actionability import CHARGES, MASSES, _density
+    """Placeholder element symbols silently zero out both statistics."""
+    from cpt.crystal.actionability import CHARGES, MASSES, _density
 
     st = _final_state(builder(3, 8), backbone)
     assert st.element_counts, "composition parsed empty"
@@ -83,9 +53,7 @@ def test_fixtures_use_real_elements_not_placeholders(builder, backbone):
 
 
 def test_density_has_more_actionable_room_than_charge_on_every_backbone():
-    """Density depends on lattice tokens as well as composition, so it must have
-    strictly more room. Equality is the signature of the placeholder defect.
-    """
+    """Density also depends on lattice tokens, so it must have strictly more room than charge."""
     for builder, backbone in ((build_b1, "B1"), (build_b1_reference, "B1ref"),
                               (build_b2, "B2")):
         toks = builder(3, 8)
@@ -109,7 +77,7 @@ def test_actionable_positions_are_never_more_than_the_sequence(backbone, builder
 
 def test_actionable_positions_actually_change_the_statistic():
     """Spot-check the counterfactual rather than trusting the counter."""
-    from scripts.crystal.actionability import _candidates
+    from cpt.crystal.actionability import _candidates
 
     toks = build_b2(3, 8)
     a = profile(toks, "B2", "i_charge")

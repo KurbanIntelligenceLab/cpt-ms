@@ -1,21 +1,11 @@
-"""Verification for the batched projection layer.
-
-Properties are checked against independent characterizations of the optimum —
-the KKT/tilt form, the variational definition of the I-projection, and autograd's
-own finite differences — rather than against the implementation's own output.
-"""
+"""Verification for the batched projection layer."""
 
 from __future__ import annotations
-
-import sys
-from pathlib import Path
 
 import pytest
 import torch
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-
-from scripts.layer.projection import project, project_differentiable
+from cpt.layer.projection import project, project_differentiable
 
 torch.set_default_dtype(torch.float64)
 
@@ -44,11 +34,7 @@ def test_constraint_is_satisfied():
 
 
 def test_solution_has_the_exponential_tilt_form():
-    """KKT: q must equal p tilted by lambda'a, up to normalization.
-
-    Checked as a ratio identity rather than by re-deriving q, so it tests the
-    optimality characterization instead of the solve path.
-    """
+    """KKT: q must equal p tilted by lambda'a, up to normalization."""
     logits, A, b = _case(seed=5)
     res = project(logits, A, b)
     log_p = torch.log_softmax(logits, dim=-1)
@@ -72,7 +58,6 @@ def test_is_the_kl_minimizer_among_feasible_perturbations():
     g = torch.Generator().manual_seed(11)
     for _ in range(200):
         d = torch.randn(q.shape, generator=g, dtype=torch.float64) * q
-        # Project the perturbation to preserve normalization and E[a].
         M = torch.stack([torch.ones_like(a), a])
         coef = torch.linalg.lstsq(M.T, d.unsqueeze(-1)).solution.squeeze(-1)
         d = d - M.T @ coef
@@ -90,7 +75,6 @@ def test_masked_tokens_receive_zero_mass():
     logits, A, b = _case(seed=13)
     mask = torch.ones_like(logits, dtype=torch.bool)
     mask[:, :3] = False
-    # Retarget to stay feasible on the reduced support.
     p = torch.softmax(logits.masked_fill(~mask, float("-inf")), dim=-1)
     b = torch.einsum("bmv,bv->bm", A, p)
     res = project(logits, A, b, mask)
@@ -99,11 +83,7 @@ def test_masked_tokens_receive_zero_mass():
 
 
 def test_zero_multiplier_when_constraint_already_holds():
-    """If p already satisfies the constraint, the projection is the identity.
-
-    This is the degenerate case the collapse test is built around, so it must be
-    exact rather than approximate.
-    """
+    """If p already satisfies the constraint, the projection is the identity."""
     logits, A, _ = _case(seed=17)
     p = torch.softmax(logits, dim=-1)
     b = torch.einsum("bmv,bv->bm", A, p)
@@ -123,20 +103,7 @@ def test_gradients_match_finite_differences(m):
 
 @pytest.mark.parametrize("offset", [1e-6, 1e-8, 1e-9, 1e-10, 1e-12])
 def test_no_residual_floor_when_near_optimal_at_initialization(offset):
-    """Constructed to start where the dual is flattest — the trap configuration.
-
-    The solver initializes at lambda = 0, so setting b just off the base
-    distribution's own statistic puts the very first iterate within `offset` of
-    the optimum. That is exactly where the dual objective is flat to machine
-    precision and where a strict-decrease line search backtracks to a zero step,
-    freezing the residual at 4e-9 no matter how many iterations are allowed — confirmed
-    at the time by running to 400 iterations with no improvement.
-
-    A floor there biases the active-multiplier fraction downward, which is the
-    quantity CP0 gates on and which selects the paper's register — a numerically
-    induced low reading would look like early internalization. Any future change
-    to the line search must keep this test passing.
-    """
+    """Constructed to start where the dual is flattest — the trap configuration."""
     logits, A, _ = _case(B=4, V=16, m=1, seed=31)
     p = torch.softmax(logits, dim=-1)
     b = torch.einsum("bmv,bv->bm", A, p) + offset
@@ -149,13 +116,7 @@ def test_no_residual_floor_when_near_optimal_at_initialization(offset):
 
 
 def test_residual_does_not_improve_with_more_iterations_when_converged():
-    """A stalled solver looks converged only until the budget is raised.
-
-    If the residual is limited by a line-search stall rather than by precision,
-    granting more iterations changes nothing — that was the signature of the
-    original defect. Here a tenfold larger budget must leave the answer alone,
-    which distinguishes genuine convergence from a frozen iterate.
-    """
+    """A stalled solver looks converged only until the budget is raised."""
     logits, A, _ = _case(B=4, V=16, m=1, seed=37)
     p = torch.softmax(logits, dim=-1)
     b = torch.einsum("bmv,bv->bm", A, p) + 1e-9
@@ -168,14 +129,7 @@ def test_residual_does_not_improve_with_more_iterations_when_converged():
 
 
 def test_converges_without_stalling_near_the_optimum():
-    """Regression: the dual is flat to machine precision at the optimum.
-
-    A strict decrease test in the line search reads rounding noise as failure and
-    backtracks to a zero step, stalling Newton one step short and pinning the
-    residual near 1e-9 regardless of the iteration budget. This asserts both the
-    tight residual and the small iteration count, since the stall showed up as
-    hitting the cap.
-    """
+    """Regression: the dual is flat to machine precision at the optimum."""
     for seed in (1161, 1323, 23, 29):
         logits, A, b = _case(B=4, V=16, m=1, seed=seed)
         res = project(logits, A, b)
@@ -186,17 +140,7 @@ def test_converges_without_stalling_near_the_optimum():
 @pytest.mark.parametrize("dtype", [torch.float64, torch.float32,
                                    torch.bfloat16, torch.float16])
 def test_solver_converges_at_every_input_dtype(dtype):
-    """The solve must not degrade with the training dtype.
-
-    Regression for a blocking defect found while preparing the CP2 benchmark. The
-    Newton iteration originally ran in the input dtype: at float32 only 11 of 64
-    entries reached tolerance, and half precision raised NotImplementedError
-    because torch has no half-precision LU. Under any mixed-precision training run
-    the layer would have crashed or silently returned non-KL-optimal
-    distributions — the exact condition the convergence flag exists to prevent.
-
-    The solve now runs in float64 internally and casts back.
-    """
+    """The solve must not degrade with the training dtype."""
     torch.manual_seed(0)
     B, V, m = 64, 120, 1
     lo = torch.randn(B, V, dtype=torch.float64)
@@ -210,7 +154,6 @@ def test_solver_converges_at_every_input_dtype(dtype):
     )
     assert r.q.dtype == dtype, "output dtype must match the input"
     assert torch.isfinite(r.q).all()
-    # Evaluated in float64 so the check measures the solve, not the cast.
     q = r.q.double()
     resid = ((A.double() @ q.unsqueeze(-1)).squeeze(-1) - b.double()).abs().max()
     floor = {torch.float64: 1e-9, torch.float32: 1e-6,
@@ -234,22 +177,12 @@ def test_probabilities_remain_normalized_in_low_precision():
 
 
 def test_fast_hessian_path_reaches_the_same_optimum():
-    """The float32-Hessian fast path must not trade accuracy for speed.
-
-    The Hessian steers the Newton direction; it does not define the fixed point,
-    which is set by the residual tolerance. So the fast path must converge to the
-    same distribution to well within tolerance. It is opt-in rather than default
-    because it perturbs the stopping point by ~1e-13 to 1e-9, which is enough to
-    break a finite-difference gradient check — the layer stops being smooth at the
-    scale gradcheck probes, and the implicit-function-theorem backward assumes q is
-    the exact solution.
-    """
+    """The float32-Hessian fast path must not trade accuracy for speed."""
     torch.manual_seed(0)
     B, V, m = 32, 256, 2
     lo = torch.randn(B, V, dtype=torch.float64)
     A = torch.randn(B, m, V, dtype=torch.float64)
     mask = torch.ones(B, V, dtype=torch.bool)
-    # Non-degenerate target: lambda != 0, so the Hessian actually participates.
     b = torch.einsum("bmv,bv->bm", A, torch.softmax(lo, -1)) + 0.5
 
     slow = project(lo, A, b, mask, tol=1e-10)
@@ -257,19 +190,13 @@ def test_fast_hessian_path_reaches_the_same_optimum():
 
     assert bool(slow.converged.all()) and bool(fast.converged.all())
     assert fast.residual.abs().max() < 1e-9, "fast path must still satisfy the constraint"
-    # Same optimum to far better than the tolerance that defines it.
     assert (fast.q - slow.q).abs().max() < 1e-11, (
         f"fast path reached a different point: {(fast.q - slow.q).abs().max():.2e}"
     )
 
 
 def test_default_hessian_precision_is_the_accurate_one():
-    """A fast default would silently break the gradient path.
-
-    Regression guard: the speed-up is opt-in. If someone flips the default to
-    float32 for the benchmark number, gradcheck breaks and the implicit-function
-    backward is no longer differentiating the function it thinks it is.
-    """
+    """A fast default would silently break the gradient path."""
     import inspect
 
     sig = inspect.signature(project)

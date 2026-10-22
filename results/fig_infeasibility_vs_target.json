@@ -1,22 +1,22 @@
 {
   "schema_version": "1.0",
-  "artifact_name": "FIG4_infeasibility_vs_target",
-  "script": "scripts/crystal/compute_fig4_infeasibility.py",
-  "git_commit": "a08c4cf83c8ef2cd801224d4c2acfae5fbdd2cb2-dirty",
+  "artifact_name": "fig_infeasibility_vs_target",
+  "script": "development/docs/figure_scripts/compute_fig4_infeasibility.py",
+  "git_commit": "999dee783e89a156636a3ecff3f0e43f07aedc8a",
   "config": {
-    "source": "WS3_steering_frontier_rows"
+    "source": "steering_frontier_rows"
   },
-  "config_hash": "391c64181c902865",
+  "config_hash": "21fe227f0ef64309",
   "seeds": [
     0,
     1
   ],
-  "created_utc": "2026-08-15T20:58:23.414613+00:00",
-  "python": "3.11.15",
-  "platform": "macOS-26.5.2-arm64-arm-64bit",
-  "payload_sha256": "08345c4dcd871f69f65fe7bd9cb577ca2e1e10da9d86a5f710d41bb189973de1",
+  "created_utc": "2026-08-21T22:24:25.008299+00:00",
+  "python": "3.13.2",
+  "platform": "macOS-26.5.2-arm64-arm-64bit-Mach-O",
+  "payload_sha256": "4edc987ca06f044d2a405d5e75f9f7ec0886fefef528e5aaa0e30cc308e145cc",
   "payload": {
-    "repair_factor_convention": "ratio of seed-averaged means per target (matches reports/WS3_steering_frontier_notes.md: 29.2x at target 1.5, 0.97x at 20.0)",
+    "repair_factor_convention": "ratio of seed-averaged means per target",
     "per_target": [
       {
         "target": 1.5,

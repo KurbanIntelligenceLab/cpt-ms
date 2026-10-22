@@ -1,40 +1,23 @@
-"""Tests for the joint two-constraint grid and its analysis.
-
-The WS-5 conclusion is a NEGATIVE result, which makes it exactly the kind of claim that
-rots quietly: if a later change makes the second dial steer, the report must stop saying it
-does not. These tests pin the criteria the verdict is derived from, so the verdict cannot
-survive a change in the underlying measurement.
-"""
+"""Tests for the joint two-constraint grid and its analysis."""
 from __future__ import annotations
 
-import json
+import itertools
 import re
-import sys
 from pathlib import Path
 
 import numpy as np
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from _artifacts import payload
 
 RESULTS = Path(__file__).resolve().parents[1] / "results"
 ART = RESULTS / "two_constraint_grid.json"
 NOTES = Path(__file__).resolve().parents[1] / "reports" / "two_constraint_grid_notes.md"
 
 
-def _payload():
-    if not ART.exists():
-        pytest.skip("WS5 grid artifact absent; run scripts.crystal.analyze_a7_grid")
-    return json.loads(ART.read_text())["payload"]
-
-
 def test_verdict_follows_from_the_measurements():
-    """The verdict text must match what pass-through and monotonicity actually show.
-
-    A verdict asserted beside numbers rather than derived from them is how a report comes
-    to disagree with its own artifact.
-    """
-    p = _payload()
+    """The verdict text must match what pass-through and monotonicity actually show."""
+    p = payload("two_constraint_grid")
     s = p["summary"]
     complete = [r for r in p["rows"] if r.get("complete")]
     if not complete:
@@ -50,21 +33,16 @@ def test_verdict_follows_from_the_measurements():
 
 
 def test_density_comparison_uses_matched_targets_only():
-    """Averaging arms over different target sets would manufacture an advantage.
-
-    The d=8.0 control sits above the reachable ceiling and carries a large error, so an
-    unmatched mean would credit joint with the absence of that cell rather than with anything
-    the second constraint did.
-    """
-    p = _payload()
+    """Averaging arms over different target sets would manufacture an advantage."""
+    p = payload("two_constraint_grid")
     s = p["summary"]
     matched = set(s["matched_density_targets"])
-    a7_targets = {c["density_target"] for c in p["cells"]
+    joint_targets = {c["density_target"] for c in p["cells"]
                   if c["deployed_density"] is not None}
     ctrl_targets = {float(k) for k, v in p["controls"].items()
                     if v["deployed_density"] is not None}
-    assert matched == a7_targets & ctrl_targets, (
-        f"matched set {matched} is not the intersection of joint {a7_targets} and controls "
+    assert matched == joint_targets & ctrl_targets, (
+        f"matched set {matched} is not the intersection of joint {joint_targets} and controls "
         f"{ctrl_targets}"
     )
     assert "density_mae_A7" not in s, (
@@ -73,30 +51,21 @@ def test_density_comparison_uses_matched_targets_only():
 
 
 def test_regime_s_survives_a_second_regime_e_constraint():
-    """Validity must stay exactly 1.0 in every cell and control.
-
-    The mask is enforced by construction, so anything below 1.0 means adding a second
-    expectation constraint broke a guarantee that does not depend on the projection.
-    """
-    p = _payload()
+    """Validity must stay exactly 1.0 in every cell and control."""
+    p = payload("two_constraint_grid")
     vals = {c["validity"] for c in p["cells"]} | {
         v["validity"] for v in p["controls"].values()}
     assert vals == {1.0}, f"structural validity is not exactly 1.0 everywhere: {vals}"
 
 
 def test_fallback_rate_rises_with_the_second_target():
-    """The competition mechanism, not just the outcome.
-
-    Fallback must rise with the second target in EVERY row: a harder second ask means more
-    positions where no distribution satisfies both budgets, regardless of compatibility.
-    This is the part of the mechanism that does not depend on which row you look at.
-    """
-    p = _payload()
+    """The competition mechanism, not just the outcome."""
+    p = payload("two_constraint_grid")
     for r in p["rows"]:
         if not r.get("complete"):
             continue
         fb = r["fallback_rates"]
-        assert all(b >= a - 1e-9 for a, b in zip(fb, fb[1:])), (
+        assert all(b >= a - 1e-9 for a, b in itertools.pairwise(fb)), (
             f"fallback rate is not monotone in the valence target at density "
             f"{r['density_target']}: {fb}"
         )
@@ -104,21 +73,12 @@ def test_fallback_rate_rises_with_the_second_target():
 
 
 def test_joint_position_direction_tracks_target_compatibility():
-    """The finding the second row produced, pinned so it cannot be flattened back.
-
-    Joint positions do NOT simply collapse with the second target. They fall where the two
-    targets conflict (low density wanting light or few atoms, high valence wanting many
-    electrons per volume) and rise where they agree. An earlier version of this test asserted
-    the collapse unconditionally, which was the one-row reading; asserting the
-    compatibility-dependent direction is what the completed rows support.
-    """
-    p = _payload()
+    """The finding the second row produced, pinned so it cannot be flattened back."""
+    p = payload("two_constraint_grid")
     rows = {r["density_target"]: r for r in p["rows"] if r.get("complete")}
     if len(rows) < 2:
         pytest.skip("fewer than two complete rows")
 
-    # The conflicting row is the one whose density target is furthest BELOW the data mean;
-    # the compatible row is above it. Derived from the artifact, not hardcoded.
     mean = p["data_reference"]["density_mean"] if "density_mean" in p.get(
         "data_reference", {}) else 6.679
     below = [t for t in rows if t < mean]
@@ -145,7 +105,7 @@ def test_joint_position_direction_tracks_target_compatibility():
 
 def test_pass_through_is_computed_from_the_cells():
     """Recompute the headline quantity rather than trusting the stored field."""
-    p = _payload()
+    p = payload("two_constraint_grid")
     for r in p["rows"]:
         if not r.get("complete"):
             continue
@@ -160,13 +120,12 @@ def test_pass_through_is_computed_from_the_cells():
 def test_notes_do_not_overclaim_the_incomplete_grid():
     """One row is complete; the notes must not read as if the grid were finished."""
     if not NOTES.exists():
-        pytest.skip("WS5 notes absent")
+        pytest.skip("joint-grid note absent; it lives in the development tree")
     txt = NOTES.read_text()
-    p = _payload()
+    p = payload("two_constraint_grid")
     n_complete = sum(1 for r in p["rows"] if r.get("complete"))
     n_rows_planned = 3
     if n_complete < n_rows_planned:
-        # The disclosure must state the count, not merely gesture at incompleteness.
         words = {1: "One", 2: "Two", 3: "Three"}
         forms = [f"{n_complete} rows of {n_rows_planned}",
                  f"{n_complete} of {n_rows_planned}",
@@ -180,10 +139,6 @@ def test_notes_do_not_overclaim_the_incomplete_grid():
         for bad in ["all three rows", "the full grid shows", "across all nine cells"]:
             assert bad not in txt, f"notes overclaim with {bad!r} on an incomplete grid"
     if n_complete >= 2:
-        # With two rows the single-row conclusion is falsified and must not be ASSERTED.
-        # A sentence that explicitly disavows it ("Not 'they do not compose' -- that was the
-        # one-row reading") is the correct way to retire a claim, so only unquoted assertions
-        # count as a violation.
         for line in txt.splitlines():
             if "do not compose" not in line:
                 continue
@@ -197,11 +152,11 @@ def test_notes_do_not_overclaim_the_incomplete_grid():
 
 def test_valence_reference_matches_cp7():
     """The data mean and sd quoted here must be CP-7's measured values."""
-    p = _payload()
+    p = payload("two_constraint_grid")
     cp7 = RESULTS / "second_channel.json"
     if not cp7.exists():
         pytest.skip("CP-7 artifact absent")
-    st = json.loads(cp7.read_text())["payload"]["channel_statistics"]
+    st = payload(cp7.name)["channel_statistics"]
     assert abs(p["data_reference"]["valence_sd"]
                - st["valence_electron_density"]["sd"]) < 5e-4
     assert abs(p["data_reference"]["valence_mean"]
@@ -209,14 +164,8 @@ def test_valence_reference_matches_cp7():
 
 
 def test_fixed_valence_columns_use_partial_rows_correctly():
-    """A partial row is valid for the direction analysis and invalid for pass-through.
-
-    Pass-through is a range over valence targets, so one cell cannot produce it. The
-    deviation-from-control comparison at a shared valence target across density rows needs only
-    one cell per row. This test pins both halves: the partial row must be absent from
-    pass-through and present in the columns.
-    """
-    p = _payload()
+    """A partial row is valid for the direction analysis and invalid for pass-through."""
+    p = payload("two_constraint_grid")
     cols = p["summary"].get("fixed_valence_columns")
     if not cols:
         pytest.skip("no fixed-valence columns")
@@ -235,12 +184,8 @@ def test_fixed_valence_columns_use_partial_rows_correctly():
 
 
 def test_direction_is_measured_against_each_cells_own_control():
-    """Deviation must be from the matching single-constraint control, not a global mean.
-
-    The achieved valence rises with the density target even with no valence constraint, so an
-    absolute level would show apparent steering where there is none.
-    """
-    p = _payload()
+    """Deviation must be from the matching single-constraint control, not a global mean."""
+    p = payload("two_constraint_grid")
     cols = p["summary"].get("fixed_valence_columns") or []
     if not cols:
         pytest.skip("no fixed-valence columns")
@@ -259,12 +204,8 @@ def test_direction_is_measured_against_each_cells_own_control():
 
 
 def test_the_directional_asymmetry_is_reported_if_present():
-    """Lowering the quantity is always affordable; raising it is not once the budget is spent.
-
-    If this asymmetry is in the data it must be in the notes, because it is a mechanism claim a
-    reader can check and a later edit could quietly drop.
-    """
-    p = _payload()
+    """Lowering the quantity is always affordable; raising it is not once the budget is spent."""
+    p = payload("two_constraint_grid")
     cols = p["summary"].get("fixed_valence_columns") or []
     if not cols:
         pytest.skip("no fixed-valence columns")

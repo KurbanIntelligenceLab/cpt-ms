@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0",
   "artifact_name": "fallback_gradients",
-  "script": "scripts/crystal/analyze_fallback_stability.py",
-  "git_commit": "1ea51cc8b7c01c821836ed3b26cebc72e5e3132d",
+  "script": "src/cpt/crystal/analyze_fallback_stability.py",
+  "git_commit": "999dee783e89a156636a3ecff3f0e43f07aedc8a",
   "config": {
     "seed": 0
   },
@@ -10,7 +10,7 @@
   "seeds": [
     0
   ],
-  "created_utc": "2026-08-21T18:43:30.646233+00:00",
+  "created_utc": "2026-08-21T22:24:16.202296+00:00",
   "python": "3.13.2",
   "platform": "macOS-26.5.2-arm64-arm-64bit-Mach-O",
   "payload_sha256": "e1bc2da5e1adc4fdf5aff1797ab5aec34435f485d5399af7caa962a29ead6749",

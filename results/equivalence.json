@@ -1,23 +1,23 @@
 {
   "schema_version": "1.0",
-  "artifact_name": "WS4_equivalence",
-  "script": "scripts/crystal/equivalence_test.py",
-  "git_commit": "cf70977b8b6f981bd30bd41f444e91444ee2df63-dirty",
+  "artifact_name": "equivalence",
+  "script": "src/cpt/crystal/equivalence_test.py",
+  "git_commit": "f85888eaa45939eea10dd99033f0c1fb12002c68",
   "config": {
     "results_dir": "results",
     "margin_rule": "mean retarget seed sd",
-    "margin_read_from": "WS4_equivalence_margin.md"
+    "margin_read_from": "equivalence_margin.md"
   },
-  "config_hash": "3dd0b8e9d6e3749a",
+  "config_hash": "2a7e0cc62da4e4bf",
   "seeds": [
     0,
     1,
     2
   ],
-  "created_utc": "2026-08-15T04:22:25.526382+00:00",
-  "python": "3.11.15",
-  "platform": "macOS-26.5.2-arm64-arm-64bit",
-  "payload_sha256": "940d8a6ce54cb482afaf4649662a39a87262d4d3185e1e332a9e899a6c14f98d",
+  "created_utc": "2026-08-21T22:34:11.672989+00:00",
+  "python": "3.13.2",
+  "platform": "macOS-26.5.2-arm64-arm-64bit-Mach-O",
+  "payload_sha256": "2090d4b6ff91735fb7d1c08c8d3191a85ec4b3a2e39b780e0539cab7b31409f7",
   "payload": {
     "question": "Is one retargeted checkpoint equivalent to per-target training, or is the null result simply underpowered?",
     "n_paired_targets": 7,
@@ -33,8 +33,8 @@
     "mean_paired_difference": -0.012215938542029339,
     "sd_paired_difference": 0.10672461910634051,
     "ci95_on_mean_difference": [
-      -0.11091974876339111,
-      0.08648787167933245
+      -0.11091974876339071,
+      0.08648787167933204
     ],
     "ci95_bootstrap": [
       -0.08951491031419123,
@@ -50,21 +50,21 @@
       "paired_t_p": 0.7722377025800835
     },
     "power": {
-      "min_detectable_effect_80pct": 0.13523817296740512,
-      "as_fraction_of_frontier_error": 0.20430001910076293,
+      "min_detectable_effect_80pct": 0.13523817296737367,
+      "as_fraction_of_frontier_error": 0.20430001910071544,
       "frontier_mean_error": 0.6619586897870245
     },
     "equivalence": {
       "margin_definition": "mean within-target seed sd of the retargeted arm; a difference below the method's own reproducibility is not actionable",
       "margin": 0.189,
-      "margin_source": "preregistration/WS4_equivalence_margin.md",
+      "margin_source": "preregistration/equivalence_margin.md",
       "margin_matches_stated_rule": true,
-      "tost_p": 0.002327652477498273,
+      "tost_p": 0.0023276524774982726,
       "equivalent_at_margin": true,
       "sensitivity_to_margin": {
-        "0.10": 0.03621962676838089,
-        "0.15": 0.007109074974470599,
-        "0.20": 0.001742281117676387,
+        "0.10": 0.036219626768380864,
+        "0.15": 0.007109074974470592,
+        "0.20": 0.0017422811176763871,
         "0.25": 0.0005290760784268782
       },
       "decision_rule": "pre-registered: claim equivalence only if TOST p < 0.05 at the margin AND still p < 0.05 at a 0.10 margin",

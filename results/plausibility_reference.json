@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "artifact_name": "WS3_plausibility_reference",
-  "script": "scripts/crystal/plausibility_screen.py",
+  "artifact_name": "plausibility_reference",
+  "script": "src/cpt/crystal/plausibility_screen.py",
   "git_commit": "ea90db947752d14f1022c187fba08e3bee40cb9c-dirty",
   "config": {
     "limit": 800,

@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "artifact_name": "WS2_alignment_sweep",
-  "script": "scripts/synthetic/alignment_sweep.py",
+  "artifact_name": "alignment_sweep",
+  "script": "src/cpt/synthetic/alignment_sweep.py",
   "git_commit": "07ac3429d848cda09d8c1af4953a7b7baa0c5a53",
   "config": {
     "symbols": [

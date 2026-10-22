@@ -1,31 +1,19 @@
-"""The crystal mass budget must be dimensionally consistent with its channel.
-
-Two defects lived here, both of which trained without error while producing a
-constraint the data itself could not satisfy:
-
-  - The budget was divided by remaining ELEMENT TOKENS while the channel gives a
-    per-ATOM mass, so the demanded per-step mass was ~3x what the data's own next
-    element carries and a third of positions demanded more than the heaviest
-    element in the periodic table.
-  - The constraint was applied at every position, including count and structural
-    positions where the static channel is identically zero, so infeasibility was
-    guaranteed there by construction and inflated the reported rate.
-
-Both are checked against the data rather than against the implementation: if the
-constraint is right, the real structures should mostly satisfy it.
-"""
+"""The crystal mass budget must be dimensionally consistent with its channel."""
 
 from __future__ import annotations
 
 import numpy as np
 import pytest
 
-from scripts.crystal.mp20 import ATOMIC_MASS, CrystalVocab, ELEMENTS, load_split
-from scripts.train.train_crystal import (
-    CrystalTrainConfig, GrammarMask, _element_position, _mass_budget, pad_batch,
-)
-
 from _devtree import requires_mp20
+from cpt.crystal.mp20 import ATOMIC_MASS, ELEMENTS, CrystalVocab, load_split
+from cpt.train.train_crystal import (
+    CrystalTrainConfig,
+    GrammarMask,
+    _element_position,
+    _mass_budget,
+    pad_batch,
+)
 
 pytestmark = requires_mp20
 
@@ -43,7 +31,6 @@ def data():
 
 
 def _demands(cfg, V, ids, mass):
-    """(demanded per-step mass, true next-token mass) at actionable positions."""
     out = []
     for r in range(len(ids)):
         for t in range(1, ids.shape[1]):
@@ -91,7 +78,7 @@ def test_budget_is_undefined_until_the_cell_closes(data):
 
 def test_actionable_positions_are_exactly_the_element_positions(data):
     """With a static channel only element positions can move the constraint."""
-    cfg, _, V, gm, ids, mass = data
+    _cfg, _, V, gm, ids, mass = data
     M = gm.masks_for(ids)
     for r in range(8):
         for t in range(1, min(ids.shape[1], len(V.encode(load_split('train', limit=1)[0])) + 6)):

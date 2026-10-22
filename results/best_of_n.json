@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "artifact_name": "WS6_best_of_n",
-  "script": "scripts/crystal/best_of_n.py",
+  "artifact_name": "best_of_n",
+  "script": "src/cpt/crystal/best_of_n.py",
   "git_commit": "cf70977b8b6f981bd30bd41f444e91444ee2df63-dirty",
   "config": {
     "pool": 1024,

@@ -1,38 +1,22 @@
-"""WS7 charge marginals must agree with the published multi-seed summaries and must
-exhibit the paper's anti-concentration ordering.
-
-results/charge_marginals.json retrains mask-only, projected, and comparator at a single seed to recover
-exact per-charge-value marginals that were never stored (only scalar summaries were,
-in results/training_summary.json and results/tilt_comparator.json). This file
-checks that the single-seed marginals' derived scalars are consistent with those
-published multi-seed summaries, and that the headline mechanism -- the per-step
-projection CONCENTRATES mass near the constraint target while the sequence-level tilt
-SPREADS mass toward both extremes to hit the same mean -- is visible in the numbers.
-"""
+"""Single-seed charge marginals must match the published summaries and show the anti-concentration ordering."""
 from __future__ import annotations
 
-import json
 from pathlib import Path
 
 import numpy as np
 import pytest
 
-from scripts.common.arms import normalize, pick
+from _artifacts import payload
+from cpt.common.arms import normalize, pick
 
 ROOT = Path(__file__).resolve().parents[1]
-ARTIFACT = ROOT / "results" / "charge_marginals.json"
-A2_SUMMARY = ROOT / "results" / "training_summary.json"
-A6_SUMMARY = ROOT / "results" / "tilt_comparator.json"
-
-
-def _payload(path: Path) -> dict:
-    if not path.exists():
-        pytest.skip(f"{path.name} absent")
-    return json.loads(path.read_text())["payload"]
+ARTIFACT = "charge_marginals"
+MASK_ONLY_SUMMARY = "training_summary"
+COMPARATOR_SUMMARY = "tilt_comparator"
 
 
 def test_marginals_are_normalized_and_cover_the_full_support():
-    p = _payload(ARTIFACT)
+    p = payload(ARTIFACT)
     for name, d in p["distributions"].items():
         masses = np.array(d["masses"], dtype=float)
         assert masses.min() >= -1e-12, f"{name} has negative mass"
@@ -41,9 +25,8 @@ def test_marginals_are_normalized_and_cover_the_full_support():
 
 
 def test_agreement_check_recorded_and_within_bounds():
-    """Every scalar the script itself checked against published multi-seed values
-    must be recorded as within a plausible seed spread (4 published sd)."""
-    p = _payload(ARTIFACT)
+    """Every scalar checked against published values must be recorded as within four published sd."""
+    p = payload(ARTIFACT)
     checks = p.get("agreement_check_vs_published")
     assert checks, "no agreement_check_vs_published recorded in the artifact"
     bad = [c for c in checks if not c["within_4sd"]]
@@ -51,11 +34,10 @@ def test_agreement_check_recorded_and_within_bounds():
 
 
 def test_agreement_check_matches_published_artifacts_directly():
-    """Independently recompute the same comparison from the published summary
-    artifacts, rather than trusting the recorded check alone."""
-    p = _payload(ARTIFACT)
-    a2 = normalize(_payload(A2_SUMMARY)["arms"])
-    a6 = _payload(A6_SUMMARY)
+    """Recompute the comparison from the published artifacts rather than trusting the recorded check."""
+    p = payload(ARTIFACT)
+    mask_only = normalize(payload(MASK_ONLY_SUMMARY)["arms"])
+    comparator = payload(COMPARATOR_SUMMARY)
 
     dist = normalize(p["distributions"])
 
@@ -65,29 +47,26 @@ def test_agreement_check_matches_published_artifacts_directly():
         return abs(single - mean) <= k * sd
 
     assert within(pick(dist, "mask_only")["mean_charge"],
-                  pick(a2, "mask_only")["mean_charge"][0], pick(a2, "mask_only")["mean_charge"][1])
+                  pick(mask_only, "mask_only")["mean_charge"][0], pick(mask_only, "mask_only")["mean_charge"][1])
     assert within(pick(dist, "mask_only")["charge_variance"],
-                  pick(a2, "mask_only")["charge_variance"][0], pick(a2, "mask_only")["charge_variance"][1])
+                  pick(mask_only, "mask_only")["charge_variance"][0], pick(mask_only, "mask_only")["charge_variance"][1])
     assert within(dist["projected"]["mean_charge"],
-                  a2["projected"]["mean_charge"][0], a2["projected"]["mean_charge"][1])
+                  mask_only["projected"]["mean_charge"][0], mask_only["projected"]["mean_charge"][1])
     assert within(dist["projected"]["charge_variance"],
-                  a2["projected"]["charge_variance"][0], a2["projected"]["charge_variance"][1])
+                  mask_only["projected"]["charge_variance"][0], mask_only["projected"]["charge_variance"][1])
     assert within(dist["comparator"]["mean_charge"],
-                  a6["summary"]["mean_charge"]["mean"], a6["summary"]["mean_charge"]["sd"])
+                  comparator["summary"]["mean_charge"]["mean"], comparator["summary"]["mean_charge"]["sd"])
     assert within(dist["comparator"]["charge_variance"],
-                  a6["summary"]["charge_variance"]["mean"], a6["summary"]["charge_variance"]["sd"])
-    # Exact (no-seed) objects must match to machine precision.
+                  comparator["summary"]["charge_variance"]["mean"], comparator["summary"]["charge_variance"]["sd"])
     assert dist["tilt"]["charge_variance"] == pytest.approx(
-        a6["reference"]["tilt"]["charge_variance"], abs=1e-9)
+        comparator["reference"]["tilt"]["charge_variance"], abs=1e-9)
     assert dist["data_S_conditioned"]["charge_variance"] == pytest.approx(
-        a6["reference"]["base_S_conditioned"]["charge_variance"], abs=1e-9)
+        comparator["reference"]["base_S_conditioned"]["charge_variance"], abs=1e-9)
 
 
 def test_anti_concentration_ordering_holds():
-    """The paper's headline mechanism: projection concentrates below the data's own
-    spread, while the sequence-level tilt (and comparator, which targets it) spread wider
-    than the data to buy a mean of zero."""
-    p = _payload(ARTIFACT)
+    """Projection concentrates below the data's spread while the tilt spreads wider to buy the same mean."""
+    p = payload(ARTIFACT)
     dist = normalize(p["distributions"])
     var_proj = dist["projected"]["charge_variance"]
     var_data = dist["data_S_conditioned"]["charge_variance"]
@@ -101,14 +80,13 @@ def test_anti_concentration_ordering_holds():
 
 def test_a3_deployed_mean_charge_near_target():
     """The projected arm should land close to the charge_target=0 constraint."""
-    p = _payload(ARTIFACT)
+    p = payload(ARTIFACT)
     mean = normalize(p["distributions"])["projected"]["mean_charge"]
     assert abs(mean) < 0.1, f"projected mean charge {mean} is far from the target 0.0"
 
 
 def test_single_seed_caveat_is_disclosed():
-    """The artifact must not silently present a single seed as the published multi-seed
-    result."""
-    p = _payload(ARTIFACT)
+    """A single seed must not be presented as the published multi-seed result."""
+    p = payload(ARTIFACT)
     assert "single_seed_caveat" in p, "single-seed caveat must be recorded in the artifact"
     assert p["config"]["seed"] == 0 if "config" in p else True

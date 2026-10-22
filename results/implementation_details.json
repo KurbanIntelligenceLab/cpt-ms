@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0",
   "artifact_name": "implementation_details",
-  "script": "scripts/crystal/implementation_details.py",
-  "git_commit": "1ea51cc8b7c01c821836ed3b26cebc72e5e3132d",
+  "script": "src/cpt/crystal/implementation_details.py",
+  "git_commit": "183f76c33e95faea8b081f9d5eef738bd066afc5",
   "config": {
     "reviewer_points": [
       "W4",
@@ -16,10 +16,10 @@
     1,
     2
   ],
-  "created_utc": "2026-08-21T18:42:54.479467+00:00",
+  "created_utc": "2026-08-21T23:46:12.902845+00:00",
   "python": "3.13.2",
   "platform": "macOS-26.5.2-arm64-arm-64bit-Mach-O",
-  "payload_sha256": "979c2ce5ae67627c24ee7b416f48676e84ad834a9390a3262c997c33a42897b7",
+  "payload_sha256": "48c5281c27f1228e989c33890a45a6f0c62c7eda8905aff61ab826590a02c8da",
   "payload": {
     "crystal_arms": {
       "unconstrained": {
@@ -191,7 +191,7 @@
         "vocab_size": 884,
         "wall_clock_s": 110.6,
         "note": "884-token vocab, CPU device, 300 steps, filter_tol 0.5 -- a smoke-test configuration, not a reported result",
-        "source_artifact": "results/crystal_conditional_smoke.json"
+        "source_artifact": "results/crystal_conditional_shortrun.json"
       }
     },
     "synthetic_arms": {
@@ -368,7 +368,7 @@
     },
     "tokenizer": {
       "crystal": {
-        "level": "line-level pseudo-token stream (not per-character); the grammar mask itself operates per-character over a CIF skeleton (scripts/crystal/cif_grammar.py) but the trained model's vocabulary is the coarser CrystalVocab token set",
+        "level": "line-level pseudo-token stream (not per-character); the grammar mask itself operates per-character over a CIF skeleton (src/cpt/crystal/cif_grammar.py) but the trained model's vocabulary is the coarser CrystalVocab token set",
         "vocab_size_default": 500,
         "vocab_size_conditional_smoke_variant": 884,
         "vocab_composition": {
@@ -405,7 +405,7 @@
         },
         "resolution_rationale": "chosen from measured MP-20 median relative discretization error, not convention: 64/32 bins -> 4.4%, 128/64 -> 2.4%, 256/128 -> 1.1%, 512/256 -> 0.6% (all measured under an earlier, narrower bin range). All crystal_A{1,2,3}_seed*.json runs used the 256/128 setting and its earlier range, giving vocab_size=500 as recorded in every one of those artifacts. A later fix widened the bin range to cover the full MP-20 support after a clamping defect was found (bin_index_caveat, below) and re-set resolution to 512/256 together with the new range, giving an 884-token vocabulary with 0.84% overall error; crystal_A4_smoke.json is the one artifact in this repository built with that corrected tokenizer.",
         "serialization_order": "cell_first (default) or comp_first; cell_first is required for the density constraint to be expressible as a per-step linear budget, since density is mass/volume and the volume must close before the mass channel can be evaluated",
-        "bin_index_caveat": "len:/ang: token payloads are BIN INDICES, not physical values; a past defect in scripts/train/train_crystal.py read them as floats directly, inflating the decoded cell volume by a factor of hundreds and silently producing a plausible-looking but wrong budget. The budget computation now always maps the index through the bin centre (V.LEN_LO + (j + 0.5) * (V.LEN_HI - V.LEN_LO) / V.N_LEN) before using it."
+        "bin_index_caveat": "len:/ang: token payloads are BIN INDICES, not physical values; a past defect in src/cpt/train/train_crystal.py read them as floats directly, inflating the decoded cell volume by a factor of hundreds and silently producing a plausible-looking but wrong budget. The budget computation now always maps the index through the bin centre (V.LEN_LO + (j + 0.5) * (V.LEN_HI - V.LEN_LO) / V.N_LEN) before using it."
       },
       "synthetic": {
         "level": "single-character-equivalent, one token per symbol",
@@ -423,11 +423,11 @@
           -2
         ],
         "sequence_length": 8,
-        "vocab_source": "scripts/synthetic/task.py TaskConfig.symbols/charges"
+        "vocab_source": "src/cpt/synthetic/task.py TaskConfig.symbols/charges"
       }
     },
     "solver": {
-      "defaults_from": "scripts/layer/projection.py:project()",
+      "defaults_from": "src/cpt/layer/projection.py:project()",
       "defaults": {
         "max_iter": 50,
         "tol": 1e-10,
@@ -761,7 +761,7 @@
         "retargeting_inference_overhead_s": {
           "three_checkpoints_x_ten_targets_total_s": 241,
           "one_training_run_s_approx": 1660,
-          "source": "reports/retargeting_notes.md; results/zero_shot_retargeting.json (per-checkpoint wall_clock_s)"
+          "source": "results/zero_shot_retargeting.json (per-checkpoint wall_clock_s)"
         },
         "caveat": "the conditional mean wall clock above (216.45 s) is read from conditional_baseline.json, whose record is stamped with a different platform than the RTX-5090 single-checkpoint runs (see what_is_not_matched); it is used here only because it is the sole measured conditional training cost in the repository, and the ratio is reported as an as-measured cost-structure figure, not a hardware-controlled benchmark"
       }

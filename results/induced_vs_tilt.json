@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "artifact_name": "WS1_induced_vs_tilt",
-  "script": "scripts/synthetic/induced_distribution.py",
+  "artifact_name": "induced_vs_tilt",
+  "script": "src/cpt/synthetic/induced_distribution.py",
   "git_commit": "4979489cd1450e7a89e96a6af8a688e37d752219-dirty",
   "config": {
     "symbols": [

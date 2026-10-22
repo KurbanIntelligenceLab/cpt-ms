@@ -1,18 +1,13 @@
-"""The paper's prose must agree with the artifacts and with itself.
-
-A figure quoted in three sections is three chances to drift. These tests recompute the
-load-bearing numbers from the artifacts and assert the prose still carries them, and they
-assert every artifact the paper cites actually exists -- a citation to a file that was
-renamed or never written is the failure mode that survives every other check.
-"""
+"""The paper's prose must agree with the artifacts and with itself."""
 from __future__ import annotations
 
 import fnmatch
-import json
 import re
 from pathlib import Path
 
 import pytest
+
+from _artifacts import payload
 
 ROOT = Path(__file__).resolve().parents[1]
 PAPER = ROOT / "development" / "docs" / "paper"
@@ -30,13 +25,6 @@ def _text(name: str) -> str:
     if not p.exists():
         pytest.skip(f"{name} absent")
     return re.sub(r"\s+", " ", p.read_text())
-
-
-def _payload(name: str) -> dict:
-    p = RESULTS / name
-    if not p.exists():
-        pytest.skip(f"{name} absent")
-    return json.loads(p.read_text())["payload"]
 
 
 def test_every_cited_artifact_exists():
@@ -57,7 +45,7 @@ def test_every_cited_artifact_exists():
 
 
 def test_amortization_figures_match_the_artifact():
-    s = _payload("retargeting_seed_replication.json")["summary"]
+    s = payload("retargeting_seed_replication.json")["summary"]
     txt = _text("introduction.md") + " " + _text("results.md")
     for want in (f"{s['sub_ceiling_mae_mean']:.3f}",
                  f"{s['sub_ceiling_mae_sd']:.3f}",
@@ -67,15 +55,8 @@ def test_amortization_figures_match_the_artifact():
 
 
 def test_composition_figures_match_the_artifact():
-    """Every complete row's load-bearing figures must appear, not just the first row's.
-
-    The prose quotes per-row pass-through, the endpoint joint-position counts, and the two
-    mechanism correlations; the full per-cell series lives in the figure, so requiring all six
-    fallback rates to be typed into prose would force noise rather than catch drift. An earlier
-    version of this test read rows[0] only, which would have passed while a second row's
-    numbers were absent or wrong.
-    """
-    p = _payload("two_constraint_grid.json")
+    """Every complete row's load-bearing figures must appear, not just the first row's."""
+    p = payload("two_constraint_grid.json")
     rows = [r for r in p["rows"] if r.get("complete")]
     if not rows:
         pytest.skip("no complete grid row")
@@ -103,8 +84,8 @@ def test_composition_figures_match_the_artifact():
 
 
 def test_expressibility_figures_match_the_artifact():
-    e = _payload("second_channel.json")["charge_is_not_linear"]
-    ch = _payload("second_channel.json")["channel_statistics"]
+    e = payload("second_channel.json")["charge_is_not_linear"]
+    ch = payload("second_channel.json")["channel_statistics"]
     txt = _text("results.md") + " " + _text("discussion.md")
     assert f"{e['recall_of_smact_balanced'] * 100:.1f}%" in txt or \
            f"{e['recall_of_smact_balanced'] * 100:.2f}%" in txt
@@ -125,11 +106,7 @@ def test_no_timeline_or_scheduling_language():
 
 
 def test_negative_results_are_stated_not_buried():
-    """The composition limit and the expressibility boundary must appear in the paper.
-
-    Both are results a later edit could quietly drop in favour of the flattering subset,
-    and both are load-bearing for the honesty of the exactness claim.
-    """
+    """The composition limit and the expressibility boundary must appear in the paper."""
     txt = _text("results.md") + " " + _text("discussion.md")
     assert "not monotone" in txt, "the non-monotone second dial is not stated"
     assert "existential" in txt, "the expressibility boundary is not stated"
@@ -140,7 +117,7 @@ def test_negative_results_are_stated_not_buried():
 
 def test_ceiling_claim_is_soft_not_hard():
     """Replication narrowed this; the prose must not carry the pre-replication reading."""
-    s = _payload("retargeting_seed_replication.json")["summary"]
+    s = payload("retargeting_seed_replication.json")["summary"]
     txt = _text("results.md")
     assert s["seed0_is_an_excursion"] is True
     for x in s["backbone_across_seeds"][1:]:

@@ -1,25 +1,14 @@
-"""The conditional-training baseline must be fair, and coverage must be measured.
-
-conditional trains on the subset of MP-20 near the target and applies no decode-time
-constraint. It is the "just retrain on filtered data" objection, so the comparison
-has to be constructed so it cannot be won by an accounting choice:
-
-  - conditional is scored against the FULL data's chemistry, never its own filtered subset,
-    since scoring it against the slice it trained on would flatter it.
-  - conditional gets the same step budget as mask-only/projected, which is generous to the baseline: its
-    training set is smaller, so it sees each structure more often.
-  - Accuracy alone cannot separate the arms, so coverage is measured too.
-"""
+"""The conditional-training baseline must be fair, and coverage must be measured."""
 
 from __future__ import annotations
 
 import numpy as np
 import pytest
 
-from scripts.crystal.mp20 import ELEMENTS, CrystalVocab, load_split
-from scripts.train.train_crystal import CrystalTrainConfig, _coverage
-
+from _artifacts import payload
 from _devtree import requires_mp20
+from cpt.crystal.mp20 import load_split
+from cpt.train.train_crystal import CrystalTrainConfig, _coverage
 
 pytestmark = requires_mp20
 
@@ -33,12 +22,7 @@ def test_filter_retains_a_trainable_subset_at_every_swept_target():
 
 
 def test_extreme_targets_starve_the_conditional_baseline():
-    """Pins WHY conditional cannot simply be run everywhere: the filter empties out.
-
-    At the extreme targets the filtered training set is too small to train on, which
-    is itself the argument — a conditional baseline needs data at the target and a
-    steered model does not.
-    """
+    """Pins WHY conditional cannot simply be run everywhere: the filter empties out."""
     d = np.array([c.density for c in load_split("train")])
     for t in (16.0, 20.0):
         n = int((np.abs(d - t) <= 0.5).sum())
@@ -76,8 +60,8 @@ def test_novelty_is_relative_to_what_the_arm_trained_on():
 
 def test_a4_step_budget_is_not_reduced():
     """The baseline must not be handicapped by a smaller budget."""
-    a2, a4 = CrystalTrainConfig(arm="mask_only"), CrystalTrainConfig(arm="conditional")
-    assert a4.steps == a2.steps and a4.batch == a2.batch and a4.lr == a2.lr
+    mask_only, conditional = CrystalTrainConfig(arm="mask_only"), CrystalTrainConfig(arm="conditional")
+    assert conditional.steps == mask_only.steps and conditional.batch == mask_only.batch and conditional.lr == mask_only.lr
 
 
 def _element_freq(items):
@@ -95,16 +79,7 @@ def _tv(a, b):
 
 
 def test_element_tv_is_a_shift_measure_not_a_diversity_measure():
-    """TV against the full data cannot separate the arms, and must not be cited as if it does.
-
-    Any arm reaching a target away from the data mean must shift its chemistry to get
-    there, so a large TV is required of both arms rather than evidence against either.
-    Measured, the two orderings disagree across targets: the conditional arm had the
-    larger TV at target 3.0 (0.3919 vs 0.3234) and the smaller at 5.0 (0.2028 vs
-    0.2411). This test pins the mechanism that makes TV uninformative here — the
-    filtered slice's own TV is already large, so an arm that merely reproduces its
-    slice inherits that TV without being diverse or narrow.
-    """
+    """TV against the full data cannot separate the arms, and must not be cited as if it does."""
     train = load_split("train")
     full = _element_freq(train)
     for t in (3.0, 5.0, 8.0, 10.0):
@@ -117,12 +92,7 @@ def test_element_tv_is_a_shift_measure_not_a_diversity_measure():
 
 
 def test_conditional_arm_tv_matches_its_own_slice():
-    """The conditional arm reproducing its slice is what its TV actually shows.
-
-    Measured TVs were 0.3919 at target 3.0 and 0.2028 at 5.0, against slice-vs-full
-    TVs of 0.3836 and 0.1988 — agreement within 0.004. That is the reproduction claim,
-    and it is the legitimate use of TV in this comparison.
-    """
+    """The conditional arm reproducing its slice is what its TV actually shows."""
     train = load_split("train")
     full = _element_freq(train)
     for t, measured in ((3.0, 0.3919), (5.0, 0.2028)):
@@ -135,20 +105,12 @@ def test_conditional_arm_tv_matches_its_own_slice():
 
 
 def test_sparse_regime_claim_is_coverage_not_accuracy():
-    """The conditional baseline's sparse-target weakness is coverage; claiming it loses accuracy is false.
-
-    An earlier draft asserted the conditional baseline "starves" at extreme targets.
-    Running it showed the opposite on the target metric: error 0.031 at target 13.0
-    (388 structures) and 0.071 at 16.0 (119) — no worse than at the dense targets. The
-    real collapse is in coverage, and it tracks slice size rather than target distance.
-    This test fails if a future edit reintroduces the accuracy framing.
-    """
-    import json
+    """The conditional baseline's sparse-target weakness is coverage, not accuracy."""
     from pathlib import Path
     art = Path("results/conditional_sparse.json")
     if not art.exists():
         pytest.skip("sparse artifact absent; run the sparse-target job")
-    p = json.load(open(art))["payload"]
+    p = payload(art.name)
     for t, tgt in (("13.0", 13.0), ("16.0", 16.0)):
         rows = p["rows"][t]
         err = abs(float(np.mean([r["density"] for r in rows])) - tgt)
@@ -167,12 +129,11 @@ def test_sparse_regime_claim_is_coverage_not_accuracy():
 
 def test_only_one_swept_target_actually_starves():
     """The refusal is a single case, and overstating it was the original error."""
-    import json
     from pathlib import Path
     art = Path("results/conditional_sparse.json")
     if not art.exists():
         pytest.skip("sparse artifact absent")
-    ref = json.load(open(art))["payload"]["refusal"]
+    ref = payload(art.name)["refusal"]
     assert ref["target"] == 20.0 and ref["n_structures"] == 6
     d = np.array([c.density for c in load_split("train")])
     starved = [t for t in (1.5, 2.0, 3.0, 5.0, 6.317, 8.0, 10.0, 13.0, 16.0, 20.0)

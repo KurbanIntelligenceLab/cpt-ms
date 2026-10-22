@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0",
   "artifact_name": "fig_accuracy_diversity_pareto",
-  "script": "scripts/crystal/compute_fig3_pareto.py",
-  "git_commit": "1ea51cc8b7c01c821836ed3b26cebc72e5e3132d",
+  "script": "development/docs/figure_scripts/compute_fig3_pareto.py",
+  "git_commit": "999dee783e89a156636a3ecff3f0e43f07aedc8a",
   "config": {
     "ceiling_source": "fig_steering_frontier"
   },
@@ -11,7 +11,7 @@
     0,
     1
   ],
-  "created_utc": "2026-08-21T18:43:42.127109+00:00",
+  "created_utc": "2026-08-21T22:24:24.889869+00:00",
   "python": "3.13.2",
   "platform": "macOS-26.5.2-arm64-arm-64bit-Mach-O",
   "payload_sha256": "fe2b44605caf63ac12caf0fc99125293b7719b46ae9fc149d3fe416763a15d1d",

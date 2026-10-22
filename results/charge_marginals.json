@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "artifact_name": "WS7_charge_marginals",
-  "script": "scripts/synthetic/charge_marginals.py",
+  "artifact_name": "charge_marginals",
+  "script": "src/cpt/synthetic/charge_marginals.py",
   "git_commit": "a08c4cf83c8ef2cd801224d4c2acfae5fbdd2cb2-dirty",
   "config": {
     "symbols": [

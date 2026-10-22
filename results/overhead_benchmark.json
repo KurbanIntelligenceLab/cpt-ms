@@ -1,7 +1,7 @@
 {
  "schema_version": "1.0",
- "artifact_name": "CP2_overhead_benchmark",
- "script": "scripts/layer/benchmark_overhead.py",
+ "artifact_name": "overhead_benchmark",
+ "script": "src/cpt/layer/benchmark_overhead.py",
  "git_commit": "UNVERSIONED",
  "config": {
   "batch": 256,

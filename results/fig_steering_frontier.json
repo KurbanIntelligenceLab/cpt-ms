@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0",
   "artifact_name": "fig_steering_frontier",
-  "script": "scripts/crystal/compute_fig2_steering_frontier.py",
-  "git_commit": "1ea51cc8b7c01c821836ed3b26cebc72e5e3132d",
+  "script": "development/docs/figure_scripts/compute_fig2_steering_frontier.py",
+  "git_commit": "999dee783e89a156636a3ecff3f0e43f07aedc8a",
   "config": {
     "source": "steering_frontier_rows"
   },
@@ -11,12 +11,12 @@
     0,
     1
   ],
-  "created_utc": "2026-08-21T18:43:37.927699+00:00",
+  "created_utc": "2026-08-21T22:24:24.773715+00:00",
   "python": "3.13.2",
   "platform": "macOS-26.5.2-arm64-arm-64bit-Mach-O",
-  "payload_sha256": "d1b92f50e28c4332c758d08513342c91d6f820951a67bb05d6a1bad7ea91b674",
+  "payload_sha256": "46cc750f0afe903317ba22be2a6a149fbc26e0de59edc4a847994f664f863833",
   "payload": {
-    "aggregation": "seed-averaged per target (matches reports/steering_frontier_crystal_notes.md 'The frontier' table)",
+    "aggregation": "seed-averaged per target",
     "source_artifact": "results/steering_frontier_rows.json",
     "n_source_runs": 18,
     "frontier": [

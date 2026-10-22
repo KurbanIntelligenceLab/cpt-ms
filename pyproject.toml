@@ -5,6 +5,12 @@ description = "A differentiable constraint projection layer for autoregressive m
 readme = "README.md"
 requires-python = ">=3.11"
 license = { file = "LICENSE" }
+authors = [
+    { name = "Can Polat" },
+    { name = "Mustafa Kurban" },
+    { name = "Erchin Serpedin" },
+    { name = "Hasan Kurban" },
+]
 dependencies = [
     "torch>=2.13",
     "numpy>=2.4",
@@ -26,14 +32,9 @@ baselines = [
 ]
 dev = [
     "pytest>=9.1",
+    "ruff==0.16.4",
 ]
 
-authors = [
-    { name = "Can Polat" },
-    { name = "Mustafa Kurban" },
-    { name = "Erchin Serpedin" },
-    { name = "Hasan Kurban" },
-]
 
 [project.urls]
 Repository = "https://github.com/KurbanIntelligenceLab/cpt"
@@ -43,10 +44,44 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["scripts"]
+packages = ["src/cpt"]
+
+[tool.ruff]
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "UP", "B", "RUF", "RET"]
+ignore = [
+    # Matrix and tensor names are the notation the papers and the code share: A, b, B, L, V.
+    # Lowercasing them to satisfy pep8 would make the numerics harder to read, not easier.
+    "N803", "N806",
+    # Long lines are almost all provenance strings that get emitted verbatim into artifact
+    # payloads. Rewrapping one changes the payload, and so its checksum.
+    "E501",
+    # `bud = np.empty(n); slt = np.empty(n)` pairs a quantity with its divisor on one line.
+    "E702",
+    # Every instance is a scheduler or timing lambda consumed inside the same iteration;
+    # audited individually, none is a late-binding bug.
+    "B023",
+    # warnings.filterwarnings and pytest.importorskip have to run before the import they
+    # guard, which is the whole point of putting them above it.
+    "E402",
+    # `for it in range(max_iter)` names the iteration the solver is on even where the body
+    # does not read it.
+    "B007",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests import fixtures and modules for their side effects on collection.
+"tests/*" = ["N802"]
+# S is the regime set from the paper; regime_S_mask and feasible_S are its notation.
+"src/cpt/crystal/parser.py" = ["N802"]
+"src/cpt/synthetic/task.py" = ["N815"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["src", "tests"]
 addopts = "-q"
 
 [tool.uv]

@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "artifact_name": "CPR9_external_conditioning_survey",
-  "script": "scripts/related/external_conditioning_survey.py",
+  "artifact_name": "external_conditioning_survey",
+  "script": "src/cpt/related/external_conditioning_survey.py",
   "git_commit": "5e963cc6b84d7045ace5e3139800ffd7cb12c972-dirty",
   "config": {
     "scope": "density-only external conditioning survey, W6/W11/Q6",

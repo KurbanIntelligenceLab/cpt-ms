@@ -48,42 +48,42 @@ scipy carry it.
 
 ## Verifying the claims
 
-    export PYTHONPATH="$PWD"
-    python -m pytest tests/ -q
+    uv run pytest tests/ -q
 
-On a fresh clone with no MP-20 data and no optional extras, expect **250 passed, 120
-skipped, 0 failed**. Nothing should fail. Anything skipped names its own reason: the
-manuscript-consistency checks need the paper sources under `development/`, which are not
-distributed; the crystal tests need the MP-20 CSVs in `data/`; four plausibility tests need
-`smact` from the `crystal` extra.
+On a fresh clone with no MP-20 data and no optional extras, expect **561 passed, 153
+skipped, 2 xfailed, 0 failed**. Nothing should fail. Anything skipped names its own reason:
+the manuscript-consistency checks need the paper sources under `development/`, which are not
+distributed; the crystal tests need the MP-20 CSVs in `data/`; the CIF-parsing and
+plausibility tests need `pymatgen` and `smact` from the `crystal` extra.
 
-With MP-20 in place and the extras installed, the same command gives **391 passed, 11
-skipped**. A failure means a real disagreement between code and artifact -- that is the
-point of the suite, and it is why missing inputs skip rather than fail.
+With MP-20 in place, the same command gives **675 passed, 43 skipped, 2 xfailed**; adding
+the `crystal` extra clears a further 15 skips. A failure means a real disagreement between
+code and artifact -- that is the point of the suite, and it is why missing inputs skip
+rather than fail.
 
 Before launching any measurement run:
 
-    python -m scripts.common.preflight
+    python -m cpt.common.preflight
 
 ## Running the experiments
 
 Each experiment is a module that emits one artifact into `results/`:
 
-    python -m scripts.synthetic.compute_ground_truth
-    python -m scripts.synthetic.alignment_sweep
-    python -m scripts.crystal.determinability
-    python -m scripts.layer.verify_gradients
+    python -m cpt.synthetic.compute_ground_truth
+    python -m cpt.synthetic.alignment_sweep
+    python -m cpt.crystal.determinability
+    python -m cpt.layer.verify_gradients
 
 Training takes an arm by name:
 
-    python -m scripts.train.train_crystal --arm projected --steps 6000
-    python -m scripts.train.train_synthetic --arm mask_only
+    python -m cpt.train.train_crystal --arm projected --steps 6000
+    python -m cpt.train.train_synthetic --arm mask_only
 
 Every script accepts `--smoke` for a seconds-long shard, which is what pre-flight runs.
 
 ## Terminology
 
-The arms are named for what they do. `scripts/common/arms.py` is the definition, and it also
+The arms are named for what they do. `src/cpt/common/arms.py` is the definition, and it also
 resolves the older `A1`-`A7` codes that some committed artifacts are still stamped with.
 
 | arm | what it is |
@@ -110,27 +110,28 @@ targets, `t<target>_s<seed>` is a target/seed pair, and `_smoke` marks a pre-fli
 
 MP-20, the standard 20-atom subset of the Materials Project used by CDVAE and its
 successors. The CSVs are ~58 MB and re-downloadable from the CDVAE repository, so they are
-not tracked; `scripts/crystal/mp20.py` loads them from `data/`.
+not tracked; `src/cpt/crystal/mp20.py` loads them from `data/`.
 
 ## Results
 
-`results/` holds 83 provenance-stamped JSON artifacts. They are the evidence: every number
+`results/` holds 84 provenance-stamped JSON artifacts. They are the evidence: every number
 in the manuscript is read from one of them at build time, never transcribed, and the test
 suite recomputes them and fails if the prose disagrees.
 
 ## Layout
 
 ```text
-scripts/common/      artifact emission, run ledger, pre-flight harness, arm vocabulary
-scripts/synthetic/   synthetic constrained-sequence task with exact enumerable targets
-scripts/crystal/     serialization, incremental constraint parser, per-step determinability
-scripts/layer/       the batched KL projection layer and its gradient verification
-scripts/train/       training entry points for the crystal and synthetic tracks
-scripts/plotting/    figure renderers, one per figure
+src/cpt/common/      artifact emission, pre-flight harness, arm vocabulary
+src/cpt/synthetic/   synthetic constrained-sequence task with exact enumerable targets
+src/cpt/crystal/     serialization, constraint parser, channels, model, sampling, metrics
+src/cpt/layer/       the batched KL projection layer and its gradient verification
+src/cpt/train/       training entry points for the crystal and synthetic tracks
+src/cpt/related/     survey of external conditioning approaches
 tests/               the verification suite
 results/             emitted artifacts, provenance-stamped JSON
-development/         not distributed: manuscript sources, run notes, preregistration,
-                     checkpoints, logs. Nothing here is needed to install or verify.
+development/         not distributed: manuscript sources and the scripts that build its
+                     figures, run notes, preregistration, checkpoints, logs. Nothing here
+                     is needed to install or verify.
 ```
 
 ## Conventions
@@ -139,11 +140,11 @@ development/         not distributed: manuscript sources, run notes, preregistra
 in `results/`, and each report's numbers are checked against its artifact before the report
 is saved.
 
-**Artifacts carry their own provenance.** `scripts/common/artifacts.py` stamps each emission
+**Artifacts carry their own provenance.** `src/cpt/common/artifacts.py` stamps each emission
 with the script, config hash, seeds, commit, environment, and a payload checksum. When git is
 unavailable the commit field records the sentinel `UNVERSIONED` rather than a fabricated hash.
 Because the checksum covers the payload's own key strings, artifacts are never edited in
-place — readers go through `scripts/common/arms.py` instead.
+place — readers go through `src/cpt/common/arms.py` instead.
 
 **Verdicts are derived, not asserted.** Narrative fields inside artifacts are generated from
 the computed values they describe, so a change to the computation cannot leave a stale claim
@@ -155,10 +156,6 @@ on disk from the previous run and looks like a fresh result. This happened once 
 appeared to succeed while silently emitting no rows for a new backbone variant, because the
 script was raising on an unrecognized backbone name and the redirection hid it. Suppress
 stdout if the volume is inconvenient; never stderr.
-
-**The ledger is append-only.** A run writes a `started` record and later a terminal one; the
-started record is never rewritten, so a crashed run stays visible as exactly that. The ledger
-stores no results — results are artifacts — so the two cannot disagree.
 
 ## Known limitations
 
