@@ -1,87 +1,53 @@
 [project]
 name = "cpt"
 version = "0.1.0"
-description = "A differentiable constraint projection layer for autoregressive models"
+description = "Reusable density control for inverse materials design with autoregressive models"
 readme = "README.md"
 requires-python = ">=3.11"
-license = { file = "LICENSE" }
-authors = [
-    { name = "Can Polat" },
-    { name = "Mustafa Kurban" },
-    { name = "Erchin Serpedin" },
-    { name = "Hasan Kurban" },
-]
-dependencies = [
-    "torch>=2.13",
-    "numpy>=2.4",
-    "scipy>=1.17",
-    "matplotlib>=3.11",
-    "pandas>=3.0",
-]
+dependencies = ["torch>=2.13", "numpy>=2.4", "scipy>=1.17", "pandas>=3.0"]
 
 [project.optional-dependencies]
-crystal = [
-    "pymatgen>=2026.5",
-    "smact>=4.0",
-    "ase>=3.29",
-    "chgnet>=0.4",
-]
-baselines = [
-    "cvxpy>=1.9",
-    "cvxpylayers>=1.2",
-]
-dev = [
-    "pytest>=9.1",
-    "ruff==0.16.4",
-]
-
+crystal = ["pymatgen>=2026.5", "smact>=4.0"]
+baselines = ["cvxpy>=1.9", "cvxpylayers>=1.2"]
 
 [project.urls]
-Repository = "https://github.com/KurbanIntelligenceLab/cpt"
+Repository = "https://github.com/KurbanIntelligenceLab/cpt-ms"
+
+[dependency-groups]
+dev = ["pytest>=9.1", "ruff==0.16.4"]
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[tool.hatch.build]
+exclude = ["development", "data", ".git", ".venv", "**/__pycache__", "**/._*", "**/.DS_Store"]
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/cpt"]
 
+[tool.hatch.build.targets.sdist.force-include]
+"results/checkpoints/projected_d5.0.pt" = "results/checkpoints/projected_d5.0.pt"
+
+[tool.hatch.build.targets.sdist]
+only-include = ["src/cpt", "results", "README.md", "pyproject.toml", "uv.lock", ".gitignore"]
+
 [tool.ruff]
 line-length = 100
-src = ["src", "tests"]
+src = ["src"]
+cache-dir = "development/local/.ruff_cache"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "UP", "B", "RUF", "RET"]
-ignore = [
-    # Matrix and tensor names are the notation the papers and the code share: A, b, B, L, V.
-    # Lowercasing them to satisfy pep8 would make the numerics harder to read, not easier.
-    "N803", "N806",
-    # Long lines are almost all provenance strings that get emitted verbatim into artifact
-    # payloads. Rewrapping one changes the payload, and so its checksum.
-    "E501",
-    # `bud = np.empty(n); slt = np.empty(n)` pairs a quantity with its divisor on one line.
-    "E702",
-    # Every instance is a scheduler or timing lambda consumed inside the same iteration;
-    # audited individually, none is a late-binding bug.
-    "B023",
-    # warnings.filterwarnings and pytest.importorskip have to run before the import they
-    # guard, which is the whole point of putting them above it.
-    "E402",
-    # `for it in range(max_iter)` names the iteration the solver is on even where the body
-    # does not read it.
-    "B007",
-]
+ignore = ["N803", "N806", "E501", "E702", "B023", "E402", "B007"]
 
 [tool.ruff.lint.per-file-ignores]
-# Tests import fixtures and modules for their side effects on collection.
-"tests/*" = ["N802"]
-# S is the regime set from the paper; regime_S_mask and feasible_S are its notation.
-"src/cpt/crystal/parser.py" = ["N802"]
 "src/cpt/synthetic/task.py" = ["N815"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
-pythonpath = ["src", "tests"]
+testpaths = ["development/tests"]
+pythonpath = ["src", "development/tests"]
+cache_dir = "development/local/.pytest_cache"
 addopts = "-q"
 
 [tool.uv]

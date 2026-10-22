@@ -1,5 +1,3 @@
-"""Exact constrained targets for the synthetic task."""
-
 from __future__ import annotations
 
 import numpy as np

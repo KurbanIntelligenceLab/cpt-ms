@@ -1,8 +1,7 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "2.0",
   "artifact_name": "zero_shot_retargeting",
   "script": "src/cpt/crystal/retarget.py",
-  "git_commit": "UNVERSIONED",
   "config": {
     "n_checkpoints": 3,
     "smoke": false,
@@ -23,18 +22,15 @@
   "seeds": [
     0
   ],
-  "created_utc": "2026-08-14T03:24:14.354003+00:00",
-  "python": "3.11.13",
-  "platform": "Linux-6.8.0-136-generic-x86_64-with-glibc2.35",
-  "payload_sha256": "326f67d9939ee36cd65a777b04a7175899e5972f74cb5d8468b6b16732953af2",
+  "payload_sha256": "0694c608df3c6451d6b22086e2820e80511356e2ae2ee33ca973de6579042f55",
   "payload": {
     "question": "Does a checkpoint trained at one density target steer to targets it never trained for, with no retraining?",
     "matrix": [
       {
-        "checkpoint": "ckpt/A3_t3.0_s0.pt",
+        "checkpoint": "ckpt/projected_t3.0_s0.pt",
         "trained_density_target": 3.0,
         "train_config": {
-          "arm": "A3",
+          "arm": "projected",
           "d_model": 256,
           "n_layer": 6,
           "n_head": 8,
@@ -45,7 +41,7 @@
           "seed": 0,
           "eval_every": 1000,
           "n_eval_samples": 4096,
-          "density_target": 20.0,
+          "density_target": 3.0,
           "train_limit": null,
           "order": "cell_first",
           "expected_atoms": 10.4,
@@ -219,10 +215,10 @@
         "wall_clock_s": 75.8
       },
       {
-        "checkpoint": "ckpt/A3_t5.0_s0.pt",
+        "checkpoint": "ckpt/projected_t5.0_s0.pt",
         "trained_density_target": 5.0,
         "train_config": {
-          "arm": "A3",
+          "arm": "projected",
           "d_model": 256,
           "n_layer": 6,
           "n_head": 8,
@@ -233,7 +229,7 @@
           "seed": 0,
           "eval_every": 1000,
           "n_eval_samples": 4096,
-          "density_target": 20.0,
+          "density_target": 5.0,
           "train_limit": null,
           "order": "cell_first",
           "expected_atoms": 10.4,
@@ -407,10 +403,10 @@
         "wall_clock_s": 76.9
       },
       {
-        "checkpoint": "ckpt/A3_t10.0_s0.pt",
+        "checkpoint": "ckpt/projected_t10.0_s0.pt",
         "trained_density_target": 10.0,
         "train_config": {
-          "arm": "A3",
+          "arm": "projected",
           "d_model": 256,
           "n_layer": 6,
           "n_head": 8,
@@ -421,7 +417,7 @@
           "seed": 0,
           "eval_every": 1000,
           "n_eval_samples": 4096,
-          "density_target": 20.0,
+          "density_target": 10.0,
           "train_limit": null,
           "order": "cell_first",
           "expected_atoms": 10.4,

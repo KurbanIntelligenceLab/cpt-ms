@@ -1,5 +1,3 @@
-"""The projected arm's induced sequence distribution vs the exponential tilt."""
-
 from __future__ import annotations
 
 import argparse

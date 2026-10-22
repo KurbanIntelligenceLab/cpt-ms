@@ -1,8 +1,6 @@
-"""Zero-shot retargeting: deploy one trained checkpoint at targets it never saw."""
 from __future__ import annotations
 
 import argparse
-import json
 import time
 from dataclasses import asdict
 from pathlib import Path
@@ -10,7 +8,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from cpt.common.artifacts import emit
+from cpt.common.artifacts import emit, file_sha256
 from cpt.crystal.mp20 import load_split
 from cpt.train.train_crystal import (
     ELEMENTS,
@@ -29,7 +27,7 @@ FRONTIER_TARGETS = [1.5, 2.0, 3.0, 5.0, 6.317, 8.0, 10.0, 13.0, 16.0, 20.0]
 
 def load_checkpoint(path: str | Path, device) -> tuple[torch.nn.Module, dict]:
     """Rebuild the model from a checkpoint without touching the training data."""
-    ck = torch.load(Path(path), map_location="cpu", weights_only=False)
+    ck = torch.load(Path(path), map_location="cpu", weights_only=True)
     cfg = CrystalTrainConfig(**ck["train_config"])
     V = CrystalVocab(ck.get("elements", ELEMENTS), order=ck["vocab_order"])
     if len(V) != ck["vocab_size"]:
@@ -37,6 +35,11 @@ def load_checkpoint(path: str | Path, device) -> tuple[torch.nn.Module, dict]:
             f"vocab size {len(V)} rebuilt from checkpoint disagrees with the stored "
             f"{ck['vocab_size']}; the serialization changed since this checkpoint"
         )
+    tokenizer = V.configuration()
+    if "tokenizer" in ck and ck["tokenizer"] != tokenizer:
+        raise ValueError("Checkpoint tokenizer differs from the current token definitions")
+    ck["tokenizer"] = tokenizer
+    ck["checkpoint_sha256"] = file_sha256(path)
     model = CrystalDecoder(len(V), ck["max_len"] + 2, cfg).to(device)
     model.load_state_dict(ck["state_dict"])
     model.eval()
@@ -56,6 +59,7 @@ def retarget(ckpt: str | Path, targets=None, n_samples: int | None = None,
     model, ck = load_checkpoint(ckpt, dev)
     trained_at = float(ck["trained_density_target"])
     cfg = CrystalTrainConfig(**ck["train_config"])
+    training_config = asdict(cfg)
     if n_samples is not None:
         cfg.n_eval_samples = int(n_samples)
     if smoke:
@@ -80,11 +84,13 @@ def retarget(ckpt: str | Path, targets=None, n_samples: int | None = None,
     for tgt in (targets or FRONTIER_TARGETS):
         cfg.density_target = float(tgt)
         rng = np.random.default_rng(seed)
+        torch.manual_seed(seed)
         bseq, bdiag = sample(model, V, gm, cfg, dev, cfg.n_eval_samples,
                              use_mask=True, project_at_inference=False,
                              max_len=max_len + 2, rng=rng)
         bb = structural_metrics(bseq, V, gm, cfg, **COV) | bdiag
         rng = np.random.default_rng(seed)
+        torch.manual_seed(seed)
         dseq, ddiag = sample(model, V, gm, cfg, dev, cfg.n_eval_samples,
                              use_mask=True, project_at_inference=True,
                              max_len=max_len + 2, rng=rng)
@@ -112,9 +118,11 @@ def retarget(ckpt: str | Path, targets=None, n_samples: int | None = None,
               f"valid {dp['structural_validity_rate']:.4f}", flush=True)
 
     return {
-        "checkpoint": str(ckpt),
+        "checkpoint": Path(ckpt).name,
+        "checkpoint_sha256": ck["checkpoint_sha256"],
+        "tokenizer": ck["tokenizer"],
         "trained_density_target": trained_at,
-        "train_config": asdict(cfg),
+        "train_config": training_config,
         "data_density_mean": float(data_density.mean()),
         "device": str(dev),
         "rows": rows,
@@ -131,8 +139,12 @@ if __name__ == "__main__":
     ap.add_argument("--n-samples", type=int, default=None)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--smoke", action="store_true")
-    ap.add_argument("--out", default=None, help="write raw JSON here instead of emitting")
+    ap.add_argument("--out", default="", help="explicit checksummed JSON output path; must not exist")
     a = ap.parse_args()
+    if a.out and Path(a.out).suffix != ".json":
+        ap.error("--out must end in .json")
+    if a.out and Path(a.out).exists():
+        ap.error("--out already exists; choose a fresh output path")
 
     tg = [float(x) for x in a.targets.split(",")] if a.targets else None
     payload = {
@@ -141,12 +153,9 @@ if __name__ == "__main__":
         "matrix": [retarget(c, targets=tg, n_samples=a.n_samples, seed=a.seed,
                             smoke=a.smoke) for c in a.ckpt],
     }
-    if a.out:
-        Path(a.out).write_text(json.dumps(payload, indent=1))
-        print(a.out)
-    else:
-        print(emit("zero_shot_retargeting" + ("_smoke" if a.smoke else ""),
-                   payload,
-                   config={"n_checkpoints": len(a.ckpt), "smoke": a.smoke,
-                           "targets": tg or FRONTIER_TARGETS},
-                   seeds=[a.seed], script=SCRIPT))
+    destination = {"results_dir": Path(a.out).parent} if a.out else {}
+    name = Path(a.out).stem if a.out else "zero_shot_retargeting" + ("_smoke" if a.smoke else "")
+    print(emit(name, payload,
+               config={"n_checkpoints": len(a.ckpt), "smoke": a.smoke,
+                       "targets": tg or FRONTIER_TARGETS, "n_samples": a.n_samples},
+               seeds=[a.seed], script=SCRIPT, **destination))

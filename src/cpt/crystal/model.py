@@ -1,5 +1,3 @@
-"""The crystal decoder, its configuration, and the grammar mask."""
-
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -52,8 +50,6 @@ class CrystalDecoder(nn.Module):
 
 
 class GrammarMask:
-    """Regime S for the crystal serialization: which tokens are legal next."""
-
     def __init__(self, V: CrystalVocab, max_elements: int = 6, order: str = "cell_first"):
         self.V = V
         self.order = order

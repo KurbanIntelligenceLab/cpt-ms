@@ -1,25 +1,51 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "2.0",
   "artifact_name": "train_mask_only_seed1",
-  "script": "src/cpt/train/train_crystal.py",
-  "git_commit": "UNVERSIONED",
+  "script": "src/cpt/train/train_synthetic.py",
   "config": {
-    "arm": "A2",
-    "steps": 4000,
-    "smoke": false
+    "training": {
+      "arm": "mask_only",
+      "d_model": 128,
+      "n_layer": 4,
+      "n_head": 4,
+      "steps": 4000,
+      "batch": 256,
+      "lr": 0.0003,
+      "warmup": 200,
+      "seed": 1,
+      "eval_every": 500,
+      "charge_target": 0.0
+    },
+    "task": {
+      "symbols": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "charges": [
+        2,
+        1,
+        -1,
+        -2
+      ],
+      "length": 8,
+      "max_count": 3,
+      "charge_target": 0.0,
+      "markov_seed": 0,
+      "markov_bias": 1.6,
+      "markov_temperature": 0.8
+    }
   },
-  "config_hash": "3ba6512ab22c3267",
+  "config_hash": "5704a35e0637bf37",
   "seeds": [
     1
   ],
-  "created_utc": "2026-08-09T00:29:56.586186+00:00",
-  "python": "3.11.13",
-  "platform": "Linux-6.8.0-136-generic-x86_64-with-glibc2.35",
-  "payload_sha256": "79fac1dc534f2527d67ef488560509f362d5880d31fc8335335d6af6646dc5f9",
+  "payload_sha256": "d9802af8d4cc6530d62f1a3261ccffa5c447957c89d7847127518ed3a7ae2eae",
   "payload": {
-    "arm": "A2",
+    "arm": "mask_only",
     "train_config": {
-      "arm": "A2",
+      "arm": "mask_only",
       "d_model": 128,
       "n_layer": 4,
       "n_head": 4,

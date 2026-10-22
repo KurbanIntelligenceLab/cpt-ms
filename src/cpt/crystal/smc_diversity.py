@@ -59,6 +59,8 @@ def main(ckpt: str, K: int, sigma: float, targets: list[float], trials: int = 10
     payload = {
         "arm": "SMC steering, tuned sigma, diversity measured over independent runs",
         "checkpoint": Path(ckpt).name,
+        "checkpoint_sha256": ck["checkpoint_sha256"],
+        "tokenizer": ck["tokenizer"],
         "K": int(K),
         "sigma": float(sigma),
         "trials": trials,

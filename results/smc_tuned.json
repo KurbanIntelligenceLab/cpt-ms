@@ -1,8 +1,7 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "2.0",
   "artifact_name": "smc_tuned",
   "script": "src/cpt/crystal/smc_tune.py",
-  "git_commit": "5e963cc6b84d7045ace5e3139800ffd7cb12c972-dirty",
   "config": {
     "K": 16,
     "sigmas": [
@@ -29,19 +28,16 @@
       20.0
     ],
     "runs": 16,
-    "checkpoint": "A3_d5.0.pt"
+    "checkpoint": "projected_d5.0.pt"
   },
-  "config_hash": "b709fd82d37d8242",
+  "config_hash": "f27dedef4b35e5b1",
   "seeds": [
     0
   ],
-  "created_utc": "2026-08-21T02:53:40.472922+00:00",
-  "python": "3.11.15",
-  "platform": "macOS-26.5.2-arm64-arm-64bit",
-  "payload_sha256": "39b1096c10f8c31c52ad1a4e5a046eb8540c5a721f1c31acce703e8e9973ff80",
+  "payload_sha256": "44655813b8fdc4d54aef2f7b005a5e9501c1baa41c07985a39466143e6a5a377",
   "payload": {
     "arm": "sequential Monte Carlo steering at inference, potential width tuned",
-    "checkpoint": "A3_d5.0.pt",
+    "checkpoint": "projected_d5.0.pt",
     "trained_density_target": 5.0,
     "K": 16,
     "sigmas": [
@@ -1175,8 +1171,8 @@
         "forward_passes_per_output": 16
       }
     ],
-    "tuning_selection_note": "best_per_target_selected_on_eval selects sigma per target from the same runs that report the error, so its mean is optimistically biased and is not the reported comparison point; global_best_fixed_sigma is the single sigma value chosen without looking at per-target outcomes and is the honest tuned number, matching the convention results/WS6_smc_steering.json set for its own sweep.",
-    "matched_particle_budget_note": "K is held fixed at 16 across every sigma in this sweep, identical to the existing sigma_sweep in results/WS6_smc_steering.json, so differences across rows are attributable to the potential width alone, not to particle count.",
+    "tuning_selection_note": "Both width-selection summaries use evaluation outcomes. The global fixed width minimizes target-averaged error; no held-out tuning is available.",
+    "matched_particle_budget_note": "Particle count is fixed across all widths and targets, isolating width within this sweep.",
     "prior_sweep_reference": {
       "existing_sigma_sweep_sigmas": [
         0.3,
@@ -1184,6 +1180,6 @@
       ],
       "existing_sigma_sweep_finding": "No single potential width is best: sigma=0.3 beats sigma=1.0 at 4 of 10 targets and loses at the rest, and its mean error over targets is worse (1.801 against 0.944) because one target degrades badly (9.222 at target 16.0). A single-target probe suggested sigma=0.3 was uniformly better; sweeping all ten targets refuted that."
     },
-    "still_untuned": "proposal distribution, resampling threshold, and number of resampling points remain untuned; this sweep only tunes the potential width sigma at fixed K, over a range roughly 30x wider than the two-point probe already on record"
+    "still_untuned": "The proposal distribution and resampling rule are fixed; this sweep varies only the potential width."
   }
 }

@@ -1,8 +1,7 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "2.0",
   "artifact_name": "tilt_comparator",
   "script": "src/cpt/synthetic/train_comparator.py",
-  "git_commit": "a8eb1b36947bca493c2aaa8fd366673902942d08-dirty",
   "config": {
     "steps": 4000,
     "seeds": [
@@ -10,22 +9,19 @@
       1,
       2
     ],
-    "arm": "A6",
+    "arm": "comparator",
     "training_rule": "MLE on exact tilt samples"
   },
-  "config_hash": "b49d29c4c38b5122",
+  "config_hash": "a960dc598a9d1732",
   "seeds": [
     0,
     1,
     2
   ],
-  "created_utc": "2026-08-15T20:43:38.686435+00:00",
-  "python": "3.11.15",
-  "platform": "macOS-26.5.2-arm64-arm-64bit",
-  "payload_sha256": "9a1d0e1feb46dfe9f3807d59ce7388dc195ff208ce0a65cbdd6a3f76c9b8e316",
+  "payload_sha256": "ab8e523668a23986a2d355612651b624abb00602f046f6860cf2a6002f7a2c68",
   "payload": {
-    "arm": "A6: MLE on exact samples from the sequence-level tilt, mask active",
-    "why_this_training_rule": "the tilt is closed-form here, so MLE on its exact samples is DPG's fixed point with unit importance weights -- A6 therefore gets the best case of the method it stands for, and no gradient-estimator artefact can be blamed for the result",
+    "arm": "comparator: MLE on exact samples from the sequence-level tilt, mask active",
+    "why_this_training_rule": "The comparator fits exact samples from the closed-form sequence tilt by maximum likelihood.",
     "steps": 4000,
     "seeds": [
       0,

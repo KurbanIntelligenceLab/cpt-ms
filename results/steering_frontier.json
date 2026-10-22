@@ -1,8 +1,7 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "2.0",
   "artifact_name": "steering_frontier",
   "script": "src/cpt/synthetic/steering_frontier.py",
-  "git_commit": "07ac3429d848cda09d8c1af4953a7b7baa0c5a53",
   "config": {
     "symbols": [
       "A",
@@ -37,10 +36,7 @@
   "seeds": [
     0
   ],
-  "created_utc": "2026-08-08T22:04:54.523601+00:00",
-  "python": "3.11.15",
-  "platform": "macOS-26.5.2-arm64-arm-64bit",
-  "payload_sha256": "30936408b53e67507599e6decd73fc27c1e4d1845846bcdc26f070267db502d7",
+  "payload_sha256": "9d5f629d91b82121934a4aa288f5e4ec221eda98b156387dcc608d91b7d1d3a1",
   "payload": {
     "frontier": [
       {
@@ -290,6 +286,6 @@
       },
       "interpretation": "Excess divergence over the sequence-level optimum is approximately a fixed overhead (mean 1.0698, sd 0.1601 nats) while the divergence the optimum itself must pay spans 129x across the sweep. The wasted fraction therefore falls from 97.8% at the weakest steering to 32.4% at the strongest: per-step projection is almost all overhead where the base model already satisfies the constraint, and almost all necessary work where it does not."
     },
-    "baseline_definition": "Rejection sampling from the S-conditioned base, accepting only sequences whose total charge equals the target exactly. Exact by construction; expected cost 1/acceptance draws per accepted sample. A3 is compared against it on efficiency, divergence, and mass on target \u2014 never on efficiency alone."
+    "baseline_definition": "Rejection sampling from the S-conditioned base, accepting only sequences whose total charge equals the target exactly. Exact by construction; expected cost 1/acceptance draws per accepted sample. projected is compared against it on efficiency, divergence, and mass on target \u2014 never on efficiency alone."
   }
 }

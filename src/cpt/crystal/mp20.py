@@ -1,16 +1,16 @@
-"""MP-20 loading and tokenization for the crystal arms."""
-
 from __future__ import annotations
 
+import hashlib
+import json
+import os
 import re
 from dataclasses import dataclass
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
-from cpt.common.artifacts import REPO_ROOT
-
-DATA = REPO_ROOT / "data"
+DATA = Path(os.environ.get("CPT_DATA_DIR", "data")).expanduser()
 
 ELEMENTS = [
     "H","He","Li","Be","B","C","N","O","F","Ne","Na","Mg","Al","Si","P","S","Cl","Ar",
@@ -138,8 +138,6 @@ def _bucket(x: float, lo: float, hi: float, n: int) -> int:
 
 
 class CrystalVocab:
-    """B1ref token order: composition first, then cell, then a length marker."""
-
     N_LEN, N_ANG, N_CNT = 512, 256, 16
 
     ANG_LO, ANG_HI = 5.0, 175.0
@@ -157,11 +155,25 @@ class CrystalVocab:
         self.tokens += [f"ang:{i}" for i in range(self.N_ANG)]
         self.index = {t: i for i, t in enumerate(self.tokens)}
 
+    def configuration(self) -> dict:
+        """Describe the token identities and their physical interpretation."""
+        return {
+            "order": self.order,
+            "length_bins": self.N_LEN,
+            "angle_bins": self.N_ANG,
+            "count_bins": self.N_CNT,
+            "length_range_angstrom": [self.LEN_LO, self.LEN_HI],
+            "angle_range_degrees": [self.ANG_LO, self.ANG_HI],
+            "vocabulary_size": len(self.tokens),
+            "tokens_sha256": hashlib.sha256(json.dumps(
+                self.tokens, separators=(",", ":")).encode()).hexdigest(),
+        }
+
     def __len__(self) -> int:
         return len(self.tokens)
 
     def encode(self, c: Crystal) -> list[int]:
-        """Serialize. `order` selects composition-first (B1ref) or cell-first."""
+        """Serialize. `order` selects composition-first or cell-first."""
         comp = []
         for e, n in sorted(c.formula.items()):
             comp += [f"el:{e}", f"cnt:{min(n, self.N_CNT)}"]

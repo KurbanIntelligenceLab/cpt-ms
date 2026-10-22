@@ -1,8 +1,7 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "2.0",
   "artifact_name": "synthetic_ground_truth",
   "script": "src/cpt/synthetic/compute_ground_truth.py",
-  "git_commit": "07ac3429d848cda09d8c1af4953a7b7baa0c5a53",
   "config": {
     "symbols": [
       "A",
@@ -28,10 +27,7 @@
   "seeds": [
     0
   ],
-  "created_utc": "2026-08-08T22:04:03.883941+00:00",
-  "python": "3.11.15",
-  "platform": "macOS-26.5.2-arm64-arm-64bit",
-  "payload_sha256": "717a195b4c6a82b6c855cc658b2d1a9bbe83a7957bda70efb95efeaa25d861b7",
+  "payload_sha256": "218aa44014589cd1051223e01e6ac3bc4687c77a6d13d1c07ca1f9cebd69bccf",
   "payload": {
     "task": {
       "n_sequences": 65536,
@@ -72,7 +68,9 @@
         "hard_violation_rate": 0.9108939130892355,
         "regime_S_satisfied_mass": 1.0,
         "kl_from_data_nats": 0.999174814481405,
-        "kl_to_data_nats": Infinity,
+        "kl_to_data_nats": {
+          "nonfinite": "+inf"
+        },
         "tv_to_data": 0.6318168647563719
       },
       "SE_hard_conditioned": {
@@ -84,7 +82,9 @@
         "hard_violation_rate": 0.0,
         "regime_S_satisfied_mass": 1.0,
         "kl_from_data_nats": 3.4171024458233794,
-        "kl_to_data_nats": Infinity,
+        "kl_to_data_nats": {
+          "nonfinite": "+inf"
+        },
         "tv_to_data": 0.9671926415519037
       },
       "E_tilt": {
@@ -109,13 +109,17 @@
         "hard_violation_rate": 0.8754696585928741,
         "regime_S_satisfied_mass": 1.0,
         "kl_from_data_nats": 1.3338965591358338,
-        "kl_to_data_nats": Infinity,
+        "kl_to_data_nats": {
+          "nonfinite": "+inf"
+        },
         "tv_to_data": 0.6498022789489757,
         "multiplier_lambda": -0.2574681118515768
       }
     },
     "target_separation": {
-      "kl_tilt_vs_hard_nats": Infinity,
+      "kl_tilt_vs_hard_nats": {
+        "nonfinite": "+inf"
+      },
       "kl_hard_vs_tilt_nats": 2.0832058866875456,
       "tv_tilt_vs_hard": 0.8754696585928741,
       "tilt_hard_violation_rate": 0.8754696585928741,

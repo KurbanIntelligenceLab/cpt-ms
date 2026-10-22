@@ -1,0 +1,291 @@
+{
+  "schema_version": "2.0",
+  "description": "Numerical records supporting the manuscript and Supplementary Information.",
+  "records": [
+    {
+      "file": "best_of_n.json",
+      "sha256": "fb7e0338ffba3dfb650ce1fcbe4a3106a0ca45825e0164b41c71c03ea102ec28",
+      "script": "src/cpt/crystal/best_of_n.py",
+      "payload_sha256": "813cb3313964a60141e0ec7f53d658aeff4dd75f82b1bab2b7e7eb2d79c6a028"
+    },
+    {
+      "file": "conditional_baseline.json",
+      "sha256": "78fa9a8e4892ba58bf813173e5c1d18ebb1f8d3f45e90bd3c72f25a694d46a7b",
+      "script": "src/cpt/reproduce.py",
+      "payload_sha256": "83fc12b0e3f64b1f3a2d3121a3cc81b465fc7b8216d50054c4c1e9b72a59bd98"
+    },
+    {
+      "file": "generated_plausibility.json",
+      "sha256": "0ad00e012f90281c0fd7cdd27aa41e3e0716602e9358c3b802880bfaff176517",
+      "script": "src/cpt/crystal/generated_plausibility.py",
+      "payload_sha256": "289eb542352218fc665c9ccb58ca9f511b4ca854e81329b367cf2a1ef90eb860"
+    },
+    {
+      "file": "hybrid_selection.json",
+      "sha256": "ad4b46b3488fb6b52c20ac55a7c9a06a45818b37c9c0c0d7053eb446da0dd51d",
+      "script": "src/cpt/crystal/hybrid_selection.py",
+      "payload_sha256": "0908d2a5de450d266a6b56dfa7f03d507f2b1008a8ae63552608f07f525b988a"
+    },
+    {
+      "file": "induced_vs_tilt.json",
+      "sha256": "1418ce841b3c7c21dd98904d60e34dd806f26cacb775c49423ea2c1e8c8d59ad",
+      "script": "src/cpt/synthetic/induced_distribution.py",
+      "payload_sha256": "016ce90f61159cc013f49ec4f4b9d2f72cd4526b574fa4fa05053dd9802c025f"
+    },
+    {
+      "file": "materials_inputs.json",
+      "sha256": "f9257515d51311bae03db6162ab52d46b9488d0c5df49381df6b6838a4c060f1",
+      "script": "src/cpt/reproduce.py",
+      "payload_sha256": "1e99701686af7959e8fa14e9a167619eabebaea8cf2987483053494101614022"
+    },
+    {
+      "file": "plausibility_reference.json",
+      "sha256": "0214861d750b59d3f903c32cec704353f03ff6b499684204e90191c6923a6298",
+      "script": "src/cpt/crystal/plausibility_screen.py",
+      "payload_sha256": "855f62b861791fa5fdc32c4708cb578eedeaea32abea5795dc4141888fc74309"
+    },
+    {
+      "file": "projection_example.json",
+      "sha256": "017e1f223bb39648507055462312438208c0b9c9699911d443bdab59d8455218",
+      "script": "src/cpt/verify.py",
+      "payload_sha256": "263283db73fa7cfb7f8a57c9fba320f5f950ec091fae2320d472f77103d847f4"
+    },
+    {
+      "file": "retarget_t10_s1.json",
+      "sha256": "c75565918508e81975737a5e89072f37f05d0efabed90416fff7602c860bd3b2",
+      "script": "src/cpt/crystal/retarget.py",
+      "payload_sha256": "3ce016f7e4f856fbbb342407c3c3870a75e22c78e5194013e81b698e2aff58c1"
+    },
+    {
+      "file": "retarget_t10_s2.json",
+      "sha256": "8bfaa7dfaafb2c371e4739f5279dc27361461b3fb12ae37112e170e3d4c1daf3",
+      "script": "src/cpt/crystal/retarget.py",
+      "payload_sha256": "9213bc62b6d2f2e91f4520ca341763f55861b6427490d35e8dcf8aecfa765c6d"
+    },
+    {
+      "file": "smc_diversity.json",
+      "sha256": "3095d759f0820d38f4a5eb0e9ba0c546ddbdc2183f64868c9f2806562f1051a0",
+      "script": "src/cpt/crystal/smc_diversity.py",
+      "payload_sha256": "7b7c7668a7cf61e6ae453cd68354bbe29c7cee6ec87f7e7097dbdb1809255d23"
+    },
+    {
+      "file": "smc_tuned.json",
+      "sha256": "18f09444e9e9edf45135d27d5e5d918fc3a68f0b832bc09274f409a415966107",
+      "script": "src/cpt/crystal/smc_tune.py",
+      "payload_sha256": "44655813b8fdc4d54aef2f7b005a5e9501c1baa41c07985a39466143e6a5a377"
+    },
+    {
+      "file": "steering_frontier.json",
+      "sha256": "fa85b13d0a9ca0f6bc41c5a5ee219d8cadd38790ea049d54a8672b2c75fca4dd",
+      "script": "src/cpt/synthetic/steering_frontier.py",
+      "payload_sha256": "9d5f629d91b82121934a4aa288f5e4ec221eda98b156387dcc608d91b7d1d3a1"
+    },
+    {
+      "file": "steering_frontier_rows.json",
+      "sha256": "b8baa165e8888e66573ddbc2422b5d413d7d62fe39de5c08e0698061301a43c6",
+      "script": "src/cpt/reproduce.py",
+      "payload_sha256": "5ae3c48ad5bd7ce392e573a106ef6ad861fbba51e9f06033d2d268f8e20c8ecb"
+    },
+    {
+      "file": "summary.json",
+      "sha256": "e8e679b408bf9d1a3a335552339263d0e67362fbaedcb3d55ea529b5db5b058b",
+      "script": "src/cpt/reproduce.py",
+      "payload_sha256": "8acb93eca90dd6e2bd4273819fd490fb9344d21d6477f433eb7070410667709e"
+    },
+    {
+      "file": "synthetic_ground_truth.json",
+      "sha256": "45bb1ecfd357be0bdeac79cb96bc71869afbf2efb0b12498c57b2e8da89c493f",
+      "script": "src/cpt/synthetic/compute_ground_truth.py",
+      "payload_sha256": "218aa44014589cd1051223e01e6ac3bc4687c77a6d13d1c07ca1f9cebd69bccf"
+    },
+    {
+      "file": "tilt_comparator.json",
+      "sha256": "415f6990d68ccc8d20f714cea91d5801d55c9dbc7f212f1fb422c99564e002cc",
+      "script": "src/cpt/synthetic/train_comparator.py",
+      "payload_sha256": "ab8e523668a23986a2d355612651b624abb00602f046f6860cf2a6002f7a2c68"
+    },
+    {
+      "file": "train_mask_only_seed0.json",
+      "sha256": "e156e14ddcbf0920126bc95419edc8e201624affa619010b3a954790757af04e",
+      "script": "src/cpt/train/train_synthetic.py",
+      "payload_sha256": "cb48281439d88495f02dbc8ae627bc9c0118b5d1174a925e7a9e495312086c7f"
+    },
+    {
+      "file": "train_mask_only_seed1.json",
+      "sha256": "82374bd06b544a2dcda44b2f696fdb5f06a599eb0fa7e96c98adfd2fee7fe432",
+      "script": "src/cpt/train/train_synthetic.py",
+      "payload_sha256": "d9802af8d4cc6530d62f1a3261ccffa5c447957c89d7847127518ed3a7ae2eae"
+    },
+    {
+      "file": "train_mask_only_seed2.json",
+      "sha256": "caa4bfba1f0ce632b1b6816fee240028c8839669f68e9e0b7cee1d7f0969a271",
+      "script": "src/cpt/train/train_synthetic.py",
+      "payload_sha256": "ff9238993a6bedcd19b5abce76e1af983ed1fefdfc2575834d6694e898a938c1"
+    },
+    {
+      "file": "train_projected_seed0.json",
+      "sha256": "4b0ab454af8ff2496ebd5dc31e28d6b1387ef45996f7b8d0d7da0c5c741cd5c0",
+      "script": "src/cpt/train/train_synthetic.py",
+      "payload_sha256": "f59641d9839b346fad7f9c01fc0429a531f9637db5838332e510d4c15af2470a"
+    },
+    {
+      "file": "train_projected_seed1.json",
+      "sha256": "97600b35ab60f83553500ce15f388a3c003746eb7312998e5bfe7104bd672c96",
+      "script": "src/cpt/train/train_synthetic.py",
+      "payload_sha256": "0c10968f4659005606b4a3d18f3e0aea808ccc761bee1e32241faa45d4bc3a11"
+    },
+    {
+      "file": "train_projected_seed2.json",
+      "sha256": "ae60fe22666ed53a671c16d47925f0fb517ed0b4b92b770999604c1ffa6009be",
+      "script": "src/cpt/train/train_synthetic.py",
+      "payload_sha256": "4dd772b7a6eab99320f1b55b0782745118ff05eebc7106edd7df39f915df21b0"
+    },
+    {
+      "file": "zero_shot_retargeting.json",
+      "sha256": "3aa7f4e2d4450c35e213d24c10176d7dca68bdd8f20f1d270295638f5e0e125f",
+      "script": "src/cpt/crystal/retarget.py",
+      "payload_sha256": "0694c608df3c6451d6b22086e2820e80511356e2ae2ee33ca973de6579042f55"
+    }
+  ],
+  "coverage": {
+    "representation": {
+      "manuscript": [
+        "Figure 1",
+        "Methods"
+      ],
+      "records": [
+        "projection_example",
+        "materials_inputs"
+      ],
+      "code": [
+        "crystal/mp20.py",
+        "crystal/model.py",
+        "crystal/channels.py",
+        "layer/projection.py",
+        "reproduce.py",
+        "verify.py"
+      ]
+    },
+    "retargeting": {
+      "manuscript": [
+        "Figure 2",
+        "Tables S4\u2013S5"
+      ],
+      "records": [
+        "zero_shot_retargeting",
+        "retarget_t10_s1",
+        "retarget_t10_s2",
+        "steering_frontier_rows",
+        "summary"
+      ],
+      "code": [
+        "crystal/retarget.py",
+        "train/train_crystal.py",
+        "reproduce.py",
+        "verify.py"
+      ]
+    },
+    "selection": {
+      "manuscript": [
+        "Figure 3",
+        "Tables S6\u2013S7"
+      ],
+      "records": [
+        "best_of_n",
+        "hybrid_selection",
+        "summary"
+      ],
+      "code": [
+        "crystal/best_of_n.py",
+        "crystal/hybrid_selection.py",
+        "verify.py"
+      ]
+    },
+    "finite_task": {
+      "manuscript": [
+        "Figure 4",
+        "Table S8"
+      ],
+      "records": [
+        "synthetic_ground_truth",
+        "tilt_comparator",
+        "summary",
+        "train_mask_only_seed0",
+        "train_mask_only_seed1",
+        "train_mask_only_seed2",
+        "train_projected_seed0",
+        "train_projected_seed1",
+        "train_projected_seed2"
+      ],
+      "code": [
+        "train/train_synthetic.py",
+        "synthetic/train_comparator.py",
+        "synthetic/compute_ground_truth.py",
+        "verify.py"
+      ]
+    },
+    "chemical_screening": {
+      "manuscript": [
+        "Table S1"
+      ],
+      "records": [
+        "generated_plausibility",
+        "plausibility_reference"
+      ],
+      "code": [
+        "crystal/generated_plausibility.py",
+        "crystal/plausibility_screen.py"
+      ]
+    },
+    "target_filtered_training": {
+      "manuscript": [
+        "Table S2"
+      ],
+      "records": [
+        "conditional_baseline"
+      ],
+      "code": [
+        "train/train_crystal.py",
+        "reproduce.py"
+      ]
+    },
+    "particle_guidance": {
+      "manuscript": [
+        "Table S3"
+      ],
+      "records": [
+        "smc_tuned",
+        "smc_diversity"
+      ],
+      "code": [
+        "crystal/smc_steering.py",
+        "crystal/smc_tune.py",
+        "crystal/smc_diversity.py"
+      ]
+    },
+    "closing_step": {
+      "manuscript": [
+        "Table S9",
+        "Methods"
+      ],
+      "records": [
+        "steering_frontier",
+        "induced_vs_tilt"
+      ],
+      "code": [
+        "synthetic/steering_frontier.py",
+        "synthetic/induced_distribution.py",
+        "verify.py"
+      ]
+    }
+  },
+  "verification_command": "python -m cpt.verify --results results",
+  "reproduction_instructions": "README.md",
+  "nonfinite_encoding": {
+    "nonfinite": [
+      "nan",
+      "+inf",
+      "-inf"
+    ]
+  }
+}

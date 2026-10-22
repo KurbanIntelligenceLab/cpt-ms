@@ -1,8 +1,7 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "2.0",
   "artifact_name": "smc_diversity",
   "script": "src/cpt/crystal/smc_diversity.py",
-  "git_commit": "5e963cc6b84d7045ace5e3139800ffd7cb12c972-dirty",
   "config": {
     "K": 16,
     "sigma": 0.5,
@@ -16,19 +15,16 @@
       10.0
     ],
     "trials": 100,
-    "checkpoint": "A3_d5.0.pt"
+    "checkpoint": "projected_d5.0.pt"
   },
-  "config_hash": "07a17fe5c0c0127f",
+  "config_hash": "363e21bfbae40dba",
   "seeds": [
     0
   ],
-  "created_utc": "2026-08-21T15:10:08.478231+00:00",
-  "python": "3.11.15",
-  "platform": "macOS-26.5.2-arm64-arm-64bit",
-  "payload_sha256": "87a8d326042e67c55e909e094d944050c82a6f305edf5e976a6ee6608d7b7a0a",
+  "payload_sha256": "7b7c7668a7cf61e6ae453cd68354bbe29c7cee6ec87f7e7097dbdb1809255d23",
   "payload": {
     "arm": "SMC steering, tuned sigma, diversity measured over independent runs",
-    "checkpoint": "A3_d5.0.pt",
+    "checkpoint": "projected_d5.0.pt",
     "K": 16,
     "sigma": 0.5,
     "trials": 100,

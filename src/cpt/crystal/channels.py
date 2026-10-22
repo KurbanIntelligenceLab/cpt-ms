@@ -1,5 +1,3 @@
-"""Constraint channels: what each token contributes, and how much budget is left."""
-
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -36,7 +34,6 @@ def weight_channel(ids: np.ndarray, V: CrystalVocab,
 
 
 MASS_UNIT = 1.66053906660
-"""Divisor turning a g/cm3 density target into amu per cubic angstrom."""
 
 
 def mass_channel(ids: np.ndarray, V: CrystalVocab) -> np.ndarray:
@@ -104,22 +101,14 @@ def _mass_budget(ids: np.ndarray, V: CrystalVocab, cfg) -> tuple[np.ndarray, np.
 
 @dataclass(frozen=True)
 class Constraint:
-    """One channel's projection inputs at every prefix position of a flattened batch."""
-
-    A: torch.Tensor       # (n, 1, vocab) per-token contribution
-    b: torch.Tensor       # (n, 1) per-step target, clamped into the attainable range
-    active: torch.Tensor  # (n,) where the constraint actually binds
-    budget: torch.Tensor  # (n,) raw quantity still owed, before dividing over slots
+    A: torch.Tensor
+    b: torch.Tensor
+    active: torch.Tensor
+    budget: torch.Tensor
 
 
 def budget_constraint(flat, mkf, xc, V, cfg, dev, channel, budget_fn) -> Constraint:
-    """Build the projection inputs for one additive channel.
-
-    Every steered arm computes this identically and differs only in `channel` (the
-    per-token contributions) and `budget_fn` (how much of the quantity is still owed).
-    `channel` is either a vocabulary-sized tensor, reused at every position, or a
-    callable returning the contributions for a prefix, when they depend on it.
-    """
+    """Build masked projection inputs for one additive channel."""
     n_flat, vocab = flat.shape
     n, L = xc.shape[0], n_flat // xc.shape[0]
 
@@ -137,8 +126,6 @@ def budget_constraint(flat, mkf, xc, V, cfg, dev, channel, budget_fn) -> Constra
     else:
         A = channel.view(1, 1, vocab).expand(n_flat, 1, vocab).contiguous()
 
-    # Only tokens the grammar allows can carry the quantity, so the attainable range is
-    # taken over those; b outside it would make the projection infeasible by construction.
     attain = torch.where(mkf, A[:, 0, :], torch.full_like(flat, float("nan")))
     lo = torch.nan_to_num(attain, nan=float("inf")).min(-1).values
     hi = torch.nan_to_num(attain, nan=float("-inf")).max(-1).values

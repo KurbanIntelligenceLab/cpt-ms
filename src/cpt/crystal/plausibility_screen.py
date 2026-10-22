@@ -1,5 +1,3 @@
-"""Physical plausibility of generated crystals, without atomic positions."""
-
 from __future__ import annotations
 
 import argparse
@@ -89,7 +87,7 @@ def main(limit: int = 500, smoke: bool = False) -> Path:
             "positions would measure the initialization, not the generated crystal. The "
             "calibrated CHGNet screen therefore applies to reference structures only."
         ),
-        "packing_window_a3_per_atom": {
+        "packing_window_angstrom3_per_atom": {
             "lo_1pct": lo, "hi_99pct": hi,
             "data_mean": float(vpa.mean()), "data_sd": float(vpa.std()),
         },

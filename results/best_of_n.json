@@ -1,8 +1,7 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "2.0",
   "artifact_name": "best_of_n",
   "script": "src/cpt/crystal/best_of_n.py",
-  "git_commit": "cf70977b8b6f981bd30bd41f444e91444ee2df63-dirty",
   "config": {
     "pool": 1024,
     "targets": [
@@ -23,19 +22,16 @@
       16,
       64
     ],
-    "checkpoint": "A3_d5.0.pt"
+    "checkpoint": "projected_d5.0.pt"
   },
-  "config_hash": "52ac64f262b119da",
+  "config_hash": "6e73adf9e652f575",
   "seeds": [
     0
   ],
-  "created_utc": "2026-08-15T04:27:41.601581+00:00",
-  "python": "3.11.15",
-  "platform": "macOS-26.5.2-arm64-arm-64bit",
-  "payload_sha256": "e9335775d1c23d7df966c0bb76bb66e029fb3f8ba77dd6a53e51cb0a1d8a5404",
+  "payload_sha256": "813cb3313964a60141e0ec7f53d658aeff4dd75f82b1bab2b7e7eb2d79c6a028",
   "payload": {
     "arm": "best-of-n from the unsteered (masked, unprojected) model",
-    "checkpoint": "A3_d5.0.pt",
+    "checkpoint": "projected_d5.0.pt",
     "trained_density_target": 5.0,
     "pool_size": 1024,
     "n_valid_in_pool": 1021,

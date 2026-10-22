@@ -1,4 +1,3 @@
-"""Comparator: fine-tune toward the sequence-level tilt directly, the GDC/DPG comparator."""
 from __future__ import annotations
 
 import argparse
@@ -93,9 +92,7 @@ def main(steps: int | None = None, seeds=None, smoke: bool = False) -> Path:
     payload = {
         "arm": "comparator: MLE on exact samples from the sequence-level tilt, mask active",
         "why_this_training_rule": (
-            "the tilt is closed-form here, so MLE on its exact samples is DPG's fixed point "
-            "with unit importance weights -- comparator therefore gets the best case of the method it "
-            "stands for, and no gradient-estimator artefact can be blamed for the result"),
+            "The comparator fits exact samples from the closed-form sequence tilt by maximum likelihood."),
         "steps": steps or (200 if smoke else 4000),
         "seeds": list(seeds),
         "tilt_multiplier": lam,

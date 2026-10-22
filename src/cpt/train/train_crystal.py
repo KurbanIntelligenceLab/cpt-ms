@@ -1,5 +1,3 @@
-"""Crystal training: the arms on MP-20 with a real backbone."""
-
 from __future__ import annotations
 
 import argparse
@@ -12,7 +10,7 @@ import numpy as np
 import torch
 
 from cpt.common.arms import resolve
-from cpt.common.artifacts import emit
+from cpt.common.artifacts import emit, file_sha256
 from cpt.crystal.channels import (
     _additive_budget,
     _element_position,
@@ -29,8 +27,7 @@ from cpt.layer.projection import project
 
 SCRIPT = "src/cpt/train/train_crystal.py"
 
-# Re-exported: eighteen modules import these from here, several of them lazily to avoid
-# paying for the trainer. They now live in the light modules above.
+
 __all__ = [
     "ATOMIC_MASS",
     "ELEMENTS",
@@ -104,7 +101,7 @@ def main(smoke: bool = False, arm: str = "mask_only", steps: int | None = None,
                            for t in V.tokens], device=dev, dtype=torch.float32)
 
     init_ref = None
-    if cfg.arm in ("projected", "joint"):
+    if cfg.arm == "projected":
         s0, d0 = sample(model, V, gm, cfg, dev, cfg.n_eval_samples, use_mask=True,
                         project_at_inference=True, max_len=max_len + 2, rng=rng)
         init_ref = structural_metrics(s0, V, gm, cfg, **COV) | d0 | {"step": 0}
@@ -112,7 +109,6 @@ def main(smoke: bool = False, arm: str = "mask_only", steps: int | None = None,
               f"density {init_ref['mean_density'] if init_ref['mean_density'] else float('nan'):.3f}",
               flush=True)
 
-    joint_stats = None
     history, t0 = [], time.time()
     for step in range(1, cfg.steps + 1):
         idx = rng.integers(0, len(data), cfg.batch)
@@ -124,7 +120,7 @@ def main(smoke: bool = False, arm: str = "mask_only", steps: int | None = None,
             mk = torch.from_numpy(gm.masks_for(x.cpu().numpy())[:, 1:, :]).to(dev)
             logits = logits.masked_fill(~mk, float("-inf"))
 
-        if cfg.arm in ("projected", "joint"):
+        if cfg.arm == "projected":
             B, L, Vs = logits.shape
             flat = logits.reshape(B * L, Vs)
             mkf = mk.reshape(B * L, Vs)
@@ -133,54 +129,12 @@ def main(smoke: bool = False, arm: str = "mask_only", steps: int | None = None,
                 flat, mkf, xc, V, cfg, dev,
                 channel=((lambda p: mass_channel(p, V)) if cfg.channel == "prefix" else mass_t),
                 budget_fn=lambda p: _mass_budget(p, V, cfg))
-            A, b, act, bt = mass.A, mass.b, mass.active, mass.budget
+            A, b, act = mass.A, mass.b, mass.active
 
-            if cfg.arm == "joint":
-                bud2 = np.empty((B, L)); slt2 = np.empty((B, L))
-                chan2 = np.empty((B, L, Vs), dtype=np.float32)
-                for t in range(L):
-                    bb2, ss2 = _additive_budget(xc[:, :t + 1], V, cfg, VALENCE,
-                                                cfg.valence_target, 1.0)
-                    bud2[:, t], slt2[:, t] = bb2, ss2
-                    chan2[:, t] = weight_channel(xc[:, :t + 1], V, VALENCE)
-                A2c = torch.from_numpy(chan2).to(dev).reshape(B * L, 1, Vs)
-                att2 = torch.where(mkf, A2c[:, 0, :], torch.full_like(flat, float("nan")))
-                lo2 = torch.nan_to_num(att2, nan=float("inf")).min(-1).values
-                hi2 = torch.nan_to_num(att2, nan=float("-inf")).max(-1).values
-                bt2 = torch.from_numpy(bud2).to(dev).float().reshape(-1)
-                st2 = torch.from_numpy(slt2).to(dev).float().reshape(-1)
-                b2 = torch.where((st2 > 0) & torch.isfinite(bt2),
-                                 bt2 / st2.clamp_min(1), lo2)
-                b2 = b2.clamp(min=lo2, max=hi2).unsqueeze(-1)
-                spread2 = (hi2 - lo2) > 1e-9
-                both_pos = (bt > 0) & (bt2 > 0)
-                eligible = act & spread2 & both_pos
-                A = torch.cat([A, A2c], dim=1)
-                b = torch.cat([b, b2], dim=-1)
-                res_j = project(flat, A, b, mkf)
-                res_1 = project(flat, A[:, :1, :], b[:, :1], mkf)
-                joint = eligible & res_j.converged
-                q = torch.where(joint.unsqueeze(-1), res_j.q,
-                                torch.where((res_1.converged & act).unsqueeze(-1),
-                                            res_1.q, torch.softmax(flat, -1)))
-                n_joint = int(joint.sum())
-                logp = torch.log(q.clamp_min(1e-30)).reshape(B, L, Vs)
-                joint_stats = {
-                    "n_actionable_positions": int(act.sum()),
-                    "n_joint_positions": n_joint,
-                    "n_density_only_positions": int((act & ~joint).sum()),
-                    "n_excluded_rank1": int((act & ~spread2).sum()),
-                    "n_excluded_budget_exhausted": int((act & spread2 & ~both_pos).sum()),
-                    "n_eligible_for_joint": int(eligible.sum()),
-                    "n_jointly_infeasible": int((eligible & ~res_j.converged).sum()),
-                    "joint_fallback_rate": (float((eligible & ~res_j.converged).sum())
-                                            / max(int(eligible.sum()), 1)),
-                }
-            else:
-                res = project(flat, A, b, mkf)
-                q = torch.where((res.converged & act).unsqueeze(-1), res.q,
-                                torch.softmax(flat, -1))
-                logp = torch.log(q.clamp_min(1e-30)).reshape(B, L, Vs)
+            res = project(flat, A, b, mkf)
+            q = torch.where((res.converged & act).unsqueeze(-1), res.q,
+                            torch.softmax(flat, -1))
+            logp = torch.log(q.clamp_min(1e-30)).reshape(B, L, Vs)
         else:
             logp = torch.log_softmax(logits, dim=-1)
 
@@ -197,7 +151,7 @@ def main(smoke: bool = False, arm: str = "mask_only", steps: int | None = None,
             m = structural_metrics(seqs, V, gm, cfg, **COV)
             m |= {"step": step, "loss": float(loss.item()),
                   "elapsed_s": round(time.time() - t0, 1)} | diag
-            if cfg.arm in ("projected", "joint"):
+            if cfg.arm == "projected":
                 sd, dg = sample(model, V, gm, cfg, dev, cfg.n_eval_samples,
                                 use_mask=True, project_at_inference=True,
                                 max_len=max_len + 2, rng=rng)
@@ -233,8 +187,6 @@ def main(smoke: bool = False, arm: str = "mask_only", steps: int | None = None,
         "history": history,
         "final": history[-1],
         "init_reference": init_ref,
-        "joint_projection": joint_stats,
-        "valence_target": (cfg.valence_target if cfg.arm == "joint" else None),
         "wall_clock_s": round(time.time() - t0, 1),
     }
     if ckpt is not None:
@@ -250,21 +202,24 @@ def main(smoke: bool = False, arm: str = "mask_only", steps: int | None = None,
                 "vocab_size": len(V),
                 "n_parameters": sum(p.numel() for p in model.parameters()),
                 "elements": list(ELEMENTS),
-                "schema_version": 1,
+                "schema_version": 2,
+                "tokenizer": V.configuration(),
             },
             ckpt,
         )
         payload["checkpoint"] = {
-            "path": str(ckpt),
+            "path": ckpt.name,
             "trained_density_target": cfg.density_target,
             "max_len": max_len,
             "vocab_order": cfg.order,
             "bytes": ckpt.stat().st_size,
+            "sha256": file_sha256(ckpt),
+            "tokenizer": V.configuration(),
         }
     return emit(
-        name or f"crystal_{cfg.arm}" + ("_smoke" if smoke else ""),
+        name or f"crystal_{cfg.arm}_density{cfg.density_target:g}_seed{cfg.seed}" + ("_smoke" if smoke else ""),
         payload,
-        config={"arm": cfg.arm, "steps": cfg.steps, "smoke": smoke},
+        config={"training": asdict(cfg), "smoke": smoke},
         seeds=[cfg.seed], script=SCRIPT,
     )
 
@@ -273,13 +228,13 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--smoke", action="store_true")
     ap.add_argument("--arm", default="mask_only", type=resolve,
-                    choices=["unconstrained", "mask_only", "projected", "conditional", "joint"])
+                    choices=["unconstrained", "mask_only", "projected", "conditional"])
     ap.add_argument("--steps", type=int, default=None)
     ap.add_argument("--density-target", type=float, default=None)
     ap.add_argument("--valence-target", type=float, default=None)
     ap.add_argument("--seed", type=int, default=None)
     ap.add_argument("--name", default=None,
-                    help="artifact name, overriding the crystal_<arm>[_smoke] default; used for short runs that are cited and so must not sit in the ignored *_smoke namespace")
+                    help="output record name; defaults to model, density and seed")
     ap.add_argument("--ckpt", default=None,
                     help="path to save model weights for later zero-shot retargeting")
     a = ap.parse_args()

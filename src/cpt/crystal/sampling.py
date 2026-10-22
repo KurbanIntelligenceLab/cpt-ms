@@ -1,5 +1,3 @@
-"""Batch padding and constrained sampling from a trained crystal decoder."""
-
 from __future__ import annotations
 
 import numpy as np
@@ -28,6 +26,8 @@ def sample(model, V, gm, cfg, device, n, *, use_mask: bool, project_at_inference
     done = torch.zeros(n, dtype=torch.bool, device=device)
     n_infeasible = torch.zeros(n, device=device)
     n_projected = torch.zeros(n, device=device)
+    n_feasible = torch.zeros(n, device=device)
+    n_solver_fallback = torch.zeros(n, device=device)
     n_degenerate = torch.zeros(n, device=device)
     eos = V.index["<EOS>"]
     mass_t = torch.tensor([ATOMIC_MASS.get(t[3:], 0.0) if t.startswith("el:") else 0.0
@@ -66,7 +66,9 @@ def sample(model, V, gm, cfg, device, n, *, use_mask: bool, project_at_inference
             q = torch.where(res.converged.unsqueeze(-1) & feas.unsqueeze(-1),
                             res.q, torch.softmax(logits, -1))
             n_infeasible += (active & ~feas).float()
-            n_projected += feas.float()
+            n_feasible += feas.float()
+            n_projected += (feas & res.converged).float()
+            n_solver_fallback += (feas & ~res.converged).float()
         else:
             q = torch.softmax(logits, dim=-1)
 
@@ -91,10 +93,13 @@ def sample(model, V, gm, cfg, device, n, *, use_mask: bool, project_at_inference
 
     model.train()
     seqs = [[int(t) for t in row if True] for row in ids.cpu().numpy()]
-    tot = (n_infeasible + n_projected).clamp_min(1)
+    tot = (n_infeasible + n_feasible).clamp_min(1)
     return seqs, {
         "per_step_infeasible_fraction": float((n_infeasible / tot).mean()),
         "mean_steps_projected": float(n_projected.mean()),
+        "mean_steps_feasible": float(n_feasible.mean()),
+        "mean_steps_solver_fallback": float(n_solver_fallback.mean()),
+        "per_step_solver_fallback_fraction": float((n_solver_fallback / tot).mean()),
         "degenerate_row_rate": float((n_degenerate / tot).mean()),
         "sequences_with_any_degenerate_step": float((n_degenerate > 0).float().mean()),
     }
