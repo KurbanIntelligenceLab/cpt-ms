@@ -1,5 +1,3 @@
-"""Steering frontier: what per-step projection buys, and what it costs."""
-
 from __future__ import annotations
 
 import argparse

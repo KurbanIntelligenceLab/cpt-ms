@@ -1,5 +1,3 @@
-"""Train the unconstrained, mask-only and projected arms on the exactly enumerable synthetic task."""
-
 from __future__ import annotations
 
 import argparse
@@ -36,8 +34,6 @@ class TrainConfig:
 
 
 class TinyDecoder(nn.Module):
-    """Causal decoder over the synthetic vocabulary."""
-
     def __init__(self, vocab: int, length: int, cfg: TrainConfig):
         super().__init__()
         self.tok = nn.Embedding(vocab + 1, cfg.d_model)
@@ -195,9 +191,9 @@ def evaluate(model, task, cfg, tcfg, device, base, tilt) -> dict:
     return m
 
 
-def main(smoke: bool = False, arm: str = "mask_only", steps: int | None = None) -> Path:
+def main(smoke: bool = False, arm: str = "mask_only", steps: int | None = None, seed: int = 0) -> Path:
     dev = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    tcfg = TrainConfig(arm=arm, steps=steps or (200 if smoke else 4000))
+    tcfg = TrainConfig(arm=arm, steps=steps or (200 if smoke else 4000), seed=seed)
     if smoke:
         tcfg.eval_every = 100
     cfg = TaskConfig()
@@ -275,9 +271,9 @@ def main(smoke: bool = False, arm: str = "mask_only", steps: int | None = None) 
         "wall_clock_s": round(time.time() - t0, 1),
     }
     return emit(
-        f"train_{tcfg.arm}" + ("_smoke" if smoke else ""),
+        f"train_{tcfg.arm}_seed{tcfg.seed}" + ("_smoke" if smoke else ""),
         payload,
-        config={"arm": tcfg.arm, "steps": tcfg.steps, "smoke": smoke},
+        config={"training": asdict(tcfg), "task": asdict(cfg), "smoke": smoke},
         seeds=[tcfg.seed],
         script=SCRIPT,
     )
@@ -289,5 +285,6 @@ if __name__ == "__main__":
     ap.add_argument("--arm", default="mask_only", type=resolve,
                     choices=["unconstrained", "mask_only", "projected"])
     ap.add_argument("--steps", type=int, default=None)
+    ap.add_argument("--seed", type=int, default=0)
     a = ap.parse_args()
-    print(main(smoke=a.smoke, arm=a.arm, steps=a.steps))
+    print(main(smoke=a.smoke, arm=a.arm, steps=a.steps, seed=a.seed))

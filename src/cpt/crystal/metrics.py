@@ -1,5 +1,3 @@
-"""Structural validity, density statistics, and coverage of generated crystals."""
-
 from __future__ import annotations
 
 from collections import Counter

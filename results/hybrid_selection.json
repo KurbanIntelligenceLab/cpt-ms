@@ -1,8 +1,7 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "2.0",
   "artifact_name": "hybrid_selection",
   "script": "src/cpt/crystal/hybrid_selection.py",
-  "git_commit": "5e963cc6b84d7045ace5e3139800ffd7cb12c972-dirty",
   "config": {
     "pool": 512,
     "targets": [
@@ -24,19 +23,16 @@
       8,
       16
     ],
-    "checkpoint": "A3_d5.0.pt"
+    "checkpoint": "projected_d5.0.pt"
   },
-  "config_hash": "e9f2b3510c5be6bd",
+  "config_hash": "4b8e668ed355b27d",
   "seeds": [
     0
   ],
-  "created_utc": "2026-08-21T15:06:45.029946+00:00",
-  "python": "3.11.15",
-  "platform": "macOS-26.5.2-arm64-arm-64bit",
-  "payload_sha256": "0b3801a0df29d4347b28b1f345d70f2c2f69832cb3fe0fc5d466cbf5d8c7d7c7",
+  "payload_sha256": "0908d2a5de450d266a6b56dfa7f03d507f2b1008a8ae63552608f07f525b988a",
   "payload": {
     "arm": "projection + best-of-n selection: n steered samples per target, keep closest on density",
-    "checkpoint": "A3_d5.0.pt",
+    "checkpoint": "projected_d5.0.pt",
     "trained_density_target": 5.0,
     "pool_size": 512,
     "n_valid_in_pool": {

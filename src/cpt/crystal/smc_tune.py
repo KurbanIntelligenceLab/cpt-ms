@@ -8,8 +8,8 @@ import numpy as np
 import torch
 
 from cpt.common.artifacts import emit
-from cpt.crystal.retarget import load_checkpoint
-from cpt.crystal.smc_steering import FRONTIER_TARGETS, smc
+from cpt.crystal.retarget import FRONTIER_TARGETS, load_checkpoint
+from cpt.crystal.smc_steering import smc
 
 SCRIPT = "src/cpt/crystal/smc_tune.py"
 SIGMAS_WIDE = [0.1, 0.2, 0.3, 0.5, 0.7, 1.0, 1.5, 2.0, 3.0]
@@ -69,15 +69,11 @@ def main(ckpt: str, targets=None, K: int = K_FIXED, sigmas=None, runs: int = 16,
     global_best_sigma = min((s for s in sigs if per_sigma_mean[str(s)] is not None),
                             key=lambda s: per_sigma_mean[str(s)])
 
-    old = None
-    old_path = Path("results/smc_steering.json")
-    if old_path.exists():
-        import json
-        old = json.loads(old_path.read_text())["payload"].get("sigma_sweep")
-
     payload = {
         "arm": "sequential Monte Carlo steering at inference, potential width tuned",
         "checkpoint": Path(ckpt).name,
+        "checkpoint_sha256": ck["checkpoint_sha256"],
+        "tokenizer": ck["tokenizer"],
         "trained_density_target": float(ck["trained_density_target"]),
         "K": int(K),
         "sigmas": sigs,
@@ -87,24 +83,9 @@ def main(ckpt: str, targets=None, K: int = K_FIXED, sigmas=None, runs: int = 16,
         "global_best_fixed_sigma": {"sigma": float(global_best_sigma),
                                     "mean_error_over_targets": per_sigma_mean[str(global_best_sigma)]},
         "best_per_target_selected_on_eval": best_rows,
-        "tuning_selection_note": (
-            "best_per_target_selected_on_eval selects sigma per target from the same runs "
-            "that report the error, so its mean is optimistically biased and is not the "
-            "reported comparison point; global_best_fixed_sigma is the single sigma value "
-            "chosen without looking at per-target outcomes and is the honest tuned number, "
-            "matching the convention results/smc_steering.json set for its own sweep."),
-        "matched_particle_budget_note": (
-            f"K is held fixed at {K} across every sigma in this sweep, identical to the "
-            "existing sigma_sweep in results/smc_steering.json, so differences across "
-            "rows are attributable to the potential width alone, not to particle count."),
-        "prior_sweep_reference": {
-            "existing_sigma_sweep_sigmas": (old.get("sigmas") if old else None),
-            "existing_sigma_sweep_finding": (old.get("finding") if old else None),
-        },
-        "still_untuned": (
-            "proposal distribution, resampling threshold, and number of resampling points "
-            "remain untuned; this sweep only tunes the potential width sigma at fixed K, "
-            "over a range roughly 30x wider than the two-point probe already on record"),
+        "tuning_selection_note": "Both width selection summaries use evaluation outcomes; no held-out tuning is available.",
+        "matched_particle_budget_note": f"K is fixed at {K} for every width and target.",
+        "still_untuned": "The proposal distribution and resampling rule are fixed; this sweep varies only the potential width.",
     }
 
     return emit("smc_tuned" + ("_smoke" if smoke else ""), payload,

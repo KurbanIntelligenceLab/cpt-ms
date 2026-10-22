@@ -97,6 +97,8 @@ def main(ckpt: str, targets: list[float] | None = None, pool: int = 512,
     payload = {
         "arm": "projection + best-of-n selection: n steered samples per target, keep closest on density",
         "checkpoint": Path(ckpt).name,
+        "checkpoint_sha256": ck["checkpoint_sha256"],
+        "tokenizer": ck["tokenizer"],
         "trained_density_target": float(ck["trained_density_target"]),
         "pool_size": int(pool),
         "n_valid_in_pool": {str(k): v for k, v in n_valid_pools.items()},

@@ -1,8 +1,7 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "2.0",
   "artifact_name": "induced_vs_tilt",
   "script": "src/cpt/synthetic/induced_distribution.py",
-  "git_commit": "4979489cd1450e7a89e96a6af8a688e37d752219-dirty",
   "config": {
     "symbols": [
       "A",
@@ -28,9 +27,6 @@
   "seeds": [
     0
   ],
-  "created_utc": "2026-08-10T20:22:02.072580+00:00",
-  "python": "3.11.15",
-  "platform": "macOS-26.5.2-arm64-arm-64bit",
   "payload_sha256": "016ce90f61159cc013f49ec4f4b9d2f72cd4526b574fa4fa05053dd9802c025f",
   "payload": {
     "distributions": {

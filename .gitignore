@@ -1,36 +1,17 @@
-# Python
+/development/
+/data/
+/.venv/
 __pycache__/
 *.py[cod]
 *.egg-info/
-.pytest_cache/
-.venv/
-
-# macOS
 .DS_Store
-
-# SSH keys for rented compute
-.vast/
-
-# Manuscript sources, run notes, preregistration, logs, checkpoints.
-# See development/README.md.
-development/
-
-# MP-20 CSVs: ~58MB, re-downloadable from the CDVAE repo
-data/
-
-# Checkpoints are build products of a training command, not evidence
+._*
+__MACOSX/
+.pytest_cache/
+.ruff_cache/
 *.pt
-
-# Regenerable pre-flight shards and scratch
-results/*_smoke.json
-results/preflight_report.json
-results/_*.json
-
-# LaTeX build intermediates
-*.aux
-*.bbl
-*.blg
-*.fdb_latexmk
-*.fls
-*.out
-*.synctex.gz
+*.pth
+*.ckpt
+!results/checkpoints/projected_d5.0.pt
+/dist/
+/build/

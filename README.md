@@ -1,180 +1,193 @@
-# cpt
+# Reusable density control for inverse materials design with autoregressive models
 
-Code, artifacts and verification for:
+Code, numerical results, and a trained density-5 checkpoint for the paper.
 
-**Steering Crystal Generation at Every Token: A Differentiable Constraint Projection for
-Autoregressive Models**
+Can Polat¹ · Mustafa Kurban²˒³ · Erchin Serpedin¹ · Hasan Kurban⁴
 
-Can Polat<sup>1</sup> ([0000-0002-1458-302X](https://orcid.org/0000-0002-1458-302X)) ·
-Mustafa Kurban<sup>2,3</sup> ([0000-0002-7263-0234](https://orcid.org/0000-0002-7263-0234)) ·
-Erchin Serpedin<sup>1</sup> ([0000-0001-9069-770X](https://orcid.org/0000-0001-9069-770X)) ·
-Hasan Kurban<sup>4</sup> ([0000-0003-3142-2866](https://orcid.org/0000-0003-3142-2866))
+¹ Department of Computer and Electrical Engineering, Texas A&M University, College Station, TX, USA
 
-<sup>1</sup> Department of Computer and Electrical Engineering, Texas A&M University, College Station, TX, USA
-<sup>2</sup> Department of Electrical and Computer Engineering, Texas A&M University at Qatar, Doha, Qatar
-<sup>3</sup> Department of Prosthetics and Orthotics, Ankara University, Ankara, Turkey
-<sup>4</sup> College of Science and Engineering, Hamad Bin Khalifa University, Doha, Qatar
+² Department of Electrical and Computer Engineering, Texas A&M University at Qatar, Doha, Qatar
 
-Corresponding authors: kurbanm@ankara.edu.tr, hkurban@hbku.edu.qa
+³ Department of Prosthetics and Orthotics, Ankara University, Ankara, Turkey
+
+⁴ College of Science and Engineering, Hamad Bin Khalifa University, Doha, Qatar
+
+Correspondence: kurbanm@ankara.edu.tr; hkurban@hbku.edu.qa
 
 ## Abstract
 
-Inverse design asks a generative model for a crystal meeting a numerical property target.
-The established route conditions the model on the property, tying one trained model to one
-target family and concentrating output where labels are dense. We take a different route: at
-every decoding step of a text serialization of crystal structures we solve a constrained
-projection of the next-token distribution, and we train through it. The projection is convex
-with an analytic derivative, a layer rather than a decoding heuristic, and the target enters
-as a value rather than a training condition. Two findings follow, on crystal generation from
-a public materials database and on an exactly enumerable synthetic task. First, one trained
-network serves a family of ten mass-density targets it never trained for, statistically
-equivalent to separately trained models at one seventh of their cost, and parseable at every
-requested target. Second, the per-step route is not a worse approximation of the
-sequence-level optimum but an approximation of a different distribution, and the difference
-favours it: at equal satisfaction of the average, the constrained property is 6.76 times
-less variable and samples violate the requirement 1.42 times less often. The reachable range
-and the steerable property class are set by the backbone and the serialization, design
-choices a practitioner controls.
-
-## Installation
-
-    uv sync --extra crystal --extra baselines --extra dev
-
-The extras are separate because they are separately expensive. `crystal` pulls the materials
-stack (pymatgen, smact, ase, chgnet) needed to screen generated structures; `baselines`
-pulls the convex-optimization stack (cvxpy, cvxpylayers) used to verify the projection
-layer's gradients against a reference solver. The synthetic track needs neither — numpy and
-scipy carry it.
-
-## Verifying the claims
-
-    uv run pytest tests/ -q
-
-On a fresh clone with no MP-20 data and no optional extras, expect **561 passed, 153
-skipped, 2 xfailed, 0 failed**. Nothing should fail. Anything skipped names its own reason:
-the manuscript-consistency checks need the paper sources under `development/`, which are not
-distributed; the crystal tests need the MP-20 CSVs in `data/`; the CIF-parsing and
-plausibility tests need `pymatgen` and `smact` from the `crystal` extra.
-
-With MP-20 in place, the same command gives **675 passed, 43 skipped, 2 xfailed**; adding
-the `crystal` extra clears a further 15 skips. A failure means a real disagreement between
-code and artifact -- that is the point of the suite, and it is why missing inputs skip
-rather than fail.
-
-Before launching any measurement run:
-
-    python -m cpt.common.preflight
-
-## Running the experiments
-
-Each experiment is a module that emits one artifact into `results/`:
-
-    python -m cpt.synthetic.compute_ground_truth
-    python -m cpt.synthetic.alignment_sweep
-    python -m cpt.crystal.determinability
-    python -m cpt.layer.verify_gradients
-
-Training takes an arm by name:
-
-    python -m cpt.train.train_crystal --arm projected --steps 6000
-    python -m cpt.train.train_synthetic --arm mask_only
-
-Every script accepts `--smoke` for a seconds-long shard, which is what pre-flight runs.
-
-## Terminology
-
-The arms are named for what they do. `src/cpt/common/arms.py` is the definition, and it also
-resolves the older `A1`-`A7` codes that some committed artifacts are still stamped with.
-
-| arm | what it is |
-|---|---|
-| `unconstrained` | backbone decoder: no grammar mask, no projection |
-| `mask_only` | grammar mask only, no expectation projection |
-| `projected` | grammar mask plus trained-through projection, one active constraint |
-| `projected_backbone` | the projection-trained model read *without* projection at inference |
-| `projected_cell_first` | `projected`, cell-first static-channel variant |
-| `conditional` | conditional-training baseline, retrained on target-filtered MP-20 |
-| `comparator` | sequence-level comparator trained by MLE on exact tilt samples |
-| `joint` | projection under two simultaneous constraints |
-
-Every arm is reported at two readings: **backbone** (mask only) and **deployed** (mask plus
-projection).
-
-Serializations are `typed_fields` (`<COMP> el:Li:2 ...`), `cif` (the same content spelled
-character-by-character), and `cif_standard` (`cif` in CrystaLLM's ordering).
-
-Artifact filenames encode their configuration: `d<density>` and `v<valence>` are constraint
-targets, `t<target>_s<seed>` is a target/seed pair, and `_smoke` marks a pre-flight shard.
-
-## Data
-
-MP-20, the standard 20-atom subset of the Materials Project used by CDVAE and its
-successors. The CSVs are ~58 MB and re-downloadable from the CDVAE repository, so they are
-not tracked; `src/cpt/crystal/mp20.py` loads them from `data/`.
-
-## Results
-
-`results/` holds 84 provenance-stamped JSON artifacts. They are the evidence: every number
-in the manuscript is read from one of them at build time, never transcribed, and the test
-suite recomputes them and fails if the prose disagrees.
+Inverse materials design requires generating property-targeted candidate structures without repeatedly retraining generative models or sacrificing compositional variety. Here, we present a cell-first mass-budgeting framework that applies local minimum-Kullback–Leibler moment projections during autoregressive decoding, dynamically guiding element choices toward requested target densities using pre-emitted cell volumes. Retargeting a single trained model across ten density requests demonstrates robust checkpoint reusability without parameter updates. Across candidate selection pools of size sixteen, local density steering reduces average candidate density error by 70.5%. Selecting among sixteen steered candidates achieves nearly identical density accuracy to sixty-four unsteered candidates while expanding the unique composition fraction from 22.8% to 37.1%. Analytical enumeration over an exact sequence space further demonstrates that per-step moment control concentrates total additive-feature outcomes while clarifying global variance behavior. These results demonstrate that reusable, representation-aligned decoding control significantly enhances candidate selection efficiency while balancing property precision and compositional diversity.
 
 ## Layout
 
 ```text
-src/cpt/common/      artifact emission, pre-flight harness, arm vocabulary
-src/cpt/synthetic/   synthetic constrained-sequence task with exact enumerable targets
-src/cpt/crystal/     serialization, constraint parser, channels, model, sampling, metrics
-src/cpt/layer/       the batched KL projection layer and its gradient verification
-src/cpt/train/       training entry points for the crystal and synthetic tracks
-src/cpt/related/     survey of external conditioning approaches
-tests/               the verification suite
-results/             emitted artifacts, provenance-stamped JSON
-development/         not distributed: manuscript sources and the scripts that build its
-                     figures, run notes, preregistration, checkpoints, logs. Nothing here
-                     is needed to install or verify.
+src/cpt/      numerical methods, training, sampling, aggregation and verification
+results/      supporting JSON records and their integrity manifest
+  checkpoints/  supplied model weights and checkpoint manifest
+data/         local input datasets; gitignored
+development/  manuscripts, figure/table generators, tests and other private work; gitignored
 ```
 
-## Conventions
+Saved numerical outputs are collected in `results/`. Local inputs belong in `data/`; working files and generated outputs belong in `development/`.
 
-**Nothing quantitative is typed by hand.** Every number in a report is read from an artifact
-in `results/`, and each report's numbers are checked against its artifact before the report
-is saved.
+## Install and verify
 
-**Artifacts carry their own provenance.** `src/cpt/common/artifacts.py` stamps each emission
-with the script, config hash, seeds, commit, environment, and a payload checksum. When git is
-unavailable the commit field records the sentinel `UNVERSIONED` rather than a fabricated hash.
-Because the checksum covers the payload's own key strings, artifacts are never edited in
-place — readers go through `src/cpt/common/arms.py` instead.
+Python 3.11 or later is required. Run these commands from the extracted package's root directory with uv installed (macOS/Linux shell):
 
-**Verdicts are derived, not asserted.** Narrative fields inside artifacts are generated from
-the computed values they describe, so a change to the computation cannot leave a stale claim
-beside it.
+```sh
+uv sync --locked --no-dev
+source .venv/bin/activate
+python -m cpt.verify --results results
+```
 
-**Never suppress stderr on a measurement run.** A measurement script that raises must be seen
-to raise. Redirecting stderr converts a hard failure into a stale artifact that still exists
-on disk from the previous run and looks like a fresh result. This happened once here: a run
-appeared to succeed while silently emitting no rows for a new backbone variant, because the
-script was raising on an unrecognized backbone name and the redirection hid it. Suppress
-stdout if the volume is inconvenient; never stderr.
+The verification command checks the result manifest, payload/configuration checksums, numerical summaries, the supplied checkpoint hash and architecture, the projection derivative and closing-step identities. It runs directly on the supplied results without training models or loading input datasets.
 
-## Known limitations
+Successful verification prints a JSON report with `"verified_records": 24` and `"verified_checkpoints": 1` and exits with status 0. Installation needs network access; verification then runs locally. Keep the environment activated for every command below. On Windows PowerShell, activate it with `.venv\Scripts\Activate.ps1` and set environment variables with `$env:NAME="value"`.
 
-- **Checkpoints are not distributed.** They are build products of the training commands
-  above. The SI's plausibility analysis samples from a `projected` checkpoint at density
-  target 5.0 g/cm³; reproducing it means rerunning that training command first.
-- **The manuscript sources are not distributed.** They live under `development/`, so the
-  five tests that check prose against artifacts skip on a public clone.
-- **Wall-clock comparisons cross hardware.** The conditional-baseline record was written on
-  a different host from the arms it is compared against; the caveat is stated wherever the
-  ratio is used, but it is not a controlled timing experiment.
-- **The reachable target range is set by the backbone and serialization**, not by the
-  projection. A target outside what the vocabulary can express is infeasible by construction.
+For materials training and chemical screening, use `uv sync --locked --no-dev --extra crystal`. The optional `baselines` extra supplies CVXPY/CVXPYLayers for `python -m cpt.layer.verify_gradients`; install it with `uv sync --locked --no-dev --extra baselines` (add `--extra crystal` to keep both). A wheel contains the code; supply the accompanying `results/` directory explicitly when using the wheel outside this checkout.
 
-## Citing this work
+## Results
 
-See `CITATION.cff`. The DOI and version fields are placeholders until the archival deposit
-is made.
+`results/` contains JSON outputs for training, sampling, selection, chemical screening and numerical checks. `manifest.json` indexes the records and their checksums; `summary.json` collects numerical summaries.
 
-## License
+Load a record and verify its integrity with:
 
-MIT. See `LICENSE`.
+```python
+from pathlib import Path
+from cpt.common.artifacts import load
+
+record = load("summary", results_dir=Path("results"))
+print(record["payload"])
+```
+
+## Paper results
+
+The supplied JSON records support the following manuscript displays. Run `python -m cpt.reproduce summary --inputs results --output development/runs/summaries` to recompute the numerical summaries. Figure/table generation scripts and tests remain in `development/`.
+
+| Manuscript display | Numerical records in `results/` |
+|---|---|
+| Figure 1: cell-first density control | `projection_example.json`, `materials_inputs.json` |
+| Figure 2: checkpoint reuse | `zero_shot_retargeting.json`, `retarget_t10_s1.json`, `retarget_t10_s2.json`, `steering_frontier_rows.json` |
+| Figure 3: candidate selection | `best_of_n.json`, `hybrid_selection.json` |
+| Figure 4: finite-task moments | `synthetic_ground_truth.json`, `induced_vs_tilt.json`, `tilt_comparator.json`, `train_mask_only_seed*.json`, `train_projected_seed*.json` |
+| Supplementary chemical screens | `plausibility_reference.json`, `generated_plausibility.json` |
+| Supplementary target-filtered control | `conditional_baseline.json` |
+| Supplementary particle guidance | `smc_tuned.json`, `smc_diversity.json` |
+| Supplementary charge-target sweep | `steering_frontier.json` |
+
+Across the ten density targets, projected best-of-16 has mean candidate error 0.2872 g/cm³ versus 0.9742 g/cm³ for unprojected best-of-16, a 70.5% reduction. Projected best-of-16 and unprojected best-of-64 have similar mean errors (0.2872 and 0.2850 g/cm³), with unique composition fractions of 37.1% and 22.8%, respectively.
+
+## Supplied checkpoint
+
+`results/checkpoints/projected_d5.0.pt` is the density-5, seed-0 checkpoint used for candidate selection and chemical screening (`A3_d5.0.pt` in the manuscript). It contains 5,199,220 parameters, was trained for 6,000 steps, and occupies 20,821,887 bytes (20.8 MB). Its tokenizer uses 884 tokens, including 512 length bins over [2, 46] Å and 256 angle bins over [5, 175] degrees. The checkpoint manifest records its SHA-256 and tokenizer configuration.
+
+Load it without input datasets:
+
+```python
+from cpt.crystal.retarget import load_checkpoint
+
+model, checkpoint = load_checkpoint("results/checkpoints/projected_d5.0.pt", "cpu")
+print(checkpoint["trained_density_target"])
+```
+
+Run a small candidate-selection check without input datasets:
+
+```sh
+CPT_RESULTS_DIR=development/runs/checkpoint_check python -m cpt.crystal.best_of_n --ckpt results/checkpoints/projected_d5.0.pt --smoke
+```
+
+The supplied checkpoint is included in Git and the source distribution. Additional `.pt`, `.pth`, and `.ckpt` files remain gitignored, including files placed under `results/checkpoints/`.
+
+## Input data
+
+Obtain the `train.csv`, `val.csv` and `test.csv` splits from [CDVAE's MP-20 directory](https://github.com/txie-93/cdvae/tree/main/data/mp_20). Save them as `data/mp20_train.csv`, `data/mp20_val.csv` and `data/mp20_test.csv`. Keep the supplied splits and CIF strings unchanged. The data source and its attribution remain those documented by CDVAE and the Materials Project.
+
+Audit the local input files and model dimensions with:
+
+```sh
+python -m cpt.reproduce data --data data --output development/runs/input_audit
+```
+
+Compare the resulting hashes with `results/materials_inputs.json`. `CPT_DATA_DIR` overrides the local input directory for training and screening. `data/` is gitignored and excluded from distributions.
+
+## Recompute numerical summaries
+
+```sh
+python -m cpt.reproduce summary --inputs results --output development/runs/summaries
+```
+
+This writes numerical JSON only. Records encode nonfinite values as `{"nonfinite": "nan"}`, `{"nonfinite": "+inf"}` or `{"nonfinite": "-inf"}`; JSON `null` means unavailable. Use `cpt.common.artifacts.load` to read records and check their integrity.
+
+## Training and sampling
+
+Run commands below in the installed environment. Use a fresh output directory so new computations do not overwrite the saved results:
+
+```sh
+export CPT_RESULTS_DIR=development/runs/current
+export CPT_DATA_DIR=data
+```
+
+Finite-task masked/projected training uses 4,000 steps and seeds 0, 1 and 2:
+
+```sh
+for arm in mask_only projected; do
+  for seed in 0 1 2; do
+    python -m cpt.train.train_synthetic --arm "$arm" --seed "$seed" --steps 4000
+  done
+done
+python -m cpt.synthetic.compute_ground_truth
+python -m cpt.synthetic.train_comparator --steps 4000
+python -m cpt.synthetic.induced_distribution
+python -m cpt.synthetic.steering_frontier
+```
+
+The comparator defaults to all three seeds. Synthetic training writes separate seed-specific files.
+
+Materials training uses 6,000 steps. For a density-5 projected checkpoint:
+
+```sh
+python -m cpt.train.train_crystal --arm projected --density-target 5 --seed 0 --steps 6000 --ckpt results/checkpoints/projected_density5_seed0_retrained.pt
+```
+
+Adjust `--density-target`, `--seed` and `--steps` for additional runs. Use the supplied checkpoint for sampling and selection:
+
+```sh
+python -m cpt.crystal.retarget --ckpt results/checkpoints/projected_d5.0.pt --n-samples 4096 --seed 0
+python -m cpt.crystal.best_of_n --ckpt results/checkpoints/projected_d5.0.pt --pool 1024 --seed 0
+python -m cpt.crystal.hybrid_selection --ckpt results/checkpoints/projected_d5.0.pt --pool 512 --seed 0
+python -m cpt.crystal.smc_tune --ckpt results/checkpoints/projected_d5.0.pt --K 16 --runs 16 --seed 0
+python -m cpt.crystal.smc_diversity --ckpt results/checkpoints/projected_d5.0.pt --K 16 --sigma 0.5 --trials 100 --seed 0
+python -m cpt.crystal.plausibility_screen --limit 800
+python -m cpt.crystal.generated_plausibility --ckpt results/checkpoints/projected_d5.0.pt --n-samples 2048
+```
+
+Retargeting accepts repeated `--ckpt` arguments for a matrix and `--out` for an explicit checksummed JSON output file, for example `--out development/runs/current/retarget_t10_s1.json`. Choose a distinct output path for each run. Sampling seeds control both NumPy and PyTorch; the recorded training configuration remains the checkpoint's original configuration. Selection uses the full ten-target grid by default. The particle-diversity command uses the seven targets listed in its help; width selection uses all ten targets and the nine recorded widths.
+
+For the target-filtered control, train both arms into a dedicated output directory:
+
+```sh
+for arm in conditional projected; do
+  for target in 3 5 8 10; do
+    for seed in 0 1; do
+      CPT_RESULTS_DIR=development/runs/controls python -m cpt.train.train_crystal --arm "$arm" --density-target "$target" --seed "$seed" --steps 6000
+    done
+  done
+done
+```
+
+To aggregate a density-target sweep, save projected training runs under `CPT_RESULTS_DIR=development/runs/target_specific`. Aggregate each directory separately:
+
+```sh
+python -m cpt.reproduce conditional --inputs development/runs/controls --output development/runs/control_summary
+python -m cpt.reproduce sweep --inputs development/runs/target_specific --output development/runs/target_summary
+```
+
+Chemical screens require the `crystal` extra. Run `cpt.crystal.plausibility_screen` first to create the reference-screen record in `CPT_RESULTS_DIR`, then run `cpt.crystal.generated_plausibility` with a trained checkpoint.
+
+Each command provides its available options through `--help`, for example:
+
+```sh
+python -m cpt.train.train_crystal --help
+python -m cpt.crystal.retarget --help
+python -m cpt.reproduce --help
+```

@@ -1,5 +1,3 @@
-"""Synthetic constrained-sequence task."""
-
 from __future__ import annotations
 
 import itertools
@@ -10,8 +8,6 @@ import numpy as np
 
 @dataclass(frozen=True)
 class TaskConfig:
-    """Full specification of the synthetic task. Hashed into every artifact."""
-
     symbols: tuple[str, ...] = ("A", "B", "C", "D")
     charges: tuple[int, ...] = (2, 1, -1, -2)
     length: int = 8
@@ -31,8 +27,6 @@ class TaskConfig:
 
 @dataclass
 class EnumeratedTask:
-    """The task, fully enumerated. All arrays are indexed by sequence id."""
-
     config: TaskConfig
     sequences: np.ndarray
     log_p_data: np.ndarray

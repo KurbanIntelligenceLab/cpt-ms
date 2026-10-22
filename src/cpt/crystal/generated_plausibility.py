@@ -9,14 +9,14 @@ import torch
 
 warnings.filterwarnings("ignore")
 
-from cpt.common.artifacts import REPO_ROOT, emit, load
+from cpt.common.artifacts import emit, load
 from cpt.crystal.metrics import is_structurally_valid
 from cpt.crystal.mp20 import ATOMIC_MASS, CrystalVocab
 from cpt.crystal.plausibility_screen import _smact_screens
-from cpt.train.train_crystal import CrystalDecoder, CrystalTrainConfig, GrammarMask, sample
+from cpt.crystal.retarget import load_checkpoint
+from cpt.train.train_crystal import CrystalTrainConfig, GrammarMask, sample
 
 SCRIPT = "src/cpt/crystal/generated_plausibility.py"
-CKPT_PATH = REPO_ROOT / "development" / "ckpt" / "projected_d5.0.pt"
 
 
 def sequences_to_items(seqs, V):
@@ -71,28 +71,24 @@ def screen_items(items, vpa_lo, vpa_hi):
     }
 
 
-def main(n_samples: int = 2048, smoke: bool = False) -> Path:
+def main(ckpt: str, n_samples: int = 2048, smoke: bool = False) -> Path:
     n_samples = 64 if smoke else n_samples
     ref = load("plausibility_reference")["payload"]
-    lo = ref["packing_window_a3_per_atom"]["lo_1pct"]
-    hi = ref["packing_window_a3_per_atom"]["hi_99pct"]
+    lo = ref["packing_window_angstrom3_per_atom"]["lo_1pct"]
+    hi = ref["packing_window_angstrom3_per_atom"]["hi_99pct"]
     reference_ceiling = ref["data_reference"]
 
-    ckpt = torch.load(CKPT_PATH, map_location="cpu")
-    tc = dict(ckpt["train_config"])
-    cfg = CrystalTrainConfig(**tc)
     dev = torch.device("cpu")
-    V = CrystalVocab(ckpt["elements"], order=ckpt["vocab_order"])
-    gm = GrammarMask(V, order=ckpt["vocab_order"])
-    model = CrystalDecoder(ckpt["vocab_size"], ckpt["max_len"] + 2, cfg).to(dev)
-    model.load_state_dict(ckpt["state_dict"])
-    model.eval()
+    model, ck = load_checkpoint(ckpt, dev)
+    cfg = CrystalTrainConfig(**ck["train_config"])
+    V = CrystalVocab(ck["elements"], order=ck["vocab_order"])
+    gm = GrammarMask(V, order=ck["vocab_order"])
 
     torch.manual_seed(0)
     torch.use_deterministic_algorithms(True)
     rng = np.random.default_rng(0)
     seqs, diag = sample(model, V, gm, cfg, dev, n_samples, use_mask=True,
-                        project_at_inference=True, max_len=ckpt["max_len"] + 2, rng=rng)
+                        project_at_inference=True, max_len=ck["max_len"] + 2, rng=rng)
 
     n_sampled = len(seqs)
     items, n_parsed = sequences_to_items(seqs, V)
@@ -110,9 +106,11 @@ def main(n_samples: int = 2048, smoke: bool = False) -> Path:
     }
 
     payload = {
-        "checkpoint": str(CKPT_PATH),
-        "checkpoint_arm": ckpt["train_config"]["arm"],
-        "checkpoint_density_target": ckpt["trained_density_target"],
+        "checkpoint": Path(ckpt).name,
+        "checkpoint_sha256": ck["checkpoint_sha256"],
+        "tokenizer": ck["tokenizer"],
+        "checkpoint_arm": ck["train_config"]["arm"],
+        "checkpoint_density_target": ck["trained_density_target"],
         "sampling": {
             "n_samples": n_samples,
             "use_mask": True,
@@ -127,7 +125,7 @@ def main(n_samples: int = 2048, smoke: bool = False) -> Path:
             "electronegativity_ordered_rate": reference_ceiling["electronegativity_ordered_rate"],
             "packing_plausible_rate": reference_ceiling["packing_plausible_rate"],
         },
-        "packing_window_a3_per_atom": {"lo_1pct": lo, "hi_99pct": hi},
+        "packing_window_angstrom3_per_atom": {"lo_1pct": lo, "hi_99pct": hi},
         "min_interatomic_distance": {
             "computable": False,
             "reason": (
@@ -151,23 +149,13 @@ def main(n_samples: int = 2048, smoke: bool = False) -> Path:
             "compositions and cells that parsed and built."
         ),
         "scope_note": (
-            "This funnel scores the actual crystal-generation model (projected, "
-            "src/cpt/train/train_crystal.py, CrystalVocab), whose token vocabulary "
-            "has no atomic-position tokens at all. It is a different serialization "
-            "from the standalone character-level CIF grammar in "
-            "src/cpt/crystal/cif_grammar.py used by parse_validity, which does "
-            "emit placeholder fractional-coordinate numbers and is where the "
-            "reviewer-cited 47 percent structure-build rate originates. Parse here "
-            "means grammar-complete composition+cell tokens; build here means the "
-            "decoded cell has a valid triclinic volume and every element resolves "
-            "to a known atomic mass. Neither step in this funnel produces or could "
-            "produce atomic positions."
+            'The generator emits composition and cell parameters without atomic positions. Grammar completion, composition-cell decoding and chemical screens use distinct denominators; these screens do not establish structural stability.'
         ),
     }
     return emit(
         "generated_plausibility" + ("_smoke" if smoke else ""),
         payload,
-        config={"n_samples": n_samples, "smoke": smoke, "checkpoint": str(CKPT_PATH)},
+        config={"n_samples": n_samples, "smoke": smoke, "checkpoint": Path(ckpt).name},
         seeds=[0], script=SCRIPT,
     )
 
@@ -176,5 +164,6 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--n-samples", type=int, default=2048)
     ap.add_argument("--smoke", action="store_true")
+    ap.add_argument("--ckpt", required=True, help="trained density checkpoint")
     a = ap.parse_args()
-    print(main(n_samples=a.n_samples, smoke=a.smoke))
+    print(main(ckpt=a.ckpt, n_samples=a.n_samples, smoke=a.smoke))

@@ -1,5 +1,3 @@
-"""Compute and emit the exact constrained targets for the synthetic task."""
-
 from __future__ import annotations
 
 import argparse

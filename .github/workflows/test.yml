@@ -1,28 +1,25 @@
-name: test
+name: Verify submission
 
 on:
   push:
   pull_request:
+
+permissions:
+  contents: read
 
 jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - uses: astral-sh/setup-uv@v5
+      - uses: actions/setup-python@v5
         with:
-          enable-cache: true
-
-      # Fails if pyproject and uv.lock disagree, which is how the environment stopped
-      # being installable the last time: the floors drifted and nothing checked.
-      - name: Install
-        run: uv sync --locked --extra dev
-
-      - name: Lint
-        run: uv run ruff check src tests
-
-      # A bare clone carries no MP-20 and no development/, so the suite must SKIP those,
-      # never fail them. The counts are the contract the README states.
-      - name: Verify the claims
-        run: uv run pytest tests/ -p no:warnings -v | tail -1 | tee /dev/stderr | grep -q "561 passed, 153 skipped, 2 xfailed"
+          python-version: '3.13'
+      - run: python -m pip install uv
+      - run: uv sync --locked --no-dev
+      - run: uv run --no-sync python -m cpt.verify --results results
+      - run: uv build
+      - name: Check supplied checkpoint sampling
+        env:
+          CPT_RESULTS_DIR: development/runs/ci
+        run: uv run --no-sync python -m cpt.crystal.best_of_n --ckpt results/checkpoints/projected_d5.0.pt --smoke

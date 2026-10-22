@@ -1,5 +1,3 @@
-"""Batched expectation-constraint projection layer."""
-
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -9,8 +7,6 @@ import torch
 
 @dataclass
 class ProjectionResult:
-    """Output of a projection, with everything needs to report."""
-
     q: torch.Tensor
     lam: torch.Tensor
     residual: torch.Tensor
@@ -108,8 +104,6 @@ def project(
 
 
 class ProjectionLayer(torch.autograd.Function):
-    """Projection with implicit-function-theorem gradients."""
-
     @staticmethod
     def forward(ctx, logits, A, b, mask, max_iter, tol):
         with torch.no_grad():

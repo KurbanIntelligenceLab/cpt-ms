@@ -1,4 +1,3 @@
-"""Best-of-n from the unsteered model: the baseline a reviewer asks for first."""
 from __future__ import annotations
 
 import argparse
@@ -97,6 +96,8 @@ def main(ckpt: str, targets: list[float] | None = None, pool: int = 512,
     payload = {
         "arm": "best-of-n from the unsteered (masked, unprojected) model",
         "checkpoint": Path(ckpt).name,
+        "checkpoint_sha256": ck["checkpoint_sha256"],
+        "tokenizer": ck["tokenizer"],
         "trained_density_target": float(ck["trained_density_target"]),
         "pool_size": int(pool),
         "n_valid_in_pool": int(dens.size),

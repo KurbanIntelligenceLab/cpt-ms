@@ -1,8 +1,7 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "2.0",
   "artifact_name": "conditional_baseline",
-  "script": "src/cpt/train/train_crystal.py",
-  "git_commit": "6d88840627bc249b085af4bbd8c7be934b146f3b-dirty",
+  "script": "src/cpt/reproduce.py",
   "config": {
     "targets": [
       3.0,
@@ -21,14 +20,11 @@
     0,
     1
   ],
-  "created_utc": "2026-08-11T19:12:36.952059+00:00",
-  "python": "3.11.15",
-  "platform": "macOS-26.5.2-arm64-arm-64bit",
-  "payload_sha256": "9b3c879a90abe7182fe22384bfbecfd9c20ad7d79eac411e2771301a4024ea3c",
+  "payload_sha256": "83fc12b0e3f64b1f3a2d3121a3cc81b465fc7b8216d50054c4c1e9b72a59bd98",
   "payload": {
     "per_target": {
       "3.0": {
-        "A3": {
+        "projected": {
           "err": 0.24021361009591957,
           "err_sd": 0.091583184525597,
           "nov": 0.927001953125,
@@ -39,7 +35,7 @@
           "dens": 3.2402136100959193,
           "n": 2.0
         },
-        "A4": {
+        "conditional": {
           "err": 0.13761062492728993,
           "err_sd": 0.004517854365572909,
           "nov": 0.073486328125,
@@ -52,7 +48,7 @@
         }
       },
       "5.0": {
-        "A3": {
+        "projected": {
           "err": 0.1510648116254334,
           "err_sd": 0.09685182458235549,
           "nov": 0.94580078125,
@@ -63,7 +59,7 @@
           "dens": 4.848935188374567,
           "n": 2.0
         },
-        "A4": {
+        "conditional": {
           "err": 0.032769733330798356,
           "err_sd": 0.019703985310937856,
           "nov": 0.059326171875,
@@ -76,7 +72,7 @@
         }
       },
       "8.0": {
-        "A3": {
+        "projected": {
           "err": 1.2403089450901237,
           "err_sd": 0.03147282373420199,
           "nov": 0.94140625,
@@ -87,7 +83,7 @@
           "dens": 6.759691054909876,
           "n": 2.0
         },
-        "A4": {
+        "conditional": {
           "err": 0.046873426448065914,
           "err_sd": 0.038241946031021844,
           "nov": 0.0726318359375,
@@ -100,7 +96,7 @@
         }
       },
       "10.0": {
-        "A3": {
+        "projected": {
           "err": 1.6697273022425585,
           "err_sd": 0.7893813303671311,
           "nov": 0.9481201171875,
@@ -111,7 +107,7 @@
           "dens": 8.330272697757442,
           "n": 2.0
         },
-        "A4": {
+        "conditional": {
           "err": 0.00780245854857764,
           "err_sd": 0.009929692531082866,
           "nov": 0.0294189453125,
@@ -133,28 +129,28 @@
         10.0
       ],
       "seeds_per_cell": 2,
-      "a4_wins_accuracy_at_all_targets": true,
+      "conditional_wins_accuracy_at_all_targets": true,
       "mae_below_mean": {
-        "A4": 0.08519017912904414,
-        "A3": 0.19563921086067648
+        "conditional": 0.08519017912904414,
+        "projected": 0.19563921086067648
       },
       "mae_above_mean": {
-        "A4": 0.027337942498321777,
-        "A3": 1.455018123666341
+        "conditional": 0.027337942498321777,
+        "projected": 1.455018123666341
       },
       "novel_formula_fraction": {
-        "A4": 0.0587158203125,
-        "A3": 0.940582275390625
+        "conditional": 0.0587158203125,
+        "projected": 0.940582275390625
       },
       "unique_formula_fraction": {
-        "A4": 0.439849853515625,
-        "A3": 0.785797119140625
+        "conditional": 0.439849853515625,
+        "projected": 0.785797119140625
       },
       "validity_all_arms_all_targets": 1.0
     },
     "runs": {
-      "A3_t10.0_s0": {
-        "arm": "A3",
+      "projected_t10.0_s0": {
+        "arm": "projected",
         "target": 10.0,
         "seed": 0,
         "loss": 4.1169257164001465,
@@ -180,8 +176,8 @@
         "data_mean": 6.678904185463716,
         "wall": 2631.0
       },
-      "A3_t10.0_s1": {
-        "arm": "A3",
+      "projected_t10.0_s1": {
+        "arm": "projected",
         "target": 10.0,
         "seed": 1,
         "loss": 2.007220983505249,
@@ -207,8 +203,8 @@
         "data_mean": 6.678904185463716,
         "wall": 1290.7
       },
-      "A3_t3.0_s0": {
-        "arm": "A3",
+      "projected_t3.0_s0": {
+        "arm": "projected",
         "target": 3.0,
         "seed": 0,
         "loss": 1.8339992761611938,
@@ -234,8 +230,8 @@
         "data_mean": 6.678904185463716,
         "wall": 1273.9
       },
-      "A3_t3.0_s1": {
-        "arm": "A3",
+      "projected_t3.0_s1": {
+        "arm": "projected",
         "target": 3.0,
         "seed": 1,
         "loss": 1.565179467201233,
@@ -261,8 +257,8 @@
         "data_mean": 6.678904185463716,
         "wall": 1269.2
       },
-      "A3_t5.0_s0": {
-        "arm": "A3",
+      "projected_t5.0_s0": {
+        "arm": "projected",
         "target": 5.0,
         "seed": 0,
         "loss": 2.0580506324768066,
@@ -288,8 +284,8 @@
         "data_mean": 6.678904185463716,
         "wall": 2132.3
       },
-      "A3_t5.0_s1": {
-        "arm": "A3",
+      "projected_t5.0_s1": {
+        "arm": "projected",
         "target": 5.0,
         "seed": 1,
         "loss": 1.460003137588501,
@@ -315,8 +311,8 @@
         "data_mean": 6.678904185463716,
         "wall": 1459.9
       },
-      "A3_t8.0_s0": {
-        "arm": "A3",
+      "projected_t8.0_s0": {
+        "arm": "projected",
         "target": 8.0,
         "seed": 0,
         "loss": 1.886020302772522,
@@ -342,8 +338,8 @@
         "data_mean": 6.678904185463716,
         "wall": 1197.0
       },
-      "A3_t8.0_s1": {
-        "arm": "A3",
+      "projected_t8.0_s1": {
+        "arm": "projected",
         "target": 8.0,
         "seed": 1,
         "loss": 1.9398763179779053,
@@ -369,8 +365,8 @@
         "data_mean": 6.678904185463716,
         "wall": 2127.2
       },
-      "A4_t10.0_s0": {
-        "arm": "A4",
+      "conditional_t10.0_s0": {
+        "arm": "conditional",
         "target": 10.0,
         "seed": 0,
         "loss": 0.3920992314815521,
@@ -396,8 +392,8 @@
         "data_mean": 6.678904185463716,
         "wall": 202.9
       },
-      "A4_t10.0_s1": {
-        "arm": "A4",
+      "conditional_t10.0_s1": {
+        "arm": "conditional",
         "target": 10.0,
         "seed": 1,
         "loss": 0.39929288625717163,
@@ -423,8 +419,8 @@
         "data_mean": 6.678904185463716,
         "wall": 211.7
       },
-      "A4_t3.0_s0": {
-        "arm": "A4",
+      "conditional_t3.0_s0": {
+        "arm": "conditional",
         "target": 3.0,
         "seed": 0,
         "loss": 0.3313414752483368,
@@ -450,11 +446,13 @@
         "data_mean": 6.678904185463716,
         "wall": 231.8
       },
-      "A4_t3.0_s1": {
-        "arm": "A4",
+      "conditional_t3.0_s1": {
+        "arm": "conditional",
         "target": 3.0,
         "seed": 1,
-        "loss": Infinity,
+        "loss": {
+          "nonfinite": "+inf"
+        },
         "n_train": 2392,
         "frac_split": 0.08888888888888889,
         "train_density_mean": 3.069951788325094,
@@ -477,8 +475,8 @@
         "data_mean": 6.678904185463716,
         "wall": 231.9
       },
-      "A4_t5.0_s0": {
-        "arm": "A4",
+      "conditional_t5.0_s0": {
+        "arm": "conditional",
         "target": 5.0,
         "seed": 0,
         "loss": 0.4072815179824829,
@@ -504,8 +502,8 @@
         "data_mean": 6.678904185463716,
         "wall": 218.7
       },
-      "A4_t5.0_s1": {
-        "arm": "A4",
+      "conditional_t5.0_s1": {
+        "arm": "conditional",
         "target": 5.0,
         "seed": 1,
         "loss": 0.4072757065296173,
@@ -531,8 +529,8 @@
         "data_mean": 6.678904185463716,
         "wall": 213.8
       },
-      "A4_t8.0_s0": {
-        "arm": "A4",
+      "conditional_t8.0_s0": {
+        "arm": "conditional",
         "target": 8.0,
         "seed": 0,
         "loss": 0.36670926213264465,
@@ -558,8 +556,8 @@
         "data_mean": 6.678904185463716,
         "wall": 209.0
       },
-      "A4_t8.0_s1": {
-        "arm": "A4",
+      "conditional_t8.0_s1": {
+        "arm": "conditional",
         "target": 8.0,
         "seed": 1,
         "loss": 0.37043046951293945,
@@ -586,7 +584,7 @@
         "wall": 211.8
       }
     },
-    "note": "A4 is the conditional-training baseline: masked model trained on the MP-20 subset within +/-0.5 of the target, no decode-time constraint. A3 is masked plus trained-through projection, read deployed. Both scored against the FULL split's chemistry, never A4's filtered slice.",
-    "tv_caveat": "element_tv_vs_full_data is a SHIFT measure, not a diversity measure: any arm reaching a non-mean target must shift, the orderings disagree across targets, and A4's TV tracks its own slice's TV to within 0.004."
+    "note": "conditional is the conditional-training baseline: masked model trained on the MP-20 subset within +/-0.5 of the target, no decode-time constraint. projected is masked plus trained-through projection, read deployed. Both scored against the FULL split's chemistry, never conditional's filtered slice.",
+    "tv_caveat": "element_tv_vs_full_data is a SHIFT measure, not a diversity measure: any arm reaching a non-mean target must shift, the orderings disagree across targets, and conditional's TV tracks its own slice's TV to within 0.004."
   }
 }
