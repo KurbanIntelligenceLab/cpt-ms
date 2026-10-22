@@ -1,0 +1,53 @@
+{
+  "schema_version": "2.0",
+  "artifact_name": "materials_inputs",
+  "script": "src/cpt/reproduce.py",
+  "config": {
+    "serialization": "cell_first"
+  },
+  "config_hash": "57e0e1eb0eb9acd0",
+  "seeds": [],
+  "payload_sha256": "1e99701686af7959e8fa14e9a167619eabebaea8cf2987483053494101614022",
+  "payload": {
+    "splits": {
+      "train": {
+        "file": "mp20_train.csv",
+        "sha256": "133bab58dba02d316f9f91174839f17802dce648be4e8659d1a42b32b97fa01d",
+        "rows": 27136,
+        "duplicate_ids": 0,
+        "duplicate_cif_strings": 0,
+        "ids_shared_with_preceding_splits": 0,
+        "cifs_shared_with_preceding_splits": 0
+      },
+      "val": {
+        "file": "mp20_val.csv",
+        "sha256": "7b5f4085464b3eac9fd2123acee97ec372214004ce7e983b535b33395abc3e29",
+        "rows": 9047,
+        "duplicate_ids": 0,
+        "duplicate_cif_strings": 0,
+        "ids_shared_with_preceding_splits": 0,
+        "cifs_shared_with_preceding_splits": 0
+      },
+      "test": {
+        "file": "mp20_test.csv",
+        "sha256": "dd605c7543cf95a13e150aed630d0915e74edc8dea17e85301ee6fbfeb7f500a",
+        "rows": 9046,
+        "duplicate_ids": 0,
+        "duplicate_cif_strings": 0,
+        "ids_shared_with_preceding_splits": 0,
+        "cifs_shared_with_preceding_splits": 0
+      }
+    },
+    "retained_training_records": 26910,
+    "count_clipped_records": 39,
+    "vocabulary_size": 884,
+    "maximum_sequence_length": 26,
+    "model_position_slots": 28,
+    "model_parameters": 5199220,
+    "packing_window": [
+      8.919033410425,
+      46.301696929933335
+    ],
+    "duplicate_check_scope": "Exact identifiers and CIF strings; not structural equivalence."
+  }
+}

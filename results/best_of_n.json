@@ -1,0 +1,621 @@
+{
+  "schema_version": "2.0",
+  "artifact_name": "best_of_n",
+  "script": "src/cpt/crystal/best_of_n.py",
+  "config": {
+    "pool": 1024,
+    "targets": [
+      1.5,
+      2.0,
+      3.0,
+      5.0,
+      6.317,
+      8.0,
+      10.0,
+      13.0,
+      16.0,
+      20.0
+    ],
+    "n_values": [
+      1,
+      4,
+      16,
+      64
+    ],
+    "checkpoint": "projected_d5.0.pt"
+  },
+  "config_hash": "6e73adf9e652f575",
+  "seeds": [
+    0
+  ],
+  "payload_sha256": "813cb3313964a60141e0ec7f53d658aeff4dd75f82b1bab2b7e7eb2d79c6a028",
+  "payload": {
+    "arm": "best-of-n from the unsteered (masked, unprojected) model",
+    "checkpoint": "projected_d5.0.pt",
+    "trained_density_target": 5.0,
+    "pool_size": 1024,
+    "n_valid_in_pool": 1021,
+    "pool_wall_clock_s": 12.2,
+    "pool_density": {
+      "mean": 8.657053989326915,
+      "sd": 5.190727760717373,
+      "min": 0.3588065021958928,
+      "max": 38.17421943551929
+    },
+    "n_values": [
+      1,
+      4,
+      16,
+      64
+    ],
+    "rows": [
+      {
+        "target": 1.5,
+        "n": 1,
+        "mean_best_error": 6.904905896720855,
+        "sd_best_error": 4.198601163977823,
+        "trials": 200,
+        "inference_samples_per_output": 1
+      },
+      {
+        "target": 1.5,
+        "n": 4,
+        "mean_best_error": 3.0445985082740505,
+        "sd_best_error": 1.7858105700953175,
+        "trials": 200,
+        "inference_samples_per_output": 4
+      },
+      {
+        "target": 1.5,
+        "n": 16,
+        "mean_best_error": 1.437805332734979,
+        "sd_best_error": 0.8610101215097936,
+        "trials": 200,
+        "inference_samples_per_output": 16
+      },
+      {
+        "target": 1.5,
+        "n": 64,
+        "mean_best_error": 0.48419438900009726,
+        "sd_best_error": 0.4092550345148328,
+        "trials": 200,
+        "inference_samples_per_output": 64
+      },
+      {
+        "target": 2.0,
+        "n": 1,
+        "mean_best_error": 7.1273359482600505,
+        "sd_best_error": 5.558982434785807,
+        "trials": 200,
+        "inference_samples_per_output": 1
+      },
+      {
+        "target": 2.0,
+        "n": 4,
+        "mean_best_error": 2.347552355726193,
+        "sd_best_error": 1.6772573977477803,
+        "trials": 200,
+        "inference_samples_per_output": 4
+      },
+      {
+        "target": 2.0,
+        "n": 16,
+        "mean_best_error": 1.008198543705968,
+        "sd_best_error": 0.7077470559001143,
+        "trials": 200,
+        "inference_samples_per_output": 16
+      },
+      {
+        "target": 2.0,
+        "n": 64,
+        "mean_best_error": 0.28975255532991545,
+        "sd_best_error": 0.2845363188157763,
+        "trials": 200,
+        "inference_samples_per_output": 64
+      },
+      {
+        "target": 3.0,
+        "n": 1,
+        "mean_best_error": 5.08990319452625,
+        "sd_best_error": 4.736814058973003,
+        "trials": 200,
+        "inference_samples_per_output": 1
+      },
+      {
+        "target": 3.0,
+        "n": 4,
+        "mean_best_error": 1.9097580309786235,
+        "sd_best_error": 1.6034236450746868,
+        "trials": 200,
+        "inference_samples_per_output": 4
+      },
+      {
+        "target": 3.0,
+        "n": 16,
+        "mean_best_error": 0.5746716897423956,
+        "sd_best_error": 0.4496733256953041,
+        "trials": 200,
+        "inference_samples_per_output": 16
+      },
+      {
+        "target": 3.0,
+        "n": 64,
+        "mean_best_error": 0.13786801161995726,
+        "sd_best_error": 0.14909633115952012,
+        "trials": 200,
+        "inference_samples_per_output": 64
+      },
+      {
+        "target": 5.0,
+        "n": 1,
+        "mean_best_error": 4.303050018128415,
+        "sd_best_error": 4.8121150191189725,
+        "trials": 200,
+        "inference_samples_per_output": 1
+      },
+      {
+        "target": 5.0,
+        "n": 4,
+        "mean_best_error": 1.0063475714234928,
+        "sd_best_error": 0.9897195969524237,
+        "trials": 200,
+        "inference_samples_per_output": 4
+      },
+      {
+        "target": 5.0,
+        "n": 16,
+        "mean_best_error": 0.24984696402430942,
+        "sd_best_error": 0.2434785380404265,
+        "trials": 200,
+        "inference_samples_per_output": 16
+      },
+      {
+        "target": 5.0,
+        "n": 64,
+        "mean_best_error": 0.07349970650864072,
+        "sd_best_error": 0.05879794230753784,
+        "trials": 200,
+        "inference_samples_per_output": 64
+      },
+      {
+        "target": 6.317,
+        "n": 1,
+        "mean_best_error": 3.9103386130845035,
+        "sd_best_error": 4.248147431160925,
+        "trials": 200,
+        "inference_samples_per_output": 1
+      },
+      {
+        "target": 6.317,
+        "n": 4,
+        "mean_best_error": 0.8432530951330041,
+        "sd_best_error": 0.7295833998754195,
+        "trials": 200,
+        "inference_samples_per_output": 4
+      },
+      {
+        "target": 6.317,
+        "n": 16,
+        "mean_best_error": 0.2520641109583457,
+        "sd_best_error": 0.23482119523963557,
+        "trials": 200,
+        "inference_samples_per_output": 16
+      },
+      {
+        "target": 6.317,
+        "n": 64,
+        "mean_best_error": 0.06241689760931469,
+        "sd_best_error": 0.06610575486924271,
+        "trials": 200,
+        "inference_samples_per_output": 64
+      },
+      {
+        "target": 8.0,
+        "n": 1,
+        "mean_best_error": 3.7289309744474135,
+        "sd_best_error": 3.8088676345785397,
+        "trials": 200,
+        "inference_samples_per_output": 1
+      },
+      {
+        "target": 8.0,
+        "n": 4,
+        "mean_best_error": 1.1388979252613647,
+        "sd_best_error": 0.9264903276881952,
+        "trials": 200,
+        "inference_samples_per_output": 4
+      },
+      {
+        "target": 8.0,
+        "n": 16,
+        "mean_best_error": 0.3909967677747997,
+        "sd_best_error": 0.3577285406251776,
+        "trials": 200,
+        "inference_samples_per_output": 16
+      },
+      {
+        "target": 8.0,
+        "n": 64,
+        "mean_best_error": 0.09687042907119948,
+        "sd_best_error": 0.08909066389620782,
+        "trials": 200,
+        "inference_samples_per_output": 64
+      },
+      {
+        "target": 10.0,
+        "n": 1,
+        "mean_best_error": 4.111882678999563,
+        "sd_best_error": 2.7797871707628747,
+        "trials": 200,
+        "inference_samples_per_output": 1
+      },
+      {
+        "target": 10.0,
+        "n": 4,
+        "mean_best_error": 1.5714117203376663,
+        "sd_best_error": 1.2082901453502715,
+        "trials": 200,
+        "inference_samples_per_output": 4
+      },
+      {
+        "target": 10.0,
+        "n": 16,
+        "mean_best_error": 0.5157473051586269,
+        "sd_best_error": 0.42138512632666464,
+        "trials": 200,
+        "inference_samples_per_output": 16
+      },
+      {
+        "target": 10.0,
+        "n": 64,
+        "mean_best_error": 0.12997457521438713,
+        "sd_best_error": 0.13044532034888792,
+        "trials": 200,
+        "inference_samples_per_output": 64
+      },
+      {
+        "target": 13.0,
+        "n": 1,
+        "mean_best_error": 5.844275749836832,
+        "sd_best_error": 3.185312202992533,
+        "trials": 200,
+        "inference_samples_per_output": 1
+      },
+      {
+        "target": 13.0,
+        "n": 4,
+        "mean_best_error": 2.341554858607868,
+        "sd_best_error": 1.929217303170912,
+        "trials": 200,
+        "inference_samples_per_output": 4
+      },
+      {
+        "target": 13.0,
+        "n": 16,
+        "mean_best_error": 0.6825734690293084,
+        "sd_best_error": 0.7192559325827076,
+        "trials": 200,
+        "inference_samples_per_output": 16
+      },
+      {
+        "target": 13.0,
+        "n": 64,
+        "mean_best_error": 0.17700294341190756,
+        "sd_best_error": 0.21556474574343432,
+        "trials": 200,
+        "inference_samples_per_output": 64
+      },
+      {
+        "target": 16.0,
+        "n": 1,
+        "mean_best_error": 7.9064489999565986,
+        "sd_best_error": 3.6335175481392796,
+        "trials": 200,
+        "inference_samples_per_output": 1
+      },
+      {
+        "target": 16.0,
+        "n": 4,
+        "mean_best_error": 4.269064906911337,
+        "sd_best_error": 2.785324650593024,
+        "trials": 200,
+        "inference_samples_per_output": 4
+      },
+      {
+        "target": 16.0,
+        "n": 16,
+        "mean_best_error": 1.4803083828994574,
+        "sd_best_error": 1.4108976100270716,
+        "trials": 200,
+        "inference_samples_per_output": 16
+      },
+      {
+        "target": 16.0,
+        "n": 64,
+        "mean_best_error": 0.44839537817972863,
+        "sd_best_error": 0.46477171163036535,
+        "trials": 200,
+        "inference_samples_per_output": 64
+      },
+      {
+        "target": 20.0,
+        "n": 1,
+        "mean_best_error": 11.854129392167925,
+        "sd_best_error": 4.2103402469184585,
+        "trials": 200,
+        "inference_samples_per_output": 1
+      },
+      {
+        "target": 20.0,
+        "n": 4,
+        "mean_best_error": 6.971774376363439,
+        "sd_best_error": 3.7631403536695065,
+        "trials": 200,
+        "inference_samples_per_output": 4
+      },
+      {
+        "target": 20.0,
+        "n": 16,
+        "mean_best_error": 3.1493523314384153,
+        "sd_best_error": 2.521978251962415,
+        "trials": 200,
+        "inference_samples_per_output": 16
+      },
+      {
+        "target": 20.0,
+        "n": 64,
+        "mean_best_error": 0.9502377718022731,
+        "sd_best_error": 0.9183303019122742,
+        "trials": 200,
+        "inference_samples_per_output": 64
+      }
+    ],
+    "protocol_note": "One unsteered pool is drawn once and reused for every target and every n; best-of-n is estimated by repeated subsampling of n draws from that pool, so the reported value is the expected error of a practitioner running best-of-n rather than the best single draw in the pool.",
+    "diversity": [
+      {
+        "target": 1.5,
+        "n": 1,
+        "unique_formula_fraction": 0.84,
+        "n_outputs": 200
+      },
+      {
+        "target": 1.5,
+        "n": 4,
+        "unique_formula_fraction": 0.725,
+        "n_outputs": 200
+      },
+      {
+        "target": 1.5,
+        "n": 16,
+        "unique_formula_fraction": 0.525,
+        "n_outputs": 200
+      },
+      {
+        "target": 1.5,
+        "n": 64,
+        "unique_formula_fraction": 0.225,
+        "n_outputs": 200
+      },
+      {
+        "target": 2.0,
+        "n": 1,
+        "unique_formula_fraction": 0.85,
+        "n_outputs": 200
+      },
+      {
+        "target": 2.0,
+        "n": 4,
+        "unique_formula_fraction": 0.72,
+        "n_outputs": 200
+      },
+      {
+        "target": 2.0,
+        "n": 16,
+        "unique_formula_fraction": 0.505,
+        "n_outputs": 200
+      },
+      {
+        "target": 2.0,
+        "n": 64,
+        "unique_formula_fraction": 0.22,
+        "n_outputs": 200
+      },
+      {
+        "target": 3.0,
+        "n": 1,
+        "unique_formula_fraction": 0.825,
+        "n_outputs": 200
+      },
+      {
+        "target": 3.0,
+        "n": 4,
+        "unique_formula_fraction": 0.7,
+        "n_outputs": 200
+      },
+      {
+        "target": 3.0,
+        "n": 16,
+        "unique_formula_fraction": 0.48,
+        "n_outputs": 200
+      },
+      {
+        "target": 3.0,
+        "n": 64,
+        "unique_formula_fraction": 0.225,
+        "n_outputs": 200
+      },
+      {
+        "target": 5.0,
+        "n": 1,
+        "unique_formula_fraction": 0.805,
+        "n_outputs": 200
+      },
+      {
+        "target": 5.0,
+        "n": 4,
+        "unique_formula_fraction": 0.72,
+        "n_outputs": 200
+      },
+      {
+        "target": 5.0,
+        "n": 16,
+        "unique_formula_fraction": 0.445,
+        "n_outputs": 200
+      },
+      {
+        "target": 5.0,
+        "n": 64,
+        "unique_formula_fraction": 0.205,
+        "n_outputs": 200
+      },
+      {
+        "target": 6.317,
+        "n": 1,
+        "unique_formula_fraction": 0.815,
+        "n_outputs": 200
+      },
+      {
+        "target": 6.317,
+        "n": 4,
+        "unique_formula_fraction": 0.73,
+        "n_outputs": 200
+      },
+      {
+        "target": 6.317,
+        "n": 16,
+        "unique_formula_fraction": 0.455,
+        "n_outputs": 200
+      },
+      {
+        "target": 6.317,
+        "n": 64,
+        "unique_formula_fraction": 0.215,
+        "n_outputs": 200
+      },
+      {
+        "target": 8.0,
+        "n": 1,
+        "unique_formula_fraction": 0.835,
+        "n_outputs": 200
+      },
+      {
+        "target": 8.0,
+        "n": 4,
+        "unique_formula_fraction": 0.715,
+        "n_outputs": 200
+      },
+      {
+        "target": 8.0,
+        "n": 16,
+        "unique_formula_fraction": 0.48,
+        "n_outputs": 200
+      },
+      {
+        "target": 8.0,
+        "n": 64,
+        "unique_formula_fraction": 0.22,
+        "n_outputs": 200
+      },
+      {
+        "target": 10.0,
+        "n": 1,
+        "unique_formula_fraction": 0.84,
+        "n_outputs": 200
+      },
+      {
+        "target": 10.0,
+        "n": 4,
+        "unique_formula_fraction": 0.77,
+        "n_outputs": 200
+      },
+      {
+        "target": 10.0,
+        "n": 16,
+        "unique_formula_fraction": 0.515,
+        "n_outputs": 200
+      },
+      {
+        "target": 10.0,
+        "n": 64,
+        "unique_formula_fraction": 0.23,
+        "n_outputs": 200
+      },
+      {
+        "target": 13.0,
+        "n": 1,
+        "unique_formula_fraction": 0.835,
+        "n_outputs": 200
+      },
+      {
+        "target": 13.0,
+        "n": 4,
+        "unique_formula_fraction": 0.745,
+        "n_outputs": 200
+      },
+      {
+        "target": 13.0,
+        "n": 16,
+        "unique_formula_fraction": 0.515,
+        "n_outputs": 200
+      },
+      {
+        "target": 13.0,
+        "n": 64,
+        "unique_formula_fraction": 0.24,
+        "n_outputs": 200
+      },
+      {
+        "target": 16.0,
+        "n": 1,
+        "unique_formula_fraction": 0.805,
+        "n_outputs": 200
+      },
+      {
+        "target": 16.0,
+        "n": 4,
+        "unique_formula_fraction": 0.76,
+        "n_outputs": 200
+      },
+      {
+        "target": 16.0,
+        "n": 16,
+        "unique_formula_fraction": 0.495,
+        "n_outputs": 200
+      },
+      {
+        "target": 16.0,
+        "n": 64,
+        "unique_formula_fraction": 0.245,
+        "n_outputs": 200
+      },
+      {
+        "target": 20.0,
+        "n": 1,
+        "unique_formula_fraction": 0.785,
+        "n_outputs": 200
+      },
+      {
+        "target": 20.0,
+        "n": 4,
+        "unique_formula_fraction": 0.745,
+        "n_outputs": 200
+      },
+      {
+        "target": 20.0,
+        "n": 16,
+        "unique_formula_fraction": 0.485,
+        "n_outputs": 200
+      },
+      {
+        "target": 20.0,
+        "n": 64,
+        "unique_formula_fraction": 0.25,
+        "n_outputs": 200
+      }
+    ],
+    "diversity_note": "Unique-formula fraction among best-of-n outputs. Selection concentrates the accepted set on the pool's tail near the target, so accuracy and diversity trade against each other in n. The projection shapes the distribution instead of filtering it, so its diversity does not depend on how hard the target is to hit -- which is the axis on which the two approaches actually differ.",
+    "cost_note": "Best-of-n costs n forward passes per accepted output, every time, at every target. The projection costs one training run and one forward pass per output. Accuracy alone is therefore not the comparison.",
+    "targets_outside_pool_support": [],
+    "support_note": "Every target lies inside the pool's span of 0.36 to 38.17."
+  }
+}

@@ -1,0 +1,133 @@
+{
+  "schema_version": "2.0",
+  "artifact_name": "tilt_comparator",
+  "script": "src/cpt/synthetic/train_comparator.py",
+  "config": {
+    "steps": 4000,
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "arm": "comparator",
+    "training_rule": "MLE on exact tilt samples"
+  },
+  "config_hash": "a960dc598a9d1732",
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "payload_sha256": "ab8e523668a23986a2d355612651b624abb00602f046f6860cf2a6002f7a2c68",
+  "payload": {
+    "arm": "comparator: MLE on exact samples from the sequence-level tilt, mask active",
+    "why_this_training_rule": "The comparator fits exact samples from the closed-form sequence tilt by maximum likelihood.",
+    "steps": 4000,
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "tilt_multiplier": -0.2574681118515768,
+    "reference": {
+      "tilt": {
+        "mean_charge": 1.1102230246251565e-16,
+        "charge_variance": 10.451958002729187,
+        "kl_from_tilt": 0.0,
+        "kl_to_tilt": 0.0,
+        "tv_vs_tilt": 0.0,
+        "kl_from_base": 0.3131795201058082,
+        "mass_outside_S": 0.0,
+        "hard_violation_rate": 0.8754696585928741,
+        "support_size": 36120
+      },
+      "base_S_conditioned": {
+        "mean_charge": 2.5164330452453623,
+        "charge_variance": 8.56361361318514,
+        "kl_from_tilt": 0.33472174465442883,
+        "kl_to_tilt": 0.3131795201058082,
+        "tv_vs_tilt": 0.32339368639638033,
+        "kl_from_base": 0.0,
+        "mass_outside_S": 0.0,
+        "hard_violation_rate": 0.9108939130892355,
+        "support_size": 36120
+      }
+    },
+    "runs": [
+      {
+        "seed": 0,
+        "wall_clock_s": 234.8,
+        "mean_charge": -0.14804046411416227,
+        "charge_variance": 10.495788802407326,
+        "kl_from_tilt": 0.012084359150077405,
+        "kl_to_tilt": 0.01223571123227516,
+        "tv_vs_tilt": 0.06147656191741633,
+        "kl_from_base": 0.35860615763130577,
+        "mass_outside_S": 0.0,
+        "hard_violation_rate": 0.8781846163282158,
+        "support_size": 36120
+      },
+      {
+        "seed": 1,
+        "wall_clock_s": 254.0,
+        "mean_charge": -0.11535111556570482,
+        "charge_variance": 10.082800864169768,
+        "kl_from_tilt": 0.016323407906249886,
+        "kl_to_tilt": 0.016649962223213396,
+        "tv_vs_tilt": 0.07128359608838367,
+        "kl_from_base": 0.3697515950771729,
+        "mass_outside_S": 0.0,
+        "hard_violation_rate": 0.872502278774047,
+        "support_size": 36120
+      },
+      {
+        "seed": 2,
+        "wall_clock_s": 271.1,
+        "mean_charge": 0.07771871539669939,
+        "charge_variance": 10.507015800986956,
+        "kl_from_tilt": 0.02162244878363467,
+        "kl_to_tilt": 0.021283343441905727,
+        "tv_vs_tilt": 0.08127268775748965,
+        "kl_from_base": 0.31070411130203973,
+        "mass_outside_S": 0.0,
+        "hard_violation_rate": 0.8744910376975322,
+        "support_size": 36120
+      }
+    ],
+    "summary": {
+      "mean_charge": {
+        "mean": -0.061890954761055904,
+        "sd": 0.1220053006155821
+      },
+      "charge_variance": {
+        "mean": 10.361868489188018,
+        "sd": 0.2417448362928797
+      },
+      "kl_from_tilt": {
+        "mean": 0.016676738613320655,
+        "sd": 0.004778851368881699
+      },
+      "kl_to_tilt": {
+        "mean": 0.01672300563246476,
+        "sd": 0.004524258354129704
+      },
+      "tv_vs_tilt": {
+        "mean": 0.07134428192109654,
+        "sd": 0.00989820244522831
+      },
+      "kl_from_base": {
+        "mean": 0.3463539546701728,
+        "sd": 0.03137257868097952
+      },
+      "mass_outside_S": {
+        "mean": 0.0,
+        "sd": 0.0
+      },
+      "hard_violation_rate": {
+        "mean": 0.875059310933265,
+        "sd": 0.002883477219039004
+      }
+    },
+    "exactness_note": "induced distributions are enumerated over all 65536 sequences, so every divergence is exact rather than estimated"
+  }
+}

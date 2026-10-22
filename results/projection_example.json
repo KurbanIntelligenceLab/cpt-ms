@@ -1,0 +1,42 @@
+{
+  "schema_version": "2.0",
+  "artifact_name": "projection_example",
+  "script": "src/cpt/verify.py",
+  "config": {
+    "illustration_only": true
+  },
+  "config_hash": "82e571612bc82201",
+  "seeds": [],
+  "payload_sha256": "263283db73fa7cfb7f8a57c9fba320f5f950ec091fae2320d472f77103d847f4",
+  "payload": {
+    "illustration_only": true,
+    "elements": [
+      "Na",
+      "S",
+      "Fe",
+      "Pb"
+    ],
+    "masses_amu": [
+      22.98976928,
+      32.06,
+      55.845,
+      207.2
+    ],
+    "masked_probabilities": [
+      0.4,
+      0.3,
+      0.2,
+      0.1
+    ],
+    "projected_probabilities": [
+      0.31686656436974,
+      0.25094155528310663,
+      0.19295653502792773,
+      0.2392353453192256
+    ],
+    "multiplier": 0.006,
+    "masked_mean_mass": 50.702907712,
+    "local_target_mass": 75.67509671856115,
+    "note": "Synthetic local-projection illustration, not experimental measurements."
+  }
+}

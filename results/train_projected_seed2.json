@@ -1,0 +1,569 @@
+{
+  "schema_version": "2.0",
+  "artifact_name": "train_projected_seed2",
+  "script": "src/cpt/train/train_synthetic.py",
+  "config": {
+    "training": {
+      "arm": "projected",
+      "d_model": 128,
+      "n_layer": 4,
+      "n_head": 4,
+      "steps": 4000,
+      "batch": 256,
+      "lr": 0.0003,
+      "warmup": 200,
+      "seed": 2,
+      "eval_every": 500,
+      "charge_target": 0.0
+    },
+    "task": {
+      "symbols": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "charges": [
+        2,
+        1,
+        -1,
+        -2
+      ],
+      "length": 8,
+      "max_count": 3,
+      "charge_target": 0.0,
+      "markov_seed": 0,
+      "markov_bias": 1.6,
+      "markov_temperature": 0.8
+    }
+  },
+  "config_hash": "9b56cc569557978c",
+  "seeds": [
+    2
+  ],
+  "payload_sha256": "4dd772b7a6eab99320f1b55b0782745118ff05eebc7106edd7df39f915df21b0",
+  "payload": {
+    "arm": "projected",
+    "train_config": {
+      "arm": "projected",
+      "d_model": 128,
+      "n_layer": 4,
+      "n_head": 4,
+      "steps": 4000,
+      "batch": 256,
+      "lr": 0.0003,
+      "warmup": 200,
+      "seed": 2,
+      "eval_every": 500,
+      "charge_target": 0.0
+    },
+    "task_config": {
+      "symbols": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "charges": [
+        2,
+        1,
+        -1,
+        -2
+      ],
+      "length": 8,
+      "max_count": 3,
+      "charge_target": 0.0,
+      "markov_seed": 0,
+      "markov_bias": 1.6,
+      "markov_temperature": 0.8
+    },
+    "device": "cuda",
+    "gpu": "NVIDIA GeForce RTX 5090",
+    "n_parameters": 795268,
+    "history": [
+      {
+        "mean_charge": -1.072563761156097,
+        "charge_error": -1.072563761156097,
+        "charge_variance": 7.481433864374536,
+        "infeasible_mass": 0.0,
+        "kl_from_data": 2.391577608180199,
+        "kl_from_tilt": 1.7807048971004866,
+        "violation_rate": 0.8295912588500156,
+        "entropy_nats": 8.837651991996808,
+        "deployed": {
+          "mean_charge": 0.0050938587705975725,
+          "charge_error": 0.0050938587705975725,
+          "charge_variance": 1.5704287870683085,
+          "infeasible_mass": 0.0,
+          "kl_from_data": 1.8471508048799536,
+          "kl_from_tilt": 1.513740566425229,
+          "violation_rate": 0.5893081157198694,
+          "entropy_nats": 9.01802748997114,
+          "per_step_infeasible_fraction": 0.01808187841978151,
+          "per_step_infeasible_fraction_unweighted": 0.108856201171875
+        },
+        "deployed_fast_hessian": {
+          "mean_charge": 0.005093856761823658,
+          "charge_error": 0.005093856761823658,
+          "charge_variance": 1.5704287911708554,
+          "infeasible_mass": 0.0,
+          "kl_from_data": 1.847150769470585,
+          "kl_from_tilt": 1.5137405304986653,
+          "violation_rate": 0.5893081184942108,
+          "entropy_nats": 9.01802752581208
+        },
+        "precision_mismatch_sampled": {
+          "n_samples": 1000000,
+          "violation_rate_exact": 0.589475,
+          "violation_rate_fast": 0.588993,
+          "violation_rate_abs_diff": 0.00048199999999998244,
+          "two_proportion_z": 0.6927729097734615,
+          "detectable_at_0_05": false,
+          "mean_charge_exact": 0.007603,
+          "mean_charge_fast": 0.004683,
+          "infeasible_count_exact": 0,
+          "infeasible_count_fast": 0
+        },
+        "precision_mismatch": {
+          "total_variation": 3.2989157890839852e-09,
+          "max_abs_prob_diff": 4.4755026594456293e-10,
+          "mean_charge_diff": -2.0087739145691064e-09,
+          "infeasible_mass_diff": 0.0
+        },
+        "step": 500,
+        "loss": 7.354266166687012,
+        "elapsed_s": 70.0
+      },
+      {
+        "mean_charge": 0.2878474191122754,
+        "charge_error": 0.2878474191122754,
+        "charge_variance": 7.592475957472656,
+        "infeasible_mass": 0.0,
+        "kl_from_data": 2.112027946980456,
+        "kl_from_tilt": 1.8514177338262139,
+        "violation_rate": 0.8035654132034118,
+        "entropy_nats": 8.804134242321494,
+        "deployed": {
+          "mean_charge": -0.00397460241272156,
+          "charge_error": -0.00397460241272156,
+          "charge_variance": 1.4608756771455207,
+          "infeasible_mass": 0.0,
+          "kl_from_data": 1.7357357991808244,
+          "kl_from_tilt": 1.3999907211478315,
+          "violation_rate": 0.5742221593310639,
+          "entropy_nats": 9.128311548051432,
+          "per_step_infeasible_fraction": 0.01874048880014322,
+          "per_step_infeasible_fraction_unweighted": 0.108856201171875
+        },
+        "deployed_fast_hessian": {
+          "mean_charge": -0.003974603146388875,
+          "charge_error": -0.003974603146388875,
+          "charge_variance": 1.460875679491095,
+          "infeasible_mass": 0.0,
+          "kl_from_data": 1.735735785237796,
+          "kl_from_tilt": 1.399990707015907,
+          "violation_rate": 0.5742221606743463,
+          "entropy_nats": 9.128311561267735
+        },
+        "precision_mismatch_sampled": {
+          "n_samples": 1000000,
+          "violation_rate_exact": 0.575203,
+          "violation_rate_fast": 0.57373,
+          "violation_rate_abs_diff": 0.0014730000000000576,
+          "two_proportion_z": 2.1066312260391404,
+          "detectable_at_0_05": true,
+          "mean_charge_exact": -0.003423,
+          "mean_charge_fast": -0.004333,
+          "infeasible_count_exact": 0,
+          "infeasible_count_fast": 0
+        },
+        "precision_mismatch": {
+          "total_variation": 1.8018030550333383e-09,
+          "max_abs_prob_diff": 3.097791874905574e-10,
+          "mean_charge_diff": -7.336673152683049e-10,
+          "infeasible_mass_diff": 0.0
+        },
+        "step": 1000,
+        "loss": 6.909549713134766,
+        "elapsed_s": 140.5
+      },
+      {
+        "mean_charge": 0.18907906600725283,
+        "charge_error": 0.18907906600725283,
+        "charge_variance": 8.75522732973624,
+        "infeasible_mass": 0.0,
+        "kl_from_data": 2.1063393934470587,
+        "kl_from_tilt": 1.820299478908176,
+        "violation_rate": 0.8248098991610996,
+        "entropy_nats": 8.910524384400858,
+        "deployed": {
+          "mean_charge": 0.016619327375935695,
+          "charge_error": 0.016619327375935695,
+          "charge_variance": 1.4086944422341372,
+          "infeasible_mass": 0.0,
+          "kl_from_data": 1.7237885040318424,
+          "kl_from_tilt": 1.3933457062171388,
+          "violation_rate": 0.5738381676819085,
+          "entropy_nats": 9.139408265900311,
+          "per_step_infeasible_fraction": 0.01761679372474286,
+          "per_step_infeasible_fraction_unweighted": 0.108856201171875
+        },
+        "deployed_fast_hessian": {
+          "mean_charge": 0.01661932723734601,
+          "charge_error": 0.01661932723734601,
+          "charge_variance": 1.40869444290658,
+          "infeasible_mass": 0.0,
+          "kl_from_data": 1.7237885009230958,
+          "kl_from_tilt": 1.3933457030727099,
+          "violation_rate": 0.5738381680339588,
+          "entropy_nats": 9.139408269370621
+        },
+        "precision_mismatch_sampled": {
+          "n_samples": 1000000,
+          "violation_rate_exact": 0.573665,
+          "violation_rate_fast": 0.573579,
+          "violation_rate_abs_diff": 8.60000000000305e-05,
+          "two_proportion_z": 0.12296263456142317,
+          "detectable_at_0_05": false,
+          "mean_charge_exact": 0.015717,
+          "mean_charge_fast": 0.016608,
+          "infeasible_count_exact": 0,
+          "infeasible_count_fast": 0
+        },
+        "precision_mismatch": {
+          "total_variation": 5.036824505874074e-10,
+          "max_abs_prob_diff": 5.02956303124677e-10,
+          "mean_charge_diff": -1.3858968486712975e-10,
+          "infeasible_mass_diff": 0.0
+        },
+        "step": 1500,
+        "loss": 7.511706352233887,
+        "elapsed_s": 209.0
+      },
+      {
+        "mean_charge": 0.08761803737029769,
+        "charge_error": 0.08761803737029769,
+        "charge_variance": 8.954791549841884,
+        "infeasible_mass": 0.0,
+        "kl_from_data": 2.033515647003023,
+        "kl_from_tilt": 1.7213527529944654,
+        "violation_rate": 0.8262629227917915,
+        "entropy_nats": 9.028393102933864,
+        "deployed": {
+          "mean_charge": 0.00994525724384368,
+          "charge_error": 0.00994525724384368,
+          "charge_variance": 1.539607181224177,
+          "infeasible_mass": 0.0,
+          "kl_from_data": 1.6773500763765274,
+          "kl_from_tilt": 1.3451889183265495,
+          "violation_rate": 0.5976474727366397,
+          "entropy_nats": 9.203432815017099,
+          "per_step_infeasible_fraction": 0.018114385629919464,
+          "per_step_infeasible_fraction_unweighted": 0.108856201171875
+        },
+        "deployed_fast_hessian": {
+          "mean_charge": 0.009945257229451372,
+          "charge_error": 0.009945257229451372,
+          "charge_variance": 1.5396071812495082,
+          "infeasible_mass": 0.0,
+          "kl_from_data": 1.677350076216219,
+          "kl_from_tilt": 1.3451889181625352,
+          "violation_rate": 0.5976474727404314,
+          "entropy_nats": 9.203432815195221
+        },
+        "precision_mismatch_sampled": {
+          "n_samples": 1000000,
+          "violation_rate_exact": 0.597641,
+          "violation_rate_fast": 0.597558,
+          "violation_rate_abs_diff": 8.299999999994423e-05,
+          "two_proportion_z": 0.11968196911579596,
+          "detectable_at_0_05": false,
+          "mean_charge_exact": 0.00897,
+          "mean_charge_fast": 0.007041,
+          "infeasible_count_exact": 0,
+          "infeasible_count_fast": 0
+        },
+        "precision_mismatch": {
+          "total_variation": 9.881987210397491e-12,
+          "max_abs_prob_diff": 5.966845331575888e-12,
+          "mean_charge_diff": -1.4392308525512654e-11,
+          "infeasible_mass_diff": 0.0
+        },
+        "step": 2000,
+        "loss": 7.331550598144531,
+        "elapsed_s": 277.2
+      },
+      {
+        "mean_charge": 0.4123015837716356,
+        "charge_error": 0.4123015837716356,
+        "charge_variance": 8.484475412512586,
+        "infeasible_mass": 0.0,
+        "kl_from_data": 1.847449875695438,
+        "kl_from_tilt": 1.6188826413281057,
+        "violation_rate": 0.8435938848772823,
+        "entropy_nats": 9.039513496778865,
+        "deployed": {
+          "mean_charge": 0.014368017243284693,
+          "charge_error": 0.014368017243284693,
+          "charge_variance": 1.573302626968502,
+          "infeasible_mass": 0.0,
+          "kl_from_data": 1.656580511128328,
+          "kl_from_tilt": 1.3255580727445784,
+          "violation_rate": 0.6209457145410606,
+          "entropy_nats": 9.170198442908552,
+          "per_step_infeasible_fraction": 0.019421226812704185,
+          "per_step_infeasible_fraction_unweighted": 0.108856201171875
+        },
+        "deployed_fast_hessian": {
+          "mean_charge": 0.014368017244881123,
+          "charge_error": 0.014368017244881123,
+          "charge_variance": 1.5733026269758208,
+          "infeasible_mass": 0.0,
+          "kl_from_data": 1.6565805110954974,
+          "kl_from_tilt": 1.325558072712159,
+          "violation_rate": 0.620945714541569,
+          "entropy_nats": 9.170198442941022
+        },
+        "precision_mismatch_sampled": {
+          "n_samples": 1000000,
+          "violation_rate_exact": 0.620696,
+          "violation_rate_fast": 0.621274,
+          "violation_rate_abs_diff": 0.0005779999999999674,
+          "two_proportion_z": 0.8424499069059721,
+          "detectable_at_0_05": false,
+          "mean_charge_exact": 0.015165,
+          "mean_charge_fast": 0.01425,
+          "infeasible_count_exact": 0,
+          "infeasible_count_fast": 0
+        },
+        "precision_mismatch": {
+          "total_variation": 1.778853551080232e-12,
+          "max_abs_prob_diff": 7.629453370355672e-15,
+          "mean_charge_diff": 1.59642958574846e-12,
+          "infeasible_mass_diff": 0.0
+        },
+        "step": 2500,
+        "loss": 7.044276237487793,
+        "elapsed_s": 345.0
+      },
+      {
+        "mean_charge": 0.3403051415801459,
+        "charge_error": 0.3403051415801459,
+        "charge_variance": 8.163395348731672,
+        "infeasible_mass": 0.0,
+        "kl_from_data": 1.620557199084903,
+        "kl_from_tilt": 1.3734531766864968,
+        "violation_rate": 0.822977182109937,
+        "entropy_nats": 9.184380167104422,
+        "deployed": {
+          "mean_charge": 0.012464707354381864,
+          "charge_error": 0.012464707354381864,
+          "charge_variance": 1.471567123206814,
+          "infeasible_mass": 0.0,
+          "kl_from_data": 1.6381679379954446,
+          "kl_from_tilt": 1.3066554580083307,
+          "violation_rate": 0.5892954697676359,
+          "entropy_nats": 9.173716970654512,
+          "per_step_infeasible_fraction": 0.01771135890014841,
+          "per_step_infeasible_fraction_unweighted": 0.108856201171875
+        },
+        "deployed_fast_hessian": {
+          "mean_charge": 0.012464707416060846,
+          "charge_error": 0.012464707416060846,
+          "charge_variance": 1.471567123258777,
+          "infeasible_mass": 0.0,
+          "kl_from_data": 1.6381679378154912,
+          "kl_from_tilt": 1.3066554578442577,
+          "violation_rate": 0.5892954697432875,
+          "entropy_nats": 9.173716970769625
+        },
+        "precision_mismatch_sampled": {
+          "n_samples": 1000000,
+          "violation_rate_exact": 0.588952,
+          "violation_rate_fast": 0.589656,
+          "violation_rate_abs_diff": 0.0007039999999999269,
+          "two_proportion_z": 1.0118770135702406,
+          "detectable_at_0_05": false,
+          "mean_charge_exact": 0.012502,
+          "mean_charge_fast": 0.011094,
+          "infeasible_count_exact": 0,
+          "infeasible_count_fast": 0
+        },
+        "precision_mismatch": {
+          "total_variation": 6.686446942214997e-11,
+          "max_abs_prob_diff": 6.644508943433932e-11,
+          "mean_charge_diff": 6.167898136677508e-11,
+          "infeasible_mass_diff": 0.0
+        },
+        "step": 3000,
+        "loss": 7.443696975708008,
+        "elapsed_s": 413.5
+      },
+      {
+        "mean_charge": 0.9065799916361893,
+        "charge_error": 0.9065799916361893,
+        "charge_variance": 7.825783711957288,
+        "infeasible_mass": 0.0,
+        "kl_from_data": 1.5721286469150442,
+        "kl_from_tilt": 1.4708223409496015,
+        "violation_rate": 0.8516097365916095,
+        "entropy_nats": 9.146737416297752,
+        "deployed": {
+          "mean_charge": 0.01905359529160938,
+          "charge_error": 0.01905359529160938,
+          "charge_variance": 1.5595458038620498,
+          "infeasible_mass": 0.0,
+          "kl_from_data": 1.7160060065412672,
+          "kl_from_tilt": 1.3861899550905532,
+          "violation_rate": 0.6175022971071671,
+          "entropy_nats": 9.159600390705585,
+          "per_step_infeasible_fraction": 0.019463791962740437,
+          "per_step_infeasible_fraction_unweighted": 0.108856201171875
+        },
+        "deployed_fast_hessian": {
+          "mean_charge": 0.019053595285471767,
+          "charge_error": 0.019053595285471767,
+          "charge_variance": 1.5595458038766827,
+          "infeasible_mass": 0.0,
+          "kl_from_data": 1.7160060064406712,
+          "kl_from_tilt": 1.3861899549883767,
+          "violation_rate": 0.6175022971091982,
+          "entropy_nats": 9.159600390813603
+        },
+        "precision_mismatch_sampled": {
+          "n_samples": 1000000,
+          "violation_rate_exact": 0.617178,
+          "violation_rate_fast": 0.617408,
+          "violation_rate_abs_diff": 0.00022999999999995246,
+          "two_proportion_z": 0.3346061809824355,
+          "detectable_at_0_05": false,
+          "mean_charge_exact": 0.019421,
+          "mean_charge_fast": 0.019537,
+          "infeasible_count_exact": 0,
+          "infeasible_count_fast": 0
+        },
+        "precision_mismatch": {
+          "total_variation": 5.7532455637871466e-12,
+          "max_abs_prob_diff": 2.6338291769974572e-12,
+          "mean_charge_diff": -6.137611252565733e-12,
+          "infeasible_mass_diff": 0.0
+        },
+        "step": 3500,
+        "loss": 6.816225051879883,
+        "elapsed_s": 481.7
+      },
+      {
+        "mean_charge": 1.0211006338319395,
+        "charge_error": 1.0211006338319395,
+        "charge_variance": 7.616704313542864,
+        "infeasible_mass": 0.0,
+        "kl_from_data": 1.515423345474407,
+        "kl_from_tilt": 1.4436024530231342,
+        "violation_rate": 0.8326083913867532,
+        "entropy_nats": 9.178711623436435,
+        "deployed": {
+          "mean_charge": 0.018695234160600933,
+          "charge_error": 0.018695234160600933,
+          "charge_variance": 1.5571713604105495,
+          "infeasible_mass": 0.0,
+          "kl_from_data": 1.637822627332361,
+          "kl_from_tilt": 1.307914309317885,
+          "violation_rate": 0.6169153289543938,
+          "entropy_nats": 9.193153152563106,
+          "per_step_infeasible_fraction": 0.018876550674053957,
+          "per_step_infeasible_fraction_unweighted": 0.108856201171875
+        },
+        "deployed_fast_hessian": {
+          "mean_charge": 0.01869523417468725,
+          "charge_error": 0.01869523417468725,
+          "charge_variance": 1.5571713604449111,
+          "infeasible_mass": 0.0,
+          "kl_from_data": 1.6378226270906588,
+          "kl_from_tilt": 1.3079143090798095,
+          "violation_rate": 0.6169153289593937,
+          "entropy_nats": 9.193153152813625
+        },
+        "precision_mismatch_sampled": {
+          "n_samples": 1000000,
+          "violation_rate_exact": 0.61754,
+          "violation_rate_fast": 0.617296,
+          "violation_rate_abs_diff": 0.00024400000000002198,
+          "two_proportion_z": 0.35499555782447106,
+          "detectable_at_0_05": false,
+          "mean_charge_exact": 0.020481,
+          "mean_charge_fast": 0.018176,
+          "infeasible_count_exact": 0,
+          "infeasible_count_fast": 0
+        },
+        "precision_mismatch": {
+          "total_variation": 1.3406211054135277e-11,
+          "max_abs_prob_diff": 4.07640654705105e-12,
+          "mean_charge_diff": 1.4086315447414677e-11,
+          "infeasible_mass_diff": 0.0
+        },
+        "step": 4000,
+        "loss": 6.833670616149902,
+        "elapsed_s": 549.7
+      }
+    ],
+    "final": {
+      "mean_charge": 1.0211006338319395,
+      "charge_error": 1.0211006338319395,
+      "charge_variance": 7.616704313542864,
+      "infeasible_mass": 0.0,
+      "kl_from_data": 1.515423345474407,
+      "kl_from_tilt": 1.4436024530231342,
+      "violation_rate": 0.8326083913867532,
+      "entropy_nats": 9.178711623436435,
+      "deployed": {
+        "mean_charge": 0.018695234160600933,
+        "charge_error": 0.018695234160600933,
+        "charge_variance": 1.5571713604105495,
+        "infeasible_mass": 0.0,
+        "kl_from_data": 1.637822627332361,
+        "kl_from_tilt": 1.307914309317885,
+        "violation_rate": 0.6169153289543938,
+        "entropy_nats": 9.193153152563106,
+        "per_step_infeasible_fraction": 0.018876550674053957,
+        "per_step_infeasible_fraction_unweighted": 0.108856201171875
+      },
+      "deployed_fast_hessian": {
+        "mean_charge": 0.01869523417468725,
+        "charge_error": 0.01869523417468725,
+        "charge_variance": 1.5571713604449111,
+        "infeasible_mass": 0.0,
+        "kl_from_data": 1.6378226270906588,
+        "kl_from_tilt": 1.3079143090798095,
+        "violation_rate": 0.6169153289593937,
+        "entropy_nats": 9.193153152813625
+      },
+      "precision_mismatch_sampled": {
+        "n_samples": 1000000,
+        "violation_rate_exact": 0.61754,
+        "violation_rate_fast": 0.617296,
+        "violation_rate_abs_diff": 0.00024400000000002198,
+        "two_proportion_z": 0.35499555782447106,
+        "detectable_at_0_05": false,
+        "mean_charge_exact": 0.020481,
+        "mean_charge_fast": 0.018176,
+        "infeasible_count_exact": 0,
+        "infeasible_count_fast": 0
+      },
+      "precision_mismatch": {
+        "total_variation": 1.3406211054135277e-11,
+        "max_abs_prob_diff": 4.07640654705105e-12,
+        "mean_charge_diff": 1.4086315447414677e-11,
+        "infeasible_mass_diff": 0.0
+      },
+      "step": 4000,
+      "loss": 6.833670616149902,
+      "elapsed_s": 549.7
+    },
+    "reference": {
+      "tilt_kl_from_data": 0.3347217446544234,
+      "tilt_mean_charge": 2.085831507514513e-14,
+      "data_mean_charge": 2.5164330452453636
+    },
+    "wall_clock_s": 549.7
+  }
+}

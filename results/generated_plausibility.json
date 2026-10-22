@@ -1,0 +1,61 @@
+{
+  "schema_version": "2.0",
+  "artifact_name": "generated_plausibility",
+  "script": "src/cpt/crystal/generated_plausibility.py",
+  "config": {
+    "n_samples": 2048,
+    "smoke": false,
+    "checkpoint": "projected_d5.0.pt"
+  },
+  "config_hash": "70dded801546b582",
+  "seeds": [
+    0
+  ],
+  "payload_sha256": "289eb542352218fc665c9ccb58ca9f511b4ca854e81329b367cf2a1ef90eb860",
+  "payload": {
+    "checkpoint": "projected_d5.0.pt",
+    "checkpoint_arm": "projected",
+    "checkpoint_density_target": 5.0,
+    "sampling": {
+      "n_samples": 2048,
+      "use_mask": true,
+      "project_at_inference": true,
+      "per_step_infeasible_fraction": 0.04901181161403656,
+      "degenerate_row_rate": 0.0
+    },
+    "funnel": {
+      "n_sampled": 2048,
+      "n_parsed_grammar_complete": 2048,
+      "parsed_rate": 1.0,
+      "n_built_composition_cell": 2031,
+      "built_given_parsed_rate": 0.99169921875,
+      "built_rate_of_sampled": 0.99169921875,
+      "screens_on_built": {
+        "n_screened": 2031,
+        "charge_balanced_rate": 0.48399803052683404,
+        "electronegativity_ordered_rate": 0.4549483013293944,
+        "packing_plausible_rate": 0.794190054160512
+      }
+    },
+    "reference_ceiling": {
+      "n_screened": 800,
+      "charge_balanced_rate": 0.715,
+      "electronegativity_ordered_rate": 0.64,
+      "packing_plausible_rate": 0.9775
+    },
+    "min_interatomic_distance": {
+      "computable": false,
+      "reason": "The generated serialization encodes composition (element, count) and cell (lengths, angles) tokens only; there are no fractional coordinate or Wyckoff-position tokens in the vocabulary (CrystalVocab defines only el:, cnt:, len:, ang: token families). Minimum interatomic distance requires atomic positions, which the model does not emit and does not attempt to predict."
+    },
+    "dft_subset": {
+      "attempted": false,
+      "reason": "Generated serialization is composition + cell with no atomic positions. An energy model requires positions; obtaining them is crystal structure prediction, which the model does not attempt. Relaxing from random positions would measure the initialization, not the generated crystal. The calibrated CHGNet screen therefore applies to reference structures only."
+    },
+    "note": "charge_balanced_rate, electronegativity_ordered_rate and packing_plausible_rate are computed by the IDENTICAL screen path (scripts/crystal/plausibility_screen.py::_smact_screens and the same packing window) used for the reference, applied to generated compositions and cells that parsed and built.",
+    "scope_note": "The model emits composition and cell parameters without atomic positions. Grammar completion, composition-cell decoding and chemical screens use distinct denominators; chemical compatibility does not establish structural stability.",
+    "packing_window_angstrom3_per_atom": {
+      "lo_1pct": 8.919033410425,
+      "hi_99pct": 46.301696929933335
+    }
+  }
+}

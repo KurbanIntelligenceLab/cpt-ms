@@ -1,0 +1,776 @@
+{
+  "schema_version": "2.0",
+  "artifact_name": "hybrid_selection",
+  "script": "src/cpt/crystal/hybrid_selection.py",
+  "config": {
+    "pool": 512,
+    "targets": [
+      1.5,
+      2.0,
+      3.0,
+      5.0,
+      6.317,
+      8.0,
+      10.0,
+      13.0,
+      16.0,
+      20.0
+    ],
+    "n_values": [
+      1,
+      2,
+      4,
+      8,
+      16
+    ],
+    "checkpoint": "projected_d5.0.pt"
+  },
+  "config_hash": "4b8e668ed355b27d",
+  "seeds": [
+    0
+  ],
+  "payload_sha256": "0908d2a5de450d266a6b56dfa7f03d507f2b1008a8ae63552608f07f525b988a",
+  "payload": {
+    "arm": "projection + best-of-n selection: n steered samples per target, keep closest on density",
+    "checkpoint": "projected_d5.0.pt",
+    "trained_density_target": 5.0,
+    "pool_size": 512,
+    "n_valid_in_pool": {
+      "1.5": 511,
+      "2.0": 511,
+      "3.0": 511,
+      "5.0": 511,
+      "6.317": 511,
+      "8.0": 511,
+      "10.0": 511,
+      "13.0": 511,
+      "16.0": 511,
+      "20.0": 511
+    },
+    "pool_wall_clock_s": {
+      "1.5": 7.0,
+      "2.0": 6.0,
+      "3.0": 6.6,
+      "5.0": 8.4,
+      "6.317": 7.7,
+      "8.0": 8.7,
+      "10.0": 8.7,
+      "13.0": 8.9,
+      "16.0": 9.4,
+      "20.0": 9.4
+    },
+    "n_values": [
+      1,
+      2,
+      4,
+      8,
+      16
+    ],
+    "rows": [
+      {
+        "target": 1.5,
+        "n": 1,
+        "mean_best_error": 1.0054143954133303,
+        "sd_best_error": 1.600163537320317,
+        "trials": 200,
+        "inference_samples_per_output": 1
+      },
+      {
+        "target": 1.5,
+        "n": 2,
+        "mean_best_error": 0.47814553975738167,
+        "sd_best_error": 0.41377791992348645,
+        "trials": 200,
+        "inference_samples_per_output": 2
+      },
+      {
+        "target": 1.5,
+        "n": 4,
+        "mean_best_error": 0.21592080491447083,
+        "sd_best_error": 0.20604993694466092,
+        "trials": 200,
+        "inference_samples_per_output": 4
+      },
+      {
+        "target": 1.5,
+        "n": 8,
+        "mean_best_error": 0.10603884199407813,
+        "sd_best_error": 0.10801026192216803,
+        "trials": 200,
+        "inference_samples_per_output": 8
+      },
+      {
+        "target": 1.5,
+        "n": 16,
+        "mean_best_error": 0.055231138218991394,
+        "sd_best_error": 0.048842315030586406,
+        "trials": 200,
+        "inference_samples_per_output": 16
+      },
+      {
+        "target": 2.0,
+        "n": 1,
+        "mean_best_error": 1.3551165998328702,
+        "sd_best_error": 2.0494320465117513,
+        "trials": 200,
+        "inference_samples_per_output": 1
+      },
+      {
+        "target": 2.0,
+        "n": 2,
+        "mean_best_error": 0.6106595189038938,
+        "sd_best_error": 0.7106223497020404,
+        "trials": 200,
+        "inference_samples_per_output": 2
+      },
+      {
+        "target": 2.0,
+        "n": 4,
+        "mean_best_error": 0.26424935805224214,
+        "sd_best_error": 0.2714523200781923,
+        "trials": 200,
+        "inference_samples_per_output": 4
+      },
+      {
+        "target": 2.0,
+        "n": 8,
+        "mean_best_error": 0.1370474417683419,
+        "sd_best_error": 0.14679269997923294,
+        "trials": 200,
+        "inference_samples_per_output": 8
+      },
+      {
+        "target": 2.0,
+        "n": 16,
+        "mean_best_error": 0.058687243777186114,
+        "sd_best_error": 0.06773627158475934,
+        "trials": 200,
+        "inference_samples_per_output": 16
+      },
+      {
+        "target": 3.0,
+        "n": 1,
+        "mean_best_error": 1.6161532875381053,
+        "sd_best_error": 1.7856825734203579,
+        "trials": 200,
+        "inference_samples_per_output": 1
+      },
+      {
+        "target": 3.0,
+        "n": 2,
+        "mean_best_error": 1.0679784106029844,
+        "sd_best_error": 1.0065753611894483,
+        "trials": 200,
+        "inference_samples_per_output": 2
+      },
+      {
+        "target": 3.0,
+        "n": 4,
+        "mean_best_error": 0.5073662264751034,
+        "sd_best_error": 0.5632448738382057,
+        "trials": 200,
+        "inference_samples_per_output": 4
+      },
+      {
+        "target": 3.0,
+        "n": 8,
+        "mean_best_error": 0.2267399765433985,
+        "sd_best_error": 0.23729456026682877,
+        "trials": 200,
+        "inference_samples_per_output": 8
+      },
+      {
+        "target": 3.0,
+        "n": 16,
+        "mean_best_error": 0.09566538903093548,
+        "sd_best_error": 0.10562505637865255,
+        "trials": 200,
+        "inference_samples_per_output": 16
+      },
+      {
+        "target": 5.0,
+        "n": 1,
+        "mean_best_error": 2.277993494211362,
+        "sd_best_error": 2.9014406476869548,
+        "trials": 200,
+        "inference_samples_per_output": 1
+      },
+      {
+        "target": 5.0,
+        "n": 2,
+        "mean_best_error": 1.0321097059421038,
+        "sd_best_error": 1.016818057180635,
+        "trials": 200,
+        "inference_samples_per_output": 2
+      },
+      {
+        "target": 5.0,
+        "n": 4,
+        "mean_best_error": 0.5997306932534592,
+        "sd_best_error": 0.6715248076959173,
+        "trials": 200,
+        "inference_samples_per_output": 4
+      },
+      {
+        "target": 5.0,
+        "n": 8,
+        "mean_best_error": 0.2700806553376676,
+        "sd_best_error": 0.22684446195557906,
+        "trials": 200,
+        "inference_samples_per_output": 8
+      },
+      {
+        "target": 5.0,
+        "n": 16,
+        "mean_best_error": 0.15080291739544582,
+        "sd_best_error": 0.1508835959960866,
+        "trials": 200,
+        "inference_samples_per_output": 16
+      },
+      {
+        "target": 6.317,
+        "n": 1,
+        "mean_best_error": 2.713786973534334,
+        "sd_best_error": 3.1819828040344524,
+        "trials": 200,
+        "inference_samples_per_output": 1
+      },
+      {
+        "target": 6.317,
+        "n": 2,
+        "mean_best_error": 1.239012352230072,
+        "sd_best_error": 1.196320188244901,
+        "trials": 200,
+        "inference_samples_per_output": 2
+      },
+      {
+        "target": 6.317,
+        "n": 4,
+        "mean_best_error": 0.7735840259320536,
+        "sd_best_error": 0.7635756380395863,
+        "trials": 200,
+        "inference_samples_per_output": 4
+      },
+      {
+        "target": 6.317,
+        "n": 8,
+        "mean_best_error": 0.3390073733473791,
+        "sd_best_error": 0.3673051581199721,
+        "trials": 200,
+        "inference_samples_per_output": 8
+      },
+      {
+        "target": 6.317,
+        "n": 16,
+        "mean_best_error": 0.13936491591257785,
+        "sd_best_error": 0.14979075584584073,
+        "trials": 200,
+        "inference_samples_per_output": 16
+      },
+      {
+        "target": 8.0,
+        "n": 1,
+        "mean_best_error": 3.3140670090023945,
+        "sd_best_error": 2.6853861706262987,
+        "trials": 200,
+        "inference_samples_per_output": 1
+      },
+      {
+        "target": 8.0,
+        "n": 2,
+        "mean_best_error": 1.8798061785199685,
+        "sd_best_error": 1.5947276444823826,
+        "trials": 200,
+        "inference_samples_per_output": 2
+      },
+      {
+        "target": 8.0,
+        "n": 4,
+        "mean_best_error": 0.9230679301126241,
+        "sd_best_error": 0.8824565412813814,
+        "trials": 200,
+        "inference_samples_per_output": 4
+      },
+      {
+        "target": 8.0,
+        "n": 8,
+        "mean_best_error": 0.46853659861115315,
+        "sd_best_error": 0.42076132057986004,
+        "trials": 200,
+        "inference_samples_per_output": 8
+      },
+      {
+        "target": 8.0,
+        "n": 16,
+        "mean_best_error": 0.24209705913774243,
+        "sd_best_error": 0.19088353314063625,
+        "trials": 200,
+        "inference_samples_per_output": 16
+      },
+      {
+        "target": 10.0,
+        "n": 1,
+        "mean_best_error": 3.6958617774607787,
+        "sd_best_error": 2.7487387835251478,
+        "trials": 200,
+        "inference_samples_per_output": 1
+      },
+      {
+        "target": 10.0,
+        "n": 2,
+        "mean_best_error": 2.2690404152690835,
+        "sd_best_error": 1.990729773826595,
+        "trials": 200,
+        "inference_samples_per_output": 2
+      },
+      {
+        "target": 10.0,
+        "n": 4,
+        "mean_best_error": 1.2411630321470908,
+        "sd_best_error": 1.1635213337127452,
+        "trials": 200,
+        "inference_samples_per_output": 4
+      },
+      {
+        "target": 10.0,
+        "n": 8,
+        "mean_best_error": 0.6615648646732378,
+        "sd_best_error": 0.6449878389831805,
+        "trials": 200,
+        "inference_samples_per_output": 8
+      },
+      {
+        "target": 10.0,
+        "n": 16,
+        "mean_best_error": 0.3123243041369662,
+        "sd_best_error": 0.2602991415897938,
+        "trials": 200,
+        "inference_samples_per_output": 16
+      },
+      {
+        "target": 13.0,
+        "n": 1,
+        "mean_best_error": 5.246086244260194,
+        "sd_best_error": 3.604688295755979,
+        "trials": 200,
+        "inference_samples_per_output": 1
+      },
+      {
+        "target": 13.0,
+        "n": 2,
+        "mean_best_error": 3.1457877058512294,
+        "sd_best_error": 2.568026212211503,
+        "trials": 200,
+        "inference_samples_per_output": 2
+      },
+      {
+        "target": 13.0,
+        "n": 4,
+        "mean_best_error": 1.6424872492195988,
+        "sd_best_error": 1.664730730180317,
+        "trials": 200,
+        "inference_samples_per_output": 4
+      },
+      {
+        "target": 13.0,
+        "n": 8,
+        "mean_best_error": 0.8380324930738517,
+        "sd_best_error": 0.9398246851341406,
+        "trials": 200,
+        "inference_samples_per_output": 8
+      },
+      {
+        "target": 13.0,
+        "n": 16,
+        "mean_best_error": 0.3774425668207488,
+        "sd_best_error": 0.39986389848004794,
+        "trials": 200,
+        "inference_samples_per_output": 16
+      },
+      {
+        "target": 16.0,
+        "n": 1,
+        "mean_best_error": 6.489041373172752,
+        "sd_best_error": 4.216988287478286,
+        "trials": 200,
+        "inference_samples_per_output": 1
+      },
+      {
+        "target": 16.0,
+        "n": 2,
+        "mean_best_error": 4.294644873794805,
+        "sd_best_error": 3.5389808204763242,
+        "trials": 200,
+        "inference_samples_per_output": 2
+      },
+      {
+        "target": 16.0,
+        "n": 4,
+        "mean_best_error": 2.391092601019455,
+        "sd_best_error": 2.1927192985480706,
+        "trials": 200,
+        "inference_samples_per_output": 4
+      },
+      {
+        "target": 16.0,
+        "n": 8,
+        "mean_best_error": 1.1077979235674515,
+        "sd_best_error": 1.0243617840645525,
+        "trials": 200,
+        "inference_samples_per_output": 8
+      },
+      {
+        "target": 16.0,
+        "n": 16,
+        "mean_best_error": 0.5097664803374137,
+        "sd_best_error": 0.5064922689447587,
+        "trials": 200,
+        "inference_samples_per_output": 16
+      },
+      {
+        "target": 20.0,
+        "n": 1,
+        "mean_best_error": 10.333178384609432,
+        "sd_best_error": 5.4647674913094395,
+        "trials": 200,
+        "inference_samples_per_output": 1
+      },
+      {
+        "target": 20.0,
+        "n": 2,
+        "mean_best_error": 6.926943414189754,
+        "sd_best_error": 4.836934732135681,
+        "trials": 200,
+        "inference_samples_per_output": 2
+      },
+      {
+        "target": 20.0,
+        "n": 4,
+        "mean_best_error": 4.439648195450793,
+        "sd_best_error": 3.6944260149590553,
+        "trials": 200,
+        "inference_samples_per_output": 4
+      },
+      {
+        "target": 20.0,
+        "n": 8,
+        "mean_best_error": 1.8984697770396393,
+        "sd_best_error": 1.8470302704145911,
+        "trials": 200,
+        "inference_samples_per_output": 8
+      },
+      {
+        "target": 20.0,
+        "n": 16,
+        "mean_best_error": 0.9301758656036171,
+        "sd_best_error": 0.9888508136373306,
+        "trials": 200,
+        "inference_samples_per_output": 16
+      }
+    ],
+    "protocol_note": "One steered pool (project_at_inference=True at the requested target) is drawn once per target and reused for every n; selection is estimated by repeated subsampling of n draws from that pool, mirroring scripts/crystal/best_of_n.py's protocol exactly so the two arms are comparable. Unlike best_of_n.py, a fresh pool is drawn PER TARGET here because the pool itself is steered toward that target rather than drawn once from an unsteered model.",
+    "diversity": [
+      {
+        "target": 1.5,
+        "n": 1,
+        "unique_formula_fraction": 0.765,
+        "n_outputs": 200
+      },
+      {
+        "target": 1.5,
+        "n": 2,
+        "unique_formula_fraction": 0.735,
+        "n_outputs": 200
+      },
+      {
+        "target": 1.5,
+        "n": 4,
+        "unique_formula_fraction": 0.64,
+        "n_outputs": 200
+      },
+      {
+        "target": 1.5,
+        "n": 8,
+        "unique_formula_fraction": 0.5,
+        "n_outputs": 200
+      },
+      {
+        "target": 1.5,
+        "n": 16,
+        "unique_formula_fraction": 0.325,
+        "n_outputs": 200
+      },
+      {
+        "target": 2.0,
+        "n": 1,
+        "unique_formula_fraction": 0.775,
+        "n_outputs": 200
+      },
+      {
+        "target": 2.0,
+        "n": 2,
+        "unique_formula_fraction": 0.74,
+        "n_outputs": 200
+      },
+      {
+        "target": 2.0,
+        "n": 4,
+        "unique_formula_fraction": 0.63,
+        "n_outputs": 200
+      },
+      {
+        "target": 2.0,
+        "n": 8,
+        "unique_formula_fraction": 0.525,
+        "n_outputs": 200
+      },
+      {
+        "target": 2.0,
+        "n": 16,
+        "unique_formula_fraction": 0.395,
+        "n_outputs": 200
+      },
+      {
+        "target": 3.0,
+        "n": 1,
+        "unique_formula_fraction": 0.795,
+        "n_outputs": 200
+      },
+      {
+        "target": 3.0,
+        "n": 2,
+        "unique_formula_fraction": 0.78,
+        "n_outputs": 200
+      },
+      {
+        "target": 3.0,
+        "n": 4,
+        "unique_formula_fraction": 0.68,
+        "n_outputs": 200
+      },
+      {
+        "target": 3.0,
+        "n": 8,
+        "unique_formula_fraction": 0.535,
+        "n_outputs": 200
+      },
+      {
+        "target": 3.0,
+        "n": 16,
+        "unique_formula_fraction": 0.37,
+        "n_outputs": 200
+      },
+      {
+        "target": 5.0,
+        "n": 1,
+        "unique_formula_fraction": 0.77,
+        "n_outputs": 200
+      },
+      {
+        "target": 5.0,
+        "n": 2,
+        "unique_formula_fraction": 0.735,
+        "n_outputs": 200
+      },
+      {
+        "target": 5.0,
+        "n": 4,
+        "unique_formula_fraction": 0.66,
+        "n_outputs": 200
+      },
+      {
+        "target": 5.0,
+        "n": 8,
+        "unique_formula_fraction": 0.515,
+        "n_outputs": 200
+      },
+      {
+        "target": 5.0,
+        "n": 16,
+        "unique_formula_fraction": 0.385,
+        "n_outputs": 200
+      },
+      {
+        "target": 6.317,
+        "n": 1,
+        "unique_formula_fraction": 0.805,
+        "n_outputs": 200
+      },
+      {
+        "target": 6.317,
+        "n": 2,
+        "unique_formula_fraction": 0.76,
+        "n_outputs": 200
+      },
+      {
+        "target": 6.317,
+        "n": 4,
+        "unique_formula_fraction": 0.645,
+        "n_outputs": 200
+      },
+      {
+        "target": 6.317,
+        "n": 8,
+        "unique_formula_fraction": 0.56,
+        "n_outputs": 200
+      },
+      {
+        "target": 6.317,
+        "n": 16,
+        "unique_formula_fraction": 0.365,
+        "n_outputs": 200
+      },
+      {
+        "target": 8.0,
+        "n": 1,
+        "unique_formula_fraction": 0.8,
+        "n_outputs": 200
+      },
+      {
+        "target": 8.0,
+        "n": 2,
+        "unique_formula_fraction": 0.715,
+        "n_outputs": 200
+      },
+      {
+        "target": 8.0,
+        "n": 4,
+        "unique_formula_fraction": 0.625,
+        "n_outputs": 200
+      },
+      {
+        "target": 8.0,
+        "n": 8,
+        "unique_formula_fraction": 0.505,
+        "n_outputs": 200
+      },
+      {
+        "target": 8.0,
+        "n": 16,
+        "unique_formula_fraction": 0.385,
+        "n_outputs": 200
+      },
+      {
+        "target": 10.0,
+        "n": 1,
+        "unique_formula_fraction": 0.82,
+        "n_outputs": 200
+      },
+      {
+        "target": 10.0,
+        "n": 2,
+        "unique_formula_fraction": 0.81,
+        "n_outputs": 200
+      },
+      {
+        "target": 10.0,
+        "n": 4,
+        "unique_formula_fraction": 0.7,
+        "n_outputs": 200
+      },
+      {
+        "target": 10.0,
+        "n": 8,
+        "unique_formula_fraction": 0.54,
+        "n_outputs": 200
+      },
+      {
+        "target": 10.0,
+        "n": 16,
+        "unique_formula_fraction": 0.415,
+        "n_outputs": 200
+      },
+      {
+        "target": 13.0,
+        "n": 1,
+        "unique_formula_fraction": 0.825,
+        "n_outputs": 200
+      },
+      {
+        "target": 13.0,
+        "n": 2,
+        "unique_formula_fraction": 0.775,
+        "n_outputs": 200
+      },
+      {
+        "target": 13.0,
+        "n": 4,
+        "unique_formula_fraction": 0.685,
+        "n_outputs": 200
+      },
+      {
+        "target": 13.0,
+        "n": 8,
+        "unique_formula_fraction": 0.535,
+        "n_outputs": 200
+      },
+      {
+        "target": 13.0,
+        "n": 16,
+        "unique_formula_fraction": 0.38,
+        "n_outputs": 200
+      },
+      {
+        "target": 16.0,
+        "n": 1,
+        "unique_formula_fraction": 0.76,
+        "n_outputs": 200
+      },
+      {
+        "target": 16.0,
+        "n": 2,
+        "unique_formula_fraction": 0.77,
+        "n_outputs": 200
+      },
+      {
+        "target": 16.0,
+        "n": 4,
+        "unique_formula_fraction": 0.685,
+        "n_outputs": 200
+      },
+      {
+        "target": 16.0,
+        "n": 8,
+        "unique_formula_fraction": 0.5,
+        "n_outputs": 200
+      },
+      {
+        "target": 16.0,
+        "n": 16,
+        "unique_formula_fraction": 0.35,
+        "n_outputs": 200
+      },
+      {
+        "target": 20.0,
+        "n": 1,
+        "unique_formula_fraction": 0.795,
+        "n_outputs": 200
+      },
+      {
+        "target": 20.0,
+        "n": 2,
+        "unique_formula_fraction": 0.745,
+        "n_outputs": 200
+      },
+      {
+        "target": 20.0,
+        "n": 4,
+        "unique_formula_fraction": 0.71,
+        "n_outputs": 200
+      },
+      {
+        "target": 20.0,
+        "n": 8,
+        "unique_formula_fraction": 0.51,
+        "n_outputs": 200
+      },
+      {
+        "target": 20.0,
+        "n": 16,
+        "unique_formula_fraction": 0.34,
+        "n_outputs": 200
+      }
+    ],
+    "diversity_note": "Unique-formula fraction among the selected outputs, computed identically to scripts/crystal/best_of_n.py's diversity block (same selection-then-count-uniques procedure) so the hybrid, best-of-n, and projection-alone (n=1 row here) arms sit on the same diversity definition."
+  }
+}

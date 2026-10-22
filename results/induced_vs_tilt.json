@@ -1,0 +1,126 @@
+{
+  "schema_version": "2.0",
+  "artifact_name": "induced_vs_tilt",
+  "script": "src/cpt/synthetic/induced_distribution.py",
+  "config": {
+    "symbols": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "charges": [
+      2,
+      1,
+      -1,
+      -2
+    ],
+    "length": 8,
+    "max_count": 3,
+    "charge_target": 0.0,
+    "markov_seed": 0,
+    "markov_bias": 1.6,
+    "markov_temperature": 0.8,
+    "smoke": false
+  },
+  "config_hash": "c1405023c523b4a6",
+  "seeds": [
+    0
+  ],
+  "payload_sha256": "016ce90f61159cc013f49ec4f4b9d2f72cd4526b574fa4fa05053dd9802c025f",
+  "payload": {
+    "distributions": {
+      "base_S": {
+        "name": "base_S",
+        "mean_charge": 2.516433045245362,
+        "var_charge": 8.56361361318514,
+        "entropy_nats": 9.64134343817761,
+        "support_size": 36120,
+        "hard_violation_rate": 0.9108939130892355,
+        "kl_from_base_S_nats": 0.0,
+        "tv_to_base_S": 0.0,
+        "mass_outside_S": 0.0
+      },
+      "tilt": {
+        "name": "tilt",
+        "mean_charge": 2.7755575615628914e-17,
+        "var_charge": 10.451958002729189,
+        "entropy_nats": 9.895616448166207,
+        "support_size": 36120,
+        "hard_violation_rate": 0.8754696585928741,
+        "kl_from_base_S_nats": 0.33472174465442883,
+        "tv_to_base_S": 0.32339368639638033,
+        "mass_outside_S": 0.0,
+        "sequence_multiplier": -0.2574681118515768
+      },
+      "induced": {
+        "name": "induced",
+        "mean_charge": 0.10279134161286849,
+        "var_charge": 3.1025173925512823,
+        "entropy_nats": 9.329638558897692,
+        "support_size": 36120,
+        "hard_violation_rate": 0.6200204775790881,
+        "kl_from_base_S_nats": 1.3600731292455523,
+        "tv_to_base_S": 0.6444308956651641,
+        "mass_outside_S": 0.0
+      }
+    },
+    "comparison": {
+      "kl_induced_from_tilt_nats": 1.0518168772308791,
+      "kl_tilt_from_induced_nats": 35.49676454625966,
+      "tv_induced_tilt": 0.555305594206841,
+      "induced_mean_charge_error": 0.10279134161286849,
+      "tilt_mean_charge_error": 2.7755575615628914e-17,
+      "excess_kl_of_induced_over_tilt_nats": 1.0253513845911235,
+      "entropy_gap_nats": 0.565977889268515
+    },
+    "per_step_diagnostics": {
+      "fallback_policy": "base",
+      "mass_before_renormalization": 1.0,
+      "nodes_visited": 16537,
+      "per_step_infeasible_count": 6140,
+      "per_step_saturated_count": 1585,
+      "per_step_infeasible_fraction": 0.3712886255064401,
+      "max_abs_multiplier": 64.0,
+      "infeasible_by_position": {
+        "0": {
+          "nodes": 1,
+          "infeasible": 0
+        },
+        "1": {
+          "nodes": 4,
+          "infeasible": 0
+        },
+        "2": {
+          "nodes": 16,
+          "infeasible": 0
+        },
+        "3": {
+          "nodes": 64,
+          "infeasible": 0
+        },
+        "4": {
+          "nodes": 252,
+          "infeasible": 0
+        },
+        "5": {
+          "nodes": 960,
+          "infeasible": 40
+        },
+        "6": {
+          "nodes": 3480,
+          "infeasible": 640
+        },
+        "7": {
+          "nodes": 11760,
+          "infeasible": 5460
+        }
+      },
+      "first_infeasible_position": 5
+    },
+    "interpretation_keys": {
+      "constraint_hit": false,
+      "induced_is_suboptimal": true
+    }
+  }
+}

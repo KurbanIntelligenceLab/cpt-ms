@@ -1,0 +1,30 @@
+{
+  "checkpoints": [
+    {
+      "file": "projected_d5.0.pt",
+      "bytes": 20821887,
+      "sha256": "e7a38f95b5339add8e2405a50d699085d59a573a8cdd8d01d6325d207137ce23",
+      "trained_density_target": 5.0,
+      "seed": 0,
+      "training_steps": 6000,
+      "vocabulary_size": 884,
+      "model_parameters": 5199220,
+      "tokenizer": {
+        "order": "cell_first",
+        "length_bins": 512,
+        "angle_bins": 256,
+        "count_bins": 16,
+        "length_range_angstrom": [
+          2.0,
+          46.0
+        ],
+        "angle_range_degrees": [
+          5.0,
+          175.0
+        ],
+        "vocabulary_size": 884,
+        "tokens_sha256": "79788d4aa3671e69ebf82487ecb21bf5ef2bb6fdb94ad730d608724cc8235499"
+      }
+    }
+  ]
+}

@@ -1,0 +1,209 @@
+{
+  "schema_version": "2.0",
+  "artifact_name": "train_mask_only_seed0",
+  "script": "src/cpt/train/train_synthetic.py",
+  "config": {
+    "training": {
+      "arm": "mask_only",
+      "d_model": 128,
+      "n_layer": 4,
+      "n_head": 4,
+      "steps": 4000,
+      "batch": 256,
+      "lr": 0.0003,
+      "warmup": 200,
+      "seed": 0,
+      "eval_every": 500,
+      "charge_target": 0.0
+    },
+    "task": {
+      "symbols": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "charges": [
+        2,
+        1,
+        -1,
+        -2
+      ],
+      "length": 8,
+      "max_count": 3,
+      "charge_target": 0.0,
+      "markov_seed": 0,
+      "markov_bias": 1.6,
+      "markov_temperature": 0.8
+    }
+  },
+  "config_hash": "67ad8c7ea6d996ab",
+  "seeds": [
+    0
+  ],
+  "payload_sha256": "cb48281439d88495f02dbc8ae627bc9c0118b5d1174a925e7a9e495312086c7f",
+  "payload": {
+    "arm": "mask_only",
+    "train_config": {
+      "arm": "mask_only",
+      "d_model": 128,
+      "n_layer": 4,
+      "n_head": 4,
+      "steps": 4000,
+      "batch": 256,
+      "lr": 0.0003,
+      "warmup": 200,
+      "seed": 0,
+      "eval_every": 500,
+      "charge_target": 0.0
+    },
+    "task_config": {
+      "symbols": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "charges": [
+        2,
+        1,
+        -1,
+        -2
+      ],
+      "length": 8,
+      "max_count": 3,
+      "charge_target": 0.0,
+      "markov_seed": 0,
+      "markov_bias": 1.6,
+      "markov_temperature": 0.8
+    },
+    "device": "cuda",
+    "gpu": "NVIDIA GeForce RTX 5090",
+    "n_parameters": 795268,
+    "history": [
+      {
+        "mean_charge": 2.3516977037644127,
+        "charge_error": 2.3516977037644127,
+        "charge_variance": 8.804810743431801,
+        "infeasible_mass": 0.0,
+        "kl_from_data": 0.0392021333384989,
+        "kl_from_tilt": 0.30996755611797716,
+        "violation_rate": 0.9056931565443022,
+        "entropy_nats": 9.655954752583895,
+        "step": 500,
+        "loss": 1.2077090740203857,
+        "elapsed_s": 14.9
+      },
+      {
+        "mean_charge": 2.8838177427923894,
+        "charge_error": 2.8838177427923894,
+        "charge_variance": 7.737025455034446,
+        "infeasible_mass": 0.0,
+        "kl_from_data": 0.03428243202879816,
+        "kl_from_tilt": 0.4420517965351967,
+        "violation_rate": 0.9167766138827491,
+        "entropy_nats": 9.510335976654853,
+        "step": 1000,
+        "loss": 1.2196959257125854,
+        "elapsed_s": 26.1
+      },
+      {
+        "mean_charge": 2.425379220498583,
+        "charge_error": 2.425379220498583,
+        "charge_variance": 8.60246461012692,
+        "infeasible_mass": 0.0,
+        "kl_from_data": 0.021698753856661836,
+        "kl_from_tilt": 0.31143481762804726,
+        "violation_rate": 0.9087673929313014,
+        "entropy_nats": 9.631886987859538,
+        "step": 1500,
+        "loss": 1.2208415269851685,
+        "elapsed_s": 37.2
+      },
+      {
+        "mean_charge": 2.3966793429529507,
+        "charge_error": 2.3966793429529507,
+        "charge_variance": 8.705172459905329,
+        "infeasible_mass": 0.0,
+        "kl_from_data": 0.019016690186480615,
+        "kl_from_tilt": 0.30136345067582043,
+        "violation_rate": 0.9041458688568125,
+        "entropy_nats": 9.66459980925628,
+        "step": 2000,
+        "loss": 1.2089972496032715,
+        "elapsed_s": 50.3
+      },
+      {
+        "mean_charge": 2.593424810842615,
+        "charge_error": 2.593424810842615,
+        "charge_variance": 8.498989291311027,
+        "infeasible_mass": 0.0,
+        "kl_from_data": 0.015610233404771528,
+        "kl_from_tilt": 0.348612678027018,
+        "violation_rate": 0.9100712037119862,
+        "entropy_nats": 9.643358302025817,
+        "step": 2500,
+        "loss": 1.1993740797042847,
+        "elapsed_s": 62.6
+      },
+      {
+        "mean_charge": 2.6410848616749765,
+        "charge_error": 2.6410848616749765,
+        "charge_variance": 8.319503486550875,
+        "infeasible_mass": 0.0,
+        "kl_from_data": 0.014788512609116646,
+        "kl_from_tilt": 0.3600619005299218,
+        "violation_rate": 0.9161265934166625,
+        "entropy_nats": 9.575812406384674,
+        "step": 3000,
+        "loss": 1.204653024673462,
+        "elapsed_s": 70.8
+      },
+      {
+        "mean_charge": 2.301623981366441,
+        "charge_error": 2.301623981366441,
+        "charge_variance": 8.874162242361994,
+        "infeasible_mass": 0.0,
+        "kl_from_data": 0.01805777527806109,
+        "kl_from_tilt": 0.275930811298354,
+        "violation_rate": 0.9073258488324463,
+        "entropy_nats": 9.691582449326162,
+        "step": 3500,
+        "loss": 1.2127749919891357,
+        "elapsed_s": 81.7
+      },
+      {
+        "mean_charge": 2.3557343138898683,
+        "charge_error": 2.3557343138898683,
+        "charge_variance": 8.878023402405649,
+        "infeasible_mass": 0.0,
+        "kl_from_data": 0.015976560141067662,
+        "kl_from_tilt": 0.2877812813078282,
+        "violation_rate": 0.9063214579612822,
+        "entropy_nats": 9.6641571868542,
+        "step": 4000,
+        "loss": 1.2217211723327637,
+        "elapsed_s": 93.5
+      }
+    ],
+    "final": {
+      "mean_charge": 2.3557343138898683,
+      "charge_error": 2.3557343138898683,
+      "charge_variance": 8.878023402405649,
+      "infeasible_mass": 0.0,
+      "kl_from_data": 0.015976560141067662,
+      "kl_from_tilt": 0.2877812813078282,
+      "violation_rate": 0.9063214579612822,
+      "entropy_nats": 9.6641571868542,
+      "step": 4000,
+      "loss": 1.2217211723327637,
+      "elapsed_s": 93.5
+    },
+    "reference": {
+      "tilt_kl_from_data": 0.3347217446544234,
+      "tilt_mean_charge": 2.085831507514513e-14,
+      "data_mean_charge": 2.5164330452453636
+    },
+    "wall_clock_s": 93.5
+  }
+}

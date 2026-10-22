@@ -1,0 +1,35 @@
+{
+  "schema_version": "2.0",
+  "artifact_name": "plausibility_reference",
+  "script": "src/cpt/crystal/plausibility_screen.py",
+  "config": {
+    "limit": 800,
+    "smoke": false
+  },
+  "config_hash": "cd8b03a098f7ef83",
+  "seeds": [
+    0
+  ],
+  "payload_sha256": "855f62b861791fa5fdc32c4708cb578eedeaea32abea5795dc4141888fc74309",
+  "payload": {
+    "screens": [
+      "charge_neutrality",
+      "electronegativity_order",
+      "packing_plausibility"
+    ],
+    "why_not_energy": "Generated serialization is composition + cell with no atomic positions. An energy model requires positions; obtaining them is crystal structure prediction, which the model does not attempt. Relaxing from random positions would measure the initialization, not the generated crystal. The calibrated CHGNet screen therefore applies to reference structures only.",
+    "data_reference": {
+      "n_screened": 800,
+      "charge_balanced_rate": 0.715,
+      "electronegativity_ordered_rate": 0.64,
+      "packing_plausible_rate": 0.9775
+    },
+    "note": "The data reference is scored through the IDENTICAL path as any generated sample, so it is a measured ceiling rather than an assumed 100%.",
+    "packing_window_angstrom3_per_atom": {
+      "lo_1pct": 8.919033410425,
+      "hi_99pct": 46.301696929933335,
+      "data_mean": 19.942091099634595,
+      "data_sd": 8.230433399355524
+    }
+  }
+}

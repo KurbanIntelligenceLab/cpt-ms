@@ -1,0 +1,209 @@
+{
+  "schema_version": "2.0",
+  "artifact_name": "train_mask_only_seed2",
+  "script": "src/cpt/train/train_synthetic.py",
+  "config": {
+    "training": {
+      "arm": "mask_only",
+      "d_model": 128,
+      "n_layer": 4,
+      "n_head": 4,
+      "steps": 4000,
+      "batch": 256,
+      "lr": 0.0003,
+      "warmup": 200,
+      "seed": 2,
+      "eval_every": 500,
+      "charge_target": 0.0
+    },
+    "task": {
+      "symbols": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "charges": [
+        2,
+        1,
+        -1,
+        -2
+      ],
+      "length": 8,
+      "max_count": 3,
+      "charge_target": 0.0,
+      "markov_seed": 0,
+      "markov_bias": 1.6,
+      "markov_temperature": 0.8
+    }
+  },
+  "config_hash": "6feb33ce3e726c15",
+  "seeds": [
+    2
+  ],
+  "payload_sha256": "ff9238993a6bedcd19b5abce76e1af983ed1fefdfc2575834d6694e898a938c1",
+  "payload": {
+    "arm": "mask_only",
+    "train_config": {
+      "arm": "mask_only",
+      "d_model": 128,
+      "n_layer": 4,
+      "n_head": 4,
+      "steps": 4000,
+      "batch": 256,
+      "lr": 0.0003,
+      "warmup": 200,
+      "seed": 2,
+      "eval_every": 500,
+      "charge_target": 0.0
+    },
+    "task_config": {
+      "symbols": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "charges": [
+        2,
+        1,
+        -1,
+        -2
+      ],
+      "length": 8,
+      "max_count": 3,
+      "charge_target": 0.0,
+      "markov_seed": 0,
+      "markov_bias": 1.6,
+      "markov_temperature": 0.8
+    },
+    "device": "cuda",
+    "gpu": "NVIDIA GeForce RTX 5090",
+    "n_parameters": 795268,
+    "history": [
+      {
+        "mean_charge": 2.4553260645879624,
+        "charge_error": 2.4553260645879624,
+        "charge_variance": 8.77597236625058,
+        "infeasible_mass": 0.0,
+        "kl_from_data": 0.04738304755388115,
+        "kl_from_tilt": 0.3448294687288729,
+        "violation_rate": 0.9020953432542385,
+        "entropy_nats": 9.574594895207964,
+        "step": 500,
+        "loss": 1.22380530834198,
+        "elapsed_s": 14.6
+      },
+      {
+        "mean_charge": 2.81879187436117,
+        "charge_error": 2.81879187436117,
+        "charge_variance": 8.124095090945662,
+        "infeasible_mass": 0.0,
+        "kl_from_data": 0.03411156532880429,
+        "kl_from_tilt": 0.4251388422687071,
+        "violation_rate": 0.9178153339970172,
+        "entropy_nats": 9.526219572536826,
+        "step": 1000,
+        "loss": 1.1958391666412354,
+        "elapsed_s": 28.4
+      },
+      {
+        "mean_charge": 2.673137026386851,
+        "charge_error": 2.673137026386851,
+        "charge_variance": 8.297466316979934,
+        "infeasible_mass": 0.0,
+        "kl_from_data": 0.04886456440109114,
+        "kl_from_tilt": 0.4023903626510181,
+        "violation_rate": 0.9189811761475315,
+        "entropy_nats": 9.606793933510193,
+        "step": 1500,
+        "loss": 1.1943994760513306,
+        "elapsed_s": 41.9
+      },
+      {
+        "mean_charge": 2.703165664204551,
+        "charge_error": 2.703165664204551,
+        "charge_variance": 8.296022086900113,
+        "infeasible_mass": 0.0,
+        "kl_from_data": 0.02091507730438216,
+        "kl_from_tilt": 0.3821722922347073,
+        "violation_rate": 0.9118339026861523,
+        "entropy_nats": 9.619097495455105,
+        "step": 2000,
+        "loss": 1.2190779447555542,
+        "elapsed_s": 52.8
+      },
+      {
+        "mean_charge": 2.648365211565304,
+        "charge_error": 2.648365211565304,
+        "charge_variance": 8.258286041098605,
+        "infeasible_mass": 0.0,
+        "kl_from_data": 0.01869472620352867,
+        "kl_from_tilt": 0.3658425720642149,
+        "violation_rate": 0.9151151460662224,
+        "entropy_nats": 9.5994233258397,
+        "step": 2500,
+        "loss": 1.2095084190368652,
+        "elapsed_s": 60.9
+      },
+      {
+        "mean_charge": 2.4162531009679555,
+        "charge_error": 2.4162531009679555,
+        "charge_variance": 9.08954202402402,
+        "infeasible_mass": 0.0,
+        "kl_from_data": 0.01739745435775876,
+        "kl_from_tilt": 0.3047838333650613,
+        "violation_rate": 0.9048326029564385,
+        "entropy_nats": 9.677361515799415,
+        "step": 3000,
+        "loss": 1.2142157554626465,
+        "elapsed_s": 69.0
+      },
+      {
+        "mean_charge": 2.4169089847828875,
+        "charge_error": 2.4169089847828875,
+        "charge_variance": 8.707297851110745,
+        "infeasible_mass": 0.0,
+        "kl_from_data": 0.014946780830110199,
+        "kl_from_tilt": 0.3025020290048382,
+        "violation_rate": 0.9082082968338776,
+        "entropy_nats": 9.633557619401063,
+        "step": 3500,
+        "loss": 1.1987265348434448,
+        "elapsed_s": 77.1
+      },
+      {
+        "mean_charge": 2.517614404395113,
+        "charge_error": 2.517614404395113,
+        "charge_variance": 8.752905905041992,
+        "infeasible_mass": 0.0,
+        "kl_from_data": 0.018918305991589682,
+        "kl_from_tilt": 0.3324019884070978,
+        "violation_rate": 0.9078050745427807,
+        "entropy_nats": 9.672233792476604,
+        "step": 4000,
+        "loss": 1.215179204940796,
+        "elapsed_s": 91.2
+      }
+    ],
+    "final": {
+      "mean_charge": 2.517614404395113,
+      "charge_error": 2.517614404395113,
+      "charge_variance": 8.752905905041992,
+      "infeasible_mass": 0.0,
+      "kl_from_data": 0.018918305991589682,
+      "kl_from_tilt": 0.3324019884070978,
+      "violation_rate": 0.9078050745427807,
+      "entropy_nats": 9.672233792476604,
+      "step": 4000,
+      "loss": 1.215179204940796,
+      "elapsed_s": 91.2
+    },
+    "reference": {
+      "tilt_kl_from_data": 0.3347217446544234,
+      "tilt_mean_charge": 2.085831507514513e-14,
+      "data_mean_charge": 2.5164330452453636
+    },
+    "wall_clock_s": 91.2
+  }
+}

@@ -1,0 +1,17 @@
+/development/
+/data/
+/.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.DS_Store
+._*
+__MACOSX/
+.pytest_cache/
+.ruff_cache/
+*.pt
+*.pth
+*.ckpt
+!results/checkpoints/projected_d5.0.pt
+/dist/
+/build/
